@@ -1,0 +1,398 @@
+{
+  "name": "AI Agency - Workflow 2: Demo Booking (FIXED - No Code)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "lead-part2",
+        "options": {}
+      },
+      "id": "webhook-part2",
+      "name": "Webhook - Part 2 Form",
+      "position": [
+        240,
+        300
+      ],
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "webhookId": "GENERATE_NEW_WEBHOOK_ID"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.demo_preference }}",
+                    "operator": {
+                      "operation": "eq"
+                    },
+                    "rightValue": "Video snimak",
+                    "id": "video-recording"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.demo_preference }}",
+                    "operator": {
+                      "operation": "eq"
+                    },
+                    "rightValue": "Video poziv",
+                    "id": "video-call"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.demo_preference }}",
+                    "operator": {
+                      "operation": "eq"
+                    },
+                    "rightValue": "Uživo u Beogradu",
+                    "id": "in-person"
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "switch-demo-type",
+      "name": "Switch - Demo Type",
+      "position": [
+        460,
+        300
+      ],
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "kontakti",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "email",
+              "keyValue": "={{ $json.email }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "demo_preference",
+              "fieldValue": "={{ $json.demo_preference }}"
+            },
+            {
+              "fieldId": "email_type",
+              "fieldValue": "video_demo"
+            },
+            {
+              "fieldId": "next_email_at",
+              "fieldValue": "={{ $now.plus({minutes: 30}).toISO() }}"
+            },
+            {
+              "fieldId": "status",
+              "fieldValue": "Demo Scheduled - Video"
+            }
+          ]
+        }
+      },
+      "id": "update-video-demo",
+      "name": "Update - Video Demo",
+      "position": [
+        700,
+        140
+      ],
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "credentials": {
+        "supabaseApi": {
+          "id": "x9GAXz1Nv6O8J4Vh",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.cal.com/v1/bookings",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "json",
+        "body": "={\n  \"eventTypeId\": YOUR_VIDEO_CALL_EVENT_ID,\n  \"start\": \"{{ $json.demo_time }}\",\n  \"responses\": {\n    \"name\": \"{{ $json.ime }}\",\n    \"email\": \"{{ $json.email }}\",\n    \"notes\": \"Prepreka: {{ $json.prepreka }} | Leadovi: {{ $json.nedeljni_leadovi }}\"\n  },\n  \"metadata\": {\n    \"kompanija\": \"{{ $json.kompanija }}\"\n  }\n}",
+        "options": {}
+      },
+      "id": "calcom-video-call",
+      "name": "Cal.com - Video Call",
+      "position": [
+        700,
+        300
+      ],
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "CREATE_THIS_CREDENTIAL",
+          "name": "Cal.com API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.cal.com/v1/bookings",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "json",
+        "body": "={\n  \"eventTypeId\": YOUR_IN_PERSON_EVENT_ID,\n  \"start\": \"{{ $json.demo_time }}\",\n  \"responses\": {\n    \"name\": \"{{ $json.ime }}\",\n    \"email\": \"{{ $json.email }}\",\n    \"location\": \"{{ $json.meeting_address }}\",\n    \"notes\": \"Prepreka: {{ $json.prepreka }} | Leadovi: {{ $json.nedeljni_leadovi }}\"\n  },\n  \"metadata\": {\n    \"kompanija\": \"{{ $json.kompanija }}\",\n    \"address\": \"{{ $json.meeting_address }}\"\n  }\n}",
+        "options": {}
+      },
+      "id": "calcom-in-person",
+      "name": "Cal.com - In-Person",
+      "position": [
+        700,
+        460
+      ],
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "CREATE_THIS_CREDENTIAL",
+          "name": "Cal.com API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "kontakti",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "email",
+              "keyValue": "={{ $('Webhook - Part 2 Form').item.json.email }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "demo_preference",
+              "fieldValue": "={{ $('Webhook - Part 2 Form').item.json.demo_preference }}"
+            },
+            {
+              "fieldId": "demo_time",
+              "fieldValue": "={{ $('Webhook - Part 2 Form').item.json.demo_time }}"
+            },
+            {
+              "fieldId": "meeting_link",
+              "fieldValue": "={{ $json.booking.url || $json.url }}"
+            },
+            {
+              "fieldId": "email_type",
+              "fieldValue": "email_2"
+            },
+            {
+              "fieldId": "next_email_at",
+              "fieldValue": "={{ $now.plus({minutes: 2}).toISO() }}"
+            },
+            {
+              "fieldId": "status",
+              "fieldValue": "Demo Scheduled - Meeting"
+            }
+          ]
+        }
+      },
+      "id": "update-meeting-booked",
+      "name": "Update - Meeting Booked",
+      "position": [
+        940,
+        380
+      ],
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "credentials": {
+        "supabaseApi": {
+          "id": "x9GAXz1Nv6O8J4Vh",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "allIncomingItems",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          },
+          "responseBody": "={ \"success\": true, \"message\": \"Demo zakazan! Očekujte email potvrdu uskoro.\" }"
+        }
+      },
+      "id": "webhook-response",
+      "name": "Webhook Response",
+      "position": [
+        1180,
+        300
+      ],
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook - Part 2 Form": {
+      "main": [
+        [
+          {
+            "node": "Switch - Demo Type",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch - Demo Type": {
+      "main": [
+        [
+          {
+            "node": "Update - Video Demo",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Cal.com - Video Call",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Cal.com - In-Person",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update - Video Demo": {
+      "main": [
+        [
+          {
+            "node": "Webhook Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cal.com - Video Call": {
+      "main": [
+        [
+          {
+            "node": "Update - Meeting Booked",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cal.com - In-Person": {
+      "main": [
+        [
+          {
+            "node": "Update - Meeting Booked",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update - Meeting Booked": {
+      "main": [
+        [
+          {
+            "node": "Webhook Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "versionId": "NEW_VERSION_ID",
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "instanceId": "a3e305c738eb73f1fbc3b12617abb7f87afc97eef0e0a1514a5f1b9cf03efcf2"
+  },
+  "tags": []
+}

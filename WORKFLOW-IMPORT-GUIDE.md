@@ -3,7 +3,7 @@
 ## Files You Have
 
 1. **`IDE-PROMPT-EMAIL-COPY-REWRITE.txt`** - Paste in Antigravity to fix Email Master workflow
-2. **`WORKFLOW-2-DEMO-BOOKING.json`** - Import this directly into n8n
+2. **`WORKFLOW-2-FIXED-NO-CODE.json`** - Import this directly into n8n (fixed version without code nodes)
 
 ---
 
@@ -13,7 +13,7 @@
 2. **Click "Workflows"** in left sidebar
 3. **Click "+ Add workflow"** button (top right)
 4. **Click the 3 dots menu** (⋮) → **Import from File**
-5. **Select** `WORKFLOW-2-DEMO-BOOKING.json`
+5. **Select** `WORKFLOW-2-FIXED-NO-CODE.json`
 6. **Click "Import"**
 
 The workflow is now in your n8n! ✅
