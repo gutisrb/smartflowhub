@@ -1,0 +1,600 @@
+# EMAIL COPY REWRITE + WORKFLOW FIXES - IDE PROMPT FOR ANTIGRAVITY
+
+## CONTEXT
+You have n8n MCP access. You need to modify the workflow "AI GROWTH - Email Master v5 (FRAMEWORK ALIGNED)" to:
+1. **Rewrite ALL email copy** for maximum conversions (AI agency context)
+2. **Fix workflow routing bugs** in the Switch node
+3. **Fix email sequence flow** so emails progress automatically
+
+---
+
+## CRITICAL BUGS TO FIX
+
+### Bug 1: Switch Node Routing
+**Current Problem:**
+- Switch node has outputs for email_2 through email_7
+- email_8 is NOT in the switch node branches
+- email_8 is incorrectly connected directly from ScheduleTrigger
+- This causes email_8 to never fire properly
+
+**FIX:**
+1. Add email_8 as the 7th branch in the Switch node (after email_7)
+2. Remove the direct connection from ScheduleTrigger to GmailE8
+3. Connect Switch output #7 → GmailE8 (No-Show)
+
+### Bug 2: Email Sequence Progression
+**Current Problem:**
+- Each email sends → waits → updates Supabase
+- But NO email sets the `next_email_type` field
+- So the sequence stops after first email
+- Leads get stuck and don't progress through nurture
+
+**FIX:**
+For EACH "Update" node after every email:
+1. **UpdateE2** (after email_2):
+   - Add field: `email_type` = `"email_3"`
+   - Add field: `next_email_at` = `{{$json.meeting_time - 24h}}` (24 hours before meeting)
+
+2. **UpdateE3** (after email_3):
+   - Add field: `email_type` = `"email_4"`
+   - Add field: `next_email_at` = `{{$json.meeting_time - 1h}}` (1 hour before meeting)
+
+3. **UpdateE4** (after email_4):
+   - Add field: `email_type` = `"email_5"`
+   - Add field: `next_email_at` = `{{$json.meeting_time}}` (at meeting time)
+
+4. **UpdateE5** (after email_5):
+   - Add field: `email_type` = `"email_6"`
+   - Add field: `next_email_at` = `{{$json.meeting_time + 1h}}` (1 hour after meeting)
+
+5. **UpdateE6** (after email_6):
+   - Add field: `email_type` = `"email_7"`
+   - Add field: `next_email_at` = `{{NOW() + 2 days}}`
+
+6. **UpdateE7** (after email_7):
+   - Add field: `email_type` = `NULL` (end of sequence)
+   - Add field: `next_email_at` = `NULL`
+
+### Bug 3: No-Show Email Trigger
+**Current Problem:**
+- email_8 should fire when meeting_time has passed but status != "Meeting Complete"
+- Currently it's just connected from ScheduleTrigger which is wrong
+
+**FIX:**
+1. Remove email_8 from ScheduleTrigger direct connection
+2. Add to Switch node as branch #7
+3. Add logic: Trigger email_8 when:
+   - `meeting_time < NOW()`
+   - AND `status != "Meeting Complete"`
+   - AND `email_type = "check_no_show"`
+
+4. In UpdateE5 (after "Jumping on now" email), add:
+   - Set `email_type` = `"check_no_show"`
+   - Set `next_email_at` = `{{$json.meeting_time + 15 min}}`
+   - This way, 15 min after meeting time, we check if they showed up
+
+---
+
+## EMAIL COPY REWRITES (Conversion-Optimized)
+
+### PRINCIPLES FOR ALL EMAILS:
+- **First person from Nikola** (founder voice, builds trust)
+- **Pain → Solution → Proof → CTA** structure
+- **Specific numbers** ("save 15 hours/week" not "save time")
+- **Low friction** (one-click actions where possible)
+- **Personality** (friendly, not corporate)
+- **Urgency where appropriate** (but not sleazy)
+- **Serbian language** (maintain formality level: "vi" form but friendly)
+
+---
+
+### EMAIL 1: "video_demo" (NEW - Add this branch to Switch)
+**Trigger:** demo_preference = "Video snimak", 30 minutes after Part 2 submission
+
+**Subject:**
+```
+Vaš personalizovani SmartFlow demo je spreman 🎥
+```
+
+**Body:**
+```
+Zdravo {{$json.ime}},
+
+Upravo sam završio vaš personalizovani video demo (5 minuta).
+
+Pokazujem tačno kako SmartFlow može da automatizuje {{$json.prepreka}} za {{$json.kompanija}}.
+
+Pošto trenutno obrađujete {{$json.nedeljni_leadovi}} leadova nedeljno, ova automatizacija bi vam uštedela **15-20 sati nedeljno**.
+
+👉 **Pogledajte demo:** [VIDEO_LINK]
+
+U videu pokazujem:
+✓ Kako AI chatbot preuzima prve poruke (umesto vas)
+✓ Kako automatski kvalifikujemo samo ozbiljne leadove
+✓ Kako vam stižu samo "vreli" leadovi spremni za zatvaranje
+
+**Pitanje:** Kada pogledate video - da li biste hteli da vidimo uživo kako bi ovo funkcionisalo specifično za vaš biznis?
+
+Evo linka za zakazivanje (15 min):
+👉 [CALENDAR_LINK]
+
+Ili samo odgovorite na ovaj email sa pitanjima.
+
+Pozdrav,
+Nikola
+SmartFlow.rs
+
+P.S. 10+ agencija već koristi ovaj sistem i prosečno povećavaju broj kvalifikovanih leadova za 3x uz manje vremena. Možete biti sledeći.
+```
+
+**Wait:** 2 days
+
+**Update Supabase:**
+- `email_type` = `"video_followup"`
+- `next_email_at` = NOW() + 2 days
+
+---
+
+### EMAIL 1b: "video_followup" (NEW - Add this branch)
+**Trigger:** 2 days after video demo sent, if no meeting booked
+
+**Subject:**
+```
+Jeste li pogledali demo? Imam pitanje za vas
+```
+
+**Body:**
+```
+{{$json.ime}},
+
+Poslao sam vam video pre 2 dana gde pokazujem kako SmartFlow automatizuje {{$json.prepreka}}.
+
+Nisam siguran da li ste imali prilike da pogledate?
+
+Ako niste - evo linka ponovo: [VIDEO_LINK]
+
+Ako jeste - imam jedno brzo pitanje:
+
+**Šta vas najviše zanima - AI chatbot deo ili automatizacija kvalifikacije leadova?**
+
+Pitam jer mogu da vam pokažem uživo (15 min poziv) tačno kako bi to funkcionisalo za {{$json.kompanija}}.
+
+Evo linka za zakazivanje:
+👉 [CALENDAR_LINK]
+
+Ili samo odgovorite "chatbot" ili "kvalifikacija" i pokazaću vam specifično taj deo.
+
+Nikola
+SmartFlow.rs
+```
+
+**Wait:** 5 days
+
+**Update Supabase:**
+- `email_type` = `NULL` (move to cold nurture list)
+- `status` = `"Cold - Video Not Viewed"`
+
+---
+
+### EMAIL 2: Meeting Confirmation
+**Trigger:** Immediately after demo booking (video call or in-person)
+
+**Subject:**
+```
+✅ Potvrđeno: Vidimo se {{$json.meeting_time | format('DD.MM u HH:mm')}}
+```
+
+**Body:**
+```
+Odlično, {{$json.ime}}! 🎉
+
+Vaš termin je potvrđen. Radujem se što ćemo razgovarati o tome kako SmartFlow može da transformiše način na koji {{$json.kompanija}} obrađuje leadove.
+
+**Detalji sastanka:**
+📅 **Kada:** {{$json.meeting_time | format('DD MMMM YYYY u HH:mm')}}
+{{#if $json.meeting_address}}
+📍 **Gde:** {{$json.meeting_address}} (Beograd)
+{{else}}
+💻 **Link:** {{$json.meeting_link}}
+{{/if}}
+
+**Priprema za sastanak (opciono):**
+
+Da maksimalno iskoristimo 15 minuta, može da pomogne ako mi odgovorite na ova 2 pitanja:
+
+1. Koji deo vašeg procesa {{$json.prepreka}} vam trenutno oduzima NAJVIŠE vremena?
+2. Da li već koristite neki alat za automatizaciju (Zapier, Make, itd)?
+
+(Samo odgovorite na ovaj email - neću vas gnjavljati sa dužim anketama 😊)
+
+Do tada, slobodno istražite naš sajt:
+👉 https://smartflow.rs
+
+Vidimo se uskoro!
+
+Nikola
+SmartFlow.rs
+
+P.S. Ako vam nešto iskrsne pre sastanka - samo odgovorite na ovaj email. Obično odgovaram u roku od 2-3 sata.
+```
+
+**Wait:** Until 24h before meeting
+
+**Update Supabase:**
+- `email_type` = `"email_3"`
+- `next_email_at` = meeting_time - 24 hours
+
+---
+
+### EMAIL 3: 24h Reminder
+
+**Subject:**
+```
+Podsetnik: Naš poziv je sutra {{$json.meeting_time | format('u HH:mm')}} ⏰
+```
+
+**Body:**
+```
+Hej {{$json.ime}},
+
+Samo kratak podsetnik - naš poziv je sutra u {{$json.meeting_time | format('HH:mm')}}.
+
+{{#if $json.meeting_address}}
+Vidimo se na adresi: {{$json.meeting_address}}
+{{else}}
+Link za poziv: {{$json.meeting_link}}
+{{/if}}
+
+Da li vam i dalje odgovara vreme, ili bi bilo bolje da pomerimo?
+
+Ako vam odgovara - vidimo se sutra! 👍
+
+Ako ne - samo odgovorite i prebacićemo na neki drugi termin (bez problema).
+
+Pozdrav,
+Nikola
+
+P.S. Ako imate dodatnih pitanja pre sastanka - pitajte slobodno.
+```
+
+**Wait:** Until 1h before meeting
+
+**Update Supabase:**
+- `email_type` = `"email_4"`
+- `next_email_at` = meeting_time - 1 hour
+
+---
+
+### EMAIL 4: 60min Reminder
+
+**Subject:**
+```
+Za sat vremena! Sve je spremno 🚀
+```
+
+**Body:**
+```
+{{$json.ime}},
+
+Za **1 sat** imamo poziv! ⏰
+
+{{#if $json.meeting_address}}
+Ne zaboravite: {{$json.meeting_address}}
+{{else}}
+Link: {{$json.meeting_link}}
+
+(Klikni link par minuta ranije da se prijaviš)
+{{/if}}
+
+**Šta da očekujete:**
+- 15 minuta maksimum (ja poštujem vaše vreme)
+- Pokazaću vam uživo kako SmartFlow automatizuje {{$json.prepreka}}
+- Vi pitate šta god želite
+- Ako vidite da ima smisla - pričamo o narednim koracima
+- Ako ne - nema problema, bar ste videli šta je moguće
+
+Vidimo se za sat!
+
+Nikola
+```
+
+**Wait:** Until meeting time
+
+**Update Supabase:**
+- `email_type` = `"email_5"`
+- `next_email_at` = meeting_time
+
+---
+
+### EMAIL 5: "Jumping on now"
+
+**Subject:**
+```
+Ulazim na poziv! 💻
+```
+
+**Body:**
+```
+{{$json.ime}},
+
+Upravo sam ušao! 👋
+
+{{#if $json.meeting_address}}
+Ako kasniš par minuta - nema problema, sačekaću.
+{{else}}
+Link: {{$json.meeting_link}}
+
+Pridruži se kad budeš spreman!
+{{/if}}
+
+Nikola
+```
+
+**Wait:** Until meeting_time + 15 minutes
+
+**Update Supabase:**
+- `email_type` = `"check_no_show"` (triggers no-show check)
+- `next_email_at` = meeting_time + 15 min
+
+---
+
+### EMAIL 6: Post-Meeting Summary
+
+**Trigger:** 1 hour after meeting IF status = "Meeting Complete"
+
+**Subject:**
+```
+Hvala na sjajnom razgovoru + naredni koraci 📋
+```
+
+**Body:**
+```
+{{$json.ime}},
+
+Hvala što ste izdvojili vreme danas - bilo mi je zadovoljstvo da pričamo! 🙌
+
+**Kratak rezime našeg razgovora:**
+
+✓ Analizirali smo vaš trenutni proces {{$json.prepreka}}
+✓ Identifikovali gde gubite najviše vremena (ručno odgovaranje/kvalifikacija)
+✓ Pokazao sam kako AI chatbot + automatska kvalifikacija mogu da preuzmu 80% tog posla
+✓ Razgovarali smo o specifičnim koracima za {{$json.kompanija}}
+
+**Naredni koraci:**
+
+{{#if $json.proposal_sent}}
+✅ Poslao sam vam ponudu na {{$json.email}}
+{{else}}
+📧 Šaljem vam ponudu danas do kraja dana
+{{/if}}
+
+**Pregledajte u miru i javite mi:**
+- Da li ima smisla da krenemo sa ovim?
+- Imate li dodatnih pitanja?
+- Da li želite da vidite još neki primer uživo?
+
+Samo odgovorite na ovaj email sa vašim mislima.
+
+**Podsećam - ovo je ono što dobijate:**
+- AI chatbot koji komunicira sa leadovima 24/7
+- Automatska kvalifikacija (samo vreli leadovi stižu do vas)
+- Ušteda 15-20 sati nedeljno
+- 3x više kvalifikovanih leadova (dokazano kod postojećih klijenata)
+
+Ako krenemo ove nedelje, možete imati sistem operativan za 10-14 dana.
+
+Javite se ako imate bilo kakvih pitanja!
+
+Srdačan pozdrav,
+Nikola
+SmartFlow.rs
++381 XX XXX XXXX (WhatsApp)
+
+P.S. Ako znate nekog ko bi mogao da ima koristi od ovoga - slobodno prosledite. Dajem 10% popust za svaku preporuku koja postane klijent.
+```
+
+**Wait:** 2 days
+
+**Update Supabase:**
+- `email_type` = `"email_7"`
+- `next_email_at` = NOW() + 2 days
+
+---
+
+### EMAIL 7: Follow-up
+
+**Subject:**
+```
+Šta mislite? Imam pitanje 🤔
+```
+
+**Body:**
+```
+Hej {{$json.ime}},
+
+Prošla su 2 dana od našeg poziva, pa sam hteo da proverim:
+
+**Šta mislite o SmartFlow rešenju?**
+
+Razumem da uvođenje AI-a u biznis nije mala odluka. Evo najčešćih pitanja/dilema koje klijenti imaju pre nego što krenu:
+
+❓ "Da li je komplikovano za podešavanje?"
+→ Ne - mi sve podešavamo za vas. Vi samo testirate i odobiete.
+
+❓ "Šta ako ne radi kako treba?"
+→ Imamo 30-dnevnu garanciju. Ako ne vidite rezultate - vraćamo novac.
+
+❓ "Da li moram da menjam ceo sistem odjednom?"
+→ Ne - počinjemo sa jednim kanalom (npr. Instagram) i širimo postepeno.
+
+**Imam predlog:**
+
+Ako i dalje imate dileme - hajde da uradimo **BESPLATNO PROBNI PERIOD od 7 dana**.
+
+Podesićemo sistem za jedan vaš kanal, testirate 7 dana, i onda odlučite.
+
+Bez obaveza, bez kreditne kartice - samo test.
+
+Što kažete?
+
+Odgovorite sa "DA - hajde probno" i krenem odmah.
+
+Ili ako imate druga pitanja - samo pitajte.
+
+Pozdrav,
+Nikola
+SmartFlow.rs
+
+P.S. Trenutno radim sa {{X}} klijenata i imam kapacitet za još 2-3 ove meseca. Ako želite da krenemo - najbolje da se javite uskoro.
+```
+
+**Wait:** 7 days
+
+**Update Supabase:**
+- `email_type` = `NULL` (end of sequence)
+- `status` = `"Nurture - Not Ready"`
+
+---
+
+### EMAIL 8: No-Show Recovery
+
+**Trigger:** 15 minutes after meeting_time IF status != "Meeting Complete"
+
+**Subject:**
+```
+Sve ok? Nismo se čuli danas
+```
+
+**Body:**
+```
+Hej {{$json.ime}},
+
+Primetio sam da nismo uspeli da se čujemo u zakazano vreme danas.
+
+Potpuno razumem - dešavaju se nepredviđene stvari, sastanci se poklapaju, planovi se menjaju. No hard feelings. 😊
+
+**Želite da prebacimo termin?**
+
+Ako i dalje želite da vidite kako SmartFlow može da automatizuje {{$json.prepreka}} za {{$json.kompanija}} - jednostavno zakažite novi termin ovde:
+
+👉 [CALENDAR_LINK]
+
+**Ili možda biste radije video umesto live poziva?**
+
+Mogu da vam pripremim personalizovan 5-minutni video snimak gde pokazujem tačno kako bi sistem funkcionisao za vas.
+
+Samo odgovorite sa "Pošalji video" i spremno za sutra.
+
+Bez obaveze da nastavimo dalje - samo da vidite šta je moguće.
+
+Javite se ako vas i dalje zanima!
+
+Pozdrav,
+Nikola
+SmartFlow.rs
+
+P.S. Ako više ne želite da primate mejlove - samo odgovorite sa "Unsubscribe" i neću vas gnjaviti. 👍
+```
+
+**Wait:** No wait (end of sequence)
+
+**Update Supabase:**
+- `email_type` = `NULL`
+- `status` = `"No-Show - Recovery Sent"`
+
+---
+
+## ADDITIONAL IMPROVEMENTS
+
+### 1. Add "Abandoned Part 1" Email (from Workflow 1)
+
+Update the email in "Workflow 1: Kvalifikacija i Email 1" to match conversion style:
+
+**Subject:**
+```
+Skoro gotovo! Nedostaje još samo jedno 🎯
+```
+
+**Body:**
+```
+Hej {{$json.ime}},
+
+Primetio sam da ste započeli formular na SmartFlow.rs ali niste izabrali termin za demo.
+
+Zaboravili ste? Ili nije bilo dobrog vremena?
+
+**Evo šta se dešava u sledećih 2 minuta:**
+
+1. Kliknete ovde → [CALENDAR_LINK]
+2. Izaberete vreme koje vam odgovara (ili kažete da želite video)
+3. Dobijate personalizovani demo koji pokazuje kako da uštedite 15+ sati nedeljno
+
+Pošto ste naveli da vam trenutna najveća prepreka je **{{$json.prepreka}}** - ovo je TAČNO ono što SmartFlow rešava.
+
+Klijenti sa sličnim problemom trenutno:
+✓ Štede 15-20 sati nedeljno
+✓ Imaju 3x više kvalifikovanih leadova
+✓ Zatvaraju više dealova jer se fokusiraju na pravu publiku
+
+Završite zakazivanje (traje 30 sekundi):
+👉 [CALENDAR_LINK]
+
+Vidimo se uskoro!
+
+Nikola
+SmartFlow.rs
+
+P.S. Ako niste sigurni da li vam treba ovo - zakažite video demo (bez obaveze). Barem ćete videti šta je moguće sa AI automatizacijom.
+```
+
+---
+
+## IMPLEMENTATION CHECKLIST
+
+Use n8n MCP tools to make these changes:
+
+✅ **Fix Switch Node:**
+- Add email_8 as branch #7
+- Remove direct ScheduleTrigger → GmailE8 connection
+- Connect Switch output #7 → GmailE8
+
+✅ **Fix Email Progression:**
+- Update all 7 "Update" nodes to set next_email_type
+- Update all 7 "Update" nodes to set next_email_at
+
+✅ **Add New Email Branches:**
+- Add "video_demo" branch to Switch
+- Add "video_followup" branch to Switch
+- Add "check_no_show" logic before email_8
+
+✅ **Rewrite All Email Copy:**
+- Update Gmail node content for emails 2-8
+- Add video_demo email
+- Add video_followup email
+- Update abandoned form email in Workflow 1
+
+✅ **Test Sequence Flow:**
+- Manually trigger with test lead
+- Verify email_type progresses: email_2 → 3 → 4 → 5 → check_no_show → 6 → 7 → NULL
+- Verify next_email_at is calculated correctly
+
+---
+
+## COPY PRINCIPLES APPLIED
+
+Every email above follows these conversion principles:
+
+✅ **Personal tone** - First person from Nikola, builds trust
+✅ **Specific pain points** - References their exact problem ({{$json.prepreka}})
+✅ **Concrete numbers** - "15-20 hours saved" not "save time"
+✅ **Social proof** - "10+ agencies" / "3x more leads"
+✅ **Clear CTAs** - Single primary action per email
+✅ **Low friction** - One-click calendar links
+✅ **Objection handling** - Addresses "too complicated" / "too risky"
+✅ **Urgency where appropriate** - "Capacity for 2-3 more clients this month"
+✅ **Personality** - Emojis, casual Serbian, humor ("No hard feelings")
+✅ **Exit ramps** - Easy unsubscribe, move to video option
+
+---
+
+Apply all changes and test the workflow end-to-end.
