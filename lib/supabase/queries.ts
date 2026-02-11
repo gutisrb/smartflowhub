@@ -134,3 +134,56 @@ export async function deleteCandidate(id: string) {
     }
     return true
 }
+
+// Module Management
+export async function getClientModules(clientId: string) {
+    const supabase = createClient()
+    const { data, error } = await supabase
+        .from('client_modules')
+        .select('*')
+        .eq('client_id', clientId)
+        .eq('is_enabled', true)
+        .order('sort_order', { ascending: true, nullsFirst: false })
+
+    if (error) {
+        console.error('Error fetching client modules:', error)
+        return []
+    }
+    return data
+}
+
+export async function enableModuleForClient(clientId: string, moduleKey: string, displayName?: string, sortOrder?: number) {
+    const supabase = createClient()
+    const { data, error } = await supabase
+        .from('client_modules')
+        .insert([{
+            client_id: clientId,
+            module_key: moduleKey,
+            is_enabled: true,
+            display_name: displayName,
+            sort_order: sortOrder
+        }])
+        .select()
+        .single()
+
+    if (error) {
+        console.error('Error enabling module:', error)
+        throw error
+    }
+    return data
+}
+
+export async function disableModuleForClient(clientId: string, moduleKey: string) {
+    const supabase = createClient()
+    const { error } = await supabase
+        .from('client_modules')
+        .update({ is_enabled: false })
+        .eq('client_id', clientId)
+        .eq('module_key', moduleKey)
+
+    if (error) {
+        console.error('Error disabling module:', error)
+        throw error
+    }
+    return true
+}
