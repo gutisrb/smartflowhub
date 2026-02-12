@@ -1,0 +1,246 @@
+{
+  "name": "AI Growth Agency - Workflow 1: Kvalifikacija i Email 1",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "lead-form",
+        "options": {}
+      },
+      "id": "webhook-1",
+      "name": "Webhook - Lead Form",
+      "position": [
+        240,
+        288
+      ],
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "webhookId": "f7acdba3-e959-453f-a5a7-f7516be00143"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ json.email }}",
+        "subject": "=Zaboravili ste nešto? 🤔 (SmartFlow.rs)",
+        "message": "=Poštovani/a {{$node[\"Webhook - Lead Form\"].json.ime}},\\n\\nPrimetio sam da ste popunili formular na SmartFlow.rs ali niste odabrali termin za razgovor. Zaboravili ste nešto? 🤔\\n\\nVaš upit deluje kao savršen primer gde naša AI rešenja mogu napraviti ozbiljnu promenu.\\n\\nZakažite svoj termin ovde (traje samo 2 minuta):\\n👉 [CALENDAR_LINK]\\n\\nAko imate bilo kakvih pitanja pre sastanka, samo odgovorite na ovaj email.\\n\\nVidimo se uskoro,\\nTim SmartFlow.rs",
+        "options": {}
+      },
+      "id": "gmail-1",
+      "name": "Gmail - Email 1",
+      "position": [
+        1264,
+        288
+      ],
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "webhookId": "14b2e36e-86d8-493f-a63a-b7f7913e3740",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "FOdqS7vs3sheI0JH",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-3-flash-preview",
+          "mode": "list",
+          "cachedResultName": "models/gemini-3-flash-preview"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=Ti si AI asistent za kvalifikaciju potencijalnih klijenata (leadova) za AI Growth Agency.\n\nTvoj zadatak je da analiziraš podatke o lead-u i odrediš:\n1. **Kategoriju** - Koliko je lead kvalitetan\n2. **Prioritet skor** - Numerička ocena od 1-100\n3. **Obrazloženje** - Kratko objašnjenje zašto si tako kategorisao\n4. **Sledeća akcija** - Šta tim treba da uradi odmah\n\n---\n\n**PODATCI O LEAD-U:**\n\nIme: {{$json.ime}}\nEmail: {{$json.email}}\nKompanija: {{$json.kompanija}}\nPoruka: {{$json.poruka}}\nBudžet: {{$json.budzet}}\nVremenski okvir: {{$json.vremenski_okvir}}\n\n---\n\n**KRITERIJUMI ZA KATEGORIJU:**\n\n🔥 **Vreo Lead** (Hot):\n- Budžet: >10,000€\n- Vremenski okvir: \"Hitno\" ili \"1-3 meseca\"\n- Jasno definisan problem u poruci\n- Kompanija postoji i navedena je\n- Prioritet skor: 70-100\n\n🔸 **Topao Lead** (Warm):\n- Budžet: 5,000-10,000€\n- Vremenski okvir: \"3-6 meseci\"\n- Problem je opisan ali nije kritičan\n- Prioritet skor: 40-69\n\n❄️ **Hladan Lead** (Cold):\n- Budžet: <5,000€\n- Vremenski okvir: \"6+ meseci\"\n- Nejasan problem ili samo istraživanje\n- Prioritet skor: 1-39\n\n---\n\n**SLEDEĆE AKCIJE (preporuke):**\n\n- Za Vreo: \"Prioritetni poziv u roku od 2 sata\"\n- Za Topao: \"Zakazati discovery call u narednih 24-48h\"\n- Za Hladan: \"Dodati u nurture sekvencu, follow-up za 7 dana\"\n\n---\n\n**FORMAT ODGOVORA:**\n\nVrati SAMO validan JSON u ovom formatu (bez dodatnog teksta):\n\n{\n  \"kategorija\": \"Vreo\" | \"Topao\" | \"Hladan\",\n  \"prioritet_skor\": 1-100,\n  \"obrazlozenje\": \"Kratko objašnjenje (1-2 rečenice) zašto je lead kategorisan ovako.\",\n  \"sledeca_akcija\": \"Konkretna preporučena akcija za tim.\"\n}\n\n---\n\n**VAŽNO:**\n- Odgovori na srpskom jeziku\n- Koristi profesionalan ali prijateljski ton u obrazloženju\n- Budi precizan u oceni - ne naduvaj prioritet\n- Razmisli kritički - nije svaki lead \"Vreo\" samo zato što kaže da je hitno"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1,
+      "position": [
+        464,
+        288
+      ],
+      "id": "6e9dfbb9-dbf1-4142-94d9-d7bd582fa631",
+      "name": "Gemini - Kvalifikacija",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "WBlrLLqHWiV5KKzP",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolThink",
+      "typeVersion": 1.1,
+      "position": [
+        624,
+        544
+      ],
+      "id": "62ae365a-98d1-411b-a460-1226e40b5fd4",
+      "name": "Think"
+    },
+    {
+      "parameters": {
+        "tableId": "kontakti",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "ime",
+              "fieldValue": "={{$('Webhook - Lead Form').json.ime}}"
+            },
+            {
+              "fieldId": "email",
+              "fieldValue": "={{$('Webhook - Lead Form').json.email}}"
+            },
+            {
+              "fieldId": "telefon",
+              "fieldValue": "={{$('Webhook - Lead Form').json.telefon}}"
+            },
+            {
+              "fieldId": "kompanija",
+              "fieldValue": "={{$('Webhook - Lead Form').json.kompanija}}"
+            },
+            {
+              "fieldId": "problem",
+              "fieldValue": "={{$('Webhook - Lead Form').json.poruka}}"
+            },
+            {
+              "fieldId": "budzet",
+              "fieldValue": "={{$('Webhook - Lead Form').json.budzet}}"
+            },
+            {
+              "fieldId": "vremenski_okvir",
+              "fieldValue": "={{$('Webhook - Lead Form').json.vremenski_okvir}}"
+            },
+            {
+              "fieldId": "kategorija",
+              "fieldValue": "={{$json.kategorija}}"
+            },
+            {
+              "fieldId": "prioritet_skor",
+              "fieldValue": "={{$json.prioritet_skor}}"
+            },
+            {
+              "fieldId": "obrazlozenje",
+              "fieldValue": "={{$json.obrazlozenje}}"
+            },
+            {
+              "fieldId": "sledeca_akcija",
+              "fieldValue": "={{$json.sledeca_akcija}}"
+            },
+            {
+              "fieldId": "status",
+              "fieldValue": "Novi Lead"
+            },
+            {
+              "fieldId": "izvor",
+              "fieldValue": "Landing Page"
+            }
+          ]
+        }
+      },
+      "id": "supabase-create-lead",
+      "name": "Supabase - Kreiraj Lead",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1040,
+        288
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "x9GAXz1Nv6O8J4Vh",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const response = $input.first().json.content;\ntry {\n  // Use regex to clean up potential markdown formatting if Gemini includes it\n  const jsonMatch = response.match(/\\{[\\s\\S]*\\}/);\n  const jsonStr = jsonMatch ? jsonMatch[0] : response;\n  const parsed = JSON.parse(jsonStr);\n  return {\n    kategorija: parsed.kategorija,\n    prioritet_skor: parseInt(parsed.prioritet_skor) || 0,\n    obrazlozenje: parsed.obrazlozenje,\n    sledeca_akcija: parsed.sledeca_akcija\n  };\n} catch (e) {\n  return {\n    kategorija: \"Nepoznato\",\n    prioritet_skor: 0,\n    obrazlozenje: \"Greška pri parsiranju AI odgovora.\",\n    sledeca_akcija: \"Ručna provera\"\n  };\n}"
+      },
+      "id": "67b720b9-fae5-46e1-a08b-9f6ca3d0ac89",
+      "name": "Parse AI Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        816,
+        288
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook - Lead Form": {
+      "main": [
+        [
+          {
+            "node": "Gemini - Kvalifikacija",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Think": {
+      "ai_tool": [
+        [
+          {
+            "node": "Gemini - Kvalifikacija",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini - Kvalifikacija": {
+      "main": [
+        [
+          {
+            "node": "Parse AI Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase - Kreiraj Lead": {
+      "main": [
+        [
+          {
+            "node": "Gmail - Email 1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse AI Response": {
+      "main": [
+        [
+          {
+            "node": "Supabase - Kreiraj Lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "versionId": "77c05f1f-0f71-452b-a5df-648fb3196c03",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "a3e305c738eb73f1fbc3b12617abb7f87afc97eef0e0a1514a5f1b9cf03efcf2"
+  },
+  "id": "oaSDcjiIMBI0UocZ",
+  "tags": []
+}

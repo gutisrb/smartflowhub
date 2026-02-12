@@ -1,0 +1,382 @@
+{
+  "name": "AI Growth Agency - Workflow 3: Chatbot",
+  "nodes": [
+    {
+      "parameters": {
+        "jsCode": "const chatInput = $input.first().json.chatInput;\nconst sessionId = $input.first().json.sessionId;\n\nreturn {\n  json: {\n    sender_id: sessionId, \n    message_text: chatInput,\n    timestamp: new Date().toISOString(),\n    platform: 'chat'\n  }\n};"
+      },
+      "id": "extract-message",
+      "name": "Extract Message",
+      "position": [
+        -480,
+        -96
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "kontakti",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "={{ $json.sender_id }}"
+            }
+          ]
+        }
+      },
+      "id": "airtable-query",
+      "name": "Supabase - Lookup Lead",
+      "position": [
+        -256,
+        -96
+      ],
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "x9GAXz1Nv6O8J4Vh",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "exist-check",
+              "leftValue": "={{ $json.created_at }}",
+              "operator": {
+                "type": "string",
+                "operation": "empty"
+              },
+              "rightValue": ""
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "if-exists",
+      "name": "IF - Lead Exists",
+      "position": [
+        -32,
+        -96
+      ],
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "tableId": "kontakti",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "id_razgovora",
+              "fieldValue": "={{$('Extract Message').json.sender_id}}"
+            },
+            {
+              "fieldId": "izvor",
+              "fieldValue": "Chatbot"
+            },
+            {
+              "fieldId": "status",
+              "fieldValue": "Razgovor Započet"
+            },
+            {
+              "fieldId": "ime",
+              "fieldValue": "Facebook User"
+            },
+            {
+              "fieldId": "email",
+              "fieldValue": "pending@chatbot.com"
+            }
+          ]
+        }
+      },
+      "id": "supabase-create",
+      "name": "Supabase - Create Lead",
+      "position": [
+        192,
+        -32
+      ],
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "credentials": {
+        "supabaseApi": {
+          "id": "x9GAXz1Nv6O8J4Vh",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "tableId": "kontakti"
+      },
+      "id": "supabase-tool",
+      "name": "SupabaseCreateLeadTool",
+      "position": [
+        800,
+        128
+      ],
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "credentials": {
+        "supabaseApi": {
+          "id": "x9GAXz1Nv6O8J4Vh",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "text": "=Ti si AI Agent za AI Growth Agency. Tvoj cilj je da kvalifikuješ leadove i navedes ih da zakazu sastanak preko Calendly linka.\n\nKADA KORISNIK IZRAZI NAMERU DA ZAKAŽE ILI POKAŽE VELIKO INTERESOVANJE:\n1. Odmah koristi `SupabaseUpdateLeadTool` da postaviš `status` na 'Meeting Booked'.\n2. Ponudi Calendly link: [CALENDAR_LINK]\n\nVodič za kvalifikaciju:\n- Pitaj za kompaniju, nišu i potreban obim posla.\n- Ako su kvalifikovani, budi direktan oko zakazivanja.",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        608,
+        -96
+      ],
+      "id": "039d43b8-e6d7-4403-82ee-62227b56c539",
+      "name": "AI Agent (Tools Agent)1"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        672,
+        128
+      ],
+      "id": "2b1fa603-18b1-4d22-8048-d41c444dab0f",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "s7iE7FlrTIWBIAWB",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/s7iE7FlrTIWBIAWB",
+          "cachedResultName": "Image analysis"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        928,
+        128
+      ],
+      "id": "a83723ae-a8d8-48a4-a8fc-e2303ffc9009",
+      "name": "Call 'Image analysis'"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "chat-trigger",
+      "name": "When chat message received",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -704,
+        -96
+      ],
+      "webhookId": "958adf55-13f9-4d99-b08d-13f7459e2d35"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "kontakti"
+      },
+      "id": "supabase-update-lead-tool-1",
+      "name": "SupabaseUpdateLeadTool",
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        416,
+        128
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "x9GAXz1Nv6O8J4Vh",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3-flash-preview",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        544,
+        128
+      ],
+      "id": "eb6ef407-439f-42a3-8820-aaeed6b8c1c6",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "WBlrLLqHWiV5KKzP",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Supabase - Lookup Lead": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "IF - Lead Exists",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Extract Message": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Supabase - Lookup Lead",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "IF - Lead Exists": {
+      "main": [
+        [
+          {
+            "node": "AI Agent (Tools Agent)1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "index": 0,
+            "node": "Supabase - Create Lead",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "SupabaseCreateLeadTool": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent (Tools Agent)1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent (Tools Agent)1",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call 'Image analysis'": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent (Tools Agent)1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Extract Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase - Create Lead": {
+      "main": [
+        [
+          {
+            "node": "AI Agent (Tools Agent)1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SupabaseUpdateLeadTool": {
+      "main": [
+        [
+          {
+            "node": "AI Agent (Tools Agent)1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent (Tools Agent)1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "versionId": "efb70440-8d0b-4b36-ae78-68750d55048c",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "a3e305c738eb73f1fbc3b12617abb7f87afc97eef0e0a1514a5f1b9cf03efcf2"
+  },
+  "id": "VxbWwPO9ZOY9TuXo",
+  "tags": []
+}

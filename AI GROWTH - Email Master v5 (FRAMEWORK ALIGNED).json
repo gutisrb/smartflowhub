@@ -1,0 +1,834 @@
+{
+  "name": "AI GROWTH - Email Master v5 (FRAMEWORK ALIGNED)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 15
+            }
+          ]
+        }
+      },
+      "id": "ScheduleTrigger-Fixed",
+      "name": "ScheduleTrigger",
+      "position": [
+        112,
+        512
+      ],
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery"
+      },
+      "id": "SupabaseQuery-Fixed",
+      "name": "SupabaseQuery",
+      "position": [
+        352,
+        384
+      ],
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "credentials": {
+        "supabaseApi": {
+          "id": "x9GAXz1Nv6O8J4Vh",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.email_type }}",
+                    "operator": {
+                      "operation": "eq"
+                    },
+                    "rightValue": "email_2",
+                    "id": "6e2089f1-85b1-4450-a89a-ec7431f95dbc"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.email_type }}",
+                    "operator": {
+                      "operation": "eq"
+                    },
+                    "rightValue": "email_3",
+                    "id": "4be4ded6-f0e6-4cde-ab2b-baa975e6f3f1"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.email_type }}",
+                    "operator": {
+                      "operation": "eq"
+                    },
+                    "rightValue": "email_4",
+                    "id": "3b7f39c7-28c0-4690-ae2c-d76e78460125"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.email_type }}",
+                    "operator": {
+                      "operation": "eq"
+                    },
+                    "rightValue": "email_5",
+                    "id": "7285602e-6584-4535-b5c0-c17cbbd65382"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.email_type }}",
+                    "operator": {
+                      "operation": "eq"
+                    },
+                    "rightValue": "email_6",
+                    "id": "2fd9ab77-9699-4bda-bfad-ab49e3c288a7"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.email_type }}",
+                    "operator": {
+                      "operation": "eq"
+                    },
+                    "rightValue": "email_7",
+                    "id": "0a95b55b-6028-4bca-978f-65a9a9e23fb9"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.email_type }}",
+                    "operator": {
+                      "operation": "eq"
+                    },
+                    "rightValue": "email_8",
+                    "id": "7ba147b4-c008-483d-8f11-2b51a470076e"
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "SwitchType-Fixed-Node",
+      "name": "SwitchTypeFixed",
+      "position": [
+        608,
+        512
+      ],
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "subject": "=Potvrda termina: Vidimo se uskoro! (SmartFlow.rs)",
+        "message": "=Sjajne vesti, {{$json.ime}}!\\n\\nVaš termin je uspešno potvrđen. Radujem se što ćemo razgovarati o automatizaciji vašeg biznisa.\\n\\nDetalji sastanka:\\n📅 Vreme: {{$json.meeting_time}}\\n🔗 Link: {{$json.meeting_link}}\\n\\nDo tada, slobodno istražite naš sajt: https://smartflow.rs\\n\\nVidimo se,\\nTim SmartFlow.rs",
+        "options": {}
+      },
+      "id": "GmailE2-Fixed",
+      "name": "GmailE2",
+      "position": [
+        864,
+        112
+      ],
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "webhookId": "36e317d4-dd63-493b-803c-f649098f0f7e",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "FOdqS7vs3sheI0JH",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 2,
+        "unit": "minutes"
+      },
+      "id": "WaitE2-Fixed-Node",
+      "name": "WaitE2",
+      "position": [
+        1104,
+        112
+      ],
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "webhookId": "bd765897-3fbd-4e94-bb2d-c4eca427cb25"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "kontakti",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "keyValue": "={{ $json.id }}"
+            }
+          ]
+        }
+      },
+      "id": "UpdateE2-Fixed-Node",
+      "name": "UpdateE2",
+      "position": [
+        1360,
+        112
+      ],
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "credentials": {
+        "supabaseApi": {
+          "id": "x9GAXz1Nv6O8J4Vh",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "subject": "=Podsetnik: Naš sastanak je sutra (SmartFlow.rs)",
+        "message": "=Samo kratak podsetnik, {{$json.ime}}.\\n\\nNaš sastanak je zakazan za sutra. Da li vam i dalje odgovara termin?\\n\\nVidimo se na linku:\\n🔗 {{$json.meeting_link}}\\n\\nPozdrav,\\nSmartFlow.rs tim",
+        "options": {}
+      },
+      "id": "GmailE3-Fixed-Node",
+      "name": "GmailE3",
+      "position": [
+        864,
+        256
+      ],
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "webhookId": "381291c6-e404-40bb-832e-2c93942ca853",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "FOdqS7vs3sheI0JH",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "id": "WaitE3-Fixed-Node",
+      "name": "WaitE3",
+      "position": [
+        1104,
+        256
+      ],
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "webhookId": "f3f3cc0f-2f13-4f7f-919e-f5b6b37e5950"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "kontakti",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "keyValue": "={{ $json.id }}"
+            }
+          ]
+        }
+      },
+      "id": "UpdateE3-Fixed-Node",
+      "name": "UpdateE3",
+      "position": [
+        1360,
+        256
+      ],
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "credentials": {
+        "supabaseApi": {
+          "id": "x9GAXz1Nv6O8J4Vh",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "subject": "=Podsetnik: Sastanak počinje za 60 minuta!",
+        "message": "=Vidimo se za sat vremena! 🚀\\n\\nSve je spremno za naš razgovor. Pripremite pitanja koja imate o AI integraciji.\\n\\nPridružite se ovde:\\n🔗 {{$json.meeting_link}}\\n\\nVidimo se uskoro,\\nSmartFlow.rs",
+        "options": {}
+      },
+      "id": "GmailE4-Fixed-Node",
+      "name": "GmailE4",
+      "position": [
+        864,
+        400
+      ],
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "webhookId": "34ab1a11-e9ad-4afb-9da4-32db73579a27",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "FOdqS7vs3sheI0JH",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "id": "WaitE4-Fixed-Node",
+      "name": "WaitE4",
+      "position": [
+        1104,
+        400
+      ],
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "webhookId": "4c1cffed-8cbe-4c24-83e6-771484d14061"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "kontakti",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "={{ $json.id }}"
+            }
+          ]
+        }
+      },
+      "id": "UpdateE4-Fixed-Node",
+      "name": "UpdateE4",
+      "position": [
+        1360,
+        400
+      ],
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "credentials": {
+        "supabaseApi": {
+          "id": "x9GAXz1Nv6O8J4Vh",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "subject": "=Jumping on now! (SmartFlow.rs)",
+        "message": "=Upravo ulazim na sastanak, {{$json.ime}}! 🏃‍♂️\\n\\nČekam vas na linku:\\n🔗 {{$json.meeting_link}}\\n\\nVidimo se za par minuta!",
+        "options": {}
+      },
+      "id": "GmailE5-Fixed-Node",
+      "name": "GmailE5",
+      "position": [
+        864,
+        560
+      ],
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "webhookId": "9bb4ac1f-d631-47dc-8c75-c7568dd700da",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "FOdqS7vs3sheI0JH",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "id": "WaitE5-Fixed-Node",
+      "name": "WaitE5",
+      "position": [
+        1104,
+        560
+      ],
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "webhookId": "0d5b7529-2652-45ac-92ac-8ede57a79923"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "kontakti",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "keyValue": "={{ $json.id }}"
+            }
+          ]
+        }
+      },
+      "id": "UpdateE5-Fixed-Node",
+      "name": "UpdateE5",
+      "position": [
+        1360,
+        560
+      ],
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "credentials": {
+        "supabaseApi": {
+          "id": "x9GAXz1Nv6O8J4Vh",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "subject": "=Rezime sastanka i naredni koraci (SmartFlow.rs)",
+        "message": "=Hvala na sjajnom razgovoru danas, {{$json.ime}}!\\n\\nKao što smo obećali, evo kratkog rezimea:\\n- Analizirali smo vaš trenutni workflow\\n- Identifikovali smo bolne tačke u prodaji\\n- Predložili smo AI rešenje za automatizaciju lead-ova\\n\\nNaredni koraci:\\n1. Pregledajte našu ponudu\\n2. Javite nam ako imate dodatnih pitanja\\n\\nStojimo vam na raspolaganju,\\nSmartFlow.rs tim",
+        "options": {}
+      },
+      "id": "GmailE6-Fixed-Node",
+      "name": "GmailE6",
+      "position": [
+        864,
+        704
+      ],
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "webhookId": "71d4827f-8d27-4899-a40d-63e1379dd737",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "FOdqS7vs3sheI0JH",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "id": "WaitE6-Fixed-Node",
+      "name": "WaitE6",
+      "position": [
+        1104,
+        704
+      ],
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "webhookId": "08c24796-8e79-4875-bbf5-bc620d973b37"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "kontakti",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "keyValue": "={{ $json.id }}"
+            }
+          ]
+        }
+      },
+      "id": "UpdateE6-Fixed-Node",
+      "name": "UpdateE6",
+      "position": [
+        1360,
+        704
+      ],
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "credentials": {
+        "supabaseApi": {
+          "id": "x9GAXz1Nv6O8J4Vh",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "subject": "=Razmislili ste o koracima rasta? 💡 (SmartFlow.rs)",
+        "message": "=Zdravo {{$json.ime}},\\n\\nProšlo je par dana od našeg razgovora, pa sam hteo da proverim da li ste imali vremena da razmislite o predloženim koracima?\\n\\nZnamo da je uvođenje AI-a velika odluka, ali rezultati u uštedi vremena su skoro momentalni.\\n\\nTu smo ako vam treba dodatno pojašnjenje.\\n\\nSve najbolje,\\nSmartFlow.rs tim",
+        "options": {}
+      },
+      "id": "GmailE7-Fixed-Node",
+      "name": "GmailE7",
+      "position": [
+        864,
+        864
+      ],
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "webhookId": "2af16d14-771e-4d61-859d-c2c876b6528f",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "FOdqS7vs3sheI0JH",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "id": "WaitE7-Fixed-Node",
+      "name": "WaitE7",
+      "position": [
+        1104,
+        864
+      ],
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "webhookId": "1f614e5d-cec3-4ea9-ae0e-18f913d4fa98"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "kontakti",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "keyValue": "={{ $json.id }}"
+            }
+          ]
+        }
+      },
+      "id": "UpdateE7-Fixed-Node",
+      "name": "UpdateE7",
+      "position": [
+        1360,
+        864
+      ],
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "credentials": {
+        "supabaseApi": {
+          "id": "x9GAXz1Nv6O8J4Vh",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "subject": "=Da li je sve u redu? (SmartFlow.rs)",
+        "message": "=Zdravo {{$json.ime}},\\n\\nPrimetio sam da se nismo čuli u zakazano vreme. Potpuno razumem da se planovi menjaju i da iskrsnu nepredviđene obaveze.\\n\\nU SmartFlow-u cenimo vaše vreme, pa rekoh da proverim da li je sve u redu?\\n\\nAko i dalje želite da istražite kako AI može ubrzati vaš rast, slobodno zakažite novi termin ovde kad vam bude odgovaralo:\\n👉 {{$json.meeting_link || \"[CALENDAR_LINK]\"}}\\n\\nSrdačan pozdrav,\\nTim SmartFlow.rs",
+        "options": {}
+      },
+      "id": "132d25c0-2ceb-4025-bc3f-780f52f99745",
+      "name": "GmailE8 (No-Show)",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        848,
+        1120
+      ],
+      "webhookId": "64684429-4e06-4abb-ae8a-364d506b44b5"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "GmailE2": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "WaitE2",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "GmailE3": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "WaitE3",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "GmailE4": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "WaitE4",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "GmailE5": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "WaitE5",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "GmailE6": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "WaitE6",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "GmailE7": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "WaitE7",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "ScheduleTrigger": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "SupabaseQuery",
+            "type": "main"
+          },
+          {
+            "node": "GmailE8 (No-Show)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SupabaseQuery": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "SwitchTypeFixed",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "SwitchTypeFixed": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "GmailE2",
+            "type": "main"
+          }
+        ],
+        [
+          {
+            "index": 0,
+            "node": "GmailE3",
+            "type": "main"
+          }
+        ],
+        [
+          {
+            "index": 0,
+            "node": "GmailE4",
+            "type": "main"
+          }
+        ],
+        [
+          {
+            "index": 0,
+            "node": "GmailE5",
+            "type": "main"
+          }
+        ],
+        [
+          {
+            "index": 0,
+            "node": "GmailE6",
+            "type": "main"
+          }
+        ],
+        [
+          {
+            "index": 0,
+            "node": "GmailE7",
+            "type": "main"
+          }
+        ]
+      ],
+      "email_8": [
+        [
+          {
+            "node": "GmailE8 (No-Show)",
+            "type": "email_8",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WaitE2": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "UpdateE2",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "WaitE3": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "UpdateE3",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "WaitE4": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "UpdateE4",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "WaitE5": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "UpdateE5",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "WaitE6": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "UpdateE6",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "WaitE7": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "UpdateE7",
+            "type": "main"
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "saveManualExecutions": true,
+    "saveExecutionProgress": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "versionId": "4df169e9-8831-410b-91fb-d3cde15eec88",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "a3e305c738eb73f1fbc3b12617abb7f87afc97eef0e0a1514a5f1b9cf03efcf2"
+  },
+  "id": "hA8nFaedBOsHHy8D",
+  "tags": []
+}

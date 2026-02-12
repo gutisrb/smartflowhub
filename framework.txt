@@ -1,0 +1,43 @@
+CRM Infrastructure (The Core)
+Build a database (Airtable/PostgreSQL) with the following Statuses and Columns:
+• Pipeline Statuses:
+    1. Lead Captured (Form submitted)
+    2. Qualified (Pre-meeting vetting)
+    3. Meeting Booked (Calendly trigger)
+    4. Meeting Complete (Post-call status)
+    5. Closed (Contract signed)
+    6. Lost (Archived)
+• Essential Columns:
+    ◦ Contact Info (Name, Email, Company, Phone)
+    ◦ Youth Labor Needs (Niche, Volume of workers needed)
+    ◦ Booking Timestamp (From Calendly)
+    ◦ Meeting Date/Time
+    ◦ Source (Website Form vs. Chatbot)
+    ◦ Nudge Triggered (Boolean: Yes/No)
+2. Automated Email Sequence Engine
+Set up an n8n workflow to handle these 7 specific emails:
+• The Inbound Nudge (The "Leaky Bucket" Fix):
+    ◦ Trigger: Website Intake Form submission.
+    ◦ Logic: Wait 30 minutes. Check if the email exists in "Meeting Booked" status. If NOT, send Email 1: Complete your booking.
+• The Attendance Sequence (The "Show-Up" Logic):
+    ◦ Email 2: Immediate Booking Confirmation.
+    ◦ Email 3: 24-Hour Reminder before the meeting.
+    ◦ Email 4: 1-Hour Reminder.
+    ◦ Email 5: 15-Minute Reminder (The "Jumping on now" nudge).
+• The Post-Call Logic:
+    ◦ Email 6: Recap & Next Steps (Sent if the meeting is marked "Meeting Complete" but not yet "Closed").
+    ◦ Email 7: Follow-up/Nurture (Sent 3 days later if still not closed).
+3. Front-End Integration (Capture & Enrich)
+• Website Intake Form: Connect via Webhook to n8n to create a record in the CRM at Lead Captured status.
+• AI Chatbot (Final Layer): An n8n-hosted AI Agent node on the website to:
+    ◦ Answer labor regulation/pricing questions.
+    ◦ Route qualified businesses to the Meeting Booked status by providing the calendar link directly.
+4. Dashboard Tracking (The "Cockpit")
+Create a reporting view to track these 5 critical metrics:
+1. Total Registrations/Leads (Form/Chatbot entries)
+2. Booking Rate (% of leads who booked a call)
+3. Show-Up Rate (% of booked calls that were "Meeting Complete")
+4. Conversion Rate (% of meetings that moved to "Closed")
+5. Average Time to Close (From Lead Captured to Closed)
+Future Integration Note
+The system must be designed so that Outbound Workflows (e.g., Clay/Instantly) can be connected later as a new source to feed leads directly into this same CRM and sequence engine.
