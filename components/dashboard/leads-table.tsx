@@ -25,14 +25,18 @@ interface Lead {
     meeting_time: string
     izvor: string
     created_at: string
+    kategorija?: string
+    prioritet_skor?: number
+    obrazlozenje?: string
+    sledeca_akcija?: string
 }
 
 interface LeadsTableProps {
     leads: Lead[]
-    onOpenChat: (leadId: string) => void
+    onOpenIntelligence: (lead: Lead) => void
 }
 
-export function LeadsTable({ leads, onOpenChat }: LeadsTableProps) {
+export function LeadsTable({ leads, onOpenIntelligence }: LeadsTableProps) {
     const getKategorijaColor = (kategorija: string) => {
         switch (kategorija) {
             case "Vreo": return "bg-red-500 hover:bg-red-600"
@@ -48,14 +52,14 @@ export function LeadsTable({ leads, onOpenChat }: LeadsTableProps) {
                 <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead className="w-[150px]">Ime</TableHead>
+                            <TableHead className="w-[120px]">Ime</TableHead>
                             <TableHead>Kompanija</TableHead>
+                            <TableHead>AI Prioritet</TableHead>
                             <TableHead>Email / Tel</TableHead>
                             <TableHead>Niche</TableHead>
                             <TableHead>Volume</TableHead>
                             <TableHead>Status</TableHead>
                             <TableHead>Sastanak</TableHead>
-                            <TableHead>Izvor</TableHead>
                             <TableHead>Datum</TableHead>
                             <TableHead className="text-right">Akcije</TableHead>
                         </TableRow>
@@ -72,6 +76,22 @@ export function LeadsTable({ leads, onOpenChat }: LeadsTableProps) {
                             <TableRow key={lead.id}>
                                 <TableCell className="font-bold text-blue-600">{lead.ime || "-"}</TableCell>
                                 <TableCell className="font-semibold">{lead.kompanija || "-"}</TableCell>
+                                <TableCell>
+                                    <div className="flex flex-col gap-1">
+                                        <div className="flex items-center gap-2">
+                                            <div className={`w-2 h-2 rounded-full ${lead.prioritet_skor && lead.prioritet_skor >= 70 ? 'bg-red-500' : lead.prioritet_skor && lead.prioritet_skor >= 40 ? 'bg-orange-500' : 'bg-gray-300'}`} />
+                                            <span className="font-mono font-bold text-sm">{lead.prioritet_skor || 0}%</span>
+                                            <Badge className={`${getKategorijaColor(lead.kategorija || "")} text-[8px] h-4 px-1 uppercase shrink-0`}>
+                                                {lead.kategorija || "Cold"}
+                                            </Badge>
+                                        </div>
+                                        {lead.obrazlozenje && (
+                                            <div className="text-[9px] text-gray-400 leading-tight max-w-[150px] line-clamp-2 italic" title={lead.obrazlozenje}>
+                                                "{lead.obrazlozenje}"
+                                            </div>
+                                        )}
+                                    </div>
+                                </TableCell>
                                 <TableCell>
                                     <div className="flex flex-col gap-0.5">
                                         <div className="text-xs text-gray-900">{lead.email}</div>
@@ -111,7 +131,7 @@ export function LeadsTable({ leads, onOpenChat }: LeadsTableProps) {
                                 </TableCell>
                                 <TableCell className="text-right">
                                     <div className="flex justify-end gap-2">
-                                        <Button variant="ghost" size="icon" onClick={() => onOpenChat(lead.id)} className="h-7 w-7">
+                                        <Button variant="ghost" size="icon" onClick={() => onOpenIntelligence(lead)} className="h-7 w-7" title="Lead Intelligence">
                                             <MessageSquare className="h-3.5 w-3.5" />
                                         </Button>
                                         <Button variant="ghost" size="icon" className="h-7 w-7">

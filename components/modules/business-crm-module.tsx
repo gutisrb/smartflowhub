@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react"
 import { StatsGrid } from "@/components/dashboard/stats-grid"
 import { LeadsTable } from "@/components/dashboard/leads-table"
-import { ChatLogViewer } from "@/components/dashboard/chat-log-viewer"
+import { LeadIntelligenceViewer } from "@/components/dashboard/lead-intelligence-viewer"
 import { getLeadsByClientId } from "@/lib/supabase/queries"
 import { createClient } from "@/lib/supabase/client"
 
@@ -13,8 +13,8 @@ interface BusinessCRMModuleProps {
 
 export function BusinessCRMModule({ clientId }: BusinessCRMModuleProps) {
   const [leads, setLeads] = useState<any[]>([])
-  const [selectedChatId, setSelectedChatId] = useState<string | null>(null)
-  const [isChatOpen, setIsChatOpen] = useState(false)
+  const [selectedLead, setSelectedLead] = useState<any | null>(null)
+  const [isIntelligenceOpen, setIsIntelligenceOpen] = useState(false)
   const [stats, setStats] = useState({
     totalLeads: 0,
     bookingRate: 0,
@@ -80,12 +80,9 @@ export function BusinessCRMModule({ clientId }: BusinessCRMModuleProps) {
     }
   }, [clientId, fetchLeads, supabase])
 
-  const handleOpenChat = (leadId: string) => {
-    const lead = leads.find(l => l.id === leadId)
-    if (lead?.id_razgovora) {
-      setSelectedChatId(lead.id_razgovora)
-      setIsChatOpen(true)
-    }
+  const handleOpenIntelligence = (lead: any) => {
+    setSelectedLead(lead)
+    setIsIntelligenceOpen(true)
   }
 
   return (
@@ -97,14 +94,14 @@ export function BusinessCRMModule({ clientId }: BusinessCRMModuleProps) {
           <h3 className="text-xl font-semibold">Business CRM (Job Owners)</h3>
         </div>
         <div className="rounded-xl border bg-white shadow-sm overflow-hidden uppercase text-[10px] tracking-wider font-semibold">
-          <LeadsTable leads={leads} onOpenChat={handleOpenChat} />
+          <LeadsTable leads={leads} onOpenIntelligence={handleOpenIntelligence} />
         </div>
       </div>
 
-      <ChatLogViewer
-        idRazgovora={selectedChatId}
-        isOpen={isChatOpen}
-        onClose={() => setIsChatOpen(false)}
+      <LeadIntelligenceViewer
+        lead={selectedLead}
+        isOpen={isIntelligenceOpen}
+        onClose={() => setIsIntelligenceOpen(false)}
       />
     </div>
   )
