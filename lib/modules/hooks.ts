@@ -38,7 +38,7 @@ export function useClientModules(clientId: string | null) {
             return {
               ...definition,
               clientModuleId: cm.id,
-              displayName: cm.display_name || definition.defaultLabel,
+              displayName: cm.display_name || definition.label,
               settings: cm.settings,
               sortOrder: cm.sort_order || 0,
             }

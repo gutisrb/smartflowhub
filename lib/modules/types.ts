@@ -3,23 +3,28 @@ import { LucideIcon } from "lucide-react"
 export type ModuleKey =
   | 'business-crm'
   | 'email-outreach'
-  | 'analytics'
-  | 'settings'
-  | 'social-jobs'
-  | 'social-candidates'
   | 'linkedin-agent'
+  | 'job-postings'
+  | 'candidates'
+  | 'social-chatbot'
   | 'website-chatbot'
 
 export type ModuleCategory = 'social' | 'outreach' | 'analytics' | 'settings' | 'crm'
 
-export interface ModuleDefinition {
+export interface DashboardModule {
   key: ModuleKey
-  defaultLabel: string
+  label: string
   icon: LucideIcon
   category: ModuleCategory
-  isCore: boolean
-  description?: string
-  componentPath: string
+  description: string
+}
+
+export type UserRole = 'admin' | 'client_admin' | 'client_user'
+
+export interface ClientModuleConfig {
+  clientId: string
+  enabledModules: ModuleKey[]
+  settings?: Record<string, any>
 }
 
 export interface ClientModule {
@@ -33,7 +38,7 @@ export interface ClientModule {
   created_at: string
 }
 
-export interface EnabledModule extends ModuleDefinition {
+export interface EnabledModule extends DashboardModule {
   clientModuleId: string
   displayName: string
   settings: Record<string, any> | null

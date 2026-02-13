@@ -12,22 +12,21 @@ import { LogOut } from "lucide-react"
 // Import all module components
 import { BusinessCRMModule } from "@/components/modules/business-crm-module"
 import { EmailOutreachModule } from "@/components/modules/email-outreach-module"
-import { AnalyticsModule } from "@/components/modules/analytics-module"
-import { SettingsModule } from "@/components/modules/settings-module"
-import { SocialJobsModule } from "@/components/modules/social-jobs-module"
-import { SocialCandidatesModule } from "@/components/modules/social-candidates-module"
 import { LinkedInAgentModule } from "@/components/modules/linkedin-agent-module"
+import { JobPostingsModule } from "@/components/modules/job-postings-module"
+import { CandidatesModule } from "@/components/modules/candidates-module"
+import { SocialChatbotModule } from "@/components/modules/social-chatbot-module"
 import { WebsiteChatbotModule } from "@/components/modules/website-chatbot-module"
 
 export default function DashboardPage() {
-  const [currentView, setCurrentView] = useState<ModuleKey | null>(null)
-  const [selectedClientId, setSelectedClientId] = useState<string | null>(null)
+  const [activeModule, setActiveModule] = useState<ModuleKey>('business-crm') // Default
+  const [clientId, setClientId] = useState<string | null>(null)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [clientName, setClientName] = useState("")
   const [userEmail, setUserEmail] = useState<string | null>(null)
 
   const supabase = createClient()
-  const { modules, loading: modulesLoading } = useClientModules(selectedClientId)
+  const { modules: availableModules, loading: isLoading } = useClientModules(clientId)
 
   const checkSession = useCallback(async () => {
     const { data: { session } } = await supabase.auth.getSession()
@@ -42,7 +41,7 @@ export default function DashboardPage() {
           .single()
 
         if (data) {
-          setSelectedClientId(data.id)
+          setClientId(data.id)
           setClientName(data.name)
         }
       }
@@ -53,57 +52,50 @@ export default function DashboardPage() {
     checkSession()
   }, [checkSession])
 
-  // Set default view to first available module
+  // Update active module when available modules change (to ensure access)
   useEffect(() => {
-    if (modules.length > 0 && !currentView) {
-      // Prefer business-crm as default, otherwise use first module
-      const defaultModule = modules.find(m => m.key === 'business-crm') || modules[0]
-      setCurrentView(defaultModule.key)
+    if (!isLoading && availableModules.length > 0) {
+      if (!availableModules.some(m => m.key === activeModule)) {
+        setActiveModule(availableModules[0].key)
+      }
     }
-  }, [modules, currentView])
+  }, [availableModules, isLoading, activeModule])
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
     setIsAuthenticated(false)
-    setSelectedClientId(null)
+    setClientId(null)
     setUserEmail(null)
-    setCurrentView(null)
+    setActiveModule('business-crm') // Reset to default
   }
 
+  // Render the correct module
   const renderModule = () => {
-    if (!selectedClientId) return null
-    if (!currentView) return null
+    if (!clientId) return <div className="p-8 text-center text-gray-500">Loading client data...</div>
 
-    // Module routing
-    switch (currentView) {
+    switch (activeModule) {
       case 'business-crm':
-        return <BusinessCRMModule clientId={selectedClientId} />
+        return <BusinessCRMModule clientId={clientId} />
       case 'email-outreach':
-        return <EmailOutreachModule clientId={selectedClientId} />
-      case 'analytics':
-        return <AnalyticsModule clientId={selectedClientId} />
-      case 'settings':
-        return <SettingsModule clientId={selectedClientId} />
-      case 'social-jobs':
-        return <SocialJobsModule clientId={selectedClientId} />
-      case 'social-candidates':
-        return <SocialCandidatesModule clientId={selectedClientId} />
+        return <EmailOutreachModule clientId={clientId} />
       case 'linkedin-agent':
-        return <LinkedInAgentModule clientId={selectedClientId} />
+        return <LinkedInAgentModule clientId={clientId} />
+      case 'job-postings':
+        return <JobPostingsModule clientId={clientId} />
+      case 'candidates':
+        return <CandidatesModule clientId={clientId} />
+      case 'social-chatbot':
+        return <SocialChatbotModule clientId={clientId} />
       case 'website-chatbot':
-        return <WebsiteChatbotModule clientId={selectedClientId} />
+        return <WebsiteChatbotModule clientId={clientId} />
       default:
-        return (
-          <div className="flex h-full items-center justify-center">
-            <p className="text-muted-foreground">Module not found</p>
-          </div>
-        )
+        return <div className="p-8 text-center">Module not found</div>
     }
   }
 
   const getModuleLabel = () => {
-    if (!currentView) return "Dashboard"
-    const module = modules.find(m => m.key === currentView)
+    if (!activeModule) return "Dashboard"
+    const module = availableModules.find(m => m.key === activeModule)
     return module?.displayName || "Dashboard"
   }
 
@@ -112,42 +104,47 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="flex h-screen bg-gray-50/50">
-      {currentView && (
+    <div className="flex h-screen bg-zinc-50">
+      {isAuthenticated && (
         <Sidebar
-          currentView={currentView}
-          onViewChange={setCurrentView}
+          currentView={activeModule}
+          onViewChange={setActiveModule}
           clientName={clientName}
-          clientId={selectedClientId}
+          clientId={clientId}
         />
       )}
 
-      <main className="flex-1 flex flex-col overflow-hidden">
-        <header className="h-16 border-b bg-white flex items-center justify-between px-8 shrink-0">
+      <main className="flex-1 flex flex-col overflow-hidden relative">
+        <header className="h-16 border-b border-zinc-200 bg-white/80 backdrop-blur-md flex items-center justify-between px-8 shrink-0 sticky top-0 z-10">
           <div className="flex items-center gap-4">
-            <h1 className="text-lg font-semibold text-gray-900 uppercase tracking-wider">
+            <h1 className="text-lg font-semibold text-zinc-800 uppercase tracking-widest">
               {getModuleLabel()}
             </h1>
           </div>
           <div className="flex items-center gap-4">
-            <span className="text-sm text-gray-500">{userEmail}</span>
-            <Button variant="ghost" size="sm" onClick={handleLogout} className="text-gray-500 hover:text-red-600">
+            <span className="text-sm text-zinc-500 font-medium">{userEmail}</span>
+            <Button variant="ghost" size="sm" onClick={handleLogout} className="text-zinc-500 hover:text-rose-600 hover:bg-rose-50 transition-colors">
               <LogOut className="w-4 h-4 mr-2" /> Sign Out
             </Button>
           </div>
         </header>
 
-        <div className="flex-1 overflow-y-auto p-8">
-          <div className="max-w-7xl mx-auto">
-            {modulesLoading ? (
-              <div className="flex h-full items-center justify-center">
-                <p className="text-muted-foreground">Loading modules...</p>
+        <div className="flex-1 overflow-y-auto p-8 scrollbar-thin scrollbar-thumb-zinc-200 scrollbar-track-transparent">
+          <div className="max-w-7xl mx-auto space-y-6">
+            {isLoading ? (
+              <div className="flex h-full items-center justify-center min-h-[400px]">
+                <div className="flex flex-col items-center gap-2">
+                  <div className="w-8 h-8 border-4 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin" />
+                  <p className="text-zinc-400 text-sm uppercase tracking-wider">Loading modules...</p>
+                </div>
               </div>
-            ) : selectedClientId ? (
-              renderModule()
+            ) : clientId ? (
+              <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                {renderModule()}
+              </div>
             ) : (
               <div className="flex h-full items-center justify-center">
-                <p className="text-muted-foreground italic">Connecting to client...</p>
+                <p className="text-zinc-400 italic">Connecting to client...</p>
               </div>
             )}
           </div>
