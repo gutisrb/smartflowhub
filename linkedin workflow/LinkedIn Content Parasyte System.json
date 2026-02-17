@@ -1,0 +1,448 @@
+{
+  "name": "LinkedIn Content Parasyte System",
+  "nodes": [
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "3bb87851-879d-4427-936f-d82ebb24eff7",
+              "leftValue": "={{ $json.message.content.verdict }}",
+              "rightValue": "relevant",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        1200,
+        -16
+      ],
+      "id": "ad789679-65cb-4814-b8fb-4a8db5b89f4d",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "batchSize": 20,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        640,
+        -16
+      ],
+      "id": "6d6d7ddf-0462-4048-bdd0-40a04afc8e47",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1rZeE_s7ib0dgbjCcHs_skcprLCDDG2OuLe-tjYEU5QY",
+          "mode": "list",
+          "cachedResultName": "LinkedIn Parasyte",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1rZeE_s7ib0dgbjCcHs_skcprLCDDG2OuLe-tjYEU5QY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1rZeE_s7ib0dgbjCcHs_skcprLCDDG2OuLe-tjYEU5QY/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Original Post": "={{ $('Scrape Posts').item.json.text }}",
+            "Re-Written Post": "={{ $json.content[0].text }}",
+            "Post URL": "={{ $('Scrape Posts').item.json.url }}",
+            "Post Date": "={{ $('Scrape Posts').item.json.postedAtISO.toDateTime().format('DD') }}",
+            "Username": "={{ $('Scrape Posts').item.json.authorName }}",
+            "Likes": "={{ $('Scrape Posts').item.json.numLikes }}",
+            "Comments": "={{ $('Scrape Posts').item.json.numComments }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Post Date",
+              "displayName": "Post Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Username",
+              "displayName": "Username",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Post URL",
+              "displayName": "Post URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Original Post",
+              "displayName": "Original Post",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Re-Written Post",
+              "displayName": "Re-Written Post",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Likes",
+              "displayName": "Likes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Comments",
+              "displayName": "Comments",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1808,
+        -16
+      ],
+      "id": "7f0d88d3-a370-4489-a858-fba21fb61c9c",
+      "name": "Add IG post to Sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "EQZ4ODVSjcsOy7Lc",
+          "name": "Michele Connection 17th August"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "claude-3-5-haiku-20241022",
+          "mode": "list",
+          "cachedResultName": "claude-3-5-haiku-20241022"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=#Overview\nYou're a helpful, intelligent writing assistant.\n\n##Task\nRewrite the LinkedIn post that I'm going to give you in a way that encapsulates the original theme but uses different words.\n\nI am targeting an audience that are people who build with or want to learn AI. They are always fascinated by new discoveries or news that actually make an impact.\n\n## My Results\nOver the last year I generated 6 figures, worked with 40+ businesses and taught 17k+ people and I got to do a bunch of fun stuff like travel, enjoy my life, etc. \n\n\n#Rules\n- Use a no fluff, young tone when re-writing the LinkedIn post\n- ONLY output the LinkedIn post and that's it\n"
+            },
+            {
+              "content": "=Here is the LinkedIn post to rewrite: {{ $('Scrape Posts').item.json.text }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.anthropic",
+      "typeVersion": 1,
+      "position": [
+        1456,
+        -16
+      ],
+      "id": "83bf2e0c-2aaa-47ff-8e4f-2925b2f43547",
+      "name": "Re-Write Post",
+      "credentials": {
+        "anthropicApi": {
+          "id": "ghatRdM2P5QhqFdI",
+          "name": "Michele Connection 2 | 19th Aug"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4.1-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4.1-MINI"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=You are a helpful, precise LinkedIn post classifier for an AI -focused audience (people who build with or want to learn AI, understand cool news that come out of it that actually strike have an interesting take).",
+              "role": "system"
+            },
+            {
+              "content": "=Classify a LinkedIn post for an automation-focused audience. Return only {\"verdict\":\"relevant or not_relevant\"}. \n\n- Relevant if it's valuable advice for someone looking to start an AI Agency\n\n- Not relevant if it's motivational/personal, non-automation coding, crypto/politics/finance, or tool discounts etc.. or vague hype with no build/impact. \n\n\nOutput valid JSON only.\n{\"verdict\":\"relevant or not_relevant\"}"
+            },
+            {
+              "content": "=Here is the LinkedIn post to analyse:  {{ $json.text }}"
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        880,
+        -16
+      ],
+      "id": "58e02f14-9073-43fe-a2fc-0edd1e20ac49",
+      "name": "Relevant?",
+      "credentials": {
+        "openAiApi": {
+          "id": "JW58mv7uuR54fXsx",
+          "name": "YT Aug 19th"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## 1. Scrape LinkedIn Post\n",
+        "height": 272,
+        "width": 672
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        112,
+        -96
+      ],
+      "typeVersion": 1,
+      "id": "4d46ec51-04af-45e3-a7c1-dd4b7f3f0345",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## 2. Check Relevance\n",
+        "height": 272,
+        "width": 560,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        800,
+        -96
+      ],
+      "typeVersion": 1,
+      "id": "df6cad97-b1c7-4333-a0cc-4f4122e538fb",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## 3. Re-Write Post and Add to DB\n",
+        "height": 272,
+        "width": 640,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1376,
+        -96
+      ],
+      "typeVersion": 1,
+      "id": "d0dff107-cd6b-4098-b118-3d9862b15b3d",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "formTitle": "LinkedIn Accounts",
+        "formDescription": "Please add two LinkedIn accounts of your favourite creators to then be able to scrape their posts. ",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "LinkedIn Account Number 1 (URL)",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "LinkedIn Account Number 2 (URL)",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Number of posts / profile",
+              "fieldType": "number",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.3,
+      "position": [
+        192,
+        -16
+      ],
+      "id": "f98c203f-7e5d-4cf9-ac73-71db44f594dd",
+      "name": "LinkedIn Accounts",
+      "webhookId": "7246091f-78ca-4c3d-be4a-9f06b0147320"
+    },
+    {
+      "parameters": {
+        "operation": "Run actor and get dataset",
+        "actorId": {
+          "__rl": true,
+          "value": "Wpp1BZ6yGWjySadk3",
+          "mode": "list",
+          "cachedResultName": "Linkedin Post Scraper ✅ No cookies ✅ $2 per 1k posts (supreme_coder/linkedin-post)",
+          "cachedResultUrl": "https://console.apify.com/actors/Wpp1BZ6yGWjySadk3/input"
+        },
+        "customBody": "={\n    \"deepScrape\": true,\n    \"limitPerSource\": 10,\n    \"rawData\": false,\n    \"urls\": [\n        \"{{ $json['LinkedIn Account Number 1 (URL)'] }}\",\n        \"{{ $json['LinkedIn Account Number 2 (URL)'] }}\"\n    ]\n}",
+        "authentication": "apifyOAuth2Api"
+      },
+      "type": "@apify/n8n-nodes-apify.apify",
+      "typeVersion": 1,
+      "position": [
+        432,
+        -16
+      ],
+      "id": "5cf7df0e-cdc9-41c3-803a-9846b1861367",
+      "name": "Run an Actor and get dataset",
+      "credentials": {
+        "apifyOAuth2Api": {
+          "id": "8vXqfCFhzU1qC1Zh",
+          "name": "Michele Connection | 31st Oct"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Re-Write Post",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Relevant?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add IG post to Sheet": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Re-Write Post": {
+      "main": [
+        [
+          {
+            "node": "Add IG post to Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Relevant?": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LinkedIn Accounts": {
+      "main": [
+        [
+          {
+            "node": "Run an Actor and get dataset",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Run an Actor and get dataset": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "f9e680db-c887-4d0a-a113-82d4e9c905ba",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "497b9f82c9e2221fea60e82fa63290386b7aadcded14b21ff31b0075b1df1efd"
+  },
+  "id": "gKdp9SkL5QoX69nB",
+  "tags": []
+}

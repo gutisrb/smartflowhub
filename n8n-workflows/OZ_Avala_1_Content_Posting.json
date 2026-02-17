@@ -1,0 +1,315 @@
+{
+  "name": "OZ Avala - 1. Content Posting (2x/week)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 9 * * 2,4"
+            }
+          ]
+        }
+      },
+      "id": "schedule-trigger",
+      "name": "Schedule: Tue & Thu 9AM",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "linkedin_posted_topics",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "client_id",
+              "condition": "eq",
+              "keyValue": "[OZ_AVALA_CLIENT_UUID]"
+            },
+            {
+              "keyName": "posted_at",
+              "condition": "gte",
+              "keyValue": "={{ $now.minus({ months: 3 }).toISO() }}"
+            }
+          ]
+        }
+      },
+      "id": "get-posted-topics",
+      "name": "Get Posted Topics (last 3 months)",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [480, 300],
+      "credentials": {
+        "supabaseApi": {
+          "id": "x9GAXz1Nv6O8J4Vh",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// Extract all posted keywords to avoid repeating\nconst postedTopics = items.map(item => item.json.topic_keyword).filter(Boolean);\n\n// Keywords to search for trending posts\nconst searchKeywords = [\n  'zapošljavanje mladih srbija',\n  'građevinski radnici',\n  'omladinska zadruga',\n  'posao za mlade beograd',\n  'kako zaposliti radnike',\n  'gen z radnici',\n  'pronalazak radnika'\n];\n\n// Pick a random keyword that we haven't posted about recently\nconst availableKeywords = searchKeywords.filter(kw => \n  !postedTopics.some(posted => \n    posted.toLowerCase().includes(kw.split(' ')[0].toLowerCase())\n  )\n);\n\nconst selectedKeyword = availableKeywords.length > 0 \n  ? availableKeywords[Math.floor(Math.random() * availableKeywords.length)]\n  : searchKeywords[0]; // fallback\n\nreturn [{\n  json: {\n    search_keyword: selectedKeyword,\n    posted_topics: postedTopics,\n    avoid_keywords: postedTopics.join(', ')\n  }\n}];"
+      },
+      "id": "select-topic",
+      "name": "Select Topic (avoid repeats)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [720, 300]
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "resource": "text",
+        "modelId": {
+          "__rl": true,
+          "value": "gemini-2.0-flash-exp",
+          "mode": "list"
+        },
+        "prompt": "=You are a LinkedIn content strategist for Omladinska zadruga Avala. CONTEXT: Omladinska zadruga Avala helps young people (18-30) find jobs and connects companies (especially construction/engineering in Serbia) with qualified young workers. Owner: Miloš Mitić (linkedin.com/in/milos-mitic-6b33b920/), Based in Belgrade, Serbia. OBJECTIVE: Create ONE LinkedIn post optimized for (1) Engagement (likes, comments, shares) and (2) Lead generation (attract company owners and HR managers). POST TOPIC: {{ $json.search_keyword }}. TOPICS TO AVOID (already posted): {{ $json.avoid_keywords }}. CONTENT PSYCHOLOGY RULES: Use pattern interrupt hooks. Lead with counterintuitive insight or surprising statistic. Make first line scroll-stopping. Use curiosity gap technique (\"3 out of 15 companies solved this problem. Here's how.\"). Apply social proof subtly (\"15 vlasnika firmi\" not \"many companies\"). End with micro-commitment question that begs response. WRITING RULES: Length 150-250 characters maximum. Language: Serbian (latinica). Tone: Authentic, expert but accessible, never salesy. Structure: Hook → Insight/Story → CTA or provocative question. Focus: Company owner pain points (finding reliable workers, high turnover, training costs) OR young worker success stories. AVOID: Buzzwords (game-changer, revolucija, innovative, disrupting), excessive praise, emoji (unless natural), ALL CAPS, exclamation points. FORMAT: Return only JSON: {\"post_text\": \"[your post]\", \"post_theme\": \"[short theme like 'gen z work ethic' or 'construction hiring tips']\", \"engagement_score\": [1-10 score], \"target_audience\": \"[who this targets]\", \"reasoning\": \"[why this will perform]\"}. PROVEN FORMULAS THAT WORK: (1) Problem Pattern: \"Razgovarao sam sa 15 vlasnika građevinskih firmi prošle nedelje. 12 od njih ima isti problem: ne mogu da nađu pouzdane radnike. 3 koji su rešili problem? Promenili su jedan jedini pristup regrutaciji. Da li želite da čujete koji?\" (2) Insight Pattern: \"Gen Z radnici nisu lenjи. Oni su samo alergični na nejasne instrukcije. Kad znaju šta se od njih očekuje - rade brže i bolje od svih generacija pre. Problem nije u njima. Problem je u našim briefovima.\" (3) Story Pattern: \"Marko (22) nije znao ni da drži čekić pre 6 meseci. Danas vodi tim od 4 ljudi na gradilištu u Novom Beogradu. Šta se promenilo? Nemoj da podcenjuješ mlade. Daj im priliku + mentora + jasna očekivanja.\" ADVANCED TACTICS: Use specificity (\"3 nedelje\" not \"dosta vremena\"). Apply contrast principle (before/after). Challenge common beliefs (\"Gen Z nisu lenjи\"). Use micro-stories with transformation. Include subtle call-out to target audience (\"vlasnici firmi\" or \"HR menadžeri\"). End with open loop or question requiring answer. White space for scannability (short paragraphs). QUALITY CHECKLIST: (1) First sentence stops scroll? (2) Challenges assumption or reveals insight? (3) Includes specific number or metric? (4) Relatable to target audience pain? (5) Ends with question or curiosity gap? (6) Zero buzzwords or jargon? (7) Under 250 characters? Generate post now:"
+      },
+      "id": "gemini-generate",
+      "name": "Gemini: Generate Post",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleVertex",
+      "typeVersion": 1.1,
+      "position": [960, 300],
+      "credentials": {
+        "googleApi": {
+          "id": "WBlrLLqHWiV5KKzP",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// Parse Gemini response\nconst response = items[0].json.message?.content || items[0].json.text || \"\";\n\nlet parsed;\ntry {\n  // Remove markdown code blocks if present\n  const cleaned = response.replace(/```json\\n?|```\\n?/g, '').trim();\n  parsed = JSON.parse(cleaned);\n} catch (e) {\n  // Fallback if not JSON\n  return [{\n    json: {\n      post_text: response.substring(0, 300),\n      post_theme: $('Select Topic').item.json.search_keyword,\n      engagement_score: 7,\n      target_audience: 'company owners',\n      reasoning: 'Generated content'\n    }\n  }];\n}\n\nreturn [{\n  json: {\n    post_text: parsed.post_text,\n    post_theme: parsed.post_theme || $('Select Topic').item.json.search_keyword,\n    engagement_score: parsed.engagement_score || 7,\n    target_audience: parsed.target_audience || 'company owners and HR',\n    reasoning: parsed.reasoning || 'AI generated',\n    status: 'draft',\n    post_type: 'original',\n    client_id: '[OZ_AVALA_CLIENT_UUID]'\n  }\n}];"
+      },
+      "id": "parse-response",
+      "name": "Parse Gemini Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1200, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.kie.ai/api/v1/jobs/createTask",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"nano-banana-pro\",\n  \"input\": {\n    \"prompt\": \"Professional LinkedIn post visual for '{{ $json.post_theme }}' theme. Modern Serbian business aesthetic. High-energy editorial style with sharp diagonal split background (deep navy blue and electric cyan). Subject: Dynamic professional worker scene related to {{ $json.post_theme }}. Text overlay: Key insight from post in Serbian. Render: Bold, slanted white typography. Include: Company branding feel, high-contrast, mobile-optimized 1:1 format. Visual hierarchy: Impact > Clarity > Style. No generic stock photos.\",\n    \"aspect.ratio\": \"1:1\"\n  }\n}",
+        "options": {}
+      },
+      "id": "kie-create-image",
+      "name": "Kie.ai: Create Image Task",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1440, 300],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "[KIE_AI_CREDENTIAL_ID]",
+          "name": "Kie.ai API Key"
+        }
+      },
+      "notes": "Generate LinkedIn post image - 1:1 format"
+    },
+    {
+      "parameters": {
+        "amount": 70
+      },
+      "id": "wait-image-generation",
+      "name": "Wait 70s (Image Generation)",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [1680, 300],
+      "webhookId": "kie-image-wait"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.kie.ai/api/v1/jobs/recordInfo?taskId={{ $('Kie.ai: Create Image Task').item.json.data.taskId }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "id": "kie-get-image",
+      "name": "Kie.ai: Get Image Result",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1920, 300],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "[KIE_AI_CREDENTIAL_ID]",
+          "name": "Kie.ai API Key"
+        }
+      },
+      "notes": "Retrieve generated image URL"
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "tableId": "linkedin_content",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "post_text",
+              "fieldValue": "={{ $json.post_text }}"
+            },
+            {
+              "fieldId": "post_theme",
+              "fieldValue": "={{ $json.post_theme }}"
+            },
+            {
+              "fieldId": "post_type",
+              "fieldValue": "original"
+            },
+            {
+              "fieldId": "engagement_score",
+              "fieldValue": "={{ $json.engagement_score }}"
+            },
+            {
+              "fieldId": "target_audience",
+              "fieldValue": "={{ $json.target_audience }}"
+            },
+            {
+              "fieldId": "status",
+              "fieldValue": "draft"
+            },
+            {
+              "fieldId": "client_id",
+              "fieldValue": "[OZ_AVALA_CLIENT_UUID]"
+            },
+            {
+              "fieldId": "image_url",
+              "fieldValue": "={{ $('Kie.ai: Get Image Result').item.json.data.imageUrl || '' }}"
+            }
+          ]
+        }
+      },
+      "id": "save-to-supabase",
+      "name": "Save to linkedin_content",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [2160, 300],
+      "credentials": {
+        "supabaseApi": {
+          "id": "x9GAXz1Nv6O8J4Vh",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "# OZ Avala Content Posting Workflow\n\n## What it does:\n1. Runs every Tuesday & Thursday at 9 AM\n2. Checks what topics were posted in last 3 months\n3. Selects a new topic (avoids repeats)\n4. Uses Gemini 2.0 Flash to generate Serbian post\n5. Saves to linkedin_content table with status='draft'\n6. Client reviews in dashboard LinkedIn tab\n7. Client approves → status changes to 'approved'\n8. Client can schedule or post immediately\n\n## Post Guidelines:\n- 150-250 characters\n- Serbian language (latinica)\n- Optimized for engagement & lead gen\n- Target: Company owners & HR managers\n- Focus: Youth employment, construction hiring\n\n## Manual Actions Required:\n1. Review generated post in dashboard\n2. Click 'Approve' or 'Edit' or 'Delete'\n3. Schedule or publish\n\n## Topics Covered:\n- Youth employment tips\n- Construction hiring\n- Gen Z workers\n- Finding reliable employees\n- Success stories\n\n## Client: Omladinska zadruga Avala\nOwner: Miloš Mitić\nLinkedIn: linkedin.com/in/milos-mitic-6b33b920",
+        "height": 680,
+        "width": 480,
+        "color": 4
+      },
+      "id": "sticky-note",
+      "name": "Workflow Info",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [140, 140]
+    }
+  ],
+  "connections": {
+    "Schedule: Tue & Thu 9AM": {
+      "main": [
+        [
+          {
+            "node": "Get Posted Topics (last 3 months)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Posted Topics (last 3 months)": {
+      "main": [
+        [
+          {
+            "node": "Select Topic (avoid repeats)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Select Topic (avoid repeats)": {
+      "main": [
+        [
+          {
+            "node": "Gemini: Generate Post",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini: Generate Post": {
+      "main": [
+        [
+          {
+            "node": "Parse Gemini Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Gemini Response": {
+      "main": [
+        [
+          {
+            "node": "Kie.ai: Create Image Task",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Kie.ai: Create Image Task": {
+      "main": [
+        [
+          {
+            "node": "Wait 70s (Image Generation)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait 70s (Image Generation)": {
+      "main": [
+        [
+          {
+            "node": "Kie.ai: Get Image Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Kie.ai: Get Image Result": {
+      "main": [
+        [
+          {
+            "node": "Save to linkedin_content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "active": false
+}

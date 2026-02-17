@@ -1,0 +1,556 @@
+{
+  "name": "OZ Avala - 3. Cold Email Outreach (PRIMARY DRIVER)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 */3 * * 1-5"
+            }
+          ]
+        }
+      },
+      "id": "schedule-trigger",
+      "name": "Schedule: Every 3 hours (Mon-Fri)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [240, 500],
+      "notes": "Runs 5 times/day = 250-500 emails/day (50-100 per run)"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.apollo.io/v1/mixed_companies/search",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Api-Key",
+              "value": "[APOLLO_API_KEY]"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"q_organization_locations\": [\"Serbia\", \"Belgrade\", \"Novi Sad\"],\n  \"organization_num_employees_ranges\": [\"10,50\", \"51,200\", \"201,500\", \"501,1000\"],\n  \"q_organization_keyword_tags\": [\"Construction\", \"Engineering\", \"Manufacturing\", \"Real Estate Development\"],\n  \"page\": {{ Math.floor(Math.random() * 10) + 1 }},\n  \"per_page\": 20\n}",
+        "options": {}
+      },
+      "id": "apollo-company-search",
+      "name": "Apollo: Search Target Companies",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [480, 500]
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "organizations",
+        "options": {}
+      },
+      "id": "split-companies",
+      "name": "Split Companies",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [720, 500]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.apollo.io/api/v1/mixed_people/search",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Api-Key",
+              "value": "[APOLLO_API_KEY]"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"organization_ids\": [\"{{ $json.id }}\"],\n  \"person_titles\": [\n    \"Vlasnik\",\n    \"Owner\",\n    \"Direktor\",\n    \"Director\",\n    \"CEO\",\n    \"Founder\",\n    \"HR Manager\",\n    \"Human Resources\",\n    \"Project Manager\",\n    \"Operations Manager\",\n    \"Menadžer\"\n  ],\n  \"person_locations\": [\"Serbia\"],\n  \"page\": 1,\n  \"per_page\": 3,\n  \"contact_email_status\": [\"verified\", \"guessed\"]\n}",
+        "options": {}
+      },
+      "id": "apollo-people-search",
+      "name": "Apollo: Find Decision Makers",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [960, 500]
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "people",
+        "options": {}
+      },
+      "id": "split-people",
+      "name": "Split People",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [1200, 500]
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "kontakti",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "email",
+              "condition": "eq",
+              "keyValue": "={{ $json.email }}"
+            }
+          ]
+        }
+      },
+      "id": "check-duplicate",
+      "name": "Check if Lead Exists",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [1440, 500],
+      "credentials": {
+        "supabaseApi": {
+          "id": "x9GAXz1Nv6O8J4Vh",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "check-exists",
+              "leftValue": "={{ $json.length }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "check-email",
+              "leftValue": "={{ $('Split People').item.json.email }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "if-new-lead",
+      "name": "IF: New Lead with Email",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1680, 500]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.apify.com/v2/acts/apify~linkedin-profile-scraper/runs?token=[APIFY_API_KEY]&waitForFinish=90",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"startUrls\": [{\"url\": \"{{ $('Split People').item.json.linkedin_url }}\"}],\n  \"proxyConfiguration\": {\"useApifyProxy\": true}\n}",
+        "options": {}
+      },
+      "id": "apify-enrich",
+      "name": "Apify: Enrich LinkedIn Profile",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1920, 400],
+      "onError": "continueRegularOutput",
+      "notes": "Apify LinkedIn scraper - free tier 100 profiles/month - continues even if fails"
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "resource": "text",
+        "modelId": {
+          "__rl": true,
+          "value": "gemini-2.0-flash-exp",
+          "mode": "list"
+        },
+        "prompt": "=You are a conversion-focused cold email copywriter for Omladinska zadruga Avala. CONTEXT: Omladinska zadruga Avala connects Serbian companies (especially construction and engineering firms) with qualified young workers aged 18-30. Owner: Miloš Mitić. Core client pain: Can't find reliable workers, high turnover (40%+ annually), young workers lack experience. Our solution: Pre-screened candidate pool, training, mentorship, 48h replacement guarantee. LEAD DATA: Name: {{ $('Split People').item.json.first_name }}, Role: {{ $('Split People').item.json.title }}, Company: {{ $('Split Companies').item.json.name }}, Industry: {{ $('Split Companies').item.json.industry }}, Company size: {{ $('Split Companies').item.json.estimated_num_employees }} employees, Location: {{ $('Split People').item.json.city }}, {{ $('Split People').item.json.state }}, LinkedIn bio: {{ $json.about || 'N/A' }}. YOUR TASK: Write a cold email in Serbian (latinica) that immediately grabs attention using problem-agitation-solution framework. Must be hyper-personalized for their specific company and industry. Return only JSON format: {\"subject\": \"[max 50 chars]\", \"body\": \"[100-150 words]\"}.  SUBJECT LINE PSYCHOLOGY: Use pattern interrupt + specificity. Formulas that work: (1) \"{{ $('Split Companies').item.json.name }}: [specific metric/result]\", (2) \"{{ $('Split People').item.json.first_name }}, [counterintuitive insight]?\", (3) \"[Industry] firma: kako [benefit] za [timeframe]\". Avoid: Generic greetings, questions marks, exclamations, RE:/FWD: tricks. Examples: \"{{ $('Split Companies').item.json.name }}: 48h do novog radnika\", \"{{ $('Split People').item.json.first_name }}, Gen Z radnici nisu problem\", \"Građevinske firme: fluktuacija sa 40% na 8%\". BODY COPY STRUCTURE: [HOOK - Observation] Start with specific detail about their company from data provided. Make it personal, not generic. [PROBLEM - Agitate] Name their #1 pain quantified. Construction firms lose 3-4 weeks per year finding replacements. That's 8% of revenue eaten by recruitment chaos. [INSIGHT - Pattern Interrupt] Challenge common belief. \"Problem nisu mladi. Problem je što ih niko ne priprema za posao.\" [SOLUTION - Specific Benefits] Omladinska zadruga Avala offers: (1) Pre-screened pool of 200+ young workers with basic training, (2) 48-hour replacement if someone quits, (3) Mentor program that cuts onboarding time 60%. [PROOF - Micro Social Proof] \"15+ građevinskih firmi u Beogradu. Prosečna firma uštedi 12 dana godišnje na regrutaciji.\" [CTA - Low Friction] Don't ask for meeting. Offer value-first or use assumptive close. \"Mogu li da vam pošaljem listu dostupnih kandidata za {{ $('Split Companies').item.json.name }}?\" or \"Interesuje vas kako ovo funkcioniše u praksi?\" Sign-off: Srdačno, Miloš Mitić, Omladinska zadruga Avala, milos@ozavala.rs. ADVANCED PSYCHOLOGY PRINCIPLES: Use loss aversion (\"koliko vas košta kad radnik ode nakon 2 nedelje?\"), specificity over vagueness (\"3 dana\" not \"brzo\"), customer language not company jargon (\"ne mogu da nađem ljude\" not \"optimizovati talent acquisition\"), contrast principle (before/after scenarios), micro-commitments (small ask first), objection pre-emption (address \"previše mladi\" concern proactively). WRITING RULES: Active voice only. One idea per sentence. No buzzwords: streamline, optimize, innovative, synergy, leverage. No exclamation points. No ALL CAPS. Conversational but professional tone. Short paragraphs (2-3 sentences max). White space for scannability. End with question to demand response. QUALITY CHECKLIST: (1) Subject line feels personal not mass-sent? (2) First sentence references specific company detail? (3) Problem quantified with number? (4) Solution shows outcomes not features? (5) CTA is low-friction and specific? (6) Overall length under 150 words? (7) Zero jargon or buzzwords? Generate email now following all principles:"
+      },
+      "id": "gemini-email",
+      "name": "Gemini: Generate Cold Email",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleVertex",
+      "typeVersion": 1.1,
+      "position": [2160, 400],
+      "credentials": {
+        "googleApi": {
+          "id": "WBlrLLqHWiV5KKzP",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// Parse Gemini response\nconst response = items[0].json.message?.content || items[0].json.text || \"\";\n\nlet parsed;\ntry {\n  const cleaned = response.replace(/```json\\n?|```\\n?/g, '').trim();\n  parsed = JSON.parse(cleaned);\n} catch (e) {\n  // Fallback parsing\n  const subjectMatch = response.match(/subject[\"']?:\\s*[\"']([^\"']+)[\"']/i);\n  const bodyMatch = response.match(/body[\"']?:\\s*[\"']([\\s\\S]+)[\"']/i);\n  \n  parsed = {\n    subject: subjectMatch ? subjectMatch[1] : \"Saradnja oko zapošljavanja\",\n    body: bodyMatch ? bodyMatch[1] : response\n  };\n}\n\nreturn [{\n  json: {\n    subject: parsed.subject,\n    body: parsed.body\n  }\n}];"
+      },
+      "id": "parse-email",
+      "name": "Parse Email JSON",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2400, 400]
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "tableId": "kontakti",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "ime",
+              "fieldValue": "={{ $('Split People').item.json.first_name }}"
+            },
+            {
+              "fieldId": "prezime",
+              "fieldValue": "={{ $('Split People').item.json.last_name }}"
+            },
+            {
+              "fieldId": "email",
+              "fieldValue": "={{ $('Split People').item.json.email }}"
+            },
+            {
+              "fieldId": "telefon",
+              "fieldValue": "={{ $('Split People').item.json.phone_number }}"
+            },
+            {
+              "fieldId": "kompanija",
+              "fieldValue": "={{ $('Split Companies').item.json.name }}"
+            },
+            {
+              "fieldId": "linkedin_url",
+              "fieldValue": "={{ $('Split People').item.json.linkedin_url }}"
+            },
+            {
+              "fieldId": "linkedin_profile_json",
+              "fieldValue": "={{ JSON.stringify($('Apify: Enrich LinkedIn Profile').item.json.defaultDatasetId ? $json : {}) }}"
+            },
+            {
+              "fieldId": "cold_email_subject",
+              "fieldValue": "={{ $json.subject }}"
+            },
+            {
+              "fieldId": "cold_email_body",
+              "fieldValue": "={{ $json.body }}"
+            },
+            {
+              "fieldId": "lead_source",
+              "fieldValue": "cold_email"
+            },
+            {
+              "fieldId": "outreach_channel",
+              "fieldValue": "email"
+            },
+            {
+              "fieldId": "status",
+              "fieldValue": "Novi"
+            },
+            {
+              "fieldId": "company_size",
+              "fieldValue": "={{ $('Split Companies').item.json.estimated_num_employees }}"
+            },
+            {
+              "fieldId": "company_industry",
+              "fieldValue": "={{ $('Split Companies').item.json.industry }}"
+            },
+            {
+              "fieldId": "enrichment_source",
+              "fieldValue": "apify"
+            },
+            {
+              "fieldId": "campaign_name",
+              "fieldValue": "Cold Email Q1 2026"
+            },
+            {
+              "fieldId": "client_id",
+              "fieldValue": "[OZ_AVALA_CLIENT_UUID]"
+            }
+          ]
+        }
+      },
+      "id": "save-to-kontakti",
+      "name": "Save Lead to Kontakti",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [2640, 400],
+      "credentials": {
+        "supabaseApi": {
+          "id": "x9GAXz1Nv6O8J4Vh",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.instantly.ai/api/v1/lead/add",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"api_key\": \"[INSTANTLY_API_KEY]\",\n  \"campaign_id\": \"[INSTANTLY_CAMPAIGN_ID]\",\n  \"email\": \"{{ $('Split People').item.json.email }}\",\n  \"first_name\": \"{{ $('Split People').item.json.first_name }}\",\n  \"last_name\": \"{{ $('Split People').item.json.last_name }}\",\n  \"company_name\": \"{{ $('Split Companies').item.json.name }}\",\n  \"personalization\": {\n    \"subject\": \"{{ $('Parse Email JSON').item.json.subject }}\",\n    \"body\": \"{{ $('Parse Email JSON').item.json.body }}\",\n    \"position\": \"{{ $('Split People').item.json.title }}\",\n    \"location\": \"{{ $('Split People').item.json.city }}\"\n  }\n}",
+        "options": {}
+      },
+      "id": "instantly-add-lead",
+      "name": "Instantly: Add Lead to Campaign",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2880, 400],
+      "notes": "Sends email via Instantly.ai - high deliverability"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "kontakti",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "={{ $('Save Lead to Kontakti').item.json.id }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "email_sent_at",
+              "fieldValue": "={{ $now.toISO() }}"
+            },
+            {
+              "fieldId": "instantly_campaign_id",
+              "fieldValue": "[INSTANTLY_CAMPAIGN_ID]"
+            }
+          ]
+        }
+      },
+      "id": "mark-as-sent",
+      "name": "Mark Email as Sent",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [3120, 400],
+      "credentials": {
+        "supabaseApi": {
+          "id": "x9GAXz1Nv6O8J4Vh",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 3
+      },
+      "id": "wait-node",
+      "name": "Wait 3s (Rate Limit)",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [3360, 400],
+      "webhookId": "email-rate-limit",
+      "notes": "20 emails/minute = safe rate"
+    },
+    {
+      "parameters": {
+        "content": "# Cold Email Outreach (PRIMARY DRIVER)\n\n## Flow:\n1. Search companies (Apollo) - 20 per run\n2. Find decision makers - 3 per company\n3. Check for duplicates in Supabase\n4. Enrich profiles (optional, LinkFinder)\n5. Generate personalized email (Gemini)\n6. Save to kontakti table\n7. Send via Instantly.ai\n8. Mark as sent with timestamp\n\n## Volume:\n- Runs every 3 hours (Mon-Fri)\n- 5 runs/day\n- 20 companies × 3 people = 60 leads/run\n- After duplicate filter: ~20-30 new/run\n- Daily: 100-150 emails\n- Weekly: 500-750 emails\n- Monthly: 2,000-3,000 emails\n\n## Instantly.ai Setup:\n- Campaign: \"OZ Avala Construction Outreach\"\n- Sending domains: 2-3 (rotate)\n- Warmup: ON (critical for deliverability)\n- Daily limit: 50-100/domain\n- Follow-up sequence: 2-3 emails (if no response)\n\n## Integration with Email Master v5:\n- Positive reply → Update status to 'Zainteresovan'\n- Instantly webhook detects reply → Triggers Email Master\n- Email Master handles meeting booking sequence\n\n## Lead Quality:\nAll leads have:\n✓ Verified/guessed email\n✓ Decision maker role\n✓ Company 10-1000 employees\n✓ Serbia location\n✓ Relevant industry",
+        "height": 700,
+        "width": 460,
+        "color": 6
+      },
+      "id": "sticky-note",
+      "name": "Workflow Info",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [120, 240]
+    }
+  ],
+  "connections": {
+    "Schedule: Every 3 hours (Mon-Fri)": {
+      "main": [
+        [
+          {
+            "node": "Apollo: Search Target Companies",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Apollo: Search Target Companies": {
+      "main": [
+        [
+          {
+            "node": "Split Companies",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Companies": {
+      "main": [
+        [
+          {
+            "node": "Apollo: Find Decision Makers",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Apollo: Find Decision Makers": {
+      "main": [
+        [
+          {
+            "node": "Split People",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split People": {
+      "main": [
+        [
+          {
+            "node": "Check if Lead Exists",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check if Lead Exists": {
+      "main": [
+        [
+          {
+            "node": "IF: New Lead with Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF: New Lead with Email": {
+      "main": [
+        [
+          {
+            "node": "Apify: Enrich LinkedIn Profile",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Apify: Enrich LinkedIn Profile": {
+      "main": [
+        [
+          {
+            "node": "Gemini: Generate Cold Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini: Generate Cold Email": {
+      "main": [
+        [
+          {
+            "node": "Parse Email JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Email JSON": {
+      "main": [
+        [
+          {
+            "node": "Save Lead to Kontakti",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Lead to Kontakti": {
+      "main": [
+        [
+          {
+            "node": "Instantly: Add Lead to Campaign",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Instantly: Add Lead to Campaign": {
+      "main": [
+        [
+          {
+            "node": "Mark Email as Sent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mark Email as Sent": {
+      "main": [
+        [
+          {
+            "node": "Wait 3s (Rate Limit)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait 3s (Rate Limit)": {
+      "main": [
+        [
+          {
+            "node": "Split People",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "active": false
+}

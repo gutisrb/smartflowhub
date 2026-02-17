@@ -1,0 +1,349 @@
+{
+  "name": "OZ Avala - 2. LinkedIn Connection Outreach (Daily)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 10 * * 1-5"
+            }
+          ]
+        }
+      },
+      "id": "schedule-trigger",
+      "name": "Schedule: Mon-Fri 10AM",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [240, 400]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.apollo.io/v1/mixed_companies/search",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Api-Key",
+              "value": "[APOLLO_API_KEY]"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"q_organization_locations\": [\"Serbia\"],\n  \"organization_num_employees_ranges\": [\"10,50\", \"51,200\", \"201,500\"],\n  \"industry_tag_ids\": [\"5567cd4773696439b10b0000\"],\n  \"page\": 1,\n  \"per_page\": 10\n}",
+        "options": {}
+      },
+      "id": "apollo-company-search",
+      "name": "Apollo: Search Companies",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [480, 400],
+      "notes": "Search for construction/engineering companies in Serbia with 10-500 employees"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "organizations",
+        "options": {}
+      },
+      "id": "split-companies",
+      "name": "Split Companies",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [720, 400]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.apollo.io/api/v1/mixed_people/search",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Api-Key",
+              "value": "[APOLLO_API_KEY]"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"organization_ids\": [\"{{ $json.id }}\"],\n  \"person_titles\": [\n    \"Vlasnik\",\n    \"Owner\",\n    \"Direktor\",\n    \"Director\",\n    \"CEO\",\n    \"Founder\",\n    \"HR\",\n    \"Project Manager\",\n    \"Menadžer\",\n    \"Rukovodilac\"\n  ],\n  \"person_locations\": [\"Serbia\", \"Belgrade\", \"Beograd\"],\n  \"page\": 1,\n  \"per_page\": 5,\n  \"contact_email_status\": [\"verified\"]\n}",
+        "options": {}
+      },
+      "id": "apollo-people-search",
+      "name": "Apollo: Find Decision Makers",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [960, 400]
+    },
+    {
+      "parameters": {
+        "jsCode": "const people = $json.people || [];\nconst companyName = $('Split Companies').item.json.name || \"\";\n\n// Keywords for decision makers\nconst highValueTitles = ['vlasnik', 'owner', 'ceo', 'direktor', 'director', 'founder', 'osnivač'];\nconst mediumValueTitles = ['hr', 'project manager', 'menadžer', 'rukovodilac'];\n\nconst scored = people.map(p => {\n  const title = (p.title || \"\").toLowerCase();\n  let score = 0;\n  \n  // High value decision makers\n  if (highValueTitles.some(t => title.includes(t))) score += 10;\n  \n  // Medium value\n  else if (mediumValueTitles.some(t => title.includes(t))) score += 6;\n  \n  // Has LinkedIn URL\n  if (p.linkedin_url) score += 3;\n  \n  // Has verified email\n  if (p.email) score += 2;\n  \n  // Location match (Serbia)\n  if (p.state && p.state.toLowerCase().includes('serbia')) score += 2;\n  \n  return { ...p, decision_maker_score: score, company_name: companyName };\n});\n\n// Return top 3 decision makers per company\nconst topPeople = scored\n  .sort((a, b) => b.decision_maker_score - a.decision_maker_score)\n  .slice(0, 3)\n  .filter(p => p.decision_maker_score >= 6); // Minimum quality threshold\n\nreturn topPeople.map(p => ({ json: p }));"
+      },
+      "id": "score-filter",
+      "name": "Score & Filter Top 3",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1200, 400]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.apify.com/v2/acts/apify~linkedin-profile-scraper/runs?token=[APIFY_API_KEY]&waitForFinish=90",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"startUrls\": [{\"url\": \"{{ $json.linkedin_url }}\"}],\n  \"proxyConfiguration\": {\"useApifyProxy\": true}\n}",
+        "options": {}
+      },
+      "id": "apify-enrich",
+      "name": "Apify: Enrich LinkedIn Profile",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1440, 400],
+      "onError": "continueRegularOutput",
+      "notes": "Apify LinkedIn scraper - free tier 100 profiles/month"
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "resource": "text",
+        "modelId": {
+          "__rl": true,
+          "value": "gemini-2.0-flash-exp",
+          "mode": "list"
+        },
+        "prompt": "=You are a LinkedIn connection messaging expert for Omladinska zadruga Avala. CONTEXT: Omladinska zadruga Avala helps companies find qualified young workers (18-30 years) for construction and engineering positions in Belgrade and Serbia. OBJECTIVE: Write a personalized LinkedIn connection request message. CRITICAL CONSTRAINT: Maximum 250 characters (LinkedIn hard limit). LEAD DATA: Name: {{ $('Score & Filter Top 3').item.json.name }}, Position: {{ $('Score & Filter Top 3').item.json.title }}, Company: {{ $('Score & Filter Top 3').item.json.company_name }}, Profile about: {{ $json.about || 'N/A' }}, Headline: {{ $json.headline || 'N/A' }}. MESSAGE PSYCHOLOGY: Lead with value, not request. Use pattern: Specific observation about their company + Relevant insight + Value proposition + Soft question. Make it feel like start of conversation, not cold pitch. PERSONALIZATION RULES: Must reference specific detail from their data (company name, role, or industry). Use their first name only (Serbian business culture). Acknowledge their position with respect but stay peer-level. WRITING RULES: Language: Serbian (latinica). Tone: Professional but warm, never salesy or pushy. Structure: Greeting + Observation + Value + Question. Focus: Partnership around youth hiring, not asking for meeting. AVOID: Generic phrases (\"razmena iskustava\", \"networking\", \"upoznavanje\"), asking for \"sastanak\" immediately, company jargon, excessive formality, any buzzwords. FORMULAS THAT WORK: (1) \"Pozdrav [Name], vidim da vodite [Company] u [industry]. Radimo sa sličnim firmama na pronalaženju mladih kvalifikovanih radnika. Bi li bili otvoreni za saradnju?\" (2) \"[Name], primetio sam da [Company] [specific observation]. Pomažemo građevinskim firmama da reše problem nalaženja pouzdanih radnika. Da li vas to zanima?\" (3) \"Pozdrav [Name], [Company] verovatno ima potrebu za mladim radnicima sa obukom. Mi imamo pool od 200+ kandidata. Može saradnja?\" ADVANCED TACTICS: Use curiosity without being vague (\"pool od 200+ kandidata\" not \"interesantna rešenja\"). Apply social proof subtly (\"radimo sa sličnim firmama\" not \"radimo sa svima\"). End with micro-commitment question (\"Bi li bili otvoreni?\" not \"Hajde da se čujemo\"). Keep it conversational, like peer reaching out to peer. CHARACTER COUNT: Must be under 250 characters including spaces. If over, cut ruthlessly - remove adjectives first, then rewrite more concisely. QUALITY CHECKLIST: (1) Uses their actual name and company? (2) References specific detail about them? (3) Leads with value not request? (4) Ends with low-pressure question? (5) Feels personal not templated? (6) Zero generic networking phrases? (7) Under 250 characters? Return ONLY the message text, no explanations or JSON. Generate message now:"
+      },
+      "id": "gemini-message",
+      "name": "Gemini: Generate Connection Message",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleVertex",
+      "typeVersion": 1.1,
+      "position": [1680, 400],
+      "credentials": {
+        "googleApi": {
+          "id": "WBlrLLqHWiV5KKzP",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "tableId": "kontakti",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "ime",
+              "fieldValue": "={{ $('Score & Filter Top 3').item.json.first_name }}"
+            },
+            {
+              "fieldId": "prezime",
+              "fieldValue": "={{ $('Score & Filter Top 3').item.json.last_name }}"
+            },
+            {
+              "fieldId": "email",
+              "fieldValue": "={{ $('Score & Filter Top 3').item.json.email }}"
+            },
+            {
+              "fieldId": "telefon",
+              "fieldValue": "={{ $('Score & Filter Top 3').item.json.phone_number }}"
+            },
+            {
+              "fieldId": "kompanija",
+              "fieldValue": "={{ $('Score & Filter Top 3').item.json.company_name }}"
+            },
+            {
+              "fieldId": "linkedin_url",
+              "fieldValue": "={{ $('Score & Filter Top 3').item.json.linkedin_url }}"
+            },
+            {
+              "fieldId": "linkedin_profile_json",
+              "fieldValue": "={{ JSON.stringify($('Apify: Enrich LinkedIn Profile').item.json.defaultDatasetId ? $json : {}) }}"
+            },
+            {
+              "fieldId": "connection_message",
+              "fieldValue": "={{ $json.message?.content || $json.text }}"
+            },
+            {
+              "fieldId": "lead_source",
+              "fieldValue": "linkedin_connection"
+            },
+            {
+              "fieldId": "outreach_channel",
+              "fieldValue": "linkedin"
+            },
+            {
+              "fieldId": "status",
+              "fieldValue": "Novi"
+            },
+            {
+              "fieldId": "decision_maker_score",
+              "fieldValue": "={{ $('Score & Filter Top 3').item.json.decision_maker_score }}"
+            },
+            {
+              "fieldId": "enrichment_source",
+              "fieldValue": "apify"
+            },
+            {
+              "fieldId": "client_id",
+              "fieldValue": "[OZ_AVALA_CLIENT_UUID]"
+            }
+          ]
+        }
+      },
+      "id": "save-to-kontakti",
+      "name": "Save to Kontakti",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [1920, 400],
+      "credentials": {
+        "supabaseApi": {
+          "id": "x9GAXz1Nv6O8J4Vh",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 5
+      },
+      "id": "wait-node",
+      "name": "Wait 5s (Rate Limit)",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [2160, 400],
+      "webhookId": "linkedin-rate-limit"
+    },
+    {
+      "parameters": {
+        "content": "# LinkedIn Connection Outreach\n\n## Flow:\n1. Search companies in Serbia (Apollo)\n2. Find decision makers (owners, directors, HR)\n3. Score by relevance (10-20 points scale)\n4. Enrich LinkedIn profiles (LinkFinder AI)\n5. Generate personalized message (Gemini)\n6. Save to kontakti table\n7. Display in dashboard LinkedIn tab\n\n## Volume:\n- 10 companies/day\n- 3 decision makers/company\n- = 30 leads/day MAX\n- = 150 leads/week\n- Filter: only score >= 6\n- Actual output: ~10-15/day\n\n## Manual Actions:\n- Client reviews in dashboard\n- Client sends connection requests manually\n- OR: Enable ConnectSafely auto-send (optional)\n\n## Rate Limiting:\n- 5 second delay between leads\n- Prevents API throttling\n\n## Lead Quality:\nHigh (10+): Owners, CEOs, Founders\nMedium (6-9): HR, Project Managers\nLow (<6): Filtered out",
+        "height": 540,
+        "width": 400,
+        "color": 5
+      },
+      "id": "sticky-note",
+      "name": "Workflow Info",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [140, 220]
+    }
+  ],
+  "connections": {
+    "Schedule: Mon-Fri 10AM": {
+      "main": [
+        [
+          {
+            "node": "Apollo: Search Companies",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Apollo: Search Companies": {
+      "main": [
+        [
+          {
+            "node": "Split Companies",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Companies": {
+      "main": [
+        [
+          {
+            "node": "Apollo: Find Decision Makers",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Apollo: Find Decision Makers": {
+      "main": [
+        [
+          {
+            "node": "Score & Filter Top 3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Score & Filter Top 3": {
+      "main": [
+        [
+          {
+            "node": "Apify: Enrich LinkedIn Profile",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Apify: Enrich LinkedIn Profile": {
+      "main": [
+        [
+          {
+            "node": "Gemini: Generate Connection Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini: Generate Connection Message": {
+      "main": [
+        [
+          {
+            "node": "Save to Kontakti",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save to Kontakti": {
+      "main": [
+        [
+          {
+            "node": "Wait 5s (Rate Limit)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait 5s (Rate Limit)": {
+      "main": [
+        [
+          {
+            "node": "Split Companies",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "active": false
+}

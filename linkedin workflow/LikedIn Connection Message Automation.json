@@ -1,0 +1,488 @@
+{
+  "name": "LikedIn Connection Message Automation",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## 2. Apollo Lead Extraction",
+        "height": 276,
+        "width": 412,
+        "color": 4
+      },
+      "id": "f7d55a77-86a3-4c43-9601-48e734bac391",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -192,
+        0
+      ],
+      "typeVersion": 1,
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## 3. Personalised Connection Message\n",
+        "height": 276,
+        "width": 524,
+        "color": 3
+      },
+      "id": "cd6cf9d4-ce2a-4d92-8e26-3de2b83e83bd",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -736,
+        304
+      ],
+      "typeVersion": 1,
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "## 4. Add to Google Sheet DB\n",
+        "height": 276,
+        "width": 412,
+        "color": 5
+      },
+      "id": "5d70568f-099b-4760-9234-2888d26fc795",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -192,
+        304
+      ],
+      "typeVersion": 1,
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "formTitle": "LinkedIn Lead Outreach Trigger",
+        "formDescription": "Insert an audience for your LinkedIn Outreach Campaign here.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Describe your audience in plain English.",
+              "fieldType": "textarea",
+              "placeholder": "Company type, location, etc",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "8ff5320a-7951-4469-9433-e83f84929a46",
+      "name": "On form submission",
+      "type": "n8n-nodes-base.formTrigger",
+      "position": [
+        -672,
+        80
+      ],
+      "webhookId": "ecb5116a-1434-45b5-8f38-31393735a1b8",
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-5-chat-latest",
+          "mode": "list",
+          "cachedResultName": "GPT-5-CHAT-LATEST"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "You're a helpful, intelligent sales assistant.",
+              "role": "system"
+            },
+            {
+              "content": "=Your task is to take as input a natural language description of a prospect audience, and turn that into an Apollo Search URL.\n\nHere's an example of an Apollo Search URL:\n\nhttps://app.apollo.io/#/people?personLocations[]=United%20States&sortAscending=false&sortByField=%5Bnone%5D&personTitles[]=owner&personTitles[]=ceo&personTitles[]=founder&personTitles[]=partner&page=1&qKeywords=creative%20agency&organizationNumEmployeesRanges[]=1%2C200\n\nThis URL describes a search for people that are\n- Located in the United States.\n- Hold the titles: Owner, CEO, Founder, or Partner.\n- Have a keyword association with “creative agency”.\n\nThese are the fields you can change:\n\norganizationLocations[], Keywords, personTitles[], and organizationNumEmployeesRanges[]\n\nDo not add or change any other fields. Use the above template\n\nReturn your response in JSON using this format:\n\n{\"searchUrl\":\"search url goes here\"}"
+            },
+            {
+              "content": "={{ $json['Describe your audience in plain English.'] }}"
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "options": {}
+      },
+      "id": "1c7141c4-7928-4732-9453-b695a8571467",
+      "name": "Generate Search URL",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "position": [
+        -496,
+        80
+      ],
+      "typeVersion": 1.6,
+      "credentials": {
+        "openAiApi": {
+          "id": "JW58mv7uuR54fXsx",
+          "name": "YT Aug 19th"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1WYI5wCZiO_-D2SZEL9Z6K9yBamOJ0rhP1MKwA285KiY",
+          "mode": "list",
+          "cachedResultName": "Personalised Outreach N8N",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1WYI5wCZiO_-D2SZEL9Z6K9yBamOJ0rhP1MKwA285KiY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1WYI5wCZiO_-D2SZEL9Z6K9yBamOJ0rhP1MKwA285KiY/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $('Get dataset items').item.json.id }}",
+            "first_name": "={{ $('Get dataset items').item.json.first_name }}",
+            "last_name": "={{ $('Get dataset items').item.json.last_name }}",
+            "name": "={{ $('Get dataset items').item.json.first_name }} ",
+            "linkedin_url": "={{ $('Get dataset items').item.json.linkedin_url }}",
+            "title": "={{ $('Get dataset items').item.json.title }}",
+            "email_status": "={{ $('Get dataset items').item.json.email_status }}",
+            "photo_url": "={{ $('Get dataset items').item.json.photo_url }}",
+            "icebreaker": "={{ $json.message.content.icebreaker }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "first_name",
+              "displayName": "first_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "last_name",
+              "displayName": "last_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "name",
+              "displayName": "name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "linkedin_url",
+              "displayName": "linkedin_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "title",
+              "displayName": "title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "email_status",
+              "displayName": "email_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "photo_url",
+              "displayName": "photo_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "icebreaker",
+              "displayName": "icebreaker",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "6cdf6c1c-96a0-49a3-98cf-ca552812d16f",
+      "name": "Add to Google Sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        -32,
+        384
+      ],
+      "typeVersion": 4.5,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "EQZ4ODVSjcsOy7Lc",
+          "name": "Michele Connection 17th August"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o",
+          "cachedResultName": "GPT-4O"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "You are a helpful, intelligent writing assistant.",
+              "role": "system"
+            },
+            {
+              "content": "=Your task is to take as input a bunch of LinkedIn profile information of a user, and then generate a very short, very punchy icebreaker that I can use as a variable in my connection request.\n\nReturn your results in this format:\n\n{\"icebreaker\":\"Icebreaker goes here\"}\n\nIn order to ensure icebreakers are punchy and high-quality, make them follow this template:\n\nHey {{name}}, loved seeing {{thingAboutThem}}. I'm also into {{plausibleTieIn}}, thought I'd connect.\n\nFor {{thingAboutThem}} and {{plausibleTieIn}}, never use the exact information provided in a LinkedIn field. Instead, always paraphrase. This makes it seem human written, instead of just an automated message. Also, make it super short. Don't say stuff like \"passionate about turning vision into reality\" or anything like that—be extremely laconic and spartan."
+            },
+            {
+              "content": "{\"linkedInFields\":\"Danielle Morgan, Fort Lauderdale, Founder & CEO at DM Creative Agency, previous experience: Regional Sales Director at Out East Eyewear, Account Director at Radancy\"}"
+            },
+            {
+              "content": "{\n  \"icebreaker\": \"Hey Danielle, loved seeing your creative agency journey. I'm also building brands, thought I'd connect.\"\n}",
+              "role": "assistant"
+            },
+            {
+              "content": "={\"linkedInFields\":\"{{ $('Get dataset items').item.json.first_name }} {{ $('Get dataset items').item.json.last_name }},  {{ $('Get dataset items').item.json.city }}, {{ $('Get dataset items').item.json.title }} at {{ $('Get dataset items').item.json.employment_history[0].organization_name }}, previous experience: \n{{ $('Get dataset items').item.json.employment_history[1].title }} at {{ $('Get dataset items').item.json.employment_history[1].organization_name }}, {{ $('Get dataset items').item.json.employment_history[2].title }} at {{ $('Get dataset items').item.json.employment_history[2].organization_name }}\"} "
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "options": {}
+      },
+      "id": "ba231e40-8614-4ccf-a855-ac98ecab3e5b",
+      "name": "Personalize Outreach",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "position": [
+        -464,
+        384
+      ],
+      "typeVersion": 1.6,
+      "credentials": {
+        "openAiApi": {
+          "id": "JW58mv7uuR54fXsx",
+          "name": "YT Aug 19th"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "actorId": {
+          "__rl": true,
+          "value": "iJcISG5H8FJUSRoVA",
+          "mode": "list",
+          "cachedResultName": "🎉 Apollo Scraper $1/1k leads. Upto 50k leads (microworlds/apollo-scraper)",
+          "cachedResultUrl": "https://console.apify.com/actors/iJcISG5H8FJUSRoVA/input"
+        },
+        "customBody": "={\n    \"getPersonalEmails\": true,\n    \"getWorkEmails\": true,\n    \"totalRecords\": 50,\n    \"url\": \"{{ $json.message.content.searchUrl }}\"\n}"
+      },
+      "type": "@apify/n8n-nodes-apify.apify",
+      "typeVersion": 1,
+      "position": [
+        -128,
+        80
+      ],
+      "id": "e2b70535-f28f-44ba-8739-dbcc3d4744c9",
+      "name": "Run an Actor",
+      "credentials": {
+        "apifyApi": {
+          "id": "KiXhGwcHmBXlZJKS",
+          "name": "mich.alcalde Connection"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Sheet\n\nhttps://docs.google.com/spreadsheets/d/1WYI5wCZiO_-D2SZEL9Z6K9yBamOJ0rhP1MKwA285KiY/edit?usp=sharing",
+        "height": 128,
+        "width": 432,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -432,
+        -192
+      ],
+      "typeVersion": 1,
+      "id": "8560857c-fa8b-45c1-8204-741b82ca8373",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "resource": "Datasets",
+        "datasetId": "={{ $json.defaultDatasetId }}",
+        "limit": null
+      },
+      "type": "@apify/n8n-nodes-apify.apify",
+      "typeVersion": 1,
+      "position": [
+        64,
+        80
+      ],
+      "id": "1985df15-7c0c-47aa-808f-47ef09207ee8",
+      "name": "Get dataset items",
+      "credentials": {
+        "apifyApi": {
+          "id": "KiXhGwcHmBXlZJKS",
+          "name": "mich.alcalde Connection"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## 1. Form Trigger turned into Apollo URL",
+        "height": 276,
+        "width": 526
+      },
+      "id": "037d122f-3e51-4001-addb-a9df496dc5d6",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -736,
+        0
+      ],
+      "typeVersion": 1,
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "batchSize": 20,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -688,
+        384
+      ],
+      "id": "6235d313-f99a-44ca-8924-18999329b927",
+      "name": "Loop Over Items"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Generate Search URL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add to Google Sheet": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Search URL": {
+      "main": [
+        [
+          {
+            "node": "Run an Actor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Personalize Outreach": {
+      "main": [
+        [
+          {
+            "node": "Add to Google Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Run an Actor": {
+      "main": [
+        [
+          {
+            "node": "Get dataset items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get dataset items": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Personalize Outreach",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "b021b494-6d59-4e03-8229-254566d009be",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "497b9f82c9e2221fea60e82fa63290386b7aadcded14b21ff31b0075b1df1efd"
+  },
+  "id": "Ed2jK1BAtUzDLP9q",
+  "tags": []
+}

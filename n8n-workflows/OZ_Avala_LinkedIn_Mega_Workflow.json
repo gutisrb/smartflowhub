@@ -1,0 +1,543 @@
+{
+  "name": "OZ Avala - LinkedIn Lead Generation & Outreach (Mega Workflow)",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "LinkedIn Job Search for OZ Avala",
+        "formDescription": "Enter job search criteria to find candidates for youth employment opportunities in Serbia.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Job Keywords (e.g. construction, engineering, superintendent)",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Location (e.g. Belgrade, Serbia)",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Number of Jobs to Scrape",
+              "fieldType": "number",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.3,
+      "position": [240, 300],
+      "id": "form-trigger-001",
+      "name": "🎯 Job Search Form",
+      "webhookId": "oz-avala-job-search"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.apify.com/v2/acts/[YOUR_APIFY_ACTOR]/runs",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"publishedAt\": \"r604800\",\n  \"saveOnlyUniqueItems\": true,\n  \"startUrls\": [\n    {\n      \"url\": \"https://www.linkedin.com/jobs/search/?keywords={{ encodeURIComponent($json['Job Keywords (e.g. construction, engineering, superintendent)']) }}&location={{ encodeURIComponent($json['Location (e.g. Belgrade, Serbia)']) }}&f_TPR=r604800&sortBy=R\"\n    }\n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [480, 300],
+      "id": "apify-job-scraper-001",
+      "name": "🔍 Scrape LinkedIn Jobs"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "[YOUR_GOOGLE_SHEETS_ID]",
+          "cachedResultName": "OZ Avala - Jobs Database"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gid=0",
+          "cachedResultName": "Jobs"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "company_name": "={{ $json.companyName }}",
+            "job_title": "={{ $json.jobTitle }}",
+            "job_url": "={{ $json.jobUrl }}",
+            "location": "={{ $json.location }}",
+            "posted_date": "={{ $json.publishedAt }}",
+            "job_description": "={{ $json.jobDescription }}",
+            "company_linkedin_url": "={{ $json.companyUrl }}",
+            "status": "new"
+          }
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [720, 300],
+      "id": "save-jobs-sheet-001",
+      "name": "💾 Save Jobs to Sheet"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "[YOUR_GOOGLE_SHEETS_ID]",
+          "cachedResultName": "OZ Avala - Jobs Database"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gid=0",
+          "cachedResultName": "Jobs"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "status",
+              "lookupValue": "new"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [240, 520],
+      "id": "get-new-jobs-001",
+      "name": "📥 Get New Jobs"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [480, 520],
+      "id": "loop-jobs-001",
+      "name": "🔄 Loop Over Jobs"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.apollo.io/v1/organizations/search",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Api-Key",
+              "value": "[YOUR_APOLLO_API_KEY]"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"q_organization_name\": \"{{ $json.company_name }}\",\n  \"page\": 1,\n  \"per_page\": 5\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [720, 520],
+      "id": "apollo-org-search-001",
+      "name": "🏢 Find Company in Apollo"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.apollo.io/api/v1/mixed_people/search",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Api-Key",
+              "value": "[YOUR_APOLLO_API_KEY]"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"organization_ids\": [\"{{ $json.organizations[0].id }}\"],\n  \"person_titles\": [\n    \"HR\",\n    \"Recruiting\",\n    \"Sourcing\",\n    \"Talent\",\n    \"Operations\",\n    \"People\",\n    \"Project\",\n    \"Manager\"\n  ],\n  \"page\": 1,\n  \"per_page\": 100,\n  \"contact_email_status\": [\"verified\"]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [960, 520],
+      "id": "apollo-people-search-001",
+      "name": "👥 Find Decision Makers"
+    },
+    {
+      "parameters": {
+        "jsCode": "const people = $json.people || [];\nconst jobLocation = $('Loop Over Jobs').item.json.location || \"\";\n\nconst keywords = ['hr', 'recruiting', 'talent', 'people', 'operations', 'project', 'manager'];\n\nconst scored = people.map(p => {\n  const title = (p.title || \"\").toLowerCase();\n  const city = (p.city || \"\").toLowerCase();\n  const state = (p.state || \"\").toLowerCase();\n  \n  let score = 0;\n  \n  // Title keyword match\n  if (keywords.some(k => title.includes(k))) score += 5;\n  \n  // Location match\n  if (jobLocation.toLowerCase().includes(city) || jobLocation.toLowerCase().includes(state)) score += 3;\n  \n  // Email verified\n  if (p.email) score += 2;\n  \n  return { ...p, score };\n});\n\n// Sort by score and return top 5\nconst topPeople = scored\n  .sort((a, b) => b.score - a.score)\n  .slice(0, 5);\n\nreturn topPeople.map(p => ({ json: p }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1200, 520],
+      "id": "filter-decision-makers-001",
+      "name": "⭐ Score & Filter Top 5"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "[YOUR_GOOGLE_SHEETS_ID]",
+          "cachedResultName": "OZ Avala - Leads Database"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gid=1",
+          "cachedResultName": "Leads"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "name": "={{ $json.name }}",
+            "email": "={{ $json.email }}",
+            "title": "={{ $json.title }}",
+            "company": "={{ $json.organization.name }}",
+            "linkedin_url": "={{ $json.linkedin_url }}",
+            "job_title": "={{ $('Loop Over Jobs').item.json.job_title }}",
+            "job_url": "={{ $('Loop Over Jobs').item.json.job_url }}",
+            "relevance_score": "={{ $json.score }}",
+            "status": "new"
+          }
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [1440, 520],
+      "id": "save-leads-sheet-001",
+      "name": "💾 Save Leads to Sheet"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "[YOUR_GOOGLE_SHEETS_ID]",
+          "cachedResultName": "OZ Avala - Leads Database"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gid=1",
+          "cachedResultName": "Leads"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "status",
+              "lookupValue": "new"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [240, 740],
+      "id": "get-new-leads-001",
+      "name": "📥 Get New Leads"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [480, 740],
+      "id": "loop-leads-001",
+      "name": "🔄 Loop Over Leads"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.linkfinderai.com",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer [YOUR_LINKFINDER_API_KEY]"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "type",
+              "value": "linkedin_profile_to_linkedin_info"
+            },
+            {
+              "name": "input_data",
+              "value": "={{ $json.linkedin_url }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [720, 740],
+      "id": "enrich-profile-001",
+      "name": "🔎 Enrich LinkedIn Profile"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Kreiraj personalizovanu poruku za LinkedIn konekciju.\n\n**Podaci o osobi:**\n- Ime: {{ $('Loop Over Leads').item.json.name }}\n- Pozicija: {{ $('Loop Over Leads').item.json.title }}\n- Kompanija: {{ $('Loop Over Leads').item.json.company }}\n- O profilu: {{ $json.about }}\n\n**Posao za koji kontaktiramo:**\n- Pozicija: {{ $('Loop Over Leads').item.json.job_title }}\n- Lokacija: {{ $('Loop Over Leads').item.json.job_url }}\n\nKreiraj kratku, prijateljsku poruku (50-80 reči) na srpskom jeziku koja:\n1. Spominje njihovu ulogu u kompaniji\n2. Objašnjava da Omladinska zadruga Avala pomaže mladima da nađu posao\n3. Poziva na razgovor o mogućnostima saradnje\n\nVrati SAMO tekst poruke, bez dodatnih objašnjenja.",
+        "options": {
+          "systemMessage": "Ti si profesionalni LinkedIn komunikator za Omladinsku zadrugu Avala, agenciju za zapošljavanje mladih u Beogradu, Srbija. Pišeš personalizovane poruke na srpskom jeziku koje su tople, profesionalne i fokusirane na saradnju."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [960, 740],
+      "id": "generate-message-001",
+      "name": "✍️ Generate Personalized Message"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "claude-3-7-sonnet-20250219",
+          "mode": "list",
+          "cachedResultName": "Claude 3.7 Sonnet"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [960, 940],
+      "id": "claude-model-001",
+      "name": "🤖 Claude 3.7 Sonnet"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "[YOUR_GOOGLE_SHEETS_ID]",
+          "cachedResultName": "OZ Avala - Leads Database"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gid=1",
+          "cachedResultName": "Leads"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "name": "={{ $('Loop Over Leads').item.json.name }}",
+            "profile_about": "={{ $('Enrich LinkedIn Profile').item.json.about }}",
+            "profile_headline": "={{ $('Enrich LinkedIn Profile').item.json.headline }}",
+            "message": "={{ $json.output }}",
+            "status": "ready_to_send"
+          },
+          "matchingColumns": ["name"]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [1200, 740],
+      "id": "update-lead-message-001",
+      "name": "💾 Save Message to Sheet"
+    },
+    {
+      "parameters": {
+        "content": "# OZ Avala LinkedIn Mega Workflow\n\n## Phase 1: Job Discovery (Top)\n1. Form Trigger → Enter search criteria\n2. Scrape LinkedIn Jobs via Apify\n3. Save to Google Sheets (Jobs Database)\n\n## Phase 2: Decision Maker Research (Middle)\n1. Get new jobs from sheet\n2. Loop over each job\n3. Find company in Apollo\n4. Search for HR/recruiting contacts\n5. Score and filter top 5 decision makers\n6. Save leads to sheet\n\n## Phase 3: Lead Enrichment & Outreach (Bottom)\n1. Get new leads from sheet\n2. Loop over each lead\n3. Enrich profile via LinkFinder AI\n4. Generate personalized message in Serbian (Claude)\n5. Save enriched data + message to sheet\n6. Status: ready_to_send\n\n## Manual Step\nReview messages in Google Sheets.\nChange status from 'ready_to_send' to 'approved'.\nThen use ConnectSafely or manual sending.",
+        "height": 720,
+        "width": 560,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [0, 200],
+      "id": "sticky-note-001",
+      "name": "📖 Workflow Overview"
+    }
+  ],
+  "connections": {
+    "🎯 Job Search Form": {
+      "main": [
+        [
+          {
+            "node": "🔍 Scrape LinkedIn Jobs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🔍 Scrape LinkedIn Jobs": {
+      "main": [
+        [
+          {
+            "node": "💾 Save Jobs to Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📥 Get New Jobs": {
+      "main": [
+        [
+          {
+            "node": "🔄 Loop Over Jobs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🔄 Loop Over Jobs": {
+      "main": [
+        [],
+        [
+          {
+            "node": "🏢 Find Company in Apollo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🏢 Find Company in Apollo": {
+      "main": [
+        [
+          {
+            "node": "👥 Find Decision Makers",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "👥 Find Decision Makers": {
+      "main": [
+        [
+          {
+            "node": "⭐ Score & Filter Top 5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "⭐ Score & Filter Top 5": {
+      "main": [
+        [
+          {
+            "node": "💾 Save Leads to Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "💾 Save Leads to Sheet": {
+      "main": [
+        [
+          {
+            "node": "🔄 Loop Over Jobs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📥 Get New Leads": {
+      "main": [
+        [
+          {
+            "node": "🔄 Loop Over Leads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🔄 Loop Over Leads": {
+      "main": [
+        [],
+        [
+          {
+            "node": "🔎 Enrich LinkedIn Profile",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🔎 Enrich LinkedIn Profile": {
+      "main": [
+        [
+          {
+            "node": "✍️ Generate Personalized Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "✍️ Generate Personalized Message": {
+      "main": [
+        [
+          {
+            "node": "💾 Save Message to Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "💾 Save Message to Sheet": {
+      "main": [
+        [
+          {
+            "node": "🔄 Loop Over Leads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🤖 Claude 3.7 Sonnet": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "✍️ Generate Personalized Message",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "instanceId": "oz-avala-production"
+  },
+  "tags": [],
+  "active": false
+}
