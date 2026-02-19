@@ -3,7 +3,7 @@
 import { cn } from "@/lib/utils"
 import { ChevronRight, UserCircle, Database } from "lucide-react"
 import { useState, useMemo } from "react"
-import { useClientModules } from "@/lib/modules/hooks"
+import { useUnifiedModules } from "@/lib/modules/hooks"
 import { EnabledModule, ModuleCategory, ModuleKey } from "@/lib/modules/types"
 
 interface SidebarProps {
@@ -20,17 +20,17 @@ interface CategoryConfig {
 }
 
 const CATEGORY_CONFIG: CategoryConfig[] = [
-  { key: 'crm', label: 'CRM', collapsible: false },
-  { key: 'outreach', label: 'Outreach', collapsible: true },
+  { key: 'crm', label: 'Growth Engine', collapsible: false }, // Renamed label for better context
   { key: 'social', label: 'Social Media', collapsible: true },
   { key: 'analytics', label: 'Analytics', collapsible: false },
   { key: 'settings', label: 'Settings', collapsible: false },
 ]
 
 export function Sidebar({ currentView, onViewChange, clientName, clientId }: SidebarProps) {
-  const { modules, loading } = useClientModules(clientId)
+  // Use the SAME unified hook as page.tsx to ensure consistent views
+  const { modules, loading } = useUnifiedModules(clientId)
   const [expandedCategories, setExpandedCategories] = useState<Set<ModuleCategory>>(
-    new Set(['crm', 'outreach', 'social', 'analytics', 'settings'])
+    new Set(['crm', 'social', 'analytics', 'settings'])
   )
 
   // Group modules by category
@@ -81,7 +81,7 @@ export function Sidebar({ currentView, onViewChange, clientName, clientId }: Sid
             <Database className="w-4 h-4 text-white" />
           </div>
           <span className="bg-clip-text text-transparent bg-gradient-to-r from-white to-zinc-400">
-            SmartFlow
+            OZ Avala
           </span>
         </div>
       </div>

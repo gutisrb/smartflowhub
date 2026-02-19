@@ -8,6 +8,7 @@ export type ModuleKey =
   | 'candidates'
   | 'social-chatbot'
   | 'website-chatbot'
+  | 'growth-engine'
 
 export type ModuleCategory = 'social' | 'outreach' | 'analytics' | 'settings' | 'crm'
 

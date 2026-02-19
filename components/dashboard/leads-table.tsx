@@ -20,7 +20,7 @@ interface Lead {
     kompanija: string
     telefon: string
     labor_niche: string
-    volume_needed: number
+    // volume_needed: number // DEPRECATED
     status: string
     meeting_time: string
     izvor: string
@@ -57,7 +57,7 @@ export function LeadsTable({ leads, onOpenIntelligence }: LeadsTableProps) {
                             <TableHead>AI Prioritet</TableHead>
                             <TableHead>Email / Tel</TableHead>
                             <TableHead>Niche</TableHead>
-                            <TableHead>Volume</TableHead>
+                            {/* <TableHead>Volume</TableHead> */}
                             <TableHead>Status</TableHead>
                             <TableHead>Sastanak</TableHead>
                             <TableHead>Datum</TableHead>
@@ -103,11 +103,11 @@ export function LeadsTable({ leads, onOpenIntelligence }: LeadsTableProps) {
                                         {lead.labor_niche || "-"}
                                     </Badge>
                                 </TableCell>
-                                <TableCell>
+                                {/* <TableCell>
                                     <div className="font-mono font-bold text-gray-700 bg-gray-100 px-2 py-0.5 rounded inline-block">
                                         {lead.volume_needed || 0}
                                     </div>
-                                </TableCell>
+                                </TableCell> */}
                                 <TableCell>
                                     <Badge variant="outline" className="font-bold border-gray-300">
                                         {lead.status}

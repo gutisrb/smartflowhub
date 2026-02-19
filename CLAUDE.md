@@ -2,158 +2,86 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Project Overview
-
-This is an AI Growth Agency Dashboard - a Next.js 16 application with Supabase authentication and real-time data synchronization. The application provides a client-facing dashboard for managing job postings, leads (kontakti), and chat logs.
-
 ## Development Commands
 
 ```bash
-# Start development server (default port 3000)
-npm run dev
-
-# Start on custom port (e.g., 3001)
-npm run dev -- -p 3001
-
-# Build for production
-npm run build
-
-# Start production server
-npm start
-
-# Lint code
-npm run lint
+npm run dev          # Start dev server (port 3000)
+npm run dev -- -p 3001  # Custom port
+npm run build        # Production build
+npm start            # Start production server
+npm run lint         # Run ESLint
 ```
+
+No test runner is configured — testing is manual (see TESTING-GUIDE.md).
 
 ## Architecture Overview
 
-### Authentication Flow
+**AI Growth Agency Dashboard** — a multi-tenant B2B SaaS dashboard built as a Next.js 16 SPA. All routes resolve to `app/page.tsx`; there are no other Next.js routes.
 
-- Single-page app with client-side authentication (app/page.tsx:36-48)
-- Uses Supabase Auth with email/password (components/auth/login-form.tsx:23-39)
-- After login, user's email is matched to a `clients` table record (app/page.tsx:51-64)
-- If no matching client profile exists, user sees a message to contact admin
-- Session check runs on mount; authenticated users automatically fetch their client profile
+### Module System
 
-### Data Model
+The core architectural concept is a database-driven module registry:
 
-**Key Supabase Tables:**
-- `clients` - Client organizations with email for auth mapping
-- `jobs` - Job postings linked to clients via `client_id`
-- `kontakti` - Leads/contacts linked to clients via `client_id`, with statuses like "Prijavljen", "Zaposlen"
-- Chat data accessed via `id_razgovora` field in kontakti
+- `lib/modules/types.ts` — `ModuleKey`, `DashboardModule`, `EnabledModule` types
+- `lib/modules/registry.ts` — Static `MODULE_REGISTRY` mapping `ModuleKey` → metadata (label, icon, category)
+- `lib/modules/hooks.ts` — `useClientModules()` fetches enabled modules from `client_modules` table; `useUnifiedModules()` adds special-case logic for OZ Avala (hardcoded UUID `7ac02189-d0ec-4532-baa6-d7d4dc84b87c`) which forces separate modules instead of a unified "Growth Engine" view
+- `components/modules/` — One component per module (12 total)
 
-**Database Schema Pattern:**
-All client-specific data uses `client_id` foreign key for multi-tenancy.
+Adding a new module requires: adding a `ModuleKey`, registering it in `MODULE_REGISTRY`, creating a component, and inserting a row in `client_modules`.
 
-### Real-Time Synchronization
+### Authentication & Multi-Tenancy
 
-The app uses Supabase Realtime channels (app/page.tsx:82-97):
-- Subscribes to `kontakti` table changes filtered by `client_id`
-- Auto-refreshes leads data on any INSERT/UPDATE/DELETE
-- Channel cleanup handled in useEffect return function
+1. Supabase email/password login (`components/auth/login-form.tsx`)
+2. User email matched to `clients` table → sets `clientId` in `app/page.tsx`
+3. `useUnifiedModules(clientId)` fetches the client's enabled modules from `client_modules`
+4. Every Supabase query filters by `client_id` — never fetch cross-client data
+5. RLS policies enforce this at the DB level (see `supabase/migrations/`)
 
-### Supabase Client Pattern
+### Supabase Client
 
-**IMPORTANT:** Uses singleton pattern for Supabase client (lib/supabase/client.ts:3-13)
-- Single browser client instance created on first call
-- Reused across all components to prevent multiple WebSocket connections
-- Always import via `createClient()` from `@/lib/supabase/client`
+Singleton pattern in `lib/supabase/client.ts` — always import via `createClient()`, never instantiate directly. All query functions live in `lib/supabase/queries.ts`.
 
-### Component Organization
+### Real-Time Subscriptions
 
-**Dashboard Components** (components/dashboard/):
-- `jobs-crm.tsx` - Full CRUD interface for job postings with inline create dialog
-- `leads-table.tsx` - Displays kontakti with action buttons
-- `chat-log-viewer.tsx` - Modal viewer for chat transcripts by `id_razgovora`
-- `stats-grid.tsx` - Aggregated statistics (total leads, applications, hired)
-- `client-selector.tsx` - Client switcher (not currently used in main flow)
-
-**UI Components** (components/ui/):
-- shadcn/ui components (tabs, card, table, dialog, etc.)
-- Configured via components.json for Tailwind CSS 4
-
-### State Management
-
-No external state library. Uses React hooks:
-- Local component state for UI (useState)
-- Data fetching in useEffect with manual refetch functions
-- Real-time updates via Supabase subscriptions
-
-### Routing
-
-Single-page application with all content in `app/page.tsx`. No app router routes beyond root.
-
-## Important Patterns
-
-### Data Fetching Pattern
-
+Used in CRM and other modules. Pattern:
 ```typescript
-// 1. Define query in lib/supabase/queries.ts
-export async function getLeadsByClientId(clientId: string) {
-    const supabase = createClient()
-    const { data, error } = await supabase
-        .from('kontakti')
-        .select('*')
-        .eq('client_id', clientId)
-    // ... error handling
-    return data
-}
-
-// 2. Call from component with useEffect
 useEffect(() => {
-    if (clientId) {
-        fetchLeads(clientId)
-    }
+    const channel = supabase
+        .channel(`kontakti:${clientId}`)
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'kontakti' },
+            () => refetch())
+        .subscribe()
+    return () => channel.unsubscribe()
 }, [clientId])
 ```
 
-### Real-Time Subscription Pattern
+### State Management
 
-Always return cleanup function from useEffect:
-```typescript
-useEffect(() => {
-    if (selectedClientId) {
-        const unsubscribe = subscribeToLeads(selectedClientId)
-        return () => { unsubscribe() }
-    }
-}, [selectedClientId])
+React hooks only (`useState`, `useEffect`, `useCallback`, `useMemo`). No Redux/Zustand.
+
+## Key Data Model
+
 ```
+clients             — organizations; email maps auth user → client
+kontakti            — leads/contacts; status: "Novi" | "Prijavljen" | "Intervencija" | "Zaposlen"
+jobs                — job postings
+candidates          — job candidates
+client_modules      — which modules each client can access (module_key, is_enabled, settings JSONB, sort_order)
+```
+
+`id_razgovora` on `kontakti` is the Meta/Instagram sender ID (TEXT, not UUID).
 
 ## Configuration
 
-**Path Aliases:**
-- `@/*` maps to root directory (tsconfig.json:21-23)
+**Path alias:** `@/*` → repo root (tsconfig.json)
 
-**Environment Variables Required:**
-- `NEXT_PUBLIC_SUPABASE_URL` - Supabase project URL
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY` - Supabase anonymous key
+**Required environment variables** (`.env.local`):
+```
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+```
 
-Create `.env.local` file with these variables (ignored by git).
-
-**Styling:**
-- Tailwind CSS 4 with PostCSS
-- Custom styles in app/globals.css
-- shadcn/ui components pre-configured
-
-## Database Access Patterns
-
-All database operations go through `lib/supabase/queries.ts`:
-- `getClients()` - Fetch all clients
-- `createNewClient(name, email)` - Create client profile
-- `getJobsByClientId(clientId)` - Fetch jobs for client
-- `createJob(jobData)` - Insert new job
-- `getLeadsByClientId(clientId)` - Fetch leads for client
-
-Always pass `clientId` for tenant isolation. Never fetch data across clients.
-
-## Multi-Tenancy Security
-
-User can only access data for their linked client:
-1. Auth email → client.email lookup (app/page.tsx:51-64)
-2. All queries filtered by `client_id`
-3. No admin/superuser role - each user sees only their client data
-4. Supabase RLS policies should enforce this at database level
+**Fallback client config:** `config/clients.ts` hardcodes 3 clients (OZ Avala, SmartFlow, dev account) as a fallback when DB lookup fails.
 
 ## n8n Workflow Integration
 
@@ -162,7 +90,7 @@ This project integrates with n8n workflows for chatbot automation. The following
 ### n8n MCP Tools
 
 **Server:** `n8n-mcp` (npx n8n-mcp)
-**Configuration:** Configured in Cursor with API access to http://localhost:5678
+**Configuration:** Configured in `.claude/mcp.json` with API access to http://localhost:5678
 
 **Available Tools:**
 - **Node search and documentation** - Access 1,084+ n8n nodes (537 core + 547 community)

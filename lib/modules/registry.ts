@@ -11,6 +11,13 @@ import {
 import { DashboardModule, ModuleKey } from "./types"
 
 export const MODULE_REGISTRY: Record<ModuleKey, DashboardModule> = {
+  'growth-engine': {
+    key: 'growth-engine',
+    label: 'Growth Engine',
+    icon: LayoutDashboard,
+    category: 'crm',
+    description: 'Unified view of your lead acquisition and management system',
+  },
   'business-crm': {
     key: 'business-crm',
     label: 'Business CRM',
@@ -22,7 +29,7 @@ export const MODULE_REGISTRY: Record<ModuleKey, DashboardModule> = {
     key: 'email-outreach',
     label: 'Email Outreach',
     icon: Mail,
-    category: 'outreach',
+    category: 'crm',
     description: 'Automated email campaigns and outreach tracking',
   },
   'job-postings': {
@@ -43,7 +50,7 @@ export const MODULE_REGISTRY: Record<ModuleKey, DashboardModule> = {
     key: 'linkedin-agent',
     label: 'LinkedIn Agent',
     icon: Linkedin,
-    category: 'outreach',
+    category: 'crm',
     description: 'Automated LinkedIn outreach and lead generation',
   },
   'website-chatbot': {

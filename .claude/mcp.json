@@ -1,5 +1,8 @@
 {
   "mcpServers": {
+    "supabase": {
+      "url": "https://mcp.supabase.com/mcp?project_ref=ndazbdkytcksmhoabtgs"
+    },
     "n8n-mcp": {
       "command": "npx",
       "args": ["n8n-mcp"],

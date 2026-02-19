@@ -26,9 +26,10 @@ interface LeadIntelligenceViewerProps {
     lead: any | null
     isOpen: boolean
     onClose: () => void
+    isClientView?: boolean
 }
 
-export function LeadIntelligenceViewer({ lead, isOpen, onClose }: LeadIntelligenceViewerProps) {
+export function LeadIntelligenceViewer({ lead, isOpen, onClose, isClientView = false }: LeadIntelligenceViewerProps) {
     const [messages, setMessages] = useState<Message[]>([])
     const [loading, setLoading] = useState(false)
     const supabase = createClient()
@@ -82,9 +83,11 @@ export function LeadIntelligenceViewer({ lead, isOpen, onClose }: LeadIntelligen
                                 {lead.ime} • {lead.kompanija || "Samostalni lead"}
                             </p>
                         </div>
-                        <Badge className={`${lead.prioritet_skor && lead.prioritet_skor >= 70 ? 'bg-red-500' : 'bg-blue-400'} text-white border-white/20 px-3 py-1`}>
-                            {lead.prioritet_skor || 0}% Match
-                        </Badge>
+                        {!isClientView && (
+                            <Badge className={`${lead.prioritet_skor && lead.prioritet_skor >= 70 ? 'bg-red-500' : 'bg-blue-400'} text-white border-white/20 px-3 py-1`}>
+                                {lead.prioritet_skor || 0}% Match
+                            </Badge>
+                        )}
                     </div>
                 </DialogHeader>
 
