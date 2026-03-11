@@ -38,23 +38,8 @@ interface LinkedInLead {
   status: string
 }
 
-const MOCK_LINKEDIN_STATS = {
-  connections_sent: 42,
-  acceptance_rate: 28,
-  new_leads: 12
-}
+// LinkedIn automation components are powered by Supabase data.
 
-const MOCK_POSTS = [
-  { id: '1', post_text: 'Kako zaposliti studente u sezoni? (Gen Z vs Millennials)', post_theme: 'Education', engagement_score: 9, status: 'approved', scheduled_for: null, created_at: new Date().toISOString() },
-  { id: '2', post_text: 'Prednosti angažovanja omladinske zadruge za vaš biznis', post_theme: 'B2B Sales', engagement_score: 8, status: 'draft', scheduled_for: null, created_at: new Date(Date.now() - 86400000).toISOString() },
-  { id: '3', post_text: '5 najčešćih grešaka pri zapošljavanju sezonaca', post_theme: 'Hiring Tips', engagement_score: 7, status: 'published', scheduled_for: null, created_at: new Date(Date.now() - 172800000).toISOString() }
-]
-
-const MOCK_LINKEDIN_LEADS = [
-  { id: '1', full_name: 'Milica Jovanović', company: 'Coca Cola HBC', connection_message: 'Videla sam da zapošljavate...', connection_sent_at: new Date().toISOString(), connection_accepted: true, status: 'Novi' },
-  { id: '2', full_name: 'Petar Petrović', company: 'NCR Voyix', connection_message: 'Povezivanje radi saradnje...', connection_sent_at: new Date(Date.now() - 86400000).toISOString(), connection_accepted: false, status: 'Novi' },
-  { id: '3', full_name: 'Sanja Ilić', company: 'Philip Morris', connection_message: 'Omladinska zadruga Avala...', connection_sent_at: new Date(Date.now() - 172800000).toISOString(), connection_accepted: true, status: 'Zainteresovan' }
-]
 
 export function LinkedInAgentModule({ clientId }: LinkedInAgentModuleProps) {
   const [stats, setStats] = useState<LinkedInStats>({
@@ -86,7 +71,6 @@ export function LinkedInAgentModule({ clientId }: LinkedInAgentModuleProps) {
 
     if (error) {
       console.error('Error fetching LinkedIn stats:', error)
-      setStats(MOCK_LINKEDIN_STATS)
       return
     }
 
@@ -110,8 +94,6 @@ export function LinkedInAgentModule({ clientId }: LinkedInAgentModuleProps) {
         ...aggregated,
         new_leads: aggregated.connections_sent
       })
-    } else {
-      setStats(MOCK_LINKEDIN_STATS)
     }
   }
 
@@ -126,7 +108,7 @@ export function LinkedInAgentModule({ clientId }: LinkedInAgentModuleProps) {
       .limit(10)
 
     if (error || !data || data.length === 0) {
-      setPosts(MOCK_POSTS as any)
+      setPosts([])
       return
     }
 
@@ -138,7 +120,7 @@ export function LinkedInAgentModule({ clientId }: LinkedInAgentModuleProps) {
     const supabase = createClient()
 
     const { data, error } = await supabase
-      .from('oz_avala_lead_pipeline')
+      .from('lead_pipeline') // Generic table or dynamic
       .select('*')
       .eq('client_id', clientId)
       .eq('lead_source', 'linkedin_connection')
@@ -146,7 +128,7 @@ export function LinkedInAgentModule({ clientId }: LinkedInAgentModuleProps) {
       .limit(20)
 
     if (error || !data || data.length === 0) {
-      setLeads(MOCK_LINKEDIN_LEADS as any)
+      setLeads([])
       setLoading(false)
       return
     }

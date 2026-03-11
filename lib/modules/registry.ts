@@ -23,7 +23,7 @@ export const MODULE_REGISTRY: Record<ModuleKey, DashboardModule> = {
     label: 'Business CRM',
     icon: Database,
     category: 'crm',
-    description: 'Manage B2B leads, track conversions, and analyze your sales pipeline',
+    description: 'Manage leads, track conversions, and analyze your sales pipeline',
   },
   'email-outreach': {
     key: 'email-outreach',
@@ -32,19 +32,19 @@ export const MODULE_REGISTRY: Record<ModuleKey, DashboardModule> = {
     category: 'crm',
     description: 'Automated email campaigns and outreach tracking',
   },
-  'job-postings': {
-    key: 'job-postings',
-    label: 'Job Postings',
+  'agent-database': {
+    key: 'agent-database',
+    label: 'Agent Database',
     icon: Briefcase,
     category: 'social',
-    description: 'Create and manage job postings for social media',
+    description: 'Client-specific knowledge base: jobs, tours, products, or offers',
   },
-  'candidates': {
-    key: 'candidates',
-    label: 'Candidates',
+  'agent-leads': {
+    key: 'agent-leads',
+    label: 'Agent Leads',
     icon: Users,
     category: 'social',
-    description: 'Track job candidates from social media channels',
+    description: 'Track leads from agent-driven channels (social media, chatbot)',
   },
   'linkedin-agent': {
     key: 'linkedin-agent',

@@ -20,9 +20,10 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu"
-import { Users, Briefcase, CheckCircle2, MoreHorizontal, MessageSquare } from "lucide-react"
+import { Users, Briefcase, CheckCircle2, MoreHorizontal, MessageSquare, LayoutGrid, List } from "lucide-react"
 import { toast } from "sonner"
 import { LeadIntelligenceViewer } from "@/components/dashboard/lead-intelligence-viewer"
+import { CRMKanbanBoard } from "@/components/modules/crm-kanban-board"
 
 interface MultiTenantCRMModuleProps {
     clientId: string
@@ -35,6 +36,7 @@ export function MultiTenantCRMModule({ clientId, tableName, statuses, showAgency
     const [leads, setLeads] = useState<any[]>([])
     const [selectedLead, setSelectedLead] = useState<any | null>(null)
     const [isIntelligenceOpen, setIsIntelligenceOpen] = useState(false)
+    const [viewMode, setViewMode] = useState<"table" | "board">("board")
     const [stats, setStats] = useState({
         totalCandidates: 0,
         interviewsScheduled: 0,
@@ -42,15 +44,6 @@ export function MultiTenantCRMModule({ clientId, tableName, statuses, showAgency
     })
 
     const supabase = createClient()
-
-    // MOCK DATA for Pitch
-    const MOCK_CRM_DATA = [
-        { id: 'm1', ime: 'Ana Popović', kompanija: 'Nordeus', email: 'ana.p@nordeus.com', telefon: '+381601234567', status: 'Intervju Zakazan', prioritet_skor: 85, estimated_value: '€2.5k', created_at: new Date().toISOString() },
-        { id: 'm2', ime: 'Marko Ilić', kompanija: 'Seven Bridges', email: 'marko.ilic@sbgenomics.com', telefon: '+381619876543', status: 'Kontaktiran', prioritet_skor: 60, estimated_value: '€1.8k', created_at: new Date(Date.now() - 86400000).toISOString() },
-        { id: 'm3', ime: 'Jovana Krstić', kompanija: 'Microsoft MDCS', email: 'jovana.k@microsoft.com', telefon: '+38163555666', status: 'Novi Lead', prioritet_skor: 45, estimated_value: '€3.0k', created_at: new Date(Date.now() - 172800000).toISOString() },
-        { id: 'm4', ime: 'Petar Petrović', kompanija: 'FishingBooker', email: 'petar@fishingbooker.com', telefon: '+38164111222', status: 'Closed', prioritet_skor: 95, estimated_value: '€4.2k', created_at: new Date(Date.now() - 259200000).toISOString() },
-        { id: 'm5', ime: 'Milica Jovanović', kompanija: 'Vega IT', email: 'milica.j@vegait.rs', telefon: '+38165333444', status: 'Meeting Booked', prioritet_skor: 75, estimated_value: '€2.0k', created_at: new Date(Date.now() - 345600000).toISOString() },
-    ]
 
     const calculateStats = useCallback((data: any[]) => {
         const total = data.length
@@ -82,15 +75,6 @@ export function MultiTenantCRMModule({ clientId, tableName, statuses, showAgency
     }, [])
 
     const fetchLeads = useCallback(async () => {
-        // Use Mock Data if client is OZ Avala and we want to force populate for pitch
-        // Or adding a prop would be cleaner, but hardcoding for the specific fix requested:
-        if (clientId === '7ac02189-d0ec-4532-baa6-d7d4dc84b87c' && leads.length === 0) {
-            // Try fetching real first, but fallback/mix if needed? 
-            // Actually, user said "add placeholder data". 
-            // For safety, let's just use real data, but if empty, use mock? 
-            // Or better, add a prop `useMockData` to the interface.
-        }
-
         const { data, error } = await supabase
             .from(tableName)
             .select('*')
@@ -99,13 +83,6 @@ export function MultiTenantCRMModule({ clientId, tableName, statuses, showAgency
 
         if (error) {
             console.error('Error fetching leads:', error)
-            return
-        }
-
-        // If data is empty and we are OZ Avala, show Mock Data (as requested for "placeholder data")
-        if ((!data || data.length === 0) && clientId === '7ac02189-d0ec-4532-baa6-d7d4dc84b87c') {
-            setLeads(MOCK_CRM_DATA)
-            calculateStats(MOCK_CRM_DATA)
             return
         }
 
@@ -133,12 +110,8 @@ export function MultiTenantCRMModule({ clientId, tableName, statuses, showAgency
     }, [clientId, tableName, fetchLeads, supabase])
 
     const handleStatusUpdate = async (id: string, newStatus: string) => {
-        // If mock data lead
-        if (id.startsWith('m')) {
-            toast.success("Status updated (Mock)")
-            setLeads(prev => prev.map(l => l.id === id ? { ...l, status: newStatus } : l))
-            return
-        }
+        // Optimistic update
+        setLeads(prev => prev.map(l => l.id === id ? { ...l, status: newStatus } : l))
 
         try {
             const { error } = await supabase
@@ -207,105 +180,134 @@ export function MultiTenantCRMModule({ clientId, tableName, statuses, showAgency
                         <h3 className="text-xl font-semibold text-gray-900">Pipeline Management</h3>
                         <p className="text-sm text-gray-500">Track and manage your leads effectively.</p>
                     </div>
+                    <div className="flex gap-2 bg-zinc-100 p-1 rounded-lg">
+                        <Button
+                            variant={viewMode === "board" ? "secondary" : "ghost"}
+                            size="sm"
+                            className={cn("h-8 px-3 rounded-md", viewMode === "board" ? "bg-white shadow-sm" : "hover:bg-white/50")}
+                            onClick={() => setViewMode("board")}
+                        >
+                            <LayoutGrid className="w-4 h-4 mr-2" />
+                            Board
+                        </Button>
+                        <Button
+                            variant={viewMode === "table" ? "secondary" : "ghost"}
+                            size="sm"
+                            className={cn("h-8 px-3 rounded-md", viewMode === "table" ? "bg-white shadow-sm" : "hover:bg-white/50")}
+                            onClick={() => setViewMode("table")}
+                        >
+                            <List className="w-4 h-4 mr-2" />
+                            Table
+                        </Button>
+                    </div>
                 </div>
 
-                <div className="rounded-xl border bg-white shadow-sm overflow-hidden">
-                    <Table>
-                        <TableHeader className="bg-gray-50/50">
-                            <TableRow>
-                                <TableHead className="w-[200px]">Lead Name</TableHead>
-                                <TableHead className="w-[200px]">Contact</TableHead>
-                                <TableHead className="w-[150px]">Status</TableHead>
-                                {showAgencyMetrics && (
-                                    <>
-                                        <TableHead className="w-[100px]">Score</TableHead>
-                                        <TableHead className="w-[100px]">Value</TableHead>
-                                    </>
-                                )}
-                                <TableHead className="text-right">Actions</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {leads.length === 0 ? (
+                {viewMode === "table" ? (
+                    <div className="rounded-xl border bg-white shadow-sm overflow-hidden">
+                        <Table>
+                            <TableHeader className="bg-gray-50/50">
                                 <TableRow>
-                                    <TableCell colSpan={showAgencyMetrics ? 6 : 4} className="h-24 text-center text-muted-foreground">
-                                        No active leads found.
-                                    </TableCell>
+                                    <TableHead className="w-[200px]">Lead Name</TableHead>
+                                    <TableHead className="w-[200px]">Contact</TableHead>
+                                    <TableHead className="w-[150px]">Status</TableHead>
+                                    {showAgencyMetrics && (
+                                        <>
+                                            <TableHead className="w-[100px]">Score</TableHead>
+                                            <TableHead className="w-[100px]">Value</TableHead>
+                                        </>
+                                    )}
+                                    <TableHead className="text-right">Actions</TableHead>
                                 </TableRow>
-                            ) : (
-                                leads.map((lead) => (
-                                    <TableRow key={lead.id} className="group hover:bg-gray-50/50 transition-colors">
-                                        <TableCell>
-                                            <div className="font-semibold text-gray-900">{lead.ime}</div>
-                                            <div className="text-xs text-gray-500">{lead.kompanija}</div>
-                                        </TableCell>
-                                        <TableCell>
-                                            <div className="flex flex-col text-sm text-gray-600">
-                                                <span>{lead.email}</span>
-                                                <span>{lead.telefon}</span>
-                                            </div>
-                                        </TableCell>
-                                        <TableCell>
-                                            <DropdownMenu>
-                                                <DropdownMenuTrigger asChild>
-                                                    <Button
-                                                        variant="outline"
-                                                        size="sm"
-                                                        className={cn(
-                                                            "h-8 w-full justify-between items-center font-semibold text-[11px] uppercase tracking-wider px-3 border-zinc-200 transition-all hover:border-zinc-300 shadow-sm",
-                                                            "bg-white text-zinc-700"
-                                                        )}
-                                                    >
-                                                        <div className="flex items-center gap-2 truncate">
-                                                            <div className={cn(
-                                                                "w-1.5 h-1.5 rounded-full",
-                                                                // Simple logic for dot color based on simple keywords, can be enhanced
-                                                                lead.status?.includes('Zaposlen') || lead.status?.includes('Closed') ? "bg-emerald-500" :
-                                                                    lead.status?.includes('Odbijen') || lead.status?.includes('Lost') ? "bg-rose-500" :
-                                                                        lead.status?.includes('Novi') ? "bg-blue-500" : "bg-indigo-500"
-                                                            )} />
-                                                            {lead.status || 'New'}
-                                                        </div>
-                                                        <MoreHorizontal className="w-3 h-3 opacity-50" />
-                                                    </Button>
-                                                </DropdownMenuTrigger>
-                                                <DropdownMenuContent align="end" className="w-[200px]">
-                                                    {statuses.map((s) => (
-                                                        <DropdownMenuItem key={s} onClick={() => handleStatusUpdate(lead.id, s)}>
-                                                            {s}
-                                                        </DropdownMenuItem>
-                                                    ))}
-                                                </DropdownMenuContent>
-                                            </DropdownMenu>
-                                        </TableCell>
-
-                                        {showAgencyMetrics && (
-                                            <>
-                                                <TableCell>
-                                                    <Badge variant="secondary">{lead.prioritet_skor || '-'}</Badge>
-                                                </TableCell>
-                                                <TableCell>
-                                                    <span className="font-mono text-xs">{lead.estimated_value || '-'}</span>
-                                                </TableCell>
-                                            </>
-                                        )}
-
-                                        <TableCell className="text-right">
-                                            <Button
-                                                variant="ghost"
-                                                size="icon"
-                                                onClick={() => handleOpenDetails(lead)}
-                                                className="text-zinc-500 hover:text-indigo-600"
-                                            >
-                                                <MessageSquare className="w-4 h-4" />
-                                            </Button>
+                            </TableHeader>
+                            <TableBody>
+                                {leads.length === 0 ? (
+                                    <TableRow>
+                                        <TableCell colSpan={showAgencyMetrics ? 6 : 4} className="h-24 text-center text-muted-foreground">
+                                            No active leads found.
                                         </TableCell>
                                     </TableRow>
-                                ))
-                            )}
-                        </TableBody>
-                    </Table>
-                </div>
+                                ) : (
+                                    leads.map((lead) => (
+                                        <TableRow key={lead.id} className="group hover:bg-gray-50/50 transition-colors">
+                                            <TableCell>
+                                                <div className="font-semibold text-gray-900">{lead.ime}</div>
+                                                <div className="text-xs text-gray-500">{lead.kompanija}</div>
+                                            </TableCell>
+                                            <TableCell>
+                                                <div className="flex flex-col text-sm text-gray-600">
+                                                    <span>{lead.email}</span>
+                                                    <span>{lead.telefon}</span>
+                                                </div>
+                                            </TableCell>
+                                            <TableCell>
+                                                <DropdownMenu>
+                                                    <DropdownMenuTrigger asChild>
+                                                        <Button
+                                                            variant="outline"
+                                                            size="sm"
+                                                            className={cn(
+                                                                "h-8 w-full justify-between items-center font-semibold text-[11px] uppercase tracking-wider px-3 border-zinc-200 transition-all hover:border-zinc-300 shadow-sm",
+                                                                "bg-white text-zinc-700"
+                                                            )}
+                                                        >
+                                                            <div className="flex items-center gap-2 truncate">
+                                                                <div className={cn(
+                                                                    "w-1.5 h-1.5 rounded-full",
+                                                                    // Simple logic for dot color based on simple keywords, can be enhanced
+                                                                    lead.status?.includes('Zaposlen') || lead.status?.includes('Closed') ? "bg-emerald-500" :
+                                                                        lead.status?.includes('Odbijen') || lead.status?.includes('Lost') ? "bg-rose-500" :
+                                                                            lead.status?.includes('Novi') ? "bg-blue-500" : "bg-indigo-500"
+                                                                )} />
+                                                                {lead.status || 'New'}
+                                                            </div>
+                                                            <MoreHorizontal className="w-3 h-3 opacity-50" />
+                                                        </Button>
+                                                    </DropdownMenuTrigger>
+                                                    <DropdownMenuContent align="end" className="w-[200px]">
+                                                        {statuses.map((s) => (
+                                                            <DropdownMenuItem key={s} onClick={() => handleStatusUpdate(lead.id, s)}>
+                                                                {s}
+                                                            </DropdownMenuItem>
+                                                        ))}
+                                                    </DropdownMenuContent>
+                                                </DropdownMenu>
+                                            </TableCell>
+
+                                            {showAgencyMetrics && (
+                                                <>
+                                                    <TableCell>
+                                                        <Badge variant="secondary">{lead.prioritet_skor || '-'}</Badge>
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <span className="font-mono text-xs">{lead.estimated_value || '-'}</span>
+                                                    </TableCell>
+                                                </>
+                                            )}
+
+                                            <TableCell className="text-right">
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    onClick={() => handleOpenDetails(lead)}
+                                                    className="text-zinc-500 hover:text-indigo-600"
+                                                >
+                                                    <MessageSquare className="w-4 h-4" />
+                                                </Button>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))
+                                )}
+                            </TableBody>
+                        </Table>
+                    </div>
+                ) : (
+                    <CRMKanbanBoard
+                        leads={leads}
+                        stages={statuses}
+                        onStatusUpdate={handleStatusUpdate}
+                        onOpenDetails={handleOpenDetails}
+                    />
+                )}
             </div>
 
             <LeadIntelligenceViewer

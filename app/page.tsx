@@ -4,34 +4,28 @@ import { useState, useEffect, useCallback } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { LoginForm } from "@/components/auth/login-form"
 import { Sidebar } from "@/components/dashboard/sidebar"
-import { useClientModules, useUnifiedModules } from "@/lib/modules/hooks"
+import { useUnifiedModules } from "@/lib/modules/hooks"
 import { ModuleKey } from "@/lib/modules/types"
 import { Button } from "@/components/ui/button"
 import { LogOut } from "lucide-react"
 
-// Import all module components
-// import { BusinessCRMModule } from "@/components/modules/business-crm-module" // DEPRECATED
+// Import module components
 import { EmailOutreachModule } from "@/components/modules/email-outreach-module"
 import { LinkedInAgentModule } from "@/components/modules/linkedin-agent-module"
-import { JobPostingsModule } from "@/components/modules/job-postings-module"
-import { CandidatesModule } from "@/components/modules/candidates-module"
 import { SocialChatbotModule } from "@/components/modules/social-chatbot-module"
 import { WebsiteChatbotModule } from "@/components/modules/website-chatbot-module"
 import { MultiTenantCRMModule } from "@/components/modules/multi-tenant-crm-module"
-import { GrowthEngineModule } from "@/components/modules/growth-engine-module"
-import { getClientConfig } from "@/config/clients"
-
-// const AGENCY_EMAILS = ["johhnylaa@gmail.com", "nikola@smartflow.rs"] // DEPRECATED: usage moved to config
+import { SocialJobsModule } from "@/components/modules/social-jobs-module"
+import { SocialCandidatesModule } from "@/components/modules/social-candidates-module"
 
 export default function DashboardPage() {
-  const [activeModule, setActiveModule] = useState<ModuleKey>('business-crm') // Default
+  const [activeModule, setActiveModule] = useState<ModuleKey>('business-crm')
   const [clientId, setClientId] = useState<string | null>(null)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [clientName, setClientName] = useState("")
   const [userEmail, setUserEmail] = useState<string | null>(null)
 
   const supabase = createClient()
-  // Use UNIFIED modules to ensure "Growth Engine" logic is applied
   const { modules: availableModules, loading: isLoading } = useUnifiedModules(clientId)
 
   const checkSession = useCallback(async () => {
@@ -49,13 +43,6 @@ export default function DashboardPage() {
         if (data) {
           setClientId(data.id)
           setClientName(data.name)
-        } else {
-          // Fallback: Check hardcoded config if DB fetch fails (e.g. for dev/hardcoded clients)
-          const config = getClientConfig(session.user.email)
-          if (config) {
-            setClientId(config.id)
-            setClientName(config.name)
-          }
         }
       }
     }
@@ -65,7 +52,7 @@ export default function DashboardPage() {
     checkSession()
   }, [checkSession])
 
-  // Update active module when available modules change (to ensure access)
+  // Ensure active module is in available set
   useEffect(() => {
     if (!isLoading && availableModules.length > 0) {
       if (!availableModules.some(m => m.key === activeModule)) {
@@ -79,71 +66,42 @@ export default function DashboardPage() {
     setIsAuthenticated(false)
     setClientId(null)
     setUserEmail(null)
-    setActiveModule('business-crm') // Reset to default
+    setActiveModule('business-crm')
   }
 
-  // Render the correct module
+  // Get settings for the active module from DB (no config file needed)
+  const getActiveModuleSettings = () => {
+    const mod = availableModules.find(m => m.key === activeModule)
+    return mod?.settings || {}
+  }
+
   const renderModule = () => {
     if (!clientId) return <div className="p-8 text-center text-gray-500">Loading client data...</div>
 
+    const settings = getActiveModuleSettings()
+
     switch (activeModule) {
       case 'business-crm':
-        // Multi-Tenant Logic
-        const config = getClientConfig(userEmail)
-
-        // Default settings if no config found (safe fallback)
-        const crmSettings = config?.modules.crm || {
-          enabled: true,
-          tableName: 'kontakti',
-          statuses: ['Novi Lead', 'Kontaktiran', 'Meeting Booked', 'Closed', 'Lost'],
-          showAgencyMetrics: false
-        }
-
         return <MultiTenantCRMModule
           clientId={clientId}
-          tableName={crmSettings.tableName}
-          statuses={crmSettings.statuses}
-          showAgencyMetrics={crmSettings.showAgencyMetrics}
-        />
-      case 'growth-engine':
-        const growthConfig = getClientConfig(userEmail)
-
-        // Defaults
-        const growthCrm = growthConfig?.modules.crm || {
-          enabled: true,
-          tableName: 'kontakti',
-          statuses: [],
-          showAgencyMetrics: false
-        }
-        const growthEmail = growthConfig?.modules.emailOutreach || {
-          enabled: true,
-          tableName: 'kontakti',
-          useMockData: false
-        }
-
-        return <GrowthEngineModule
-          clientId={clientId}
-          crmSettings={{
-            tableName: growthCrm.tableName,
-            statuses: growthCrm.statuses,
-            showAgencyMetrics: growthCrm.showAgencyMetrics
-          }}
-          emailSettings={{
-            tableName: growthEmail.tableName,
-            useMockData: growthEmail.useMockData
-          }}
+          tableName="kontakti"
+          statuses={settings.statuses || ['Novi Lead', 'Kontaktiran', 'Meeting Booked', 'Closed', 'Lost']}
+          showAgencyMetrics={settings.showAgencyMetrics || false}
         />
       case 'email-outreach':
-        const emailConfig = getClientConfig(userEmail)
-        const emailTableName = emailConfig?.modules.emailOutreach.tableName || 'kontakti'
-        const useMockData = emailConfig?.modules.emailOutreach.useMockData || false
-        return <EmailOutreachModule clientId={clientId} tableName={emailTableName} useMockData={useMockData} />
+        return <EmailOutreachModule
+          clientId={clientId}
+          tableName="kontakti"
+          useMockData={false}
+          showNicheBreakdown={settings.showNicheBreakdown || false}
+          showTemplates={settings.showTemplates || false}
+        />
       case 'linkedin-agent':
         return <LinkedInAgentModule clientId={clientId} />
-      case 'job-postings':
-        return <JobPostingsModule clientId={clientId} />
-      case 'candidates':
-        return <CandidatesModule clientId={clientId} />
+      case 'agent-database':
+        return <SocialJobsModule clientId={clientId} />
+      case 'agent-leads':
+        return <SocialCandidatesModule clientId={clientId} />
       case 'social-chatbot':
         return <SocialChatbotModule clientId={clientId} />
       case 'website-chatbot':

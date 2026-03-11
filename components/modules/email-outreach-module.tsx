@@ -12,6 +12,8 @@ interface EmailOutreachModuleProps {
   clientId: string
   tableName?: string
   useMockData?: boolean
+  showNicheBreakdown?: boolean
+  showTemplates?: boolean
 }
 
 interface EmailStats {
@@ -40,26 +42,10 @@ interface Lead {
   linkedin_intel?: string
 }
 
-// Demo Stats for Pitch (Optimized for "Email Master v5" visualization)
-const DEMO_EMAIL_STATS = {
-  total_sent: 1240,
-  total_opened: 868,
-  total_replied: 142,
-  positive_replies: 45,
-  meetings_booked: 18,
-  open_rate_pct: 70,
-  reply_rate_pct: 12
-}
+// Email Master v5 visualization components are powered by Supabase data.
 
-const MOCK_EMAIL_LEADS = [
-  { id: '1', full_name: 'Marko Petrović', company: 'Hemofarm', cold_email_subject: 'Pitanje za HR tim - Sezonski radnici', email_sent_at: new Date().toISOString(), email_opened: true, email_replied: true, email_reply_sentiment: 'positive', status: 'Sastanak Zakazan', meeting_time: new Date(Date.now() + 86400000 * 2).toISOString(), linkedin_intel: 'Posted about expanding production lines last week.' },
-  { id: '2', full_name: 'Jelena Nikolić', company: 'Delta Holding', cold_email_subject: 'Studenti za vaš tim?', email_sent_at: new Date(Date.now() - 86400000).toISOString(), email_opened: true, email_replied: false, email_reply_sentiment: null, status: 'Novi', linkedin_intel: 'Shared article on youth employment trends.' },
-  { id: '3', full_name: 'Stefan Janković', company: 'Nordeus', cold_email_subject: 'Saradnja sa OZ Avala', email_sent_at: new Date(Date.now() - 172800000).toISOString(), email_opened: true, email_replied: true, email_reply_sentiment: 'neutral', status: 'Novi', linkedin_intel: 'Celebrated 10 years at company.' },
-  { id: '4', full_name: 'Ana Jovanović', company: 'Comtrade', cold_email_subject: 'Pitanje za HR tim - Sezonski radnici', email_sent_at: new Date(Date.now() - 259200000).toISOString(), email_opened: false, email_replied: false, email_reply_sentiment: null, status: 'Novi' },
-  { id: '5', full_name: 'Nikola Đorđević', company: 'MK Group', cold_email_subject: 'Studenti za vaš tim?', email_sent_at: new Date(Date.now() - 345600000).toISOString(), email_opened: true, email_replied: true, email_reply_sentiment: 'positive', status: 'Zainteresovan', linkedin_intel: 'Looking for summer interns.' }
-]
 
-export function EmailOutreachModule({ clientId, tableName = 'kontakti', useMockData = false }: EmailOutreachModuleProps) {
+export function EmailOutreachModule({ clientId, tableName = 'kontakti', useMockData = false, showNicheBreakdown = false, showTemplates = false }: EmailOutreachModuleProps) {
   const [stats, setStats] = useState<EmailStats>({
     total_sent: 0,
     total_opened: 0,
@@ -74,8 +60,6 @@ export function EmailOutreachModule({ clientId, tableName = 'kontakti', useMockD
 
   useEffect(() => {
     if (useMockData) {
-      setStats(DEMO_EMAIL_STATS)
-      setLeads(MOCK_EMAIL_LEADS as any) // Use existing high-quality mock leads
       setLoading(false)
       return
     }
@@ -99,7 +83,6 @@ export function EmailOutreachModule({ clientId, tableName = 'kontakti', useMockD
 
     if (error) {
       console.error('Error fetching email stats:', error)
-      setStats(DEMO_EMAIL_STATS) // Fallback to mock
       return
     }
 
@@ -132,8 +115,6 @@ export function EmailOutreachModule({ clientId, tableName = 'kontakti', useMockD
         : 0
 
       setStats(aggregated)
-    } else {
-      setStats(DEMO_EMAIL_STATS)
     }
   }
 
@@ -150,8 +131,7 @@ export function EmailOutreachModule({ clientId, tableName = 'kontakti', useMockD
       .limit(50)
 
     if (error || !data || data.length === 0) {
-      // Use mock if error or empty
-      setLeads(MOCK_EMAIL_LEADS as any)
+      setLeads([])
       setLoading(false)
       return
     }
@@ -347,8 +327,8 @@ export function EmailOutreachModule({ clientId, tableName = 'kontakti', useMockD
           <div className="space-y-4">
             <div className="flex items-center justify-between p-4 border rounded-lg">
               <div>
-                <p className="font-medium">OZ Avala B2B Outreach</p>
-                <p className="text-sm text-muted-foreground">Companies hiring now (LinkedIn Jobs + Infostud)</p>
+                <p className="font-medium">SmartFlow B2B Outreach</p>
+                <p className="text-sm text-muted-foreground">High-intent leads from multiple sources</p>
               </div>
               <Badge>Active</Badge>
             </div>

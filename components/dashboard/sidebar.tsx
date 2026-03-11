@@ -81,7 +81,7 @@ export function Sidebar({ currentView, onViewChange, clientName, clientId }: Sid
             <Database className="w-4 h-4 text-white" />
           </div>
           <span className="bg-clip-text text-transparent bg-gradient-to-r from-white to-zinc-400">
-            OZ Avala
+            {clientName || "SmartFlow"}
           </span>
         </div>
       </div>
