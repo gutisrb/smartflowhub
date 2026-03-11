@@ -70,11 +70,13 @@ export default function DashboardPage() {
     setActiveModule('business-crm')
   }
 
-  // Niche-aware terminology centralized for all modules
   const terminology = useMemo(() => {
-    const isAvala = clientId === '7ac02189-d0ec-4532-baa6-d7d4dc84b87c' || clientId === 'OZ Avala'
+    const isRecruitment =
+      clientId === '7ac02189-d0ec-4532-baa6-d7d4dc84b87c' || // Avala
+      clientId === 'OZ Avala' ||
+      clientName?.toLowerCase().includes('mjob')
 
-    if (isAvala) {
+    if (isRecruitment) {
       return {
         title: "Recruitment",
         highlight: "Engine",
@@ -101,7 +103,18 @@ export default function DashboardPage() {
       searchPlaceholder: "Search trajectories, names...",
       tableHeaders: ["Identity Profile", "Comms Node", "Vector Status", "Activity"]
     }
-  }, [clientId])
+  }, [clientId, clientName])
+
+  // Filter modules for recruitment demo
+  const filteredModules = useMemo(() => {
+    const isRecruitment = clientName?.toLowerCase().includes('mjob')
+    if (isRecruitment) {
+      return availableModules.filter(m =>
+        ['business-crm', 'agent-database', 'agent-leads'].includes(m.key)
+      )
+    }
+    return availableModules
+  }, [availableModules, clientName])
 
   // Get settings for the active module from DB (no config file needed)
   const getActiveModuleSettings = () => {
@@ -168,6 +181,8 @@ export default function DashboardPage() {
           onViewChange={setActiveModule}
           clientName={clientName}
           clientId={clientId}
+          modules={filteredModules}
+          loading={isLoading}
         />
       )}
 

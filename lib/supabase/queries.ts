@@ -154,7 +154,7 @@ export async function updateCandidate(id: string, candidateData: any) {
 export async function deleteCandidate(id: string) {
     const supabase = createClient()
     const { error } = await supabase
-        .from('contacts')
+        .from('kontakti')
         .delete()
         .eq('id', id)
 

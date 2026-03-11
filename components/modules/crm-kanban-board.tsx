@@ -3,7 +3,7 @@ import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Phone, Mail, Clock, MoreHorizontal, ArrowUpRight, GripVertical, CheckCircle2, UserCircle, Briefcase, Zap, Building2, MapPin, Globe } from "lucide-react"
+import { Phone, Mail, Clock, MoreHorizontal, ArrowUpRight, GripVertical, CheckCircle2, UserCircle, Briefcase, Zap, Building2, MapPin, Globe, Trash2, Sparkles } from "lucide-react"
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -39,6 +39,8 @@ interface CRMKanbanBoardProps {
         group: string;
         [key: string]: any;
     };
+    onDeleteLead?: (id: string) => void;
+    onEditLead?: (lead: Lead) => void;
 }
 
 export function CRMKanbanBoard({
@@ -46,6 +48,8 @@ export function CRMKanbanBoard({
     stages,
     onStatusUpdate,
     onOpenDetails,
+    onDeleteLead,
+    onEditLead,
     terminology = { entity: 'Lead', group: 'Company' }
 }: CRMKanbanBoardProps) {
     // Group leads by status
@@ -163,6 +167,21 @@ export function CRMKanbanBoard({
                                                                                                 {s}
                                                                                             </DropdownMenuItem>
                                                                                         ))}
+                                                                                        <DropdownMenuSeparator className="bg-zinc-800" />
+                                                                                        <DropdownMenuItem
+                                                                                            onClick={() => onEditLead?.(lead)}
+                                                                                            className="text-xs hover:bg-emerald-500/10 focus:bg-emerald-500/10 focus:text-emerald-400 transition-colors"
+                                                                                        >
+                                                                                            <Sparkles className="h-3 w-3 mr-2 text-emerald" />
+                                                                                            Edit {terminology.entity}
+                                                                                        </DropdownMenuItem>
+                                                                                        <DropdownMenuItem
+                                                                                            onClick={() => onDeleteLead?.(lead.id)}
+                                                                                            className="text-xs text-rose-400 hover:bg-rose-500/10 focus:bg-rose-500/10 focus:text-rose-400 transition-colors"
+                                                                                        >
+                                                                                            <Trash2 className="h-3 w-3 mr-2" />
+                                                                                            Delete {terminology.entity}
+                                                                                        </DropdownMenuItem>
                                                                                     </DropdownMenuContent>
                                                                                 </DropdownMenu>
                                                                             </div>

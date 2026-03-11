@@ -327,6 +327,7 @@ export function AgentLeadsModule({ clientId, terminology: propTerminology }: Age
                         lead={selectedLead}
                         isOpen={!!selectedLead}
                         onClose={() => setSelectedLead(null)}
+                        isRecruitment={terminology.title === "Recruitment"}
                     />
                 )}
             </AnimatePresence>

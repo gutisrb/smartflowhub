@@ -45,9 +45,10 @@ interface LeadIntelligenceViewerProps {
     isOpen: boolean
     onClose: () => void
     isClientView?: boolean
+    isRecruitment?: boolean
 }
 
-export function LeadIntelligenceViewer({ lead, isOpen, onClose, isClientView = false }: LeadIntelligenceViewerProps) {
+export function LeadIntelligenceViewer({ lead, isOpen, onClose, isClientView = false, isRecruitment = false }: LeadIntelligenceViewerProps) {
     const [messages, setMessages] = useState<Message[]>([])
     const [loading, setLoading] = useState(false)
     const supabase = createClient()
@@ -98,7 +99,7 @@ export function LeadIntelligenceViewer({ lead, isOpen, onClose, isClientView = f
                         <div className="space-y-1">
                             <div className="flex items-center gap-2">
                                 <Badge className="bg-emerald/10 text-emerald border-emerald/20 text-[10px] font-bold uppercase tracking-widest px-2">
-                                    Intelligence Node
+                                    {isRecruitment ? "Candidate Profile" : "Intelligence Node"}
                                 </Badge>
                                 {lead.meeting_time && (
                                     <Badge className="bg-amber-500/10 text-amber-500 border-amber-500/20 text-[10px] font-bold uppercase tracking-widest px-2">
@@ -130,13 +131,13 @@ export function LeadIntelligenceViewer({ lead, isOpen, onClose, isClientView = f
                                 value="context"
                                 className="data-[state=active]:bg-transparent data-[state=active]:text-emerald data-[state=active]:border-b-2 data-[state=active]:border-emerald rounded-none px-0 h-full font-outfit font-medium text-silver/40 transition-all text-sm"
                             >
-                                Strategic Context
+                                {isRecruitment ? "Fit Analysis" : "Strategic Context"}
                             </TabsTrigger>
                             <TabsTrigger
                                 value="chat"
                                 className="data-[state=active]:bg-transparent data-[state=active]:text-emerald data-[state=active]:border-b-2 data-[state=active]:border-emerald rounded-none px-0 h-full font-outfit font-medium text-silver/40 transition-all text-sm"
                             >
-                                AI Conversation History
+                                {isRecruitment ? "Pre-Interview Chat" : "AI Conversation History"}
                             </TabsTrigger>
                         </TabsList>
                     </div>
@@ -148,7 +149,9 @@ export function LeadIntelligenceViewer({ lead, isOpen, onClose, isClientView = f
                                 <div className="space-y-4">
                                     <div className="flex items-center gap-2">
                                         <Sparkles className="w-4 h-4 text-emerald" />
-                                        <h4 className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.3em]">Strategic Briefing</h4>
+                                        <h4 className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.3em]">
+                                            {isRecruitment ? "Recruiter Summary" : "Strategic Briefing"}
+                                        </h4>
                                     </div>
                                     <GlassCard className="p-6 border-white/5 relative overflow-hidden group">
                                         <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
@@ -159,12 +162,16 @@ export function LeadIntelligenceViewer({ lead, isOpen, onClose, isClientView = f
                                         </p>
                                         <div className="mt-8 grid grid-cols-2 gap-4">
                                             <div className="p-4 rounded-2xl bg-white/5 border border-white/5 space-y-1">
-                                                <span className="text-[9px] text-zinc-500 uppercase font-bold tracking-widest">Trajectory Category</span>
-                                                <p className="text-sm font-bold text-emerald uppercase tracking-wider">{lead.kategorija || "Undefined"}</p>
+                                                <span className="text-[9px] text-zinc-500 uppercase font-bold tracking-widest">
+                                                    {isRecruitment ? "Current Phase" : "Trajectory Category"}
+                                                </span>
+                                                <p className="text-sm font-bold text-emerald uppercase tracking-wider">{lead.kategorija || lead.status || "Undefined"}</p>
                                             </div>
                                             <div className="p-4 rounded-2xl bg-white/5 border border-white/5 space-y-1">
-                                                <span className="text-[9px] text-zinc-500 uppercase font-bold tracking-widest">Next Calculated Step</span>
-                                                <p className="text-sm font-bold text-emerald uppercase tracking-wider">{lead.sledeca_akcija || "Manual Intelligence"}</p>
+                                                <span className="text-[9px] text-zinc-500 uppercase font-bold tracking-widest">
+                                                    {isRecruitment ? "Suggested Action" : "Next Calculated Step"}
+                                                </span>
+                                                <p className="text-sm font-bold text-emerald uppercase tracking-wider">{lead.sledeca_akcija || (isRecruitment ? "Review Profile" : "Manual Intelligence")}</p>
                                             </div>
                                         </div>
                                     </GlassCard>
@@ -174,7 +181,9 @@ export function LeadIntelligenceViewer({ lead, isOpen, onClose, isClientView = f
                                 <div className="space-y-4">
                                     <div className="flex items-center gap-2">
                                         <Target className="w-4 h-4 text-emerald" />
-                                        <h4 className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.3em]">Data Harvest Nodes</h4>
+                                        <h4 className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.3em]">
+                                            {isRecruitment ? "Application Details" : "Data Harvest Nodes"}
+                                        </h4>
                                     </div>
 
                                     {!lead.intake_data || Object.keys(lead.intake_data).length === 0 ? (

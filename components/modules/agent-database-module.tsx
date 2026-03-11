@@ -220,7 +220,9 @@ export function AgentDatabaseModule({
                         <div className="w-12 h-12 rounded-2xl bg-emerald/10 border border-emerald/20 flex items-center justify-center">
                             <config.icon className={cn("w-6 h-6", config.color)} />
                         </div>
-                        <h2 className="text-4xl font-outfit font-bold text-silver tracking-tight">Databaza <span className={config.color}>Agenta</span></h2>
+                        <h2 className="text-4xl font-outfit font-bold text-silver tracking-tight">
+                            {terminology.title === "Recruitment" ? "Recruitment" : "Databaza"} <span className={config.color}>{terminology.title === "Recruitment" ? "Database" : "Agenta"}</span>
+                        </h2>
                         <Badge className="bg-white/5 text-silver/40 border-white/10 font-outfit text-[10px] uppercase tracking-widest">{config.label}</Badge>
                     </div>
                     <p className="text-silver/60 font-outfit text-lg max-w-xl">
@@ -257,34 +259,40 @@ export function AgentDatabaseModule({
                             <div className="grid gap-6 py-8">
                                 <div className="grid grid-cols-2 gap-6">
                                     <div className="space-y-2">
-                                        <Label className="text-[10px] text-zinc-500 uppercase tracking-[0.2em] pl-1 font-bold">Node Identifier</Label>
+                                        <Label className="text-[10px] text-zinc-500 uppercase tracking-[0.2em] pl-1 font-bold">
+                                            {terminology.title === "Recruitment" ? "Job ID" : "Node Identifier"}
+                                        </Label>
                                         <Input
-                                            placeholder="NODE-404"
+                                            placeholder={terminology.title === "Recruitment" ? "MJ-2024-001" : "NODE-404"}
                                             className="h-12 bg-white/5 border-white/10 rounded-xl focus:border-emerald/40 transition-all font-outfit"
                                             value={formData.job_id}
                                             onChange={e => setFormData({ ...formData, job_id: e.target.value })}
                                         />
                                     </div>
                                     <div className="space-y-2">
-                                        <Label className="text-[10px] text-zinc-500 uppercase tracking-[0.2em] pl-1 font-bold">{config.item} Description</Label>
+                                        <Label className="text-[10px] text-zinc-500 uppercase tracking-[0.2em] pl-1 font-bold">
+                                            {terminology.title === "Recruitment" ? "Job Title" : "Node Description"}
+                                        </Label>
                                         <Input
-                                            placeholder={terminology.entity === "Candidate" ? "Senior Lead Researcher" : "Agent Context Description"}
+                                            placeholder={terminology.title === "Recruitment" ? "Promoter / Merchandiser" : "Agent Context Description"}
                                             className="h-12 bg-white/5 border-white/10 rounded-xl focus:border-emerald/40 transition-all font-outfit"
                                             value={formData.posao}
                                             onChange={e => setFormData({ ...formData, posao: e.target.value })}
                                         />
                                     </div>
                                     <div className="space-y-2">
-                                        <Label className="text-[10px] text-zinc-500 uppercase tracking-[0.2em] pl-1 font-bold">{terminology.group} Entity</Label>
+                                        <Label className="text-[10px] text-zinc-500 uppercase tracking-[0.2em] pl-1 font-bold">
+                                            {terminology.title === "Recruitment" ? "Employer" : "Origin Node"}
+                                        </Label>
                                         <Input
-                                            placeholder={terminology.entity === "Candidate" ? "Acme Intelligence Corp" : "Origin Node"}
+                                            placeholder={terminology.title === "Recruitment" ? "Client Name" : "Origin Node"}
                                             className="h-12 bg-white/5 border-white/10 rounded-xl focus:border-emerald/40 transition-all font-outfit"
                                             value={formData.firma}
                                             onChange={e => setFormData({ ...formData, firma: e.target.value })}
                                         />
                                     </div>
                                     <div className="space-y-2">
-                                        <Label className="text-[10px] text-zinc-500 uppercase tracking-[0.2em] pl-1 font-bold">Geo Context</Label>
+                                        <Label className="text-[10px] text-zinc-500 uppercase tracking-[0.2em] pl-1 font-bold">Location</Label>
                                         <Input
                                             placeholder="Remote / HQ Node"
                                             className="h-12 bg-white/5 border-white/10 rounded-xl focus:border-emerald/40 transition-all font-outfit"
@@ -296,7 +304,9 @@ export function AgentDatabaseModule({
 
                                 <div className="grid grid-cols-3 gap-4">
                                     <div className="space-y-2">
-                                        <Label className="text-[10px] text-zinc-500 uppercase tracking-[0.2em] pl-1 font-bold">Value Multiplier</Label>
+                                        <Label className="text-[10px] text-zinc-500 uppercase tracking-[0.2em] pl-1 font-bold">
+                                            {terminology.entity === "Candidate" ? "Salary / Compensation" : "Value Multiplier"}
+                                        </Label>
                                         <Input
                                             placeholder="€5,000"
                                             className="h-12 bg-white/5 border-white/10 rounded-xl focus:border-emerald/40 transition-all font-outfit"
@@ -305,7 +315,9 @@ export function AgentDatabaseModule({
                                         />
                                     </div>
                                     <div className="space-y-2">
-                                        <Label className="text-[10px] text-zinc-500 uppercase tracking-[0.2em] pl-1 font-bold">Interval</Label>
+                                        <Label className="text-[10px] text-zinc-500 uppercase tracking-[0.2em] pl-1 font-bold">
+                                            {terminology.entity === "Candidate" ? "Payment Period" : "Interval"}
+                                        </Label>
                                         <Select value={formData.tip_plate} onValueChange={v => setFormData({ ...formData, tip_plate: v })}>
                                             <SelectTrigger className="h-12 bg-white/5 border-white/10 rounded-xl focus:border-emerald/40 transition-all font-outfit">
                                                 <SelectValue />
@@ -318,7 +330,9 @@ export function AgentDatabaseModule({
                                         </Select>
                                     </div>
                                     <div className="space-y-2">
-                                        <Label className="text-[10px] text-zinc-500 uppercase tracking-[0.2em] pl-1 font-bold">Protocol Status</Label>
+                                        <Label className="text-[10px] text-zinc-500 uppercase tracking-[0.2em] pl-1 font-bold">
+                                            {terminology.entity === "Candidate" ? "Job Status" : "Protocol Status"}
+                                        </Label>
                                         <Select value={formData.status} onValueChange={v => setFormData({ ...formData, status: v })}>
                                             <SelectTrigger className="h-12 bg-white/5 border-white/10 rounded-xl focus:border-emerald/40 transition-all font-outfit">
                                                 <SelectValue />
@@ -333,7 +347,9 @@ export function AgentDatabaseModule({
                                 </div>
 
                                 <div className="space-y-2">
-                                    <Label className="text-[10px] text-zinc-500 uppercase tracking-[0.2em] pl-1 font-bold">Intelligence Synthesis</Label>
+                                    <Label className="text-[10px] text-zinc-500 uppercase tracking-[0.2em] pl-1 font-bold">
+                                        {terminology.entity === "Candidate" ? "Job Requirements & Description" : "Intelligence Synthesis"}
+                                    </Label>
                                     <textarea
                                         className="w-full h-32 bg-white/5 border-white/10 rounded-xl p-4 focus:border-emerald/40 transition-all font-outfit resize-none outline-none text-sm leading-relaxed"
                                         placeholder="Detailed background for autonomous agent reasoning..."
@@ -375,10 +391,18 @@ export function AgentDatabaseModule({
                 <Table>
                     <TableHeader className="bg-white/[0.02] border-b border-white/5">
                         <TableRow className="border-none hover:bg-transparent">
-                            <TableHead className="w-[120px] text-zinc-500 font-bold uppercase tracking-widest text-[10px] py-8 pl-8 font-outfit">Node ID</TableHead>
-                            <TableHead className="text-zinc-500 font-bold uppercase tracking-widest text-[10px] py-8 font-outfit">{config.item} Context</TableHead>
-                            <TableHead className="text-zinc-500 font-bold uppercase tracking-widest text-[10px] py-8 font-outfit">{terminology.group} Entity</TableHead>
-                            <TableHead className="text-zinc-500 font-bold uppercase tracking-widest text-[10px] py-8 font-outfit">Valuation</TableHead>
+                            <TableHead className="w-[120px] text-zinc-500 font-bold uppercase tracking-widest text-[10px] py-8 pl-8 font-outfit">
+                                {terminology.title === "Recruitment" ? "Job ID" : "Node ID"}
+                            </TableHead>
+                            <TableHead className="text-zinc-500 font-bold uppercase tracking-widest text-[10px] py-8 font-outfit">
+                                {terminology.title === "Recruitment" ? "Position Details" : `${config.item} Context`}
+                            </TableHead>
+                            <TableHead className="text-zinc-500 font-bold uppercase tracking-widest text-[10px] py-8 font-outfit">
+                                {terminology.title === "Recruitment" ? "Employer / Client" : `${terminology.group} Entity`}
+                            </TableHead>
+                            <TableHead className="text-zinc-500 font-bold uppercase tracking-widest text-[10px] py-8 font-outfit">
+                                {terminology.title === "Recruitment" ? "Compensation" : "Valuation"}
+                            </TableHead>
                             <TableHead className="text-zinc-500 font-bold uppercase tracking-widest text-[10px] py-8 font-outfit text-center">Status</TableHead>
                             <TableHead className="text-right pr-8 py-8 font-outfit">Actions</TableHead>
                         </TableRow>

@@ -11,6 +11,8 @@ interface SidebarProps {
   onViewChange: (view: ModuleKey) => void
   clientName: string
   clientId: string | null
+  modules?: EnabledModule[]
+  loading?: boolean
 }
 
 interface CategoryConfig {
@@ -27,8 +29,12 @@ const CATEGORY_CONFIG: CategoryConfig[] = [
   { key: 'settings', label: 'System Config', collapsible: false, icon: Settings },
 ]
 
-export function Sidebar({ currentView, onViewChange, clientName, clientId }: SidebarProps) {
-  const { modules, loading } = useUnifiedModules(clientId)
+export function Sidebar({ currentView, onViewChange, clientName, clientId, modules: propModules, loading: propLoading }: SidebarProps) {
+  const { modules: hookModules, loading: hookLoading } = useUnifiedModules(propModules ? null : clientId)
+
+  const modules = propModules || hookModules
+  const loading = propLoading !== undefined ? propLoading : hookLoading
+
   const [expandedCategories, setExpandedCategories] = useState<Set<ModuleCategory>>(
     new Set(['crm', 'social', 'analytics', 'settings'])
   )

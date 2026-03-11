@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from "react"
 import { createClient } from "@/lib/supabase/client"
+import { createCandidate, updateCandidate, deleteCandidate } from "@/lib/supabase/queries"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
@@ -17,6 +18,8 @@ import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
     DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu"
 import {
@@ -36,7 +39,8 @@ import {
     RefreshCw,
     Search,
     ChevronRight,
-    ExternalLink
+    ExternalLink,
+    Trash2
 } from "lucide-react"
 import { toast } from "sonner"
 import { motion, AnimatePresence } from "framer-motion"
@@ -44,6 +48,23 @@ import { GlassCard } from "@/components/ui/glass-card"
 import { LeadIntelligenceViewer } from "@/components/dashboard/lead-intelligence-viewer"
 import { CRMKanbanBoard } from "@/components/modules/crm-kanban-board"
 import { Input } from "@/components/ui/input"
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+    DialogFooter
+} from "@/components/ui/dialog"
+import { Label } from "@/components/ui/label"
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue
+} from "@/components/ui/select"
+import { Textarea } from "@/components/ui/textarea"
 
 interface GrowthEngineModuleProps {
     clientId: string
@@ -59,14 +80,29 @@ export function GrowthEngineModule({ clientId, tableName = "kontakti", statuses 
     const [searchQuery, setSearchQuery] = useState("")
     const [loading, setLoading] = useState(true)
     const [refreshing, setRefreshing] = useState(false)
+    const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
+    const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+    const [isSaving, setIsSaving] = useState(false)
+
+    // Form state for new lead
+    const [newLead, setNewLead] = useState<any>({
+        ime: "",
+        email: "",
+        kompanija: "",
+        status: "",
+        niche: ""
+    })
 
     const supabase = createClient()
 
     // Niche-aware terminology
     const terminology = useMemo(() => {
-        const isAvala = clientId === '7ac02189-d0ec-4532-baa6-d7d4dc84b87c' || clientId === 'OZ Avala'
+        const isRecruitment =
+            clientId === '7ac02189-d0ec-4532-baa6-d7d4dc84b87c' || // Avala
+            clientId === 'OZ Avala' ||
+            clientId?.toLowerCase().includes('mjob')
 
-        if (isAvala) {
+        if (isRecruitment) {
             return {
                 title: "Recruitment",
                 highlight: "Engine",
@@ -156,6 +192,81 @@ export function GrowthEngineModule({ clientId, tableName = "kontakti", statuses 
         setIsIntelligenceOpen(true)
     }
 
+    const handleDeleteLead = async (id: string) => {
+        if (!confirm(`Are you sure you want to delete this ${terminology.entity.toLowerCase()}?`)) return
+
+        try {
+            await deleteCandidate(id)
+            setLeads(prev => prev.filter(l => l.id !== id))
+            toast.success(`${terminology.entity} Purged`)
+        } catch (e) {
+            toast.error("Purge Failed")
+            console.error(e)
+        }
+    }
+
+    const handleEditLead = (lead: any) => {
+        setSelectedLead(lead)
+        setNewLead({
+            ime: lead.ime || "",
+            email: lead.email || "",
+            kompanija: lead.kompanija || lead.company_name || "",
+            status: lead.status || "",
+            niche: lead.niche || ""
+        })
+        setIsEditDialogOpen(true)
+    }
+
+    const handleUpdateLead = async () => {
+        if (!selectedLead) return
+        setIsSaving(true)
+        try {
+            const updated = await updateCandidate(selectedLead.id, newLead)
+            if (updated) {
+                setLeads(prev => prev.map(l => l.id === selectedLead.id ? updated : l))
+                setIsEditDialogOpen(false)
+                setSelectedLead(null)
+                setNewLead({ ime: "", email: "", kompanija: "", status: "", niche: "" })
+                toast.success("Podaci ažurirani")
+            }
+        } catch (e) {
+            toast.error("Ažuriranje nije uspelo")
+            console.error(e)
+        } finally {
+            setIsSaving(false)
+        }
+    }
+
+    const handleAddLead = async () => {
+        if (!newLead.ime) {
+            toast.error("Identitet je obavezan")
+            return
+        }
+
+        setIsSaving(true)
+        try {
+            const leadData = {
+                ...newLead,
+                client_id: clientId,
+                status: newLead.status || statuses[0]
+            }
+
+            const result = await createCandidate(leadData)
+
+            if (result) {
+                setLeads(prev => [result, ...prev])
+                setIsAddDialogOpen(false)
+                setNewLead({ ime: "", email: "", kompanija: "", status: "", niche: "" })
+                toast.success("Novi čvor aktiviran")
+            }
+        } catch (e) {
+            toast.error("Aktivacija nije uspela")
+            console.error(e)
+        } finally {
+            setIsSaving(false)
+        }
+    }
+
     const filteredLeads = useMemo(() => {
         return leads.filter(lead =>
             lead.ime?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -226,6 +337,16 @@ export function GrowthEngineModule({ clientId, tableName = "kontakti", statuses 
                         )}
                     </AnimatePresence>
                     <Button
+                        onClick={() => {
+                            setNewLead({ ime: "", email: "", kompanija: "", status: statuses[0], niche: "" })
+                            setIsAddDialogOpen(true)
+                        }}
+                        className="h-12 px-6 rounded-2xl bg-emerald text-obsidian font-outfit font-bold hover:bg-emerald/90 transition-all shadow-[0_0_20px_rgba(16,185,129,0.2)] group"
+                    >
+                        <Sparkles className="w-4 h-4 mr-2 group-hover:animate-pulse" />
+                        Add {terminology.entity}
+                    </Button>
+                    <Button
                         variant="ghost"
                         onClick={handleRefresh}
                         className={cn(
@@ -246,7 +367,7 @@ export function GrowthEngineModule({ clientId, tableName = "kontakti", statuses 
                     value={stats.total}
                     sub="Active Database"
                     icon={Users}
-                    trend={`+${Math.floor(Math.random() * 5)} flow`}
+                    trend={`+${Math.floor((stats.total / 10) + 1)} this week`}
                 />
                 <StatCard
                     label="Outreach Cycles"
@@ -260,7 +381,7 @@ export function GrowthEngineModule({ clientId, tableName = "kontakti", statuses 
                     value={stats.highIntent}
                     sub="Qualified Nodes"
                     icon={Sparkles}
-                    trend="Velocity: 1.2x"
+                    trend="Velocity: Optimal"
                 />
                 <StatCard
                     label="Booked Ops"
@@ -389,14 +510,43 @@ export function GrowthEngineModule({ clientId, tableName = "kontakti", statuses 
                                                         </div>
                                                     </TableCell>
                                                     <TableCell className="text-right pr-10 py-6">
-                                                        <Button
-                                                            variant="ghost"
-                                                            size="icon"
-                                                            onClick={() => handleOpenDetails(lead)}
-                                                            className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 hover:border-emerald/40 text-zinc-500 hover:text-emerald transition-all duration-500 shadow-lg group/btn"
-                                                        >
-                                                            <MessageSquare className="w-5 h-5 group-hover/btn:scale-110 transition-transform" />
-                                                        </Button>
+                                                        <div className="flex gap-2 justify-end">
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="icon"
+                                                                onClick={() => handleOpenDetails(lead)}
+                                                                className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 hover:border-emerald/40 text-zinc-500 hover:text-emerald transition-all duration-500 shadow-lg group/btn"
+                                                            >
+                                                                <MessageSquare className="w-4 h-4 group-hover/btn:scale-110 transition-transform" />
+                                                            </Button>
+                                                            <DropdownMenu>
+                                                                <DropdownMenuTrigger asChild>
+                                                                    <Button
+                                                                        variant="ghost"
+                                                                        size="icon"
+                                                                        className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 hover:border-white/20 text-zinc-500 hover:text-white transition-all duration-500 shadow-lg"
+                                                                    >
+                                                                        <MoreHorizontal className="w-4 h-4" />
+                                                                    </Button>
+                                                                </DropdownMenuTrigger>
+                                                                <DropdownMenuContent align="end" className="glass-panel border-white/10 rounded-2xl w-[180px] p-2 bg-obsidian/95 backdrop-blur-3xl">
+                                                                    <DropdownMenuItem
+                                                                        onClick={() => handleEditLead(lead)}
+                                                                        className="rounded-xl text-zinc-400 hover:text-white hover:bg-white/5 cursor-pointer text-xs font-bold py-3 transition-all"
+                                                                    >
+                                                                        <Sparkles className="w-4 h-4 mr-2 text-emerald" />
+                                                                        Edit Lead
+                                                                    </DropdownMenuItem>
+                                                                    <DropdownMenuItem
+                                                                        onClick={() => handleDeleteLead(lead.id)}
+                                                                        className="rounded-xl text-rose-400 hover:text-white hover:bg-rose-500/20 cursor-pointer text-xs font-bold py-3 transition-all"
+                                                                    >
+                                                                        <Trash2 className="w-4 h-4 mr-2" />
+                                                                        Delete Lead
+                                                                    </DropdownMenuItem>
+                                                                </DropdownMenuContent>
+                                                            </DropdownMenu>
+                                                        </div>
                                                     </TableCell>
                                                 </TableRow>
                                             ))
@@ -418,6 +568,8 @@ export function GrowthEngineModule({ clientId, tableName = "kontakti", statuses 
                                 stages={statuses}
                                 onStatusUpdate={handleStatusUpdate}
                                 onOpenDetails={handleOpenDetails}
+                                onEditLead={handleEditLead}
+                                onDeleteLead={handleDeleteLead}
                                 terminology={terminology}
                             />
                         </motion.div>
@@ -430,6 +582,190 @@ export function GrowthEngineModule({ clientId, tableName = "kontakti", statuses 
                 isOpen={isIntelligenceOpen}
                 onClose={() => setIsIntelligenceOpen(false)}
             />
+
+            {/* Add Lead Dialog */}
+            <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+                <DialogContent className="glass-panel border-white/10 rounded-[2rem] bg-obsidian/95 backdrop-blur-3xl text-silver max-w-lg shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)]">
+                    <DialogHeader className="mb-6">
+                        <DialogTitle className="text-3xl font-outfit font-bold italic">
+                            Aktiviraj <span className="text-emerald not-italic font-black text-4xl">ČVOR</span>
+                        </DialogTitle>
+                        <p className="text-silver/40 text-sm font-light mt-2 tracking-wide">
+                            Input parameters for the new {terminology.entity.toLowerCase()} trajectory.
+                        </p>
+                    </DialogHeader>
+
+                    <div className="grid gap-6 py-4">
+                        <div className="space-y-2">
+                            <Label className="text-[10px] uppercase tracking-[0.2em] font-black text-zinc-500 pl-1">Identity Profile</Label>
+                            <Input
+                                value={newLead.ime}
+                                onChange={(e) => setNewLead({ ...newLead, ime: e.target.value })}
+                                placeholder="Puno Ime"
+                                className="h-14 bg-white/5 border-white/10 rounded-2xl font-outfit focus:border-emerald/40 transition-all text-lg"
+                            />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <Label className="text-[10px] uppercase tracking-[0.2em] font-black text-zinc-500 pl-1">Comms Node</Label>
+                                <Input
+                                    value={newLead.email}
+                                    onChange={(e) => setNewLead({ ...newLead, email: e.target.value })}
+                                    placeholder="email@example.com"
+                                    className="h-14 bg-white/5 border-white/10 rounded-2xl font-outfit focus:border-emerald/40 transition-all"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label className="text-[10px] uppercase tracking-[0.2em] font-black text-zinc-500 pl-1">{terminology.group}</Label>
+                                <Input
+                                    value={newLead.kompanija}
+                                    onChange={(e) => setNewLead({ ...newLead, kompanija: e.target.value })}
+                                    placeholder="Organization"
+                                    className="h-14 bg-white/5 border-white/10 rounded-2xl font-outfit focus:border-emerald/40 transition-all"
+                                />
+                            </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <Label className="text-[10px] uppercase tracking-[0.2em] font-black text-zinc-500 pl-1">Vector Status</Label>
+                                <Select
+                                    value={newLead.status}
+                                    onValueChange={(v) => setNewLead({ ...newLead, status: v })}
+                                >
+                                    <SelectTrigger className="h-14 bg-white/5 border-white/10 rounded-2xl font-outfit focus:border-emerald/40 transition-all">
+                                        <SelectValue placeholder="Odaberi status" />
+                                    </SelectTrigger>
+                                    <SelectContent className="glass-panel border-white/10 bg-obsidian text-silver rounded-2xl">
+                                        {statuses.map(s => (
+                                            <SelectItem key={s} value={s} className="rounded-xl hover:bg-emerald/10 focus:bg-emerald/10 transition-colors">
+                                                {s}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div className="space-y-2">
+                                <Label className="text-[10px] uppercase tracking-[0.2em] font-black text-zinc-500 pl-1">Sector (Niche)</Label>
+                                <Input
+                                    value={newLead.niche}
+                                    onChange={(e) => setNewLead({ ...newLead, niche: e.target.value })}
+                                    placeholder="Specialization"
+                                    className="h-14 bg-white/5 border-white/10 rounded-2xl font-outfit focus:border-emerald/40 transition-all"
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    <DialogFooter className="mt-8 flex gap-3">
+                        <Button
+                            variant="ghost"
+                            onClick={() => setIsAddDialogOpen(false)}
+                            className="h-14 px-8 rounded-2xl font-outfit text-zinc-500 hover:text-white transition-all uppercase tracking-widest text-xs"
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            onClick={handleAddLead}
+                            disabled={isSaving}
+                            className="h-14 px-10 rounded-2xl bg-emerald text-obsidian font-outfit font-black hover:bg-emerald/90 transition-all shadow-[0_10px_30px_rgba(16,185,129,0.3)] min-w-[160px] uppercase tracking-widest text-xs"
+                        >
+                            {isSaving ? <RefreshCw className="w-5 h-5 animate-spin" /> : "Initiate Node"}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            {/* Edit Lead Dialog */}
+            <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+                <DialogContent className="glass-panel border-white/10 rounded-[2rem] bg-obsidian/95 backdrop-blur-3xl text-silver max-w-lg shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)]">
+                    <DialogHeader className="mb-6">
+                        <DialogTitle className="text-3xl font-outfit font-bold italic">
+                            Modifikuj <span className="text-emerald not-italic font-black text-4xl">PODATKE</span>
+                        </DialogTitle>
+                        <p className="text-silver/40 text-sm font-light mt-2 tracking-wide">
+                            Reconfiguring {terminology.entity.toLowerCase()} parameters.
+                        </p>
+                    </DialogHeader>
+
+                    <div className="grid gap-6 py-4">
+                        <div className="space-y-2">
+                            <Label className="text-[10px] uppercase tracking-[0.2em] font-black text-zinc-500 pl-1">Identity Profile</Label>
+                            <Input
+                                value={newLead.ime}
+                                onChange={(e) => setNewLead({ ...newLead, ime: e.target.value })}
+                                placeholder="Puno Ime"
+                                className="h-14 bg-white/5 border-white/10 rounded-2xl font-outfit focus:border-emerald/40 transition-all text-lg"
+                            />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <Label className="text-[10px] uppercase tracking-[0.2em] font-black text-zinc-500 pl-1">Comms Node</Label>
+                                <Input
+                                    value={newLead.email}
+                                    onChange={(e) => setNewLead({ ...newLead, email: e.target.value })}
+                                    placeholder="email@example.com"
+                                    className="h-14 bg-white/5 border-white/10 rounded-2xl font-outfit focus:border-emerald/40 transition-all"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label className="text-[10px] uppercase tracking-[0.2em] font-black text-zinc-500 pl-1">{terminology.group}</Label>
+                                <Input
+                                    value={newLead.kompanija}
+                                    onChange={(e) => setNewLead({ ...newLead, kompanija: e.target.value })}
+                                    placeholder="Organization"
+                                    className="h-14 bg-white/5 border-white/10 rounded-2xl font-outfit focus:border-emerald/40 transition-all"
+                                />
+                            </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <Label className="text-[10px] uppercase tracking-[0.2em] font-black text-zinc-500 pl-1">Vector Status</Label>
+                                <Select
+                                    value={newLead.status}
+                                    onValueChange={(v) => setNewLead({ ...newLead, status: v })}
+                                >
+                                    <SelectTrigger className="h-14 bg-white/5 border-white/10 rounded-2xl font-outfit focus:border-emerald/40 transition-all">
+                                        <SelectValue placeholder="Odaberi status" />
+                                    </SelectTrigger>
+                                    <SelectContent className="glass-panel border-white/10 bg-obsidian text-silver rounded-2xl">
+                                        {statuses.map(s => (
+                                            <SelectItem key={s} value={s} className="rounded-xl hover:bg-emerald/10 focus:bg-emerald/10 transition-colors">
+                                                {s}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div className="space-y-2">
+                                <Label className="text-[10px] uppercase tracking-[0.2em] font-black text-zinc-500 pl-1">Sector (Niche)</Label>
+                                <Input
+                                    value={newLead.niche}
+                                    onChange={(e) => setNewLead({ ...newLead, niche: e.target.value })}
+                                    placeholder="Specialization"
+                                    className="h-14 bg-white/5 border-white/10 rounded-2xl font-outfit focus:border-emerald/40 transition-all"
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    <DialogFooter className="mt-8 flex gap-3">
+                        <Button
+                            variant="ghost"
+                            onClick={() => setIsEditDialogOpen(false)}
+                            className="h-14 px-8 rounded-2xl font-outfit text-zinc-500 hover:text-white transition-all uppercase tracking-widest text-xs"
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            onClick={handleUpdateLead}
+                            disabled={isSaving}
+                            className="h-14 px-10 rounded-2xl bg-emerald text-obsidian font-outfit font-black hover:bg-emerald/90 transition-all shadow-[0_10px_30px_rgba(16,185,129,0.3)] min-w-[160px] uppercase tracking-widest text-xs"
+                        >
+                            {isSaving ? <RefreshCw className="w-5 h-5 animate-spin" /> : "Save Changes"}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     )
 }

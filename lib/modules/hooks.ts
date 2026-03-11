@@ -39,14 +39,57 @@ export function useUnifiedModules(clientId: string | null) {
   // FALLBACK: If DB is empty for the primary client, provide defaults
   // This addresses RLS barriers preventing automated DB population
   const PRIMARY_CLIENT_ID = "69acf7e9-557e-4ca3-85bd-a785ef39e351"
-  if (!loading && (!dbModules || dbModules.length === 0) && clientId === PRIMARY_CLIENT_ID) {
-    console.log("[Modules] Using hardcoded fallback for primary client")
+  const MJOB_CLIENT_ID = "fa252187-3229-4d0b-8a11-0f66ea97be71"
+
+  if (!loading && (!dbModules || dbModules.length === 0) && (clientId === PRIMARY_CLIENT_ID || clientId === MJOB_CLIENT_ID)) {
+    console.log(`[Modules] Using hardcoded fallback for client: ${clientId}`)
     finalDbModules = [
-      { id: "fb1", module_key: "growth-engine", is_enabled: true, display_name: "Growth Engine", sort_order: 1 },
-      { id: "fb2", module_key: "email-outreach", is_enabled: true, display_name: "Email Outreach", sort_order: 2 },
-      { id: "fb3", module_key: "business-crm", is_enabled: true, display_name: "Business CRM", sort_order: 3 },
-      { id: "fb4", module_key: "agent-database", is_enabled: true, display_name: "Agent Database", sort_order: 4 },
-      { id: "fb5", module_key: "agent-leads", is_enabled: true, display_name: "Agent Leads", sort_order: 5 }
+      {
+        id: "fb1",
+        client_id: clientId as string,
+        module_key: "business-crm",
+        is_enabled: true,
+        display_name: "CRM",
+        sort_order: 1,
+        created_at: new Date().toISOString(),
+        settings: clientId === MJOB_CLIENT_ID
+          ? { statuses: ["Novi Kandidat", "Intervju", "Ponuda Poslata", "Zaposlen"], showAgencyMetrics: true }
+          : null
+      },
+      {
+        id: "fb2",
+        client_id: clientId as string,
+        module_key: "agent-database",
+        is_enabled: true,
+        display_name: clientId === MJOB_CLIENT_ID ? "Poslovi" : "Agent Database",
+        sort_order: 2,
+        created_at: new Date().toISOString(),
+        settings: clientId === MJOB_CLIENT_ID
+          ? { entityType: "jobs", entityLabel: "Posao" }
+          : null
+      },
+      {
+        id: "fb3",
+        client_id: clientId as string,
+        module_key: "agent-leads",
+        is_enabled: true,
+        display_name: clientId === MJOB_CLIENT_ID ? "Kandidati" : "Agent Leads",
+        sort_order: 3,
+        created_at: new Date().toISOString(),
+        settings: clientId === MJOB_CLIENT_ID
+          ? { entityType: "candidates", entityLabel: "Kandidat" }
+          : null
+      },
+      {
+        id: "fb4",
+        client_id: clientId as string,
+        module_key: "website-chatbot",
+        is_enabled: true,
+        display_name: "Website Chatbot",
+        sort_order: 4,
+        created_at: new Date().toISOString(),
+        settings: null
+      }
     ] as ClientModule[]
   }
 
