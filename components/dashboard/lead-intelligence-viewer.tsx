@@ -12,7 +12,25 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Instagram, Facebook, MessageCircle, Info, MessageSquare, Target, Zap, Bot } from "lucide-react"
+import {
+    Instagram,
+    Facebook,
+    MessageCircle,
+    Info,
+    MessageSquare,
+    Target,
+    Zap,
+    Bot,
+    User,
+    Sparkles,
+    Calendar,
+    ChevronRight,
+    Search,
+    RefreshCw
+} from "lucide-react"
+import { GlassCard } from "@/components/ui/glass-card"
+import { cn } from "@/lib/utils"
+import { motion, AnimatePresence } from "framer-motion"
 
 interface Message {
     id: string
@@ -60,10 +78,10 @@ export function LeadIntelligenceViewer({ lead, isOpen, onClose, isClientView = f
 
     const getPlatformIcon = (platform: string) => {
         switch (platform?.toLowerCase()) {
-            case "instagram": return <Instagram className="h-4 w-4" />
-            case "facebook": return <Facebook className="h-4 w-4" />
-            case "whatsapp": return <MessageCircle className="h-4 w-4" />
-            default: return <MessageCircle className="h-4 w-4" />
+            case "instagram": return <Instagram className="h-3 w-3" />
+            case "facebook": return <Facebook className="h-3 w-3" />
+            case "whatsapp": return <MessageCircle className="h-3 w-3" />
+            default: return <MessageCircle className="h-3 w-3" />
         }
     }
 
@@ -71,90 +89,113 @@ export function LeadIntelligenceViewer({ lead, isOpen, onClose, isClientView = f
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="sm:max-w-[600px] h-[85vh] flex flex-col p-0 overflow-hidden border-none shadow-2xl">
-                <DialogHeader className="p-6 bg-gradient-to-r from-blue-600 to-indigo-700 text-white rounded-t-lg shrink-0">
-                    <div className="flex justify-between items-start">
-                        <div>
-                            <DialogTitle className="text-2xl font-bold flex items-center gap-2">
-                                <Zap className="h-6 w-6 text-yellow-300 fill-yellow-300" />
-                                Lead Intelligence
+            <DialogContent className="sm:max-w-[700px] h-[90vh] flex flex-col p-0 overflow-hidden border-white/5 bg-obsidian/95 backdrop-blur-2xl rounded-[2.5rem] shadow-2xl overflow-y-auto">
+                {/* Header: Elysian Obsidian Style */}
+                <div className="relative p-8 pb-4 shrink-0 overflow-hidden">
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-emerald/5 blur-[100px] rounded-full -translate-y-1/2 translate-x-1/2" />
+
+                    <div className="relative flex justify-between items-start">
+                        <div className="space-y-1">
+                            <div className="flex items-center gap-2">
+                                <Badge className="bg-emerald/10 text-emerald border-emerald/20 text-[10px] font-bold uppercase tracking-widest px-2">
+                                    Intelligence Node
+                                </Badge>
+                                {lead.meeting_time && (
+                                    <Badge className="bg-amber-500/10 text-amber-500 border-amber-500/20 text-[10px] font-bold uppercase tracking-widest px-2">
+                                        Meeting Scheduled
+                                    </Badge>
+                                )}
+                            </div>
+                            <DialogTitle className="text-3xl font-outfit font-bold text-silver tracking-tight">
+                                {lead.ime}
                             </DialogTitle>
-                            <p className="text-blue-100 text-sm mt-1 opacity-90">
-                                {lead.ime} • {lead.kompanija || "Samostalni lead"}
+                            <p className="text-silver/40 font-outfit text-sm">
+                                {lead.kompanija || lead.company_name || "Independent Lead"} • <span className="text-silver/60">{lead.niche || "General"} Vector</span>
                             </p>
                         </div>
+
                         {!isClientView && (
-                            <Badge className={`${lead.prioritet_skor && lead.prioritet_skor >= 70 ? 'bg-red-500' : 'bg-blue-400'} text-white border-white/20 px-3 py-1`}>
-                                {lead.prioritet_skor || 0}% Match
-                            </Badge>
+                            <GlassCard className="p-4 flex flex-col items-center justify-center min-w-[100px] border-emerald/20 bg-emerald/5 rounded-2xl">
+                                <span className="text-[10px] font-bold text-emerald uppercase tracking-[0.2em] mb-1">Match Score</span>
+                                <span className="text-2xl font-outfit font-bold text-silver">{lead.prioritet_skor || 0}%</span>
+                            </GlassCard>
                         )}
                     </div>
-                </DialogHeader>
+                </div>
 
                 <Tabs defaultValue="context" className="flex-1 flex flex-col min-h-0">
-                    <div className="px-6 border-b bg-gray-50/50">
-                        <TabsList className="bg-transparent gap-6 h-12 p-0">
+                    <div className="px-8 border-b border-white/5">
+                        <TabsList className="bg-transparent gap-8 h-12 p-0">
                             <TabsTrigger
                                 value="context"
-                                className="data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-blue-600 rounded-none px-0 h-full font-semibold transition-all"
+                                className="data-[state=active]:bg-transparent data-[state=active]:text-emerald data-[state=active]:border-b-2 data-[state=active]:border-emerald rounded-none px-0 h-full font-outfit font-medium text-silver/40 transition-all text-sm"
                             >
-                                <Info className="h-4 w-4 mr-2" />
                                 Strategic Context
                             </TabsTrigger>
                             <TabsTrigger
                                 value="chat"
-                                className="data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-blue-600 rounded-none px-0 h-full font-semibold transition-all text-gray-500"
+                                className="data-[state=active]:bg-transparent data-[state=active]:text-emerald data-[state=active]:border-b-2 data-[state=active]:border-emerald rounded-none px-0 h-full font-outfit font-medium text-silver/40 transition-all text-sm"
                             >
-                                <Bot className="h-4 w-4 mr-2" />
-                                AI Conversation
+                                AI Conversation History
                             </TabsTrigger>
                         </TabsList>
                     </div>
 
-                    <TabsContent value="context" className="flex-1 p-0 m-0 min-h-0">
-                        <ScrollArea className="h-full p-6">
-                            <div className="space-y-6">
-                                {/* AI Qualification Summary */}
-                                <div className="bg-blue-50/50 p-4 rounded-xl border border-blue-100/50">
-                                    <h4 className="flex items-center text-blue-900 font-bold text-sm mb-3 uppercase tracking-wider">
-                                        <Zap className="h-4 w-4 mr-2 text-blue-600" />
-                                        AI Analiza & Obrazloženje
-                                    </h4>
-                                    <p className="text-blue-800 text-sm leading-relaxed italic">
-                                        "{lead.obrazlozenje || "AI trenutno analizira podatke..."}"
-                                    </p>
-                                    <div className="mt-4 flex gap-4">
-                                        <div className="flex-1">
-                                            <span className="text-[10px] text-blue-400 uppercase font-bold">Kategorija</span>
-                                            <p className="text-sm font-bold text-blue-700">{lead.kategorija || "Nepoznato"}</p>
-                                        </div>
-                                        <div className="flex-1">
-                                            <span className="text-[10px] text-blue-400 uppercase font-bold">Sledeća Akcija</span>
-                                            <p className="text-sm font-bold text-blue-700">{lead.sledeca_akcija || "Ručna provera"}</p>
-                                        </div>
+                    <TabsContent value="context" className="flex-1 p-0 m-0 min-h-0 bg-noise">
+                        <ScrollArea className="h-full">
+                            <div className="p-8 space-y-8 pb-12">
+                                {/* AI Strategic Briefing */}
+                                <div className="space-y-4">
+                                    <div className="flex items-center gap-2">
+                                        <Sparkles className="w-4 h-4 text-emerald" />
+                                        <h4 className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.3em]">Strategic Briefing</h4>
                                     </div>
+                                    <GlassCard className="p-6 border-white/5 relative overflow-hidden group">
+                                        <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                                            <Zap className="w-12 h-12 text-emerald" />
+                                        </div>
+                                        <p className="text-silver/80 font-outfit text-base leading-relaxed italic">
+                                            "{lead.obrazlozenje || "AI currently processing vector data..."}"
+                                        </p>
+                                        <div className="mt-8 grid grid-cols-2 gap-4">
+                                            <div className="p-4 rounded-2xl bg-white/5 border border-white/5 space-y-1">
+                                                <span className="text-[9px] text-zinc-500 uppercase font-bold tracking-widest">Trajectory Category</span>
+                                                <p className="text-sm font-bold text-emerald uppercase tracking-wider">{lead.kategorija || "Undefined"}</p>
+                                            </div>
+                                            <div className="p-4 rounded-2xl bg-white/5 border border-white/5 space-y-1">
+                                                <span className="text-[9px] text-zinc-500 uppercase font-bold tracking-widest">Next Calculated Step</span>
+                                                <p className="text-sm font-bold text-emerald uppercase tracking-wider">{lead.sledeca_akcija || "Manual Intelligence"}</p>
+                                            </div>
+                                        </div>
+                                    </GlassCard>
                                 </div>
 
-                                {/* Intake Data */}
+                                {/* Intake Nodes */}
                                 <div className="space-y-4">
-                                    <h4 className="flex items-center text-gray-900 font-bold text-sm uppercase tracking-wider">
-                                        <Target className="h-4 w-4 mr-2 text-indigo-600" />
-                                        Intake Form Answers
-                                    </h4>
+                                    <div className="flex items-center gap-2">
+                                        <Target className="w-4 h-4 text-emerald" />
+                                        <h4 className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.3em]">Data Harvest Nodes</h4>
+                                    </div>
 
                                     {!lead.intake_data || Object.keys(lead.intake_data).length === 0 ? (
-                                        <div className="flex flex-col items-center justify-center py-8 text-gray-400 border-2 border-dashed rounded-xl">
-                                            <Info className="h-8 w-8 mb-2 opacity-20" />
-                                            <p className="text-[11px] font-medium italic">Nema dostupnih podataka iz upitnika.</p>
-                                        </div>
+                                        <GlassCard className="p-12 flex flex-col items-center justify-center border-dashed border-white/5">
+                                            <Search className="w-10 h-10 text-zinc-500 mb-4 opacity-20" />
+                                            <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">No harvest data localized</p>
+                                        </GlassCard>
                                     ) : (
                                         <div className="grid gap-3">
                                             {Object.entries(lead.intake_data).map(([key, value]: [string, any]) => (
-                                                <div key={key} className="p-4 rounded-xl bg-gray-50 border border-gray-100 hover:border-gray-200 hover:bg-white transition-all shadow-sm group">
-                                                    <span className="text-[10px] text-gray-400 uppercase font-bold block mb-1.5 group-hover:text-indigo-500 transition-colors">
-                                                        {key.replace(/_/g, ' ')}
-                                                    </span>
-                                                    <p className="text-sm text-gray-700 font-medium leading-normal">
+                                                <div
+                                                    key={key}
+                                                    className="p-5 rounded-2xl bg-white/5 border border-white/5 hover:border-emerald/30 transition-all duration-300 group"
+                                                >
+                                                    <div className="flex justify-between items-start mb-2">
+                                                        <span className="text-[9px] text-zinc-500 uppercase font-bold tracking-widest group-hover:text-emerald transition-colors">
+                                                            {key.replace(/_/g, ' ')}
+                                                        </span>
+                                                        <ChevronRight className="w-3 h-3 text-zinc-500 opacity-0 group-hover:opacity-100 transition-all" />
+                                                    </div>
+                                                    <p className="text-silver/80 font-outfit text-sm leading-relaxed">
                                                         {typeof value === 'object' ? JSON.stringify(value) : String(value)}
                                                     </p>
                                                 </div>
@@ -166,41 +207,55 @@ export function LeadIntelligenceViewer({ lead, isOpen, onClose, isClientView = f
                         </ScrollArea>
                     </TabsContent>
 
-                    <TabsContent value="chat" className="flex-1 p-0 m-0 min-h-0 bg-slate-50/30">
-                        <ScrollArea className="h-full p-6">
-                            <div className="space-y-4 pb-4">
+                    <TabsContent value="chat" className="flex-1 p-0 m-0 min-h-0 bg-noise/30">
+                        <ScrollArea className="h-full">
+                            <div className="p-8 space-y-6 pb-12">
                                 {messages.length === 0 && !loading && (
-                                    <div className="flex flex-col items-center justify-center py-20 text-muted-foreground opacity-50">
-                                        <Bot className="h-12 w-12 mb-4" />
-                                        <p className="text-sm italic uppercase tracking-widest text-[10px]">Nema AI razgovora za ovaj lead.</p>
+                                    <div className="flex flex-col items-center justify-center py-32 text-zinc-500">
+                                        <div className="w-16 h-16 rounded-full bg-white/5 border border-white/5 flex items-center justify-center mb-6">
+                                            <Bot className="w-8 h-8 opacity-20" />
+                                        </div>
+                                        <p className="text-[10px] font-bold uppercase tracking-[0.3em]">No Signal Detected</p>
                                     </div>
                                 )}
-                                {messages.map((msg) => (
-                                    <div
-                                        key={msg.id}
-                                        className={`flex flex-col ${msg.role === "assistant" ? "items-start" : "items-end"
-                                            }`}
-                                    >
-                                        <div className="flex items-center gap-2 mb-1.5">
-                                            {msg.role === "assistant" && <Bot className="h-3 w-3 text-blue-600" />}
-                                            <span className="text-[9px] text-muted-foreground font-bold uppercase tracking-tighter opacity-70">
-                                                {msg.role === "assistant" ? "SmartFlow AI" : "Lead"} • {new Date(msg.created_at).toLocaleTimeString()}
-                                            </span>
-                                            {getPlatformIcon(msg.platform)}
-                                        </div>
-                                        <div
-                                            className={`rounded-2xl px-4 py-2.5 text-sm max-w-[85%] shadow-sm ${msg.role === "assistant"
-                                                ? "bg-white border text-gray-700"
-                                                : "bg-blue-600 text-white font-medium"
-                                                }`}
+
+                                <AnimatePresence mode="popLayout">
+                                    {messages.map((msg, idx) => (
+                                        <motion.div
+                                            key={msg.id}
+                                            initial={{ opacity: 0, y: 10, scale: 0.98 }}
+                                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                                            transition={{ delay: idx * 0.05 }}
+                                            className={cn(
+                                                "flex flex-col max-w-[85%]",
+                                                msg.role === "assistant" ? "items-start" : "items-end ml-auto"
+                                            )}
                                         >
-                                            {msg.message}
-                                        </div>
-                                    </div>
-                                ))}
+                                            <div className="flex items-center gap-2 mb-2 px-1">
+                                                {msg.role === "assistant" && <Bot className="w-3 h-3 text-emerald" />}
+                                                <span className="text-[9px] text-zinc-500 font-bold uppercase tracking-widest opacity-70">
+                                                    {msg.role === "assistant" ? "SmartFlow Intelligence" : "Subject"} • {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                </span>
+                                                {getPlatformIcon(msg.platform)}
+                                            </div>
+
+                                            <div
+                                                className={cn(
+                                                    "px-5 py-3.5 rounded-2xl text-[13px] leading-relaxed font-outfit",
+                                                    msg.role === "assistant"
+                                                        ? "bg-white/5 border border-white/10 text-silver shadow-lg"
+                                                        : "bg-emerald text-obsidian font-semibold shadow-[0_10px_30px_rgba(16,185,129,0.1)]"
+                                                )}
+                                            >
+                                                {msg.message}
+                                            </div>
+                                        </motion.div>
+                                    ))}
+                                </AnimatePresence>
+
                                 {loading && (
-                                    <div className="flex justify-center py-4">
-                                        <Badge variant="secondary" className="animate-pulse">Loading Logs...</Badge>
+                                    <div className="flex justify-center py-10">
+                                        <RefreshCw className="w-6 h-6 text-emerald animate-spin opacity-40" />
                                     </div>
                                 )}
                             </div>
@@ -211,3 +266,4 @@ export function LeadIntelligenceViewer({ lead, isOpen, onClose, isClientView = f
         </Dialog>
     )
 }
+

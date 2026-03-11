@@ -78,7 +78,7 @@ export async function getLeadsByClientId(clientId: string) {
 export async function getCandidatesByClientId(clientId: string) {
     const supabase = createClient()
     const { data, error } = await supabase
-        .from('candidates')
+        .from('kontakti')
         .select('*')
         .eq('client_id', clientId)
         .order('created_at', { ascending: false })
@@ -93,7 +93,7 @@ export async function getCandidatesByClientId(clientId: string) {
 export async function createCandidate(candidateData: any) {
     const supabase = createClient()
     const { data, error } = await supabase
-        .from('candidates')
+        .from('kontakti')
         .insert([candidateData])
         .select()
         .single()
@@ -108,7 +108,7 @@ export async function createCandidate(candidateData: any) {
 export async function updateCandidate(id: string, candidateData: any) {
     const supabase = createClient()
     const { data, error } = await supabase
-        .from('candidates')
+        .from('kontakti')
         .update(candidateData)
         .eq('id', id)
         .select()
@@ -124,7 +124,7 @@ export async function updateCandidate(id: string, candidateData: any) {
 export async function deleteCandidate(id: string) {
     const supabase = createClient()
     const { error } = await supabase
-        .from('candidates')
+        .from('contacts')
         .delete()
         .eq('id', id)
 
