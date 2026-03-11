@@ -32,6 +32,7 @@ import { motion, AnimatePresence, Variants } from "framer-motion"
 import { cn } from "@/lib/utils"
 import { GlassCard } from "@/components/ui/glass-card"
 import { toast } from "sonner"
+import { LeadIntelligenceViewer } from "@/components/dashboard/lead-intelligence-viewer"
 
 interface AgentLeadsModuleProps {
     clientId: string | null;
@@ -61,6 +62,7 @@ export function AgentLeadsModule({ clientId, terminology: propTerminology }: Age
     const [loading, setLoading] = useState(true)
     const [searchTerm, setSearchTerm] = useState('')
     const [filter, setFilter] = useState('all')
+    const [selectedLead, setSelectedLead] = useState<any | null>(null)
 
     const terminology = propTerminology || {
         title: "Growth",
@@ -90,13 +92,24 @@ export function AgentLeadsModule({ clientId, terminology: propTerminology }: Age
         loadCandidates()
     }, [loadCandidates])
 
-    const filteredLeads = leads.filter(c =>
-        c.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        c.job_title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        c.company?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        c.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        c.location?.toLowerCase().includes(searchTerm.toLowerCase())
-    )
+    const filteredLeads = leads.filter(c => {
+        const matchesSearch = c.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            c.job_title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            c.company?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            c.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            c.location?.toLowerCase().includes(searchTerm.toLowerCase())
+
+        const candidateStatus = c.status || 'Novi';
+        const matchesFilter = filter === 'all' || candidateStatus.toLowerCase() === filter.toLowerCase();
+
+        return matchesSearch && matchesFilter;
+    })
+
+    const totalLeads = leads.length;
+    const qualifiedLeads = leads.filter(l => ['kvalifikovan', 'intervju', 'zaposlen'].includes(l.status?.toLowerCase() || '')).length;
+    const qualifiedRate = totalLeads > 0 ? Math.round((qualifiedLeads / totalLeads) * 100) : 0;
+    const activeInterviews = leads.filter(l => l.status?.toLowerCase() === 'intervju').length;
+    const hired = leads.filter(l => l.status?.toLowerCase() === 'zaposlen').length;
 
     if (!clientId) return null
 
@@ -148,10 +161,12 @@ export function AgentLeadsModule({ clientId, terminology: propTerminology }: Age
                         value={filter}
                         onChange={(e) => setFilter(e.target.value)}
                     >
-                        <option value="all">Every Generation</option>
-                        <option value="new">Unprocessed</option>
-                        <option value="contacted">Synthesized</option>
-                        <option value="converted">Finalized</option>
+                        <option value="all">Any Status</option>
+                        <option value="novi">Novi</option>
+                        <option value="kvalifikovan">Kvalifikovan</option>
+                        <option value="intervju">Intervju</option>
+                        <option value="zaposlen">Zaposlen</option>
+                        <option value="odbijen">Odbijen</option>
                     </select>
                 </div>
             </div>
@@ -265,8 +280,13 @@ export function AgentLeadsModule({ clientId, terminology: propTerminology }: Age
                                             </td>
                                             <td className="p-4 text-right pr-8">
                                                 <div className="flex items-center justify-end gap-2.5 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-4 group-hover:translate-x-0">
-                                                    <Button variant="ghost" size="icon" className="w-10 h-10 rounded-xl bg-white/5 hover:bg-emerald/10 hover:text-emerald transition-all">
-                                                        <MessageSquare className="w-4 h-4" />
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        onClick={() => setSelectedLead(lead)}
+                                                        className="w-10 h-10 rounded-xl bg-white/5 hover:bg-emerald/10 hover:text-emerald transition-all"
+                                                    >
+                                                        <User className="w-4 h-4" />
                                                     </Button>
                                                     <Button variant="ghost" size="icon" className="w-10 h-10 rounded-xl bg-white/5 text-zinc-500 hover:text-white transition-all">
                                                         <ArrowUpRight className="w-4 h-4" />
@@ -285,10 +305,10 @@ export function AgentLeadsModule({ clientId, terminology: propTerminology }: Age
             {/* Footer Stats */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6 px-2">
                 {[
-                    { label: "Nodes Captured", value: leads.length, icon: Sparkles, color: "text-emerald" },
-                    { label: "Efficiency", value: "14.2%", icon: ArrowUpRight, color: "text-emerald" },
-                    { label: "Active Synapse", value: "3", icon: MessageSquare, color: "text-emerald" },
-                    { label: "Registry Health", value: "Optimal", icon: UserCheck, color: "text-emerald" }
+                    { label: "Total Captured", value: totalLeads, icon: Sparkles, color: "text-emerald-400" },
+                    { label: "Qualification Rate", value: `${qualifiedRate}%`, icon: ArrowUpRight, color: "text-emerald-400" },
+                    { label: "Active Interviews", value: activeInterviews, icon: MessageSquare, color: "text-emerald-400" },
+                    { label: "Successfully Hired", value: hired, icon: UserCheck, color: "text-emerald-400" }
                 ].map((stat, i) => (
                     <GlassCard key={i} className="p-6 flex items-center gap-5 hover:border-emerald/30 transition-all duration-500 group">
                         <div className="w-12 h-12 rounded-2xl bg-emerald/5 border border-emerald/10 flex items-center justify-center group-hover:bg-emerald/10 transition-colors">
@@ -301,6 +321,15 @@ export function AgentLeadsModule({ clientId, terminology: propTerminology }: Age
                     </GlassCard>
                 ))}
             </div>
+            <AnimatePresence>
+                {selectedLead && (
+                    <LeadIntelligenceViewer
+                        lead={selectedLead}
+                        isOpen={!!selectedLead}
+                        onClose={() => setSelectedLead(null)}
+                    />
+                )}
+            </AnimatePresence>
         </div>
     )
 }

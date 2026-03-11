@@ -44,7 +44,7 @@ export function useUnifiedModules(clientId: string | null) {
     finalDbModules = [
       { id: "fb1", module_key: "growth-engine", is_enabled: true, display_name: "Growth Engine", sort_order: 1 },
       { id: "fb2", module_key: "email-outreach", is_enabled: true, display_name: "Email Outreach", sort_order: 2 },
-      { id: "fb3", module_key: "crm", is_enabled: true, display_name: "CRM", sort_order: 3 },
+      { id: "fb3", module_key: "business-crm", is_enabled: true, display_name: "Business CRM", sort_order: 3 },
       { id: "fb4", module_key: "agent-database", is_enabled: true, display_name: "Agent Database", sort_order: 4 },
       { id: "fb5", module_key: "agent-leads", is_enabled: true, display_name: "Agent Leads", sort_order: 5 }
     ] as ClientModule[]

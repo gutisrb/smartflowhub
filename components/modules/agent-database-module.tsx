@@ -22,9 +22,11 @@ import {
     ArrowUpRight,
     Briefcase,
     MapPin,
-    Coins
+    Coins,
+    Pencil,
+    Trash
 } from "lucide-react"
-import { getJobsByClientId, createJob } from "@/lib/supabase/queries"
+import { getJobsByClientId, createJob, updateJob, deleteJob } from "@/lib/supabase/queries"
 import {
     Dialog,
     DialogContent,
@@ -74,6 +76,7 @@ export function AgentDatabaseModule({
     const [refreshing, setRefreshing] = useState(false)
     const [isDialogOpen, setIsDialogOpen] = useState(false)
     const [searchQuery, setSearchQuery] = useState("")
+    const [editId, setEditId] = useState<string | null>(null)
 
     const [formData, setFormData] = useState({
         job_id: "",
@@ -114,35 +117,81 @@ export function AgentDatabaseModule({
         setTimeout(() => setRefreshing(false), 800)
     }
 
-    const handleCreateEntry = async () => {
+    const handleSaveEntry = async () => {
         if (!clientId) return
         try {
             const entryData = { ...formData, client_id: clientId }
-            const created = await createJob(entryData)
-            if (created) {
-                setItems([created, ...items])
-                setIsDialogOpen(false)
-                setFormData({
-                    job_id: "",
-                    posao: "",
-                    firma: "",
-                    lokacija: "",
-                    plata: "",
-                    tip_plate: "Mesečno",
-                    radno_vreme: "",
-                    opis_posla: "",
-                    kriterijum: "",
-                    start_datum: "",
-                    status: "Aktivan",
-                    tip_posla: "Regularan",
-                    msg_template: ""
-                })
-                toast.success("Node Initialized Successfully")
+            if (editId) {
+                const updated = await updateJob(editId, entryData)
+                if (updated) {
+                    setItems(items.map(i => i.id === editId ? updated : i))
+                    toast.success("Node Re-calibrated Successfully")
+                }
+            } else {
+                const created = await createJob(entryData)
+                if (created) {
+                    setItems([created, ...items])
+                    toast.success("Node Initialized Successfully")
+                }
             }
+            setIsDialogOpen(false)
+            resetForm()
         } catch (error) {
-            console.error("Failed to create entry", error)
+            console.error("Failed to save entry", error)
             toast.error("Handshake Refused")
         }
+    }
+
+    const handleDelete = async (id: string) => {
+        if (confirm("Are you sure you want to completely erase this node from the database?")) {
+            try {
+                await deleteJob(id)
+                setItems(items.filter(i => i.id !== id))
+                toast.success("Node Erased Successfully")
+            } catch (error) {
+                console.error("Failed to delete entry", error)
+                toast.error("Error erasing node")
+            }
+        }
+    }
+
+    const resetForm = () => {
+        setEditId(null)
+        setFormData({
+            job_id: "",
+            posao: "",
+            firma: "",
+            lokacija: "",
+            plata: "",
+            tip_plate: "Mesečno",
+            radno_vreme: "",
+            opis_posla: "",
+            kriterijum: "",
+            start_datum: "",
+            status: "Aktivan",
+            tip_posla: "Regularan",
+            msg_template: ""
+        })
+    }
+
+    const openEditDialog = (item: any) => {
+        setEditId(item.id)
+        setFormData({
+            job_id: item.job_id || "",
+            posao: item.posao || "",
+            firma: item.firma || "",
+            lokacija: item.lokacija || "",
+            plata: item.plata || "",
+            tip_plate: item.tip_plate || "Mesečno",
+            radno_vreme: item.radno_vreme || "",
+            opis_posla: item.opis_posla || "",
+            kriterijum: item.kriterijum || "",
+            start_datum: item.start_datum || "",
+            status: item.status || "Aktivan",
+            tip_posla: item.tip_posla || "Regularan",
+            msg_template: item.msg_template || ""
+        })
+        setIsDialogOpen(true)
     }
 
     const filteredItems = useMemo(() => {
@@ -194,15 +243,15 @@ export function AgentDatabaseModule({
 
                     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                         <DialogTrigger asChild>
-                            <Button className="h-12 px-8 bg-emerald hover:bg-emerald-600 text-obsidian font-bold rounded-2xl shadow-[0_0_20px_rgba(16,185,129,0.2)] border-none transition-all hover:scale-[1.02]">
+                            <Button onClick={resetForm} className="h-12 px-8 bg-emerald hover:bg-emerald-600 text-obsidian font-bold rounded-2xl shadow-[0_0_20px_rgba(16,185,129,0.2)] border-none transition-all hover:scale-[1.02]">
                                 <Plus className="mr-2 h-5 w-5" /> New {config.item}
                             </Button>
                         </DialogTrigger>
                         <DialogContent className="max-w-2xl bg-obsidian/95 border-white/10 text-silver rounded-[2.5rem] p-8 shadow-2xl backdrop-blur-3xl">
                             <DialogHeader>
-                                <DialogTitle className="text-3xl font-outfit font-bold tracking-tight">Initialize {config.item} Node</DialogTitle>
+                                <DialogTitle className="text-3xl font-outfit font-bold tracking-tight">{editId ? `Re-calibrate ${config.item}` : `Initialize ${config.item} Node`}</DialogTitle>
                                 <DialogDescription className="text-zinc-500 font-outfit text-base italic">
-                                    Injecting fresh context into the agentic reasoning engine...
+                                    {editId ? "Updating existing context parameters..." : "Injecting fresh context into the agentic reasoning engine..."}
                                 </DialogDescription>
                             </DialogHeader>
                             <div className="grid gap-6 py-8">
@@ -295,7 +344,7 @@ export function AgentDatabaseModule({
                             </div>
                             <div className="flex justify-end gap-3 pt-4">
                                 <Button variant="ghost" onClick={() => setIsDialogOpen(false)} className="h-12 px-6 text-zinc-500 font-outfit hover:text-white">Cancel</Button>
-                                <Button onClick={handleCreateEntry} className="h-12 px-10 bg-emerald text-obsidian font-bold rounded-xl hover:bg-emerald-600 transition-all">Capture Node</Button>
+                                <Button onClick={handleSaveEntry} className="h-12 px-10 bg-emerald text-obsidian font-bold rounded-xl hover:bg-emerald-600 transition-all">{editId ? "Save Changes" : "Capture Node"}</Button>
                             </div>
                         </DialogContent>
                     </Dialog>
@@ -405,11 +454,11 @@ export function AgentDatabaseModule({
                                         </TableCell>
                                         <TableCell className="text-right pr-8">
                                             <div className="flex items-center justify-end gap-2.5 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-4 group-hover:translate-x-0">
-                                                <Button variant="ghost" size="icon" className="w-10 h-10 rounded-xl bg-white/5 hover:bg-emerald/10 hover:text-emerald transition-all">
-                                                    <ArrowUpRight className="w-4 h-4" />
+                                                <Button variant="ghost" size="icon" onClick={() => openEditDialog(item)} className="w-10 h-10 rounded-xl bg-white/5 hover:bg-emerald/10 hover:text-emerald transition-all">
+                                                    <Pencil className="w-4 h-4" />
                                                 </Button>
-                                                <Button variant="ghost" size="icon" className="w-10 h-10 rounded-xl bg-white/5 text-zinc-500 hover:text-white transition-all">
-                                                    <MoreHorizontal className="w-4 h-4" />
+                                                <Button variant="ghost" size="icon" onClick={() => handleDelete(item.id)} className="w-10 h-10 rounded-xl bg-white/5 text-zinc-500 hover:bg-red-500/10 hover:text-red-500 transition-all">
+                                                    <Trash className="w-4 h-4" />
                                                 </Button>
                                             </div>
                                         </TableCell>

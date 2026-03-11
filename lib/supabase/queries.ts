@@ -60,6 +60,36 @@ export async function createJob(jobData: any) {
     return data
 }
 
+export async function updateJob(id: string, jobData: any) {
+    const supabase = createClient()
+    const { data, error } = await supabase
+        .from('jobs')
+        .update(jobData)
+        .eq('id', id)
+        .select()
+        .single()
+
+    if (error) {
+        console.error('Error updating job:', error)
+        throw error
+    }
+    return data
+}
+
+export async function deleteJob(id: string) {
+    const supabase = createClient()
+    const { error } = await supabase
+        .from('jobs')
+        .delete()
+        .eq('id', id)
+
+    if (error) {
+        console.error('Error deleting job:', error)
+        throw error
+    }
+    return true
+}
+
 export async function getLeadsByClientId(clientId: string) {
     const supabase = createClient()
     const { data, error } = await supabase
