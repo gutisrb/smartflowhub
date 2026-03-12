@@ -260,17 +260,6 @@ export function AgentDatabaseModule({
                                 <div className="grid grid-cols-2 gap-6">
                                     <div className="space-y-2">
                                         <Label className="text-[10px] text-zinc-500 uppercase tracking-[0.2em] pl-1 font-bold">
-                                            {terminology.title === "Recruitment" ? "Job ID" : "Node Identifier"}
-                                        </Label>
-                                        <Input
-                                            placeholder={terminology.title === "Recruitment" ? "MJ-2024-001" : "NODE-404"}
-                                            className="h-12 bg-white/5 border-white/10 rounded-xl focus:border-emerald/40 transition-all font-outfit"
-                                            value={formData.job_id}
-                                            onChange={e => setFormData({ ...formData, job_id: e.target.value })}
-                                        />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label className="text-[10px] text-zinc-500 uppercase tracking-[0.2em] pl-1 font-bold">
                                             {terminology.title === "Recruitment" ? "Job Title" : "Node Description"}
                                         </Label>
                                         <Input
