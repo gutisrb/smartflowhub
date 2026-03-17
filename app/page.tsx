@@ -11,6 +11,8 @@ import { LogOut, Bell, Search, Sparkles } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 // Import module components
+import { PipelineModule } from "@/components/modules/pipeline-module"
+import { LeadsModule } from "@/components/modules/leads-module"
 import { GrowthEngineModule } from "@/components/modules/growth-engine-module"
 import { EmailOutreachModule } from "@/components/modules/email-outreach-module"
 import { LinkedInAgentModule } from "@/components/modules/linkedin-agent-module"
@@ -18,9 +20,10 @@ import { SocialChatbotModule } from "@/components/modules/social-chatbot-module"
 import { WebsiteChatbotModule } from "@/components/modules/website-chatbot-module"
 import { AgentDatabaseModule } from "@/components/modules/agent-database-module"
 import { AgentLeadsModule } from "@/components/modules/agent-leads-module"
+import { ChatbotAnalyticsModule } from "@/components/modules/chatbot-analytics-module"
 
 export default function DashboardPage() {
-  const [activeModule, setActiveModule] = useState<ModuleKey>('business-crm')
+  const [activeModule, setActiveModule] = useState<ModuleKey>('pipeline')
   const [clientId, setClientId] = useState<string | null>(null)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [clientName, setClientName] = useState("")
@@ -67,27 +70,27 @@ export default function DashboardPage() {
     setIsAuthenticated(false)
     setClientId(null)
     setUserEmail(null)
-    setActiveModule('business-crm')
+    setActiveModule('pipeline')
   }
 
   const terminology = useMemo(() => {
     const isRecruitment =
-      clientId === '7ac02189-d0ec-4532-baa6-d7d4dc84b87c' || // Avala
+      clientId === '7ac02189-d0ec-4532-baa6-d7d4dc84b87c' || // mjob (formerly Avala)
       clientId === 'OZ Avala' ||
       clientName?.toLowerCase().includes('mjob')
 
     if (isRecruitment) {
       return {
-        title: "Recruitment",
+        title: "Regrutacija",
         highlight: "Engine",
-        entity: "Candidate",
-        entities: "Candidates",
-        group: "Position",
-        groups: "Positions",
-        dbTitle: "Recruitment Database",
-        dbItem: "Opportunity",
-        searchPlaceholder: "Search candidates, roles...",
-        tableHeaders: ["Candidate Profile", "Applied Position", "Lifecycle Phase", "Activity"]
+        entity: "Kandidat",
+        entities: "Kandidati",
+        group: "Pozicija",
+        groups: "Pozicije",
+        dbTitle: "Baza Regrutacije",
+        dbItem: "Oglas",
+        searchPlaceholder: "Pretraži kandidate, pozicije...",
+        tableHeaders: ["Profil Kandidata", "Prijavljena Pozicija", "Faza Procesa", "Aktivnost"]
       }
     }
 
@@ -110,7 +113,7 @@ export default function DashboardPage() {
     const isRecruitment = clientName?.toLowerCase().includes('mjob')
     if (isRecruitment) {
       return availableModules.filter(m =>
-        ['business-crm', 'agent-database', 'agent-leads'].includes(m.key)
+        ['pipeline', 'leads', 'business-crm', 'agent-database', 'agent-leads', 'social-chatbot', 'chatbot-analytics'].includes(m.key)
       )
     }
     return availableModules
@@ -134,12 +137,16 @@ export default function DashboardPage() {
     const settings = getActiveModuleSettings()
 
     switch (activeModule) {
+      case 'pipeline':
+        return <PipelineModule clientId={clientId} />
+      case 'leads':
+        return <LeadsModule clientId={clientId} />
       case 'growth-engine':
       case 'business-crm':
         return <GrowthEngineModule
           clientId={clientId}
           tableName="kontakti"
-          statuses={settings.statuses || ['Novi Lead', 'Kontaktiran', 'Meeting Booked', 'Closed', 'Lost']}
+          statuses={settings.statuses || ['Novi Lead', 'Kontaktiran', 'Meeting Booked', 'Closed', 'Lost', 'enriched', 'Enriched', 'Sent']}
         />
       case 'email-outreach':
         return <EmailOutreachModule
@@ -156,6 +163,8 @@ export default function DashboardPage() {
         return <SocialChatbotModule clientId={clientId} />
       case 'website-chatbot':
         return <WebsiteChatbotModule clientId={clientId} />
+      case 'chatbot-analytics':
+        return <ChatbotAnalyticsModule clientId={clientId} />
       default:
         return <div className="p-8 text-center glass-card rounded-2xl">Module node offline or restricted</div>
     }
@@ -191,7 +200,6 @@ export default function DashboardPage() {
           <header className="h-20 flex items-center justify-between px-10 shrink-0 border-b border-white/5 bg-white/[0.02]">
             <div className="flex items-center gap-6">
               <div className="flex flex-col">
-                <span className="text-[10px] font-bold text-emerald uppercase tracking-[0.3em] mb-1">Lead Acq System</span>
                 <h1 className="text-2xl font-outfit font-light text-silver tracking-tight">
                   {getModuleLabel()}
                 </h1>

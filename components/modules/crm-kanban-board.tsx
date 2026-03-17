@@ -173,14 +173,14 @@ export function CRMKanbanBoard({
                                                                                             className="text-xs hover:bg-emerald-500/10 focus:bg-emerald-500/10 focus:text-emerald-400 transition-colors"
                                                                                         >
                                                                                             <Sparkles className="h-3 w-3 mr-2 text-emerald" />
-                                                                                            Edit {terminology.entity}
+                                                                                            Izmeni {terminology.entity}
                                                                                         </DropdownMenuItem>
                                                                                         <DropdownMenuItem
                                                                                             onClick={() => onDeleteLead?.(lead.id)}
                                                                                             className="text-xs text-rose-400 hover:bg-rose-500/10 focus:bg-rose-500/10 focus:text-rose-400 transition-colors"
                                                                                         >
                                                                                             <Trash2 className="h-3 w-3 mr-2" />
-                                                                                            Delete {terminology.entity}
+                                                                                            Obriši {terminology.entity}
                                                                                         </DropdownMenuItem>
                                                                                     </DropdownMenuContent>
                                                                                 </DropdownMenu>

@@ -13,7 +13,7 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { MessageSquare, MoreHorizontal } from "lucide-react"
-import { getCandidatesByClientId } from "@/lib/supabase/queries"
+import { getKandidatiByClientId } from "@/lib/supabase/queries"
 
 interface SocialCandidatesModuleProps {
     clientId: string
@@ -30,7 +30,7 @@ export function SocialCandidatesModule({ clientId }: SocialCandidatesModuleProps
 
     const loadCandidates = async () => {
         if (!clientId) return
-        const data = await getCandidatesByClientId(clientId)
+        const data = await getKandidatiByClientId(clientId)
         setCandidates(data || [])
     }
 

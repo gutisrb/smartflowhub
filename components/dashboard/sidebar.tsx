@@ -23,10 +23,10 @@ interface CategoryConfig {
 }
 
 const CATEGORY_CONFIG: CategoryConfig[] = [
-  { key: 'crm', label: 'Growth Engine', collapsible: false, icon: Zap },
-  { key: 'social', label: 'Inbound Channels', collapsible: true, icon: Database },
+  { key: 'crm', label: 'Sistem Rasta', collapsible: false, icon: Zap },
+  { key: 'social', label: 'Kanali Akvizicije', collapsible: true, icon: Database },
   { key: 'analytics', label: 'Market Intelligence', collapsible: false, icon: BarChart3 },
-  { key: 'settings', label: 'System Config', collapsible: false, icon: Settings },
+  { key: 'settings', label: 'Podešavanja', collapsible: false, icon: Settings },
 ]
 
 export function Sidebar({ currentView, onViewChange, clientName, clientId, modules: propModules, loading: propLoading }: SidebarProps) {
@@ -90,8 +90,8 @@ export function Sidebar({ currentView, onViewChange, clientName, clientId, modul
             <div className="absolute -top-1 -right-1 w-3 h-3 bg-emerald border-2 border-obsidian rounded-full animate-pulse" />
           </div>
           <div className="flex flex-col">
-            <span className="text-xs font-bold text-emerald uppercase tracking-[0.2em] leading-none mb-1">Photonic</span>
-            <span className="text-xl font-outfit font-medium text-silver tracking-tight leading-none group-hover:text-white transition-colors">OS</span>
+            <span className="text-xs font-bold text-emerald uppercase tracking-[0.2em] leading-none mb-1">Smartflow</span>
+            <span className="text-xl font-outfit font-medium text-silver tracking-tight leading-none group-hover:text-white transition-colors">Dashboard</span>
           </div>
         </div>
       </div>

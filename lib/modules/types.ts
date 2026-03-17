@@ -1,6 +1,8 @@
 import { LucideIcon } from "lucide-react"
 
 export type ModuleKey =
+  | 'pipeline'
+  | 'leads'
   | 'business-crm'
   | 'email-outreach'
   | 'linkedin-agent'
@@ -8,6 +10,7 @@ export type ModuleKey =
   | 'agent-leads'
   | 'social-chatbot'
   | 'website-chatbot'
+  | 'chatbot-analytics'
   | 'growth-engine'
 
 export type ModuleCategory = 'social' | 'outreach' | 'analytics' | 'settings' | 'crm'

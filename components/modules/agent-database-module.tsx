@@ -13,16 +13,14 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
     Plus,
-    MoreHorizontal,
     Database,
     Search,
     RefreshCw,
-    Layers,
-    Sparkles,
-    ArrowUpRight,
     Briefcase,
     MapPin,
-    Coins,
+    Phone,
+    Clock,
+    CalendarDays,
     Pencil,
     Trash
 } from "lucide-react"
@@ -79,19 +77,22 @@ export function AgentDatabaseModule({
     const [editId, setEditId] = useState<string | null>(null)
 
     const [formData, setFormData] = useState({
-        job_id: "",
         posao: "",
         firma: "",
         lokacija: "",
+        employer_address: "",
         plata: "",
         tip_plate: "Mesečno",
         radno_vreme: "",
+        smene: "",
         opis_posla: "",
         kriterijum: "",
         start_datum: "",
         status: "Aktivan",
         tip_posla: "Regularan",
-        msg_template: ""
+        msg_template: "",
+        employer_contact: "",
+        show_template: "off"
     })
 
     const loadData = useCallback(async () => {
@@ -102,7 +103,7 @@ export function AgentDatabaseModule({
             setItems(data || [])
         } catch (error) {
             console.error("Failed to load data", error)
-            toast.error("Database Connection Error")
+            toast.error("Greška u konekciji sa bazom")
         }
         setLoading(false)
     }, [clientId])
@@ -120,37 +121,49 @@ export function AgentDatabaseModule({
     const handleSaveEntry = async () => {
         if (!clientId) return
         try {
-            const entryData = { ...formData, client_id: clientId }
+            const { show_template, smene, ...jobFields } = formData
+            const entryData = { ...jobFields, client_id: clientId }
             if (editId) {
                 const updated = await updateJob(editId, entryData)
                 if (updated) {
                     setItems(items.map(i => i.id === editId ? updated : i))
-                    toast.success("Node Re-calibrated Successfully")
+                    toast.success("Podaci su uspešno ažurirani")
                 }
             } else {
                 const created = await createJob(entryData)
                 if (created) {
                     setItems([created, ...items])
-                    toast.success("Node Initialized Successfully")
+                    toast.success("Novi oglas je uspešno kreiran")
+                    // Auto-trigger Instagram posting workflow
+                    try {
+                        await fetch("http://localhost:5678/webhook/oz-avala-job-post-live", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ record: created, msg_template: created.msg_template ?? "" })
+                        })
+                        toast.success("Posting na Instagram je pokrenut")
+                    } catch {
+                        toast.warning("Oglas je sačuvan, ali Instagram posting nije uspeo")
+                    }
                 }
             }
             setIsDialogOpen(false)
             resetForm()
         } catch (error) {
             console.error("Failed to save entry", error)
-            toast.error("Handshake Refused")
+            toast.error("Greška prilikom čuvanja")
         }
     }
 
     const handleDelete = async (id: string) => {
-        if (confirm("Are you sure you want to completely erase this node from the database?")) {
+        if (confirm("Da li ste sigurni da želite da obrišete ovaj oglas?")) {
             try {
                 await deleteJob(id)
                 setItems(items.filter(i => i.id !== id))
-                toast.success("Node Erased Successfully")
+                toast.success("Oglas je obrisan")
             } catch (error) {
                 console.error("Failed to delete entry", error)
-                toast.error("Error erasing node")
+                toast.error("Greška pri brisanju")
             }
         }
     }
@@ -158,38 +171,44 @@ export function AgentDatabaseModule({
     const resetForm = () => {
         setEditId(null)
         setFormData({
-            job_id: "",
             posao: "",
             firma: "",
             lokacija: "",
+            employer_address: "",
             plata: "",
             tip_plate: "Mesečno",
             radno_vreme: "",
+            smene: "",
             opis_posla: "",
             kriterijum: "",
             start_datum: "",
             status: "Aktivan",
             tip_posla: "Regularan",
-            msg_template: ""
+            msg_template: "",
+            employer_contact: "",
+            show_template: "off"
         })
     }
 
     const openEditDialog = (item: any) => {
         setEditId(item.id)
         setFormData({
-            job_id: item.job_id || "",
             posao: item.posao || "",
             firma: item.firma || "",
             lokacija: item.lokacija || "",
+            employer_address: item.employer_address || "",
             plata: item.plata || "",
             tip_plate: item.tip_plate || "Mesečno",
             radno_vreme: item.radno_vreme || "",
+            smene: item.smene || "",
             opis_posla: item.opis_posla || "",
             kriterijum: item.kriterijum || "",
             start_datum: item.start_datum || "",
             status: item.status || "Aktivan",
             tip_posla: item.tip_posla || "Regularan",
-            msg_template: item.msg_template || ""
+            msg_template: item.msg_template || "",
+            employer_contact: item.employer_contact || "",
+            show_template: item.show_template || "off"
         })
         setIsDialogOpen(true)
     }
@@ -197,17 +216,16 @@ export function AgentDatabaseModule({
     const filteredItems = useMemo(() => {
         return items.filter(item =>
             item.posao?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            item.firma?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            item.job_id?.toLowerCase().includes(searchQuery.toLowerCase())
+            item.firma?.toLowerCase().includes(searchQuery.toLowerCase())
         )
     }, [items, searchQuery])
 
     const config = useMemo(() => {
         return {
-            label: terminology.dbTitle || "Agent Database",
-            item: terminology.dbItem || terminology.entity || "Node",
+            label: terminology.title === "Regrutacija" || terminology.title === "Recruitment" ? "Baza Pozicija" : (terminology.dbTitle || "Baza Agenta"),
+            item: terminology.title === "Regrutacija" || terminology.title === "Recruitment" ? "Pozicija" : (terminology.dbItem || terminology.entity || "Čvor"),
             color: "text-emerald",
-            icon: terminology.entity === "Candidate" ? Briefcase : Database
+            icon: terminology.title === "Recruitment" || terminology.entity === "Candidate" ? Briefcase : Database
         }
     }, [terminology])
 
@@ -221,12 +239,14 @@ export function AgentDatabaseModule({
                             <config.icon className={cn("w-6 h-6", config.color)} />
                         </div>
                         <h2 className="text-4xl font-outfit font-bold text-silver tracking-tight">
-                            {terminology.title === "Recruitment" ? "Recruitment" : "Databaza"} <span className={config.color}>{terminology.title === "Recruitment" ? "Database" : "Agenta"}</span>
+                            {terminology.title === "Recruitment" ? "Baza" : "Databaza"} <span className={config.color}>{terminology.title === "Recruitment" ? "Pozicija" : "Agenta"}</span>
                         </h2>
                         <Badge className="bg-white/5 text-silver/40 border-white/10 font-outfit text-[10px] uppercase tracking-widest">{config.label}</Badge>
                     </div>
                     <p className="text-silver/60 font-outfit text-lg max-w-xl">
-                        Autonomous knowledge management for <span className={cn("font-medium", config.color)}>{config.item} nodes</span>.
+                        {terminology.title === "Regrutacija" || terminology.title === "Recruitment"
+                            ? "Upravljanje oglasima i kriterijumima za AI selekciju kandidata."
+                            : `Autonomno upravljanje znanjem za ${config.item} čvorove.`}
                     </p>
                 </div>
 
@@ -240,50 +260,66 @@ export function AgentDatabaseModule({
                         )}
                     >
                         <RefreshCw className={cn("w-4 h-4 mr-2 text-emerald", refreshing && "animate-spin")} />
-                        Sync Context
+                        Osveži Bazu
                     </Button>
 
                     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                         <DialogTrigger asChild>
                             <Button onClick={resetForm} className="h-12 px-8 bg-emerald hover:bg-emerald-600 text-obsidian font-bold rounded-2xl shadow-[0_0_20px_rgba(16,185,129,0.2)] border-none transition-all hover:scale-[1.02]">
-                                <Plus className="mr-2 h-5 w-5" /> New {config.item}
+                                <Plus className="mr-2 h-5 w-5" /> {editId ? "Izmeni" : "Nova"} {config.item}
                             </Button>
                         </DialogTrigger>
-                        <DialogContent className="max-w-2xl bg-obsidian/95 border-white/10 text-silver rounded-[2.5rem] p-8 shadow-2xl backdrop-blur-3xl">
+                        <DialogContent className="max-w-3xl bg-obsidian/95 border-white/10 text-silver rounded-[2.5rem] p-8 shadow-2xl backdrop-blur-3xl max-h-[90vh] overflow-y-auto">
                             <DialogHeader>
-                                <DialogTitle className="text-3xl font-outfit font-bold tracking-tight">{editId ? `Re-calibrate ${config.item}` : `Initialize ${config.item} Node`}</DialogTitle>
+                                <DialogTitle className="text-3xl font-outfit font-bold tracking-tight">
+                                    {editId ? `Izmena: ${formData.posao}` : `Kreiranje Nove Pozicije`}
+                                </DialogTitle>
                                 <DialogDescription className="text-zinc-500 font-outfit text-base italic">
-                                    {editId ? "Updating existing context parameters..." : "Injecting fresh context into the agentic reasoning engine..."}
+                                    Definišite detalje i kriterijume koje će AI koristiti za evaluaciju kandidata.
                                 </DialogDescription>
                             </DialogHeader>
-                            <div className="grid gap-6 py-8">
+                            <div className="grid gap-6 py-6 font-outfit">
                                 <div className="grid grid-cols-2 gap-6">
                                     <div className="space-y-2">
-                                        <Label className="text-[10px] text-zinc-500 uppercase tracking-[0.2em] pl-1 font-bold">
-                                            {terminology.title === "Recruitment" ? "Job Title" : "Node Description"}
-                                        </Label>
+                                        <Label className="text-[10px] text-zinc-500 uppercase tracking-[0.2em] pl-1 font-bold">Naziv Pozicije</Label>
                                         <Input
-                                            placeholder={terminology.title === "Recruitment" ? "Promoter / Merchandiser" : "Agent Context Description"}
+                                            placeholder="npr. Konobar / Šanker"
                                             className="h-12 bg-white/5 border-white/10 rounded-xl focus:border-emerald/40 transition-all font-outfit"
                                             value={formData.posao}
                                             onChange={e => setFormData({ ...formData, posao: e.target.value })}
                                         />
                                     </div>
                                     <div className="space-y-2">
-                                        <Label className="text-[10px] text-zinc-500 uppercase tracking-[0.2em] pl-1 font-bold">
-                                            {terminology.title === "Recruitment" ? "Employer" : "Origin Node"}
-                                        </Label>
+                                        <Label className="text-[10px] text-zinc-500 uppercase tracking-[0.2em] pl-1 font-bold">Poslodavac (Firma)</Label>
                                         <Input
-                                            placeholder={terminology.title === "Recruitment" ? "Client Name" : "Origin Node"}
+                                            placeholder="npr. Cosmofun"
                                             className="h-12 bg-white/5 border-white/10 rounded-xl focus:border-emerald/40 transition-all font-outfit"
                                             value={formData.firma}
                                             onChange={e => setFormData({ ...formData, firma: e.target.value })}
                                         />
                                     </div>
                                     <div className="space-y-2">
-                                        <Label className="text-[10px] text-zinc-500 uppercase tracking-[0.2em] pl-1 font-bold">Location</Label>
+                                        <Label className="text-[10px] uppercase tracking-[0.2em] font-black text-zinc-500 pl-1">Kontakt Poslodavca</Label>
                                         <Input
-                                            placeholder="Remote / HQ Node"
+                                            placeholder="npr. +381 60 123 4567"
+                                            className="h-14 bg-white/5 border-white/10 rounded-2xl font-outfit focus:border-emerald/40 transition-all font-bold text-silver"
+                                            value={formData.employer_contact}
+                                            onChange={e => setFormData({ ...formData, employer_contact: e.target.value })}
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label className="text-[10px] uppercase tracking-[0.2em] font-black text-zinc-500 pl-1">Adresa Poslodavca</Label>
+                                        <Input
+                                            placeholder="npr. TC Ušće, Sprat 2"
+                                            className="h-14 bg-white/5 border-white/10 rounded-2xl font-outfit focus:border-emerald/40 transition-all font-bold text-silver"
+                                            value={formData.employer_address}
+                                            onChange={e => setFormData({ ...formData, employer_address: e.target.value })}
+                                        />
+                                    </div>
+                                    <div className="col-span-2 space-y-2">
+                                        <Label className="text-[10px] text-zinc-500 uppercase tracking-[0.2em] pl-1 font-bold">Lokacija / Grad</Label>
+                                        <Input
+                                            placeholder="npr. Beograd"
                                             className="h-12 bg-white/5 border-white/10 rounded-xl focus:border-emerald/40 transition-all font-outfit"
                                             value={formData.lokacija}
                                             onChange={e => setFormData({ ...formData, lokacija: e.target.value })}
@@ -291,65 +327,126 @@ export function AgentDatabaseModule({
                                     </div>
                                 </div>
 
-                                <div className="grid grid-cols-3 gap-4">
+                                <div className="grid grid-cols-3 gap-6">
                                     <div className="space-y-2">
-                                        <Label className="text-[10px] text-zinc-500 uppercase tracking-[0.2em] pl-1 font-bold">
-                                            {terminology.entity === "Candidate" ? "Salary / Compensation" : "Value Multiplier"}
-                                        </Label>
+                                        <Label className="text-[10px] text-zinc-500 uppercase tracking-[0.2em] pl-1 font-bold">Iznos Plate</Label>
                                         <Input
-                                            placeholder="€5,000"
+                                            placeholder="npr. 80.000"
                                             className="h-12 bg-white/5 border-white/10 rounded-xl focus:border-emerald/40 transition-all font-outfit"
                                             value={formData.plata}
                                             onChange={e => setFormData({ ...formData, plata: e.target.value })}
                                         />
                                     </div>
                                     <div className="space-y-2">
-                                        <Label className="text-[10px] text-zinc-500 uppercase tracking-[0.2em] pl-1 font-bold">
-                                            {terminology.entity === "Candidate" ? "Payment Period" : "Interval"}
-                                        </Label>
+                                        <Label className="text-[10px] text-zinc-500 uppercase tracking-[0.2em] pl-1 font-bold">Period Plaćanja</Label>
                                         <Select value={formData.tip_plate} onValueChange={v => setFormData({ ...formData, tip_plate: v })}>
                                             <SelectTrigger className="h-12 bg-white/5 border-white/10 rounded-xl focus:border-emerald/40 transition-all font-outfit">
                                                 <SelectValue />
                                             </SelectTrigger>
                                             <SelectContent className="bg-obsidian border-white/10 text-silver rounded-xl backdrop-blur-3xl">
-                                                <SelectItem value="Mesečno">Monthly</SelectItem>
-                                                <SelectItem value="Po satu">Hourly</SelectItem>
-                                                <SelectItem value="Godišnje">Yearly</SelectItem>
+                                                <SelectItem value="Mesečno">Mesečno</SelectItem>
+                                                <SelectItem value="Po satu">Po satu</SelectItem>
+                                                <SelectItem value="Dnevnica">Dnevnica</SelectItem>
                                             </SelectContent>
                                         </Select>
                                     </div>
                                     <div className="space-y-2">
-                                        <Label className="text-[10px] text-zinc-500 uppercase tracking-[0.2em] pl-1 font-bold">
-                                            {terminology.entity === "Candidate" ? "Job Status" : "Protocol Status"}
-                                        </Label>
+                                        <Label className="text-[10px] text-zinc-500 uppercase tracking-[0.2em] pl-1 font-bold">Status Oglasa</Label>
                                         <Select value={formData.status} onValueChange={v => setFormData({ ...formData, status: v })}>
                                             <SelectTrigger className="h-12 bg-white/5 border-white/10 rounded-xl focus:border-emerald/40 transition-all font-outfit">
                                                 <SelectValue />
                                             </SelectTrigger>
                                             <SelectContent className="bg-obsidian border-white/10 text-silver rounded-xl backdrop-blur-3xl">
-                                                <SelectItem value="Aktivan">Active</SelectItem>
-                                                <SelectItem value="Pauziran">Paused</SelectItem>
-                                                <SelectItem value="Završen">Archived</SelectItem>
+                                                <SelectItem value="Aktivan">Aktivan ✅</SelectItem>
+                                                <SelectItem value="Pauziran">Pauziran (Privremeno) ⏸️</SelectItem>
+                                                <SelectItem value="Završen">Završen (Arhiva) 🏁</SelectItem>
                                             </SelectContent>
                                         </Select>
                                     </div>
                                 </div>
 
-                                <div className="space-y-2">
-                                    <Label className="text-[10px] text-zinc-500 uppercase tracking-[0.2em] pl-1 font-bold">
-                                        {terminology.entity === "Candidate" ? "Job Requirements & Description" : "Intelligence Synthesis"}
-                                    </Label>
+                                <div className="grid grid-cols-3 gap-6">
+                                    <div className="space-y-2">
+                                        <Label className="text-[10px] text-zinc-500 uppercase tracking-[0.2em] pl-1 font-bold">Radno Vreme</Label>
+                                        <Input
+                                            placeholder="npr. 08 - 16h"
+                                            className="h-12 bg-white/5 border-white/10 rounded-xl focus:border-emerald/40 transition-all font-outfit"
+                                            value={formData.radno_vreme}
+                                            onChange={e => setFormData({ ...formData, radno_vreme: e.target.value })}
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label className="text-[10px] text-zinc-500 uppercase tracking-[0.2em] pl-1 font-bold">Smene</Label>
+                                        <Input
+                                            placeholder="npr. 2 smene"
+                                            className="h-12 bg-white/5 border-white/10 rounded-xl focus:border-emerald/40 transition-all font-outfit"
+                                            value={formData.smene}
+                                            onChange={e => setFormData({ ...formData, smene: e.target.value })}
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label className="text-[10px] text-zinc-500 uppercase tracking-[0.2em] pl-1 font-bold">Datum Početka</Label>
+                                        <Input
+                                            placeholder="npr. Odmah"
+                                            className="h-12 bg-white/5 border-white/10 rounded-xl focus:border-emerald/40 transition-all font-outfit"
+                                            value={formData.start_datum}
+                                            onChange={e => setFormData({ ...formData, start_datum: e.target.value })}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-6">
+                                    <div className="space-y-2">
+                                        <Label className="text-[10px] text-zinc-500 uppercase tracking-[0.2em] pl-1 font-bold">Opis Posla</Label>
+                                        <textarea
+                                            className="w-full h-32 bg-white/5 border-white/10 rounded-xl p-4 focus:border-emerald/40 transition-all font-outfit resize-none outline-none text-sm leading-relaxed"
+                                            placeholder="Glavne odgovornosti i zadaci..."
+                                            value={formData.opis_posla}
+                                            onChange={e => setFormData({ ...formData, opis_posla: e.target.value })}
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label className="text-[10px] text-zinc-500 uppercase tracking-[0.2em] pl-1 font-bold">Kriterijumi Selekcije</Label>
+                                        <textarea
+                                            className="w-full h-32 bg-white/5 border-white/10 rounded-xl p-4 focus:border-emerald/40 transition-all font-outfit resize-none outline-none text-sm leading-relaxed"
+                                            placeholder="Šta AI treba da traži kod kandidata..."
+                                            value={formData.kriterijum}
+                                            onChange={e => setFormData({ ...formData, kriterijum: e.target.value })}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="space-y-4 border-t border-white/5 pt-6">
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex flex-col">
+                                            <Label className="text-[10px] text-zinc-500 uppercase tracking-[0.2em] pl-1 font-bold">Automatski Odgovor</Label>
+                                            <span className="text-[10px] text-zinc-600 pl-1">Koristi šablon ili prepusti AI-u</span>
+                                        </div>
+                                        <Select value={formData.show_template} onValueChange={v => setFormData({ ...formData, show_template: v })}>
+                                            <SelectTrigger className="w-[180px] h-8 bg-white/5 border-white/10 text-xs">
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent className="bg-obsidian border-white/10 text-silver rounded-xl backdrop-blur-3xl">
+                                                <SelectItem value="on">Koristi Šablon</SelectItem>
+                                                <SelectItem value="off">AI Konverzacija</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
                                     <textarea
-                                        className="w-full h-32 bg-white/5 border-white/10 rounded-xl p-4 focus:border-emerald/40 transition-all font-outfit resize-none outline-none text-sm leading-relaxed"
-                                        placeholder="Detailed background for autonomous agent reasoning..."
-                                        value={formData.opis_posla}
-                                        onChange={e => setFormData({ ...formData, opis_posla: e.target.value })}
+                                        className={cn(
+                                            "w-full h-24 bg-white/5 border-white/10 rounded-xl p-4 focus:border-emerald/40 transition-all font-outfit resize-none outline-none text-sm leading-relaxed",
+                                            formData.show_template === "off" && "opacity-40 grayscale"
+                                        )}
+                                        disabled={formData.show_template === "off"}
+                                        placeholder="👋 Poštovani/a, Cosmofun traži radnike..."
+                                        value={formData.msg_template}
+                                        onChange={e => setFormData({ ...formData, msg_template: e.target.value })}
                                     />
                                 </div>
                             </div>
                             <div className="flex justify-end gap-3 pt-4">
-                                <Button variant="ghost" onClick={() => setIsDialogOpen(false)} className="h-12 px-6 text-zinc-500 font-outfit hover:text-white">Cancel</Button>
-                                <Button onClick={handleSaveEntry} className="h-12 px-10 bg-emerald text-obsidian font-bold rounded-xl hover:bg-emerald-600 transition-all">{editId ? "Save Changes" : "Capture Node"}</Button>
+                                <Button variant="ghost" onClick={() => setIsDialogOpen(false)} className="h-12 px-6 text-zinc-500 font-outfit hover:text-white">Otkaži</Button>
+                                <Button onClick={handleSaveEntry} className="h-12 px-10 bg-emerald text-obsidian font-bold rounded-xl hover:bg-emerald-600 transition-all">{editId ? "Sačuvaj izmene" : "Kreiraj Poziciju"}</Button>
                             </div>
                         </DialogContent>
                     </Dialog>
@@ -361,7 +458,7 @@ export function AgentDatabaseModule({
                 <div className="relative w-full sm:w-80 group">
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500 group-focus-within:text-emerald transition-colors" />
                     <Input
-                        placeholder="Search intelligence index..."
+                        placeholder="Pretraži bazu pozicija..."
                         className="pl-11 h-12 bg-white/5 border-white/5 rounded-2xl font-outfit focus:border-emerald/30 transition-all"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
@@ -369,9 +466,9 @@ export function AgentDatabaseModule({
                 </div>
 
                 <div className="flex items-center gap-2 p-1.5 bg-white/5 border border-white/5 rounded-2xl">
-                    <Button variant="ghost" size="sm" className="h-9 px-5 rounded-xl text-[10px] font-bold uppercase tracking-widest text-emerald bg-emerald/10 shadow-lg shadow-emerald/5">All Nodes</Button>
-                    <Button variant="ghost" size="sm" className="h-9 px-5 rounded-xl text-[10px] font-bold uppercase tracking-widest text-zinc-500 hover:text-silver">Inbound</Button>
-                    <Button variant="ghost" size="sm" className="h-9 px-5 rounded-xl text-[10px] font-bold uppercase tracking-widest text-zinc-500 hover:text-silver">Archived</Button>
+                    <Button variant="ghost" size="sm" className="h-9 px-5 rounded-xl text-[10px] font-bold uppercase tracking-widest text-emerald bg-emerald/10 shadow-lg shadow-emerald/5">Sve Pozicije</Button>
+                    <Button variant="ghost" size="sm" className="h-9 px-5 rounded-xl text-[10px] font-bold uppercase tracking-widest text-zinc-500 hover:text-silver">Aktivne</Button>
+                    <Button variant="ghost" size="sm" className="h-9 px-5 rounded-xl text-[10px] font-bold uppercase tracking-widest text-zinc-500 hover:text-silver">Arhivirane</Button>
                 </div>
             </div>
 
@@ -380,37 +477,31 @@ export function AgentDatabaseModule({
                 <Table>
                     <TableHeader className="bg-white/[0.02] border-b border-white/5">
                         <TableRow className="border-none hover:bg-transparent">
-                            <TableHead className="w-[120px] text-zinc-500 font-bold uppercase tracking-widest text-[10px] py-8 pl-8 font-outfit">
-                                {terminology.title === "Recruitment" ? "Job ID" : "Node ID"}
-                            </TableHead>
-                            <TableHead className="text-zinc-500 font-bold uppercase tracking-widest text-[10px] py-8 font-outfit">
-                                {terminology.title === "Recruitment" ? "Position Details" : `${config.item} Context`}
-                            </TableHead>
-                            <TableHead className="text-zinc-500 font-bold uppercase tracking-widest text-[10px] py-8 font-outfit">
-                                {terminology.title === "Recruitment" ? "Employer / Client" : `${terminology.group} Entity`}
-                            </TableHead>
-                            <TableHead className="text-zinc-500 font-bold uppercase tracking-widest text-[10px] py-8 font-outfit">
-                                {terminology.title === "Recruitment" ? "Compensation" : "Valuation"}
-                            </TableHead>
+                            <TableHead className="w-[100px] text-zinc-500 font-bold uppercase tracking-widest text-[10px] py-8 pl-8 font-outfit">Kod</TableHead>
+                            <TableHead className="text-zinc-500 font-bold uppercase tracking-widest text-[10px] py-8 font-outfit">Pozicija</TableHead>
+                            <TableHead className="text-zinc-500 font-bold uppercase tracking-widest text-[10px] py-8 font-outfit">Poslodavac</TableHead>
+                            <TableHead className="text-zinc-500 font-bold uppercase tracking-widest text-[10px] py-8 font-outfit">Smene & Vreme</TableHead>
+                            <TableHead className="text-zinc-500 font-bold uppercase tracking-widest text-[10px] py-8 font-outfit">Plata</TableHead>
+                            <TableHead className="text-zinc-500 font-bold uppercase tracking-widest text-[10px] py-8 font-outfit">Početak</TableHead>
                             <TableHead className="text-zinc-500 font-bold uppercase tracking-widest text-[10px] py-8 font-outfit text-center">Status</TableHead>
-                            <TableHead className="text-right pr-8 py-8 font-outfit">Actions</TableHead>
+                            <TableHead className="text-right pr-8 py-8 font-outfit">Akcije</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         <AnimatePresence mode="popLayout">
                             {loading ? (
                                 <TableRow className="border-none">
-                                    <TableCell colSpan={6} className="h-80 text-center">
+                                    <TableCell colSpan={8} className="h-80 text-center">
                                         <div className="flex flex-col items-center gap-4">
                                             <RefreshCw className="w-10 h-10 text-emerald animate-spin opacity-20" />
-                                            <span className="text-sm text-zinc-500 font-outfit font-light uppercase tracking-widest">Traversing Knowledge Graph...</span>
+                                            <span className="text-sm text-zinc-500 font-outfit font-light uppercase tracking-widest">Sinhronizacija sa Bazom...</span>
                                         </div>
                                     </TableCell>
                                 </TableRow>
                             ) : filteredItems.length === 0 ? (
                                 <TableRow className="border-none">
-                                    <TableCell colSpan={6} className="h-80 text-center">
-                                        <p className="text-sm font-outfit text-zinc-500 italic opacity-30 tracking-widest uppercase">No {config.item.toLowerCase()} nodes detected in current slice</p>
+                                    <TableCell colSpan={8} className="h-80 text-center">
+                                        <p className="text-sm font-outfit text-zinc-500 italic opacity-30 tracking-widest uppercase">Nema pronađenih pozicija u bazi</p>
                                     </TableCell>
                                 </TableRow>
                             ) : (
@@ -424,7 +515,7 @@ export function AgentDatabaseModule({
                                     >
                                         <TableCell className="py-7 pl-8 font-mono text-[10px] text-zinc-500 font-bold">
                                             <div className="bg-white/5 border border-white/5 px-2.5 py-1 rounded-lg w-fit group-hover:border-emerald/30 group-hover:text-emerald transition-all">
-                                                {item.job_id || 'NULL'}
+                                                {item.job_id || 'O-991'}
                                             </div>
                                         </TableCell>
                                         <TableCell>
@@ -434,32 +525,70 @@ export function AgentDatabaseModule({
                                             </div>
                                         </TableCell>
                                         <TableCell>
-                                            <div className="flex flex-col gap-2">
-                                                <div className="flex items-center gap-2.5 text-zinc-300 text-sm font-outfit">
-                                                    <Briefcase className="w-3.5 h-3.5 text-emerald/40" />
-                                                    {item.firma}
-                                                </div>
-                                                <div className="flex items-center gap-2.5 text-zinc-500 text-xs font-light font-outfit">
-                                                    <MapPin className="w-3.5 h-3.5 opacity-40" />
-                                                    {item.lokacija}
-                                                </div>
+                                            <div className="flex flex-col gap-1.5">
+                                                <span className="text-zinc-300 text-sm font-outfit font-bold">{item.firma}</span>
+                                                {item.employer_address && (
+                                                    <div className="flex items-center gap-1.5 text-zinc-500 text-xs font-outfit">
+                                                        <MapPin className="w-3 h-3 opacity-50 text-emerald shrink-0" />
+                                                        {item.employer_address}
+                                                    </div>
+                                                )}
+                                                {!item.employer_address && item.lokacija && (
+                                                    <div className="flex items-center gap-1.5 text-zinc-500 text-xs font-outfit">
+                                                        <MapPin className="w-3 h-3 opacity-50 text-emerald shrink-0" />
+                                                        {item.lokacija}
+                                                    </div>
+                                                )}
+                                                {item.employer_contact && (
+                                                    <a href={`tel:${item.employer_contact}`} className="flex items-center gap-1.5 text-cyan-400/70 text-xs font-outfit hover:text-cyan-400 transition-colors">
+                                                        <Phone className="w-3 h-3 shrink-0" />
+                                                        {item.employer_contact}
+                                                    </a>
+                                                )}
+                                            </div>
+                                        </TableCell>
+                                        <TableCell>
+                                            <div className="flex flex-col gap-1">
+                                                {item.smene ? (
+                                                    <div className="flex items-center gap-1.5 text-zinc-300 text-xs font-outfit font-medium">
+                                                        <Clock className="w-3 h-3 text-emerald opacity-70 shrink-0" />
+                                                        {item.smene}
+                                                    </div>
+                                                ) : null}
+                                                {item.radno_vreme ? (
+                                                    <div className="text-zinc-500 text-xs font-outfit">{item.radno_vreme}</div>
+                                                ) : (
+                                                    !item.smene && <span className="text-zinc-600 text-xs italic">—</span>
+                                                )}
                                             </div>
                                         </TableCell>
                                         <TableCell>
                                             <div className="flex flex-col">
-                                                <div className="flex items-center gap-2 text-emerald font-bold font-outfit text-lg tracking-tight">
+                                                <div className="flex items-center gap-2 text-emerald font-bold font-outfit text-base tracking-tight">
                                                     {item.plata}
                                                 </div>
-                                                <span className="text-[10px] text-zinc-500 mt-1 uppercase tracking-widest opacity-60 font-medium">{item.tip_plate}</span>
+                                                <span className="text-[10px] text-zinc-500 mt-0.5 uppercase tracking-widest opacity-60 font-medium">{item.tip_plate}</span>
                                             </div>
+                                        </TableCell>
+                                        <TableCell>
+                                            {item.start_datum ? (
+                                                <div className="flex items-center gap-1.5 text-zinc-300 text-xs font-outfit">
+                                                    <CalendarDays className="w-3 h-3 text-emerald opacity-70 shrink-0" />
+                                                    {item.start_datum}
+                                                </div>
+                                            ) : (
+                                                <span className="text-zinc-600 text-xs italic">—</span>
+                                            )}
                                         </TableCell>
                                         <TableCell className="text-center">
                                             <Badge
                                                 className={cn(
-                                                    "px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest border-none",
+                                                    "px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest border-none transition-all",
                                                     item.status === "Aktivan"
                                                         ? "bg-emerald/10 text-emerald shadow-[0_0_15px_rgba(16,185,129,0.1)]"
-                                                        : "bg-zinc-800 text-zinc-500"
+                                                        : item.status === "Pauziran"
+                                                            ? "bg-orange-500/10 text-orange-400"
+                                                            : "bg-zinc-800 text-zinc-500"
                                                 )}
                                             >
                                                 {item.status}
@@ -483,28 +612,7 @@ export function AgentDatabaseModule({
                 </Table>
             </GlassCard>
 
-            {/* System Intelligence Feed */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {[
-                    { title: "Graph Density", desc: "Autonomous reasoning nodes have reached threshold saturation for deployment.", icon: Layers, label: "Live Nodes" },
-                    { title: "Context Ready", desc: "Intelligence points synchronized with external Obsidian reservoirs successfully.", icon: Sparkles, label: "Synapse" },
-                    { title: "Vault Integrity", desc: "All knowledge shards encrypted and isolated within the primary client vault.", icon: Database, label: "Encrypted" }
-                ].map((intel, idx) => (
-                    <GlassCard key={idx} className="p-8 group hover:border-emerald/30 transition-all duration-700 relative overflow-hidden">
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-emerald/5 blur-[80px] rounded-full -mr-16 -mt-16 group-hover:bg-emerald/10 transition-colors" />
-                        <div className="flex items-center justify-between mb-6">
-                            <div className="w-12 h-12 rounded-2xl bg-emerald/10 flex items-center justify-center border border-emerald/20">
-                                <intel.icon className="w-6 h-6 text-emerald group-hover:scale-110 transition-transform duration-500" />
-                            </div>
-                            <Badge className="bg-white/5 text-zinc-500 text-[9px] uppercase tracking-widest border-none px-3 font-bold py-1">{intel.label}</Badge>
-                        </div>
-                        <h4 className="text-silver font-bold font-outfit text-2xl mb-3 tracking-tight">{intel.title}</h4>
-                        <p className="text-base text-silver/50 font-outfit font-light leading-relaxed">
-                            {intel.desc}
-                        </p>
-                    </GlassCard>
-                ))}
-            </div>
         </div>
     )
 }
+

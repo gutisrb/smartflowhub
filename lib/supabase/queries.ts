@@ -105,61 +105,62 @@ export async function getLeadsByClientId(clientId: string) {
     return data
 }
 
-export async function getCandidatesByClientId(clientId: string) {
+// B2C candidates (mjob/Avala) — dedicated kandidati table
+export async function getKandidatiByClientId(clientId: string) {
     const supabase = createClient()
     const { data, error } = await supabase
-        .from('kontakti')
+        .from('kandidati')
         .select('*')
         .eq('client_id', clientId)
         .order('created_at', { ascending: false })
 
     if (error) {
-        console.error('Error fetching candidates:', error)
+        console.error('Error fetching kandidati:', error)
         return []
     }
     return data
 }
 
-export async function createCandidate(candidateData: any) {
+export async function createKandidat(kandidatData: any) {
     const supabase = createClient()
     const { data, error } = await supabase
-        .from('kontakti')
-        .insert([candidateData])
+        .from('kandidati')
+        .insert([kandidatData])
         .select()
         .single()
 
     if (error) {
-        console.error('Error creating candidate:', error)
+        console.error('Error creating kandidat:', error)
         throw error
     }
     return data
 }
 
-export async function updateCandidate(id: string, candidateData: any) {
+export async function updateKandidat(id: string, updates: Record<string, any>) {
     const supabase = createClient()
     const { data, error } = await supabase
-        .from('kontakti')
-        .update(candidateData)
+        .from('kandidati')
+        .update(updates)
         .eq('id', id)
         .select()
         .single()
 
     if (error) {
-        console.error('Error updating candidate:', error)
+        console.error('Error updating kandidat:', error)
         throw error
     }
     return data
 }
 
-export async function deleteCandidate(id: string) {
+export async function deleteKandidat(id: string) {
     const supabase = createClient()
     const { error } = await supabase
-        .from('kontakti')
+        .from('kandidati')
         .delete()
         .eq('id', id)
 
     if (error) {
-        console.error('Error deleting candidate:', error)
+        console.error('Error deleting kandidat:', error)
         throw error
     }
     return true

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from "react"
 import { createClient } from "@/lib/supabase/client"
-import { createCandidate, updateCandidate, deleteCandidate } from "@/lib/supabase/queries"
+import { createKandidat, updateKandidat, deleteKandidat } from "@/lib/supabase/queries"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
@@ -40,7 +40,10 @@ import {
     Search,
     ChevronRight,
     ExternalLink,
-    Trash2
+    Trash2,
+    Star,
+    Globe,
+    Zap
 } from "lucide-react"
 import { toast } from "sonner"
 import { motion, AnimatePresence } from "framer-motion"
@@ -78,6 +81,8 @@ export function GrowthEngineModule({ clientId, tableName = "kontakti", statuses 
     const [isIntelligenceOpen, setIsIntelligenceOpen] = useState(false)
     const [viewMode, setViewMode] = useState<"table" | "board">("board")
     const [searchQuery, setSearchQuery] = useState("")
+    const [filterChip, setFilterChip] = useState<"sve" | "vreo" | "topao" | "nema_email" | "starred">("sve")
+    const [sortMode, setSortMode] = useState<"datum" | "prioritet">("prioritet")
     const [loading, setLoading] = useState(true)
     const [refreshing, setRefreshing] = useState(false)
     const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
@@ -98,32 +103,34 @@ export function GrowthEngineModule({ clientId, tableName = "kontakti", statuses 
     // Niche-aware terminology
     const terminology = useMemo(() => {
         const isRecruitment =
-            clientId === '7ac02189-d0ec-4532-baa6-d7d4dc84b87c' || // Avala
+            clientId === '7ac02189-d0ec-4532-baa6-d7d4dc84b87c' || // mjob (formerly Avala)
             clientId === 'OZ Avala' ||
             clientId?.toLowerCase().includes('mjob')
 
         if (isRecruitment) {
             return {
-                title: "Recruitment",
+                title: "Regrutacija",
                 highlight: "Engine",
-                entity: "Candidate",
-                entities: "Candidates",
-                group: "Position",
-                groups: "Positions",
-                searchPlaceholder: "Search candidates, roles...",
-                tableHeaders: ["Candidate Profile", "Applied Position", "Lifecycle Phase", "Activity"]
+                entity: "Kandidat",
+                entities: "Kandidati",
+                group: "Pozicija",
+                groups: "Pozicije",
+                searchPlaceholder: "Pretraži kandidate, pozicije...",
+                tableHeaders: ["Profil Kandidata", "Prijavljena Pozicija", "Faza Procesa", "Aktivnost"],
+                isRecruitment: true
             }
         }
 
         return {
             title: "Growth",
-            highlight: "Engine",
+            highlight: "Sistem",
             entity: "Lead",
             entities: "Leads",
-            group: "Company",
-            groups: "Companies",
-            searchPlaceholder: "Search trajectories, names...",
-            tableHeaders: ["Identity Profile", "Comms Node", "Vector Status", "Activity"]
+            group: "Kompanija",
+            groups: "Kompanije",
+            searchPlaceholder: "Pretraži klijente, imena...",
+            tableHeaders: ["Profil / Ime", "Kontakt", "Oferta", "Status Procesa", "Aktivnost"],
+            isRecruitment: false
         }
     }, [clientId])
 
@@ -137,7 +144,7 @@ export function GrowthEngineModule({ clientId, tableName = "kontakti", statuses 
 
         if (error) {
             console.error('Error fetching leads:', error)
-            toast.error("Data Sync Failure")
+            toast.error("Greška u sinhronizaciji podataka")
         } else {
             setLeads(data || [])
         }
@@ -179,11 +186,43 @@ export function GrowthEngineModule({ clientId, tableName = "kontakti", statuses 
                 .eq('id', id)
 
             if (error) throw error
-            toast.success("Status Synchronized")
+            toast.success("Status sinhronizovan")
         } catch (e) {
-            toast.error("Handshake Failed")
+            toast.error("Greška u sinhronizaciji")
             console.error(e)
             fetchLeads()
+        }
+    }
+
+    const handleServiceChange = async (id: string, newService: string) => {
+        setLeads(prev => prev.map(l => l.id === id ? { ...l, service: newService } : l))
+        try {
+            const { error } = await supabase
+                .from(tableName)
+                .update({ service: newService })
+                .eq('id', id)
+            if (error) throw error
+            toast.success("Oferta ažurirana")
+        } catch (e) {
+            toast.error("Greška u ažuriranju")
+            console.error(e)
+            fetchLeads()
+        }
+    }
+
+    const handleStarToggle = async (id: string, currentStarred: boolean) => {
+        const next = !currentStarred
+        setLeads(prev => prev.map(l => l.id === id ? { ...l, starred: next } : l))
+        try {
+            const { error } = await supabase
+                .from(tableName)
+                .update({ starred: next })
+                .eq('id', id)
+            if (error) throw error
+        } catch (e) {
+            setLeads(prev => prev.map(l => l.id === id ? { ...l, starred: currentStarred } : l))
+            toast.error("Greška u ažuriranju")
+            console.error(e)
         }
     }
 
@@ -193,14 +232,14 @@ export function GrowthEngineModule({ clientId, tableName = "kontakti", statuses 
     }
 
     const handleDeleteLead = async (id: string) => {
-        if (!confirm(`Are you sure you want to delete this ${terminology.entity.toLowerCase()}?`)) return
+        if (!confirm(`Da li ste sigurni da želite da obrišete ovaj ${terminology.entity.toLowerCase()}?`)) return
 
         try {
-            await deleteCandidate(id)
+            await deleteKandidat(id)
             setLeads(prev => prev.filter(l => l.id !== id))
-            toast.success(`${terminology.entity} Purged`)
+            toast.success(`${terminology.entity} obrisan`)
         } catch (e) {
-            toast.error("Purge Failed")
+            toast.error("Brisanje nije uspelo")
             console.error(e)
         }
     }
@@ -221,7 +260,7 @@ export function GrowthEngineModule({ clientId, tableName = "kontakti", statuses 
         if (!selectedLead) return
         setIsSaving(true)
         try {
-            const updated = await updateCandidate(selectedLead.id, newLead)
+            const updated = await updateKandidat(selectedLead.id, newLead)
             if (updated) {
                 setLeads(prev => prev.map(l => l.id === selectedLead.id ? updated : l))
                 setIsEditDialogOpen(false)
@@ -251,7 +290,7 @@ export function GrowthEngineModule({ clientId, tableName = "kontakti", statuses 
                 status: newLead.status || statuses[0]
             }
 
-            const result = await createCandidate(leadData)
+            const result = await createKandidat(leadData)
 
             if (result) {
                 setLeads(prev => [result, ...prev])
@@ -268,13 +307,33 @@ export function GrowthEngineModule({ clientId, tableName = "kontakti", statuses 
     }
 
     const filteredLeads = useMemo(() => {
-        return leads.filter(lead =>
+        let result = leads.filter(lead =>
+            !searchQuery ||
             lead.ime?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            lead.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
             lead.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
             lead.kompanija?.toLowerCase().includes(searchQuery.toLowerCase()) ||
             lead.company_name?.toLowerCase().includes(searchQuery.toLowerCase())
         )
-    }, [leads, searchQuery])
+
+        // Filter chips
+        if (filterChip === 'vreo') result = result.filter(l => l.kategorija === 'Vreo')
+        else if (filterChip === 'topao') result = result.filter(l => l.kategorija === 'Topao')
+        else if (filterChip === 'nema_email') result = result.filter(l => !l.email)
+        else if (filterChip === 'starred') result = result.filter(l => l.starred)
+
+        // Sort: starred always float to top, then by chosen sort mode
+        result = [...result].sort((a, b) => {
+            if (a.starred && !b.starred) return -1
+            if (!a.starred && b.starred) return 1
+            if (sortMode === 'prioritet') {
+                return (b.prioritet_skor || 0) - (a.prioritet_skor || 0)
+            }
+            return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()
+        })
+
+        return result
+    }, [leads, searchQuery, filterChip, sortMode])
 
     const stats = useMemo(() => {
         const total = leads.length
@@ -319,7 +378,7 @@ export function GrowthEngineModule({ clientId, tableName = "kontakti", statuses 
                         </Badge>
                     </div>
                     <p className="text-silver/40 font-outfit text-lg max-w-xl font-light">
-                        Unified {terminology.entity.toLowerCase()} intelligence and pipeline operation.
+                        Objedinjena inteligencija i upravljanje {(terminology.entities || 'Kandidatima').toLowerCase()} u procesu.
                     </p>
                 </div>
                 <div className="flex items-center gap-4">
@@ -331,7 +390,7 @@ export function GrowthEngineModule({ clientId, tableName = "kontakti", statuses 
                                 exit={{ opacity: 0, scale: 0.9 }}
                             >
                                 <Badge className="bg-rose-500/10 text-rose-400 border-rose-500/20 py-2.5 px-5 rounded-2xl font-bold animate-pulse shadow-[0_0_20px_rgba(244,63,94,0.1)]">
-                                    {stats.criticalLeads.length} Node Alerts
+                                    {stats.criticalLeads.length} Obaveštenja
                                 </Badge>
                             </motion.div>
                         )}
@@ -344,7 +403,7 @@ export function GrowthEngineModule({ clientId, tableName = "kontakti", statuses 
                         className="h-12 px-6 rounded-2xl bg-emerald text-obsidian font-outfit font-bold hover:bg-emerald/90 transition-all shadow-[0_0_20px_rgba(16,185,129,0.2)] group"
                     >
                         <Sparkles className="w-4 h-4 mr-2 group-hover:animate-pulse" />
-                        Add {terminology.entity}
+                        Dodaj {terminology.entity}
                     </Button>
                     <Button
                         variant="ghost"
@@ -355,43 +414,45 @@ export function GrowthEngineModule({ clientId, tableName = "kontakti", statuses 
                         )}
                     >
                         <RefreshCw className={cn("w-4 h-4 mr-2 text-emerald group-hover:rotate-180 transition-transform duration-700", refreshing && "animate-spin")} />
-                        Refresh Nodes
+                        Osveži Podatke
                     </Button>
                 </div>
             </div>
 
-            {/* Stats Prism */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <StatCard
-                    label={`Total ${terminology.entities}`}
-                    value={stats.total}
-                    sub="Active Database"
-                    icon={Users}
-                    trend={`+${Math.floor((stats.total / 10) + 1)} this week`}
-                />
-                <StatCard
-                    label="Outreach Cycles"
-                    value={stats.totalSent}
-                    sub="Personalized Sent"
-                    icon={Send}
-                    trend={`${((stats.totalSent / stats.total || 0) * 100).toFixed(0)}% coverage`}
-                />
-                <StatCard
-                    label="High Intent"
-                    value={stats.highIntent}
-                    sub="Qualified Nodes"
-                    icon={Sparkles}
-                    trend="Velocity: Optimal"
-                />
-                <StatCard
-                    label="Booked Ops"
-                    value={stats.booked}
-                    sub={`${stats.conversion}% conversion`}
-                    icon={CheckCircle2}
-                    trend="ROI Stabilized"
-                    highlight
-                />
-            </div>
+            {/* Stats Prism — board mode only */}
+            {viewMode === "board" && (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <StatCard
+                        label={`Ukupno ${terminology.entities}`}
+                        value={stats.total}
+                        sub="Aktivna Baza"
+                        icon={Users}
+                        trend={`+${Math.floor((stats.total / 10) + 1)} ove nedelje`}
+                    />
+                    <StatCard
+                        label="Ciklusi Komunikacije"
+                        value={stats.totalSent}
+                        sub="Personalizovane Poruke"
+                        icon={Send}
+                        trend={`${((stats.totalSent / stats.total || 0) * 100).toFixed(0)}% pokrivenost`}
+                    />
+                    <StatCard
+                        label="Visok Interes"
+                        value={stats.highIntent}
+                        sub="Kvalifikovani Kandidati"
+                        icon={Sparkles}
+                        trend="Brzina: Optimalna"
+                    />
+                    <StatCard
+                        label="Zakazano"
+                        value={stats.booked}
+                        sub={`${stats.conversion}% konverzija`}
+                        icon={CheckCircle2}
+                        trend="ROI Stabilizovan"
+                        highlight
+                    />
+                </div>
+            )}
 
             {/* Operational Layout */}
             <div className="space-y-6">
@@ -420,7 +481,7 @@ export function GrowthEngineModule({ clientId, tableName = "kontakti", statuses 
                                 onClick={() => setViewMode("board")}
                             >
                                 <LayoutGrid className="w-4 h-4 mr-2" />
-                                Pipeline
+                                Proces
                             </Button>
                             <Button
                                 variant="ghost"
@@ -432,7 +493,7 @@ export function GrowthEngineModule({ clientId, tableName = "kontakti", statuses 
                                 onClick={() => setViewMode("table")}
                             >
                                 <List className="w-4 h-4 mr-2" />
-                                Spectrum
+                                Lista
                             </Button>
                         </div>
                     </div>
@@ -455,78 +516,246 @@ export function GrowthEngineModule({ clientId, tableName = "kontakti", statuses 
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -10 }}
                             transition={{ duration: 0.4 }}
+                            className="space-y-4"
                         >
+                            {/* Filter chips + sort — Lista / SmartFlow only */}
+                            {!terminology.isRecruitment && (
+                                <div className="flex items-center justify-between gap-4 flex-wrap px-1">
+                                    <div className="flex items-center gap-1.5 flex-wrap">
+                                        {([
+                                            { key: 'sve', label: 'Sve' },
+                                            { key: 'vreo', label: '🔴 Vreo' },
+                                            { key: 'topao', label: '🟡 Topao' },
+                                            { key: 'nema_email', label: 'Nema Email' },
+                                            { key: 'starred', label: '★ Starred' },
+                                        ] as const).map(chip => (
+                                            <button
+                                                key={chip.key}
+                                                onClick={() => setFilterChip(chip.key)}
+                                                className={cn(
+                                                    "text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg border transition-all",
+                                                    filterChip === chip.key
+                                                        ? 'bg-emerald/15 border-emerald/40 text-emerald'
+                                                        : 'bg-white/5 border-white/10 text-zinc-500 hover:text-silver hover:border-white/20'
+                                                )}
+                                            >
+                                                {chip.label}
+                                            </button>
+                                        ))}
+                                    </div>
+                                    <button
+                                        onClick={() => setSortMode(m => m === 'prioritet' ? 'datum' : 'prioritet')}
+                                        className="text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg border bg-white/5 border-white/10 text-zinc-500 hover:text-silver hover:border-white/20 transition-all"
+                                    >
+                                        Sort: {sortMode === 'prioritet' ? 'Prioritet' : 'Datum'}
+                                    </button>
+                                </div>
+                            )}
+                            {/* Compact stats bar — Lista mode only */}
+                            {!terminology.isRecruitment && (
+                                <div className="flex items-center gap-5 px-1">
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-[9px] text-zinc-600 uppercase tracking-widest font-bold">Ukupno</span>
+                                        <span className="text-sm font-black text-silver">{stats.total}</span>
+                                    </div>
+                                    <div className="w-px h-3 bg-white/10" />
+                                    <div className="flex items-center gap-1.5">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-rose-400" />
+                                        <span className="text-[9px] text-zinc-600 uppercase tracking-widest font-bold">Vreo</span>
+                                        <span className="text-sm font-black text-rose-400">{leads.filter(l => l.kategorija === 'Vreo').length}</span>
+                                    </div>
+                                    <div className="w-px h-3 bg-white/10" />
+                                    <div className="flex items-center gap-1.5">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                                        <span className="text-[9px] text-zinc-600 uppercase tracking-widest font-bold">Topao</span>
+                                        <span className="text-sm font-black text-amber-400">{leads.filter(l => l.kategorija === 'Topao').length}</span>
+                                    </div>
+                                    <div className="w-px h-3 bg-white/10" />
+                                    <div className="flex items-center gap-1.5">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-emerald" />
+                                        <span className="text-[9px] text-zinc-600 uppercase tracking-widest font-bold">Email</span>
+                                        <span className="text-sm font-black text-emerald">{leads.filter(l => l.email).length}<span className="text-zinc-600 font-normal">/{stats.total}</span></span>
+                                    </div>
+                                    <div className="w-px h-3 bg-white/10" />
+                                    <div className="flex items-center gap-1.5">
+                                        <Star className="w-3 h-3 text-amber-400 fill-amber-400" />
+                                        <span className="text-sm font-black text-amber-400">{leads.filter(l => l.starred).length}</span>
+                                        <span className="text-[9px] text-zinc-600 uppercase tracking-widest font-bold">starred</span>
+                                    </div>
+                                </div>
+                            )}
                             <GlassCard className="rounded-[2.5rem] overflow-hidden p-0 border-white/10 shadow-2xl">
                                 <Table>
                                     <TableHeader className="bg-white/[0.03] border-b border-white/5">
                                         <TableRow className="hover:bg-transparent border-none">
                                             {terminology.tableHeaders.map((header, i) => (
                                                 <TableHead key={i} className={cn(
-                                                    "text-zinc-500 font-black text-[9px] uppercase tracking-[0.2em] py-8",
+                                                    "text-zinc-500 font-black text-[9px] uppercase tracking-[0.2em] py-6",
                                                     i === 0 ? "pl-10" : ""
                                                 )}>
                                                     {header}
                                                 </TableHead>
                                             ))}
-                                            <TableHead className="text-right pr-10 py-8 text-zinc-500 font-black text-[9px] uppercase tracking-[0.2em]">Actions</TableHead>
+                                            <TableHead className="text-right pr-10 py-6 text-zinc-500 font-black text-[9px] uppercase tracking-[0.2em]">Akcije</TableHead>
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
                                         {filteredLeads.length === 0 ? (
                                             <TableRow className="hover:bg-transparent border-none">
-                                                <TableCell colSpan={5} className="h-60 text-center">
-                                                    <p className="text-sm font-light tracking-[0.3em] uppercase text-zinc-700">No matching trajectories</p>
+                                                <TableCell colSpan={terminology.isRecruitment ? 5 : 6} className="h-60 text-center">
+                                                    <p className="text-sm font-light tracking-[0.3em] uppercase text-zinc-700">Nema rezultata pretrage</p>
                                                 </TableCell>
                                             </TableRow>
                                         ) : (
                                             filteredLeads.map((lead) => (
                                                 <TableRow key={lead.id} className="group hover:bg-white/[0.03] border-white/5 transition-all duration-300">
-                                                    <TableCell className="pl-10 py-6">
-                                                        <div className="font-outfit text-silver group-hover:text-white transition-colors text-lg font-medium">{lead.ime}</div>
-                                                        <div className="text-xs text-zinc-500 font-light mt-1 tracking-wide">{lead.kompanija || lead.company_name}</div>
-                                                    </TableCell>
-                                                    <TableCell className="py-6">
-                                                        <div className="flex flex-col text-sm text-zinc-400 font-light font-outfit tracking-wide">
-                                                            <span className="group-hover:text-emerald transition-colors">{lead.email}</span>
-                                                            <span className="text-[10px] text-zinc-600 mt-1 uppercase tracking-widest">{lead.niche || 'No Sector'}</span>
+                                                    {/* Col 1: Name + quality signals */}
+                                                    <TableCell className="pl-10 py-4">
+                                                        <div className="flex items-start gap-2">
+                                                            <button
+                                                                onClick={e => { e.stopPropagation(); handleStarToggle(lead.id, !!lead.starred) }}
+                                                                className="mt-0.5 shrink-0 transition-all hover:scale-125"
+                                                                title={lead.starred ? "Ukloni star" : "Dodaj star"}
+                                                            >
+                                                                <Star className={cn(
+                                                                    "w-3.5 h-3.5 transition-colors",
+                                                                    lead.starred ? "text-amber-400 fill-amber-400" : "text-zinc-700 hover:text-amber-400"
+                                                                )} />
+                                                            </button>
+                                                            <div>
+                                                                <div className="font-outfit text-silver group-hover:text-white transition-colors font-medium leading-snug">
+                                                                    {lead.ime || lead.name || lead.company_name}
+                                                                </div>
+                                                                <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+                                                                    {lead.kategorija && (
+                                                                        <span className={cn(
+                                                                            "text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-md",
+                                                                            lead.kategorija === 'Vreo' ? 'bg-rose-500/15 text-rose-400' :
+                                                                            lead.kategorija === 'Topao' ? 'bg-amber-500/15 text-amber-400' :
+                                                                            'bg-blue-500/15 text-blue-400'
+                                                                        )}>
+                                                                            {lead.kategorija}
+                                                                        </span>
+                                                                    )}
+                                                                    {lead.intake_data?.page_followers > 0 && (
+                                                                        <span className="text-[10px] text-zinc-600">
+                                                                            {lead.intake_data.page_followers >= 1000
+                                                                                ? `${(lead.intake_data.page_followers / 1000).toFixed(0)}k`
+                                                                                : lead.intake_data.page_followers} pratilaca
+                                                                        </span>
+                                                                    )}
+                                                                    {lead.intake_data?.active_ads_count > 0 && (
+                                                                        <span className="text-[10px] text-zinc-600">
+                                                                            · <Zap className="w-2.5 h-2.5 inline text-amber-500/70" /> {lead.intake_data.active_ads_count} oglasa
+                                                                        </span>
+                                                                    )}
+                                                                </div>
+                                                            </div>
                                                         </div>
                                                     </TableCell>
-                                                    <TableCell className="py-6">
+                                                    {/* Col 2: Contact + enrichment status */}
+                                                    <TableCell className="py-4">
+                                                        <div className="flex flex-col gap-1">
+                                                            <div className="flex items-center gap-1.5">
+                                                                <div className={cn(
+                                                                    "w-1.5 h-1.5 rounded-full shrink-0",
+                                                                    lead.email ? 'bg-emerald shadow-[0_0_4px_rgba(16,185,129,0.6)]' : 'bg-zinc-700'
+                                                                )} />
+                                                                <span className={cn(
+                                                                    "text-sm font-outfit",
+                                                                    lead.email ? 'text-zinc-300 group-hover:text-emerald transition-colors' : 'text-zinc-600 italic text-[11px]'
+                                                                )}>
+                                                                    {lead.email || 'nema emaila'}
+                                                                </span>
+                                                            </div>
+                                                            <div className="flex items-center gap-1.5 pl-3">
+                                                                <span className="text-[10px] text-zinc-600 uppercase tracking-widest">{lead.niche || 'Nema Sektora'}</span>
+                                                                {lead.website && (
+                                                                    <a href={lead.website} target="_blank" rel="noreferrer"
+                                                                        onClick={e => e.stopPropagation()}
+                                                                        className="text-zinc-700 hover:text-emerald transition-colors">
+                                                                        <Globe className="w-2.5 h-2.5" />
+                                                                    </a>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    </TableCell>
+                                                    {/* Col 3: Service/Offer selector */}
+                                                    {!terminology.isRecruitment && (
+                                                        <TableCell className="py-4">
+                                                            <select
+                                                                value={lead.service || 'social_media_system'}
+                                                                onChange={(e) => handleServiceChange(lead.id, e.target.value)}
+                                                                className={cn(
+                                                                    "border rounded-lg text-[10px] font-outfit font-bold px-2 py-1.5 cursor-pointer transition-all focus:outline-none uppercase tracking-wide max-w-[140px]",
+                                                                    (lead.service || 'social_media_system') === 'social_media_system'
+                                                                        ? 'border-blue-500/30 text-blue-400 hover:border-blue-500/60'
+                                                                        : (lead.service) === 'ai_organic_content'
+                                                                        ? 'border-emerald/30 text-emerald hover:border-emerald/60'
+                                                                        : 'border-orange-500/30 text-orange-400 hover:border-orange-500/60'
+                                                                )}
+                                                                style={{
+                                                                    background: (lead.service || 'social_media_system') === 'social_media_system'
+                                                                        ? 'rgba(59,130,246,0.07)'
+                                                                        : lead.service === 'ai_organic_content'
+                                                                        ? 'rgba(16,185,129,0.07)'
+                                                                        : 'rgba(249,115,22,0.07)'
+                                                                }}
+                                                            >
+                                                                <option value="social_media_system">Social Media</option>
+                                                                <option value="ai_organic_content">AI Content</option>
+                                                                <option value="ai_sales_systems">AI Sales</option>
+                                                            </select>
+                                                        </TableCell>
+                                                    )}
+                                                    {/* Col 4: Status */}
+                                                    <TableCell className="py-4">
                                                         <StatusBadge
-                                                            status={lead.status || "Initial"}
+                                                            status={lead.status || "Inicijalni"}
                                                             statuses={statuses}
                                                             onUpdate={(s: string) => handleStatusUpdate(lead.id, s)}
                                                         />
                                                     </TableCell>
-                                                    <TableCell className="py-6">
-                                                        <div className="flex flex-col gap-1.5">
-                                                            <div className="text-[11px] text-zinc-500 font-outfit uppercase tracking-wider font-bold">
-                                                                {lead.last_sent_at ? `Broadcast ${new Date(lead.last_sent_at).toLocaleDateString()}` : 'Dormant Node'}
-                                                            </div>
-                                                            <div className="flex gap-1">
-                                                                {lead.meeting_time && <Badge className="bg-emerald/10 text-emerald text-[8px] py-0 px-1 border-emerald/20">MEETING</Badge>}
-                                                                {lead.last_sent_at && <Badge className="bg-blue-500/10 text-blue-400 text-[8px] py-0 px-1 border-blue-500/20">SENT</Badge>}
+                                                    {/* Col 5: Activity */}
+                                                    <TableCell className="py-4">
+                                                        <div className="flex flex-col gap-1">
+                                                            {lead.last_sent_at ? (
+                                                                <div className="text-[11px] text-zinc-400 font-outfit">
+                                                                    Poslato {new Date(lead.last_sent_at).toLocaleDateString("sr-RS")}
+                                                                </div>
+                                                            ) : lead.intake_data?.scraped_at ? (
+                                                                <div className="text-[11px] text-zinc-600 font-outfit">
+                                                                    Scraped {new Date(lead.intake_data.scraped_at).toLocaleDateString("sr-RS")}
+                                                                </div>
+                                                            ) : (
+                                                                <div className="text-[11px] text-zinc-700 italic font-outfit">Bez aktivnosti</div>
+                                                            )}
+                                                            <div className="flex gap-1 flex-wrap">
+                                                                {lead.meeting_time && <Badge className="bg-emerald/10 text-emerald text-[8px] py-0 px-1.5 border-emerald/20">SASTANAK</Badge>}
+                                                                {lead.last_sent_at && <Badge className="bg-blue-500/10 text-blue-400 text-[8px] py-0 px-1.5 border-blue-500/20">POSLATO</Badge>}
+                                                                {lead.email_draft && !lead.last_sent_at && <Badge className="bg-amber-500/10 text-amber-400 text-[8px] py-0 px-1.5 border-amber-500/20">DRAFT</Badge>}
                                                             </div>
                                                         </div>
                                                     </TableCell>
-                                                    <TableCell className="text-right pr-10 py-6">
+                                                    {/* Actions */}
+                                                    <TableCell className="text-right pr-10 py-4">
                                                         <div className="flex gap-2 justify-end">
                                                             <Button
                                                                 variant="ghost"
                                                                 size="icon"
                                                                 onClick={() => handleOpenDetails(lead)}
-                                                                className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 hover:border-emerald/40 text-zinc-500 hover:text-emerald transition-all duration-500 shadow-lg group/btn"
+                                                                className="w-9 h-9 rounded-xl bg-white/5 border border-white/10 hover:border-emerald/40 text-zinc-500 hover:text-emerald transition-all duration-300 group/btn"
                                                             >
-                                                                <MessageSquare className="w-4 h-4 group-hover/btn:scale-110 transition-transform" />
+                                                                <MessageSquare className="w-3.5 h-3.5 group-hover/btn:scale-110 transition-transform" />
                                                             </Button>
                                                             <DropdownMenu>
                                                                 <DropdownMenuTrigger asChild>
                                                                     <Button
                                                                         variant="ghost"
                                                                         size="icon"
-                                                                        className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 hover:border-white/20 text-zinc-500 hover:text-white transition-all duration-500 shadow-lg"
+                                                                        className="w-9 h-9 rounded-xl bg-white/5 border border-white/10 hover:border-white/20 text-zinc-500 hover:text-white transition-all duration-300"
                                                                     >
-                                                                        <MoreHorizontal className="w-4 h-4" />
+                                                                        <MoreHorizontal className="w-3.5 h-3.5" />
                                                                     </Button>
                                                                 </DropdownMenuTrigger>
                                                                 <DropdownMenuContent align="end" className="glass-panel border-white/10 rounded-2xl w-[180px] p-2 bg-obsidian/95 backdrop-blur-3xl">
@@ -535,14 +764,14 @@ export function GrowthEngineModule({ clientId, tableName = "kontakti", statuses 
                                                                         className="rounded-xl text-zinc-400 hover:text-white hover:bg-white/5 cursor-pointer text-xs font-bold py-3 transition-all"
                                                                     >
                                                                         <Sparkles className="w-4 h-4 mr-2 text-emerald" />
-                                                                        Edit Lead
+                                                                        Izmeni
                                                                     </DropdownMenuItem>
                                                                     <DropdownMenuItem
                                                                         onClick={() => handleDeleteLead(lead.id)}
                                                                         className="rounded-xl text-rose-400 hover:text-white hover:bg-rose-500/20 cursor-pointer text-xs font-bold py-3 transition-all"
                                                                     >
                                                                         <Trash2 className="w-4 h-4 mr-2" />
-                                                                        Delete Lead
+                                                                        Obriši
                                                                     </DropdownMenuItem>
                                                                 </DropdownMenuContent>
                                                             </DropdownMenu>
@@ -588,16 +817,16 @@ export function GrowthEngineModule({ clientId, tableName = "kontakti", statuses 
                 <DialogContent className="glass-panel border-white/10 rounded-[2rem] bg-obsidian/95 backdrop-blur-3xl text-silver max-w-lg shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)]">
                     <DialogHeader className="mb-6">
                         <DialogTitle className="text-3xl font-outfit font-bold italic">
-                            Aktiviraj <span className="text-emerald not-italic font-black text-4xl">ČVOR</span>
+                            Dodaj <span className="text-emerald not-italic font-black text-4xl">KANDIDATA</span>
                         </DialogTitle>
                         <p className="text-silver/40 text-sm font-light mt-2 tracking-wide">
-                            Input parameters for the new {terminology.entity.toLowerCase()} trajectory.
+                            Unesite parametre za novi unos u bazu.
                         </p>
                     </DialogHeader>
 
                     <div className="grid gap-6 py-4">
                         <div className="space-y-2">
-                            <Label className="text-[10px] uppercase tracking-[0.2em] font-black text-zinc-500 pl-1">Identity Profile</Label>
+                            <Label className="text-[10px] uppercase tracking-[0.2em] font-black text-zinc-500 pl-1">Profil / Ime</Label>
                             <Input
                                 value={newLead.ime}
                                 onChange={(e) => setNewLead({ ...newLead, ime: e.target.value })}
@@ -607,11 +836,11 @@ export function GrowthEngineModule({ clientId, tableName = "kontakti", statuses 
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <Label className="text-[10px] uppercase tracking-[0.2em] font-black text-zinc-500 pl-1">Comms Node</Label>
+                                <Label className="text-[10px] uppercase tracking-[0.2em] font-black text-zinc-500 pl-1">Email / Kontakt</Label>
                                 <Input
                                     value={newLead.email}
                                     onChange={(e) => setNewLead({ ...newLead, email: e.target.value })}
-                                    placeholder="email@example.com"
+                                    placeholder="email@primer.com"
                                     className="h-14 bg-white/5 border-white/10 rounded-2xl font-outfit focus:border-emerald/40 transition-all"
                                 />
                             </div>
@@ -620,14 +849,14 @@ export function GrowthEngineModule({ clientId, tableName = "kontakti", statuses 
                                 <Input
                                     value={newLead.kompanija}
                                     onChange={(e) => setNewLead({ ...newLead, kompanija: e.target.value })}
-                                    placeholder="Organization"
+                                    placeholder="Organizacija / Pozicija"
                                     className="h-14 bg-white/5 border-white/10 rounded-2xl font-outfit focus:border-emerald/40 transition-all"
                                 />
                             </div>
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <Label className="text-[10px] uppercase tracking-[0.2em] font-black text-zinc-500 pl-1">Vector Status</Label>
+                                <Label className="text-[10px] uppercase tracking-[0.2em] font-black text-zinc-500 pl-1">Status</Label>
                                 <Select
                                     value={newLead.status}
                                     onValueChange={(v) => setNewLead({ ...newLead, status: v })}
@@ -645,11 +874,11 @@ export function GrowthEngineModule({ clientId, tableName = "kontakti", statuses 
                                 </Select>
                             </div>
                             <div className="space-y-2">
-                                <Label className="text-[10px] uppercase tracking-[0.2em] font-black text-zinc-500 pl-1">Sector (Niche)</Label>
+                                <Label className="text-[10px] uppercase tracking-[0.2em] font-black text-zinc-500 pl-1">Sektor (Niche)</Label>
                                 <Input
                                     value={newLead.niche}
                                     onChange={(e) => setNewLead({ ...newLead, niche: e.target.value })}
-                                    placeholder="Specialization"
+                                    placeholder="Specijalizacija"
                                     className="h-14 bg-white/5 border-white/10 rounded-2xl font-outfit focus:border-emerald/40 transition-all"
                                 />
                             </div>
@@ -662,14 +891,14 @@ export function GrowthEngineModule({ clientId, tableName = "kontakti", statuses 
                             onClick={() => setIsAddDialogOpen(false)}
                             className="h-14 px-8 rounded-2xl font-outfit text-zinc-500 hover:text-white transition-all uppercase tracking-widest text-xs"
                         >
-                            Cancel
+                            Odustani
                         </Button>
                         <Button
                             onClick={handleAddLead}
                             disabled={isSaving}
                             className="h-14 px-10 rounded-2xl bg-emerald text-obsidian font-outfit font-black hover:bg-emerald/90 transition-all shadow-[0_10px_30px_rgba(16,185,129,0.3)] min-w-[160px] uppercase tracking-widest text-xs"
                         >
-                            {isSaving ? <RefreshCw className="w-5 h-5 animate-spin" /> : "Initiate Node"}
+                            {isSaving ? <RefreshCw className="w-5 h-5 animate-spin" /> : "Dodaj"}
                         </Button>
                     </DialogFooter>
                 </DialogContent>
@@ -683,13 +912,13 @@ export function GrowthEngineModule({ clientId, tableName = "kontakti", statuses 
                             Modifikuj <span className="text-emerald not-italic font-black text-4xl">PODATKE</span>
                         </DialogTitle>
                         <p className="text-silver/40 text-sm font-light mt-2 tracking-wide">
-                            Reconfiguring {terminology.entity.toLowerCase()} parameters.
+                            Rekonfiguracija parametara kandidata.
                         </p>
                     </DialogHeader>
 
                     <div className="grid gap-6 py-4">
                         <div className="space-y-2">
-                            <Label className="text-[10px] uppercase tracking-[0.2em] font-black text-zinc-500 pl-1">Identity Profile</Label>
+                            <Label className="text-[10px] uppercase tracking-[0.2em] font-black text-zinc-500 pl-1">Profil / Ime</Label>
                             <Input
                                 value={newLead.ime}
                                 onChange={(e) => setNewLead({ ...newLead, ime: e.target.value })}
@@ -699,11 +928,11 @@ export function GrowthEngineModule({ clientId, tableName = "kontakti", statuses 
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <Label className="text-[10px] uppercase tracking-[0.2em] font-black text-zinc-500 pl-1">Comms Node</Label>
+                                <Label className="text-[10px] uppercase tracking-[0.2em] font-black text-zinc-500 pl-1">Kontakt Kanal</Label>
                                 <Input
                                     value={newLead.email}
                                     onChange={(e) => setNewLead({ ...newLead, email: e.target.value })}
-                                    placeholder="email@example.com"
+                                    placeholder="email@primer.com"
                                     className="h-14 bg-white/5 border-white/10 rounded-2xl font-outfit focus:border-emerald/40 transition-all"
                                 />
                             </div>
@@ -712,14 +941,14 @@ export function GrowthEngineModule({ clientId, tableName = "kontakti", statuses 
                                 <Input
                                     value={newLead.kompanija}
                                     onChange={(e) => setNewLead({ ...newLead, kompanija: e.target.value })}
-                                    placeholder="Organization"
+                                    placeholder="Organizacija / Pozicija"
                                     className="h-14 bg-white/5 border-white/10 rounded-2xl font-outfit focus:border-emerald/40 transition-all"
                                 />
                             </div>
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <Label className="text-[10px] uppercase tracking-[0.2em] font-black text-zinc-500 pl-1">Vector Status</Label>
+                                <Label className="text-[10px] uppercase tracking-[0.2em] font-black text-zinc-500 pl-1">Status Procesa</Label>
                                 <Select
                                     value={newLead.status}
                                     onValueChange={(v) => setNewLead({ ...newLead, status: v })}
@@ -737,11 +966,11 @@ export function GrowthEngineModule({ clientId, tableName = "kontakti", statuses 
                                 </Select>
                             </div>
                             <div className="space-y-2">
-                                <Label className="text-[10px] uppercase tracking-[0.2em] font-black text-zinc-500 pl-1">Sector (Niche)</Label>
+                                <Label className="text-[10px] uppercase tracking-[0.2em] font-black text-zinc-500 pl-1">Sektor (Niche)</Label>
                                 <Input
                                     value={newLead.niche}
                                     onChange={(e) => setNewLead({ ...newLead, niche: e.target.value })}
-                                    placeholder="Specialization"
+                                    placeholder="Specijalizacija"
                                     className="h-14 bg-white/5 border-white/10 rounded-2xl font-outfit focus:border-emerald/40 transition-all"
                                 />
                             </div>
@@ -754,14 +983,14 @@ export function GrowthEngineModule({ clientId, tableName = "kontakti", statuses 
                             onClick={() => setIsEditDialogOpen(false)}
                             className="h-14 px-8 rounded-2xl font-outfit text-zinc-500 hover:text-white transition-all uppercase tracking-widest text-xs"
                         >
-                            Cancel
+                            Odustani
                         </Button>
                         <Button
                             onClick={handleUpdateLead}
                             disabled={isSaving}
                             className="h-14 px-10 rounded-2xl bg-emerald text-obsidian font-outfit font-black hover:bg-emerald/90 transition-all shadow-[0_10px_30px_rgba(16,185,129,0.3)] min-w-[160px] uppercase tracking-widest text-xs"
                         >
-                            {isSaving ? <RefreshCw className="w-5 h-5 animate-spin" /> : "Save Changes"}
+                            {isSaving ? <RefreshCw className="w-5 h-5 animate-spin" /> : "Sačuvaj izmene"}
                         </Button>
                     </DialogFooter>
                 </DialogContent>
