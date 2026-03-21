@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useMemo, useCallback } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Mail, TrendingUp, CheckCircle, RefreshCw, BarChart3, Layout, Send, UserCheck, MessageSquare, X, Copy, Check, Star, Pencil, Linkedin, Instagram, ExternalLink, Trash2, Tag } from "lucide-react"
+import { Mail, TrendingUp, CheckCircle, RefreshCw, BarChart3, Layout, Send, UserCheck, MessageSquare, X, Copy, Check, Star, Pencil, Linkedin, Instagram, Tag, Zap, Trash2 } from "lucide-react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { createClient } from "@/lib/supabase/client"
@@ -10,6 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 import { motion, AnimatePresence, Variants } from "framer-motion"
+import { LeadIntelligenceViewer } from "@/components/dashboard/lead-intelligence-viewer"
 
 interface EmailOutreachModuleProps {
   clientId: string
@@ -47,6 +48,8 @@ interface Lead {
   comment?: string
   instagram_handle?: string
   starred?: boolean
+  created_at?: string
+  client_id?: string
   intake_data?: {
     active_ads_count?: number
     enrichment?: {
@@ -85,6 +88,10 @@ export function EmailOutreachModule({
   sourceFilter = 'meta_ads_scrape',
 }: EmailOutreachModuleProps) {
   const [draftLead, setDraftLead] = useState<Lead | null>(null)
+  const [editingDraft, setEditingDraft] = useState<string | null>(null)
+  const [isSavingDraft, setIsSavingDraft] = useState(false)
+  const [intelLead, setIntelLead] = useState<Lead | null>(null)
+  const [confirmRemoveLead, setConfirmRemoveLead] = useState<Lead | null>(null)
   const [copied, setCopied] = useState(false)
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
@@ -142,6 +149,7 @@ export function EmailOutreachModule({
       .select('*')
       .eq('client_id', clientId)
       .eq('izvor', sourceFilter)
+      .neq('kategorija', 'Disqualified')
       .order('prioritet_skor', { ascending: false })
       .limit(200)
 
@@ -164,14 +172,6 @@ export function EmailOutreachModule({
     setRefreshing(true)
     await Promise.all([fetchEmailStats(), fetchLeads()])
     setTimeout(() => setRefreshing(false), 800)
-  }
-
-  const formatDate = (dateString?: string) => {
-    if (!dateString) return '-'
-    return new Date(dateString).toLocaleDateString('sr-RS', {
-      day: '2-digit',
-      month: 'short',
-    })
   }
 
   const filteredLeads = useMemo(() => {
@@ -247,6 +247,29 @@ export function EmailOutreachModule({
     setLeads(prev => prev.map(l => l.id === editingComment.id ? { ...l, comment: editingComment.value } : l))
     setEditingComment(null)
     setSavingComment(false)
+  }
+
+  const handleSaveDraft = async () => {
+    if (!draftLead || editingDraft === null) return
+    setIsSavingDraft(true)
+    const supabase = createClient()
+    const { error } = await supabase
+      .from('contacts')
+      .update({ email_draft: editingDraft })
+      .eq('id', draftLead.id)
+    
+    if (!error) {
+      setLeads(prev => prev.map(l => l.id === draftLead.id ? { ...l, email_draft: editingDraft } : l))
+      setDraftLead(prev => prev ? { ...prev, email_draft: editingDraft } : null)
+      setEditingDraft(null)
+    }
+    setIsSavingDraft(false)
+  }
+
+  const handleRemoveLead = async (lead: Lead) => {
+    const supabase = createClient()
+    setLeads(prev => prev.filter(l => l.id !== lead.id))
+    await supabase.from('contacts').update({ kategorija: 'Disqualified' }).eq('id', lead.id)
   }
 
   return (
@@ -435,6 +458,7 @@ export function EmailOutreachModule({
                       <TableHead className="font-outfit text-silver/40 uppercase text-[10px] tracking-widest min-w-[120px]">Instagram</TableHead>
                       <TableHead className="font-outfit text-silver/40 uppercase text-[10px] tracking-widest">Service</TableHead>
                       <TableHead className="font-outfit text-silver/40 uppercase text-[10px] tracking-widest">Status</TableHead>
+                      <TableHead className="font-outfit text-silver/40 uppercase text-[10px] tracking-widest">Intel</TableHead>
                       <TableHead className="font-outfit text-silver/40 uppercase text-[10px] tracking-widest pr-8 text-right">Draft</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -612,19 +636,42 @@ export function EmailOutreachModule({
                               <span className="font-outfit text-xs text-silver/70">{lead.status}</span>
                             </div>
                           </TableCell>
+                          <TableCell>
+                            <button
+                              onClick={() => setIntelLead(lead)}
+                              className={cn(
+                                "flex items-center gap-1.5 text-[10px] font-outfit px-2.5 py-1 rounded-lg border transition-all",
+                                lead.intake_data?.enrichment
+                                  ? "bg-blue-500/10 border-blue-500/20 text-blue-400 hover:bg-blue-500/20"
+                                  : "bg-white/[0.03] border-white/5 text-silver/20 hover:text-silver/40"
+                              )}
+                            >
+                              <Zap className="w-3 h-3" />
+                              {lead.intake_data?.enrichment ? "View" : "—"}
+                            </button>
+                          </TableCell>
                           <TableCell className="pr-8 text-right">
-                            {lead.email_draft ? (
-                              <Button
-                                variant="ghost" size="sm"
-                                onClick={() => setDraftLead(lead)}
-                                className="text-emerald hover:bg-emerald/10 rounded-xl text-xs font-outfit gap-1.5"
+                            <div className="flex items-center justify-end gap-2">
+                              {lead.email_draft ? (
+                                <Button
+                                  variant="ghost" size="sm"
+                                  onClick={() => setDraftLead(lead)}
+                                  className="text-emerald hover:bg-emerald/10 rounded-xl text-xs font-outfit gap-1.5"
+                                >
+                                  <Mail className="w-3.5 h-3.5" />
+                                  View Draft
+                                </Button>
+                              ) : (
+                                <span className="text-silver/20 text-xs font-outfit">no draft</span>
+                              )}
+                              <button
+                                onClick={() => setConfirmRemoveLead(lead)}
+                                className="opacity-0 group-hover:opacity-100 transition-opacity text-silver/20 hover:text-red-400 hover:bg-red-400/10 rounded-lg p-1"
+                                title="Disqualify lead"
                               >
-                                <Mail className="w-3.5 h-3.5" />
-                                View Draft
-                              </Button>
-                            ) : (
-                              <span className="text-silver/20 text-xs font-outfit">no draft</span>
-                            )}
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
                           </TableCell>
                         </motion.tr>
                       ))}
@@ -638,69 +685,179 @@ export function EmailOutreachModule({
 
       </div>
 
-      {/* Email Draft Dialog */}
-      <Dialog open={!!draftLead} onOpenChange={() => { setDraftLead(null); setCopied(false) }}>
-        <DialogContent className="max-w-2xl bg-obsidian/95 border-emerald/20 backdrop-blur-2xl rounded-[2rem] max-h-[80vh] flex flex-col">
-          <DialogHeader className="shrink-0">
-            <DialogTitle className="font-outfit text-silver text-xl flex items-center gap-3 flex-wrap">
-              {draftLead?.company_name}
-              {draftLead?.email && (
-                <span className="text-sm font-normal text-silver/40">{draftLead.email}</span>
-              )}
-              {draftLead?.instagram_handle && (
-                <a
-                  href={`https://instagram.com/${draftLead.instagram_handle}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm font-normal text-pink-400/80 hover:text-pink-400 transition-colors"
-                >
-                  @{draftLead.instagram_handle}
-                </a>
-              )}
+      {/* Confirm Remove Dialog */}
+      <Dialog open={!!confirmRemoveLead} onOpenChange={() => setConfirmRemoveLead(null)}>
+        <DialogContent className="max-w-sm bg-obsidian/95 border-red-500/20 backdrop-blur-2xl rounded-[2rem]">
+          <DialogHeader>
+            <DialogTitle className="font-outfit text-silver text-lg flex items-center gap-2">
+              <Trash2 className="w-5 h-5 text-red-400" />
+              Disqualify Lead?
             </DialogTitle>
-            <div className="flex gap-2 mt-2 flex-wrap">
-              {draftLead?.service && draftLead.service.split(',').map(s => s.trim()).filter(Boolean).map(svc => (
-                <span key={svc} className={cn(
-                  "text-[10px] font-outfit font-bold uppercase tracking-widest px-2 py-0.5 rounded-full border",
-                  svc === 'ai_sales_systems'
-                    ? "bg-orange-500/10 border-orange-500/20 text-orange-300"
-                    : svc === 'ai_organic_content'
-                    ? "bg-green-500/10 border-green-500/20 text-green-300"
-                    : "bg-blue-500/10 border-blue-500/20 text-blue-300"
-                )}>
-                  {svc === 'ai_sales_systems' ? 'AI Sales Systems'
-                    : svc === 'ai_organic_content' ? 'AI Organic Content'
-                    : 'Social Media System'}
-                </span>
-              ))}
-              {draftLead?.niche && (
-                <span className="text-[10px] font-outfit uppercase tracking-widest px-2 py-0.5 rounded-full border bg-emerald/10 border-emerald/20 text-emerald/70">
-                  {draftLead.niche}
-                </span>
+          </DialogHeader>
+          <p className="font-outfit text-silver/60 text-sm mt-1">
+            <span className="text-silver font-semibold">{confirmRemoveLead?.company_name}</span> will be marked as Disqualified and removed from this list.
+          </p>
+          <div className="flex gap-3 mt-4">
+            <Button
+              variant="ghost"
+              className="flex-1 font-outfit text-silver/60 hover:text-silver border border-white/10 rounded-xl"
+              onClick={() => setConfirmRemoveLead(null)}
+            >
+              Cancel
+            </Button>
+            <Button
+              className="flex-1 font-outfit bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/30 rounded-xl"
+              onClick={() => { handleRemoveLead(confirmRemoveLead!); setConfirmRemoveLead(null) }}
+            >
+              <Trash2 className="w-3.5 h-3.5 mr-2" />
+              Disqualify
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Lead Intelligence Dialog */}
+      <LeadIntelligenceViewer
+        lead={intelLead}
+        isOpen={!!intelLead}
+        onClose={() => setIntelLead(null)}
+      />
+
+      {/* Email Draft Dialog */}
+      <Dialog open={!!draftLead} onOpenChange={() => { setDraftLead(null); setEditingDraft(null); setCopied(false) }}>
+        <DialogContent className="max-w-3xl bg-obsidian/95 border-emerald/20 backdrop-blur-2xl rounded-[2rem] max-h-[90vh] flex flex-col p-0 overflow-hidden shadow-2xl">
+          {/* Custom Header */}
+          <div className="p-8 border-b border-white/5 bg-gradient-to-r from-emerald/5 to-transparent shrink-0">
+            <div className="flex justify-between items-start gap-4">
+              <div className="space-y-1">
+                <DialogTitle className="font-outfit text-silver text-2xl font-bold flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-emerald/10 flex items-center justify-center">
+                    <Mail className="w-5 h-5 text-emerald" />
+                  </div>
+                  {draftLead?.company_name || draftLead?.ime}
+                </DialogTitle>
+                <div className="flex items-center gap-3 text-silver/40 text-sm">
+                  {draftLead?.email && <span className="flex items-center gap-1.5"><Mail className="w-3.5 h-3.5" /> {draftLead.email}</span>}
+                  {draftLead?.instagram_handle && (
+                    <a href={`https://instagram.com/${draftLead.instagram_handle}`} target="_blank" rel="noopener noreferrer" className="text-pink-400/60 hover:text-pink-400 transition-colors flex items-center gap-1.5">
+                      <Instagram className="w-3.5 h-3.5" /> @{draftLead.instagram_handle}
+                    </a>
+                  )}
+                </div>
+              </div>
+              <div className="flex gap-2">
+                {draftLead?.service?.split(',').map(s => s.trim()).filter(Boolean).map(svc => (
+                  <Badge key={svc} variant="outline" className={cn(
+                    "font-outfit text-[10px] uppercase tracking-widest border-emerald/20 bg-emerald/5 text-emerald/70",
+                    svc === 'ai_sales_systems' && "border-orange-500/20 bg-orange-500/5 text-orange-400/80",
+                    svc === 'ai_organic_content' && "border-green-500/20 bg-green-500/5 text-green-400/80"
+                  )}>
+                    {svc === 'ai_sales_systems' ? 'AIS' : svc === 'ai_organic_content' ? 'AIO' : 'SMS'}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="flex-1 overflow-y-auto p-8 space-y-6">
+            {/* Subject Line Display */}
+            <div className="space-y-2">
+              <label className="text-[10px] font-outfit uppercase tracking-widest text-silver/30 pl-1">Subject Line</label>
+              <div className="p-4 bg-obsidian/60 border border-white/5 rounded-2xl font-outfit text-silver/80 text-sm italic">
+                {draftLead?.email_draft?.match(/^Subject:\s*(.*)$/m)?.[1] || "No subject detected"}
+              </div>
+            </div>
+
+            {/* Content Area */}
+            <div className="space-y-2 group">
+              <div className="flex justify-between items-center pl-1">
+                <label className="text-[10px] font-outfit uppercase tracking-widest text-silver/30">Email Body</label>
+                {!editingDraft && (
+                  <button 
+                    onClick={() => setEditingDraft(draftLead?.email_draft || '')}
+                    className="flex items-center gap-1.5 text-[10px] text-emerald/60 hover:text-emerald transition-colors uppercase tracking-widest font-bold"
+                  >
+                    <Pencil className="w-3 h-3" /> Edit Draft
+                  </button>
+                )}
+              </div>
+
+              {editingDraft !== null ? (
+                <div className="space-y-4">
+                  <textarea
+                    autoFocus
+                    value={editingDraft}
+                    onChange={(e) => setEditingDraft(e.target.value)}
+                    className="w-full h-[400px] bg-obsidian/60 border border-emerald/20 rounded-2xl p-6 font-mono text-xs text-silver/90 outline-none focus:border-emerald/50 resize-none leading-relaxed"
+                  />
+                  <div className="flex justify-end gap-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setEditingDraft(null)}
+                      className="text-silver/40 hover:text-silver/60 rounded-xl"
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      size="sm"
+                      onClick={handleSaveDraft}
+                      disabled={isSavingDraft}
+                      className="bg-emerald text-obsidian font-bold rounded-xl px-6"
+                    >
+                      {isSavingDraft ? <RefreshCw className="w-3.5 h-3.5 animate-spin mr-2" /> : <Check className="w-3.5 h-3.5 mr-2" />}
+                      Save Changes
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="relative group/content">
+                  <pre className="whitespace-pre-wrap font-mono text-xs text-silver/70 bg-obsidian/60 border border-white/5 rounded-2xl p-6 leading-relaxed min-h-[300px]">
+                    {draftLead?.email_draft?.replace(/^Subject:.*$/m, '').trim() || 'No body content available.'}
+                  </pre>
+                  <div className="absolute top-4 right-4 opacity-0 group-hover/content:opacity-100 transition-opacity flex gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleCopyDraft(draftLead?.email_draft || '')}
+                      className="bg-obsidian/80 border-emerald/20 hover:border-emerald/40 text-emerald rounded-xl"
+                    >
+                      {copied ? <Check className="w-3.5 h-3.5 mr-2" /> : <Copy className="w-3.5 h-3.5 mr-2" />}
+                      {copied ? 'Copied' : 'Copy Full Text'}
+                    </Button>
+                  </div>
+                </div>
               )}
             </div>
-          </DialogHeader>
-          <div className="overflow-y-auto flex-1 mt-4">
-            <pre className="whitespace-pre-wrap font-mono text-xs text-silver/80 bg-obsidian/60 border border-white/5 rounded-xl p-4 leading-relaxed">
-              {draftLead?.email_draft || 'No draft available.'}
-            </pre>
           </div>
-          <div className="flex justify-end gap-3 pt-4 shrink-0 border-t border-white/5">
-            <Button
-              variant="outline"
-              onClick={() => { setDraftLead(null); setCopied(false) }}
-              className="rounded-xl border-white/10 text-silver/60 font-outfit hover:border-white/20"
-            >
-              <X className="w-4 h-4 mr-2" />
-              Close
-            </Button>
-            <Button
-              onClick={() => handleCopyDraft(draftLead?.email_draft || '')}
-              className="rounded-xl bg-emerald hover:bg-emerald/80 text-obsidian font-outfit font-bold"
-            >
-              {copied ? <Check className="w-4 h-4 mr-2" /> : <Copy className="w-4 h-4 mr-2" />}
-              {copied ? 'Copied!' : 'Copy Draft'}
-            </Button>
+
+          {/* Footer Actions */}
+          <div className="p-8 border-t border-white/5 bg-obsidian/80 shrink-0 flex justify-between items-center">
+             <div className="flex items-center gap-4 text-silver/20 text-xs italic font-outfit">
+               <Zap className="w-3.5 h-3.5" />
+               Drafted by SmartFlow AI System
+             </div>
+             <div className="flex gap-3">
+                <Button
+                  variant="outline"
+                  onClick={() => { setDraftLead(null); setEditingDraft(null); setCopied(false) }}
+                  className="rounded-xl border-white/10 text-silver/60 font-outfit px-8 py-6"
+                >
+                  Close
+                </Button>
+                {!editingDraft && (
+                  <Button
+                    className="rounded-xl bg-gradient-to-r from-emerald to-emerald/80 hover:brightness-110 text-obsidian font-outfit font-bold px-10 py-6 shadow-lg shadow-emerald/10"
+                    onClick={() => {
+                      // Logic for sending will be implemented next
+                      alert('Preparing transmission... System verification required.');
+                    }}
+                  >
+                    <Send className="w-4 h-4 mr-2" />
+                    Ready to Send
+                  </Button>
+                )}
+             </div>
           </div>
         </DialogContent>
       </Dialog>

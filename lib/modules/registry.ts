@@ -2,7 +2,6 @@ import {
   Database,
   Mail,
   LayoutDashboard,
-  Settings,
   Briefcase,
   Users,
   Linkedin,
@@ -19,13 +18,6 @@ export const MODULE_REGISTRY: Record<ModuleKey, DashboardModule> = {
     icon: Kanban,
     category: 'crm',
     description: 'Deal flow kanban — stage-by-stage progression',
-  },
-  'leads': {
-    key: 'leads',
-    label: 'Leads',
-    icon: Database,
-    category: 'crm',
-    description: 'Lead intelligence database — enriched profiles, filtering, analytics',
   },
   'growth-engine': {
     key: 'growth-engine',

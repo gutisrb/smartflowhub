@@ -1,0 +1,2672 @@
+[
+  {
+    "id": "70921d7c-37da-44b4-a8ac-0a0b9b2353f7",
+    "company_name": "Dexy Co",
+    "website": "https://www.dexy.co.rs",
+    "niche": "online_prodaja",
+    "status": "enriched",
+    "intake_data": {
+      "ad_cta": "Shop now",
+      "ad_title": "Dexy Co",
+      "ad_copies": [
+        "😍 Mesečna bebi akcija donosi sjajne popuste na odabrani asortiman opereme za bebe:\n\n30% POPUSTA na Urban auto-sedišta\n20% POPUSTA na Maxi-Cosi auto-sedišta\n20% POPUSTA na FreeOn prenosive krevece\n20% POPUSTA na Avent blendere\n50% POPUSTA na Twistshake asortiman\n\n🗓️ Akcija važi od 1. do 31. marta u Dexyco prodavnicama i onlajn na www.dexy.co.rs.\n\n📦 Besplatna dostava za sve porudžbine veće od 4.999 RSD.",
+        "🎉 Počela je Revell akcija! Uživaj u 𝟐𝟎% 𝐏𝐎𝐏𝐔𝐒𝐓𝐀 na celokupan asortiman!\n\n🚀 Otkrij makete, vozila i setove za modelare svih uzrasta – idealno za sve koji vole detalje, kreativnost i kvalitetnu zabavu.\n\n📅 Akcija traje do 31. marta i važi isključivo za onlajn kupovinu na www.dexy.co.rs.\n\n👉 Poruči odmah!",
+        "Pazi akcija! 🔥 Sve što klinci vole sada je na sniženju. Poruči odmah i uštedi! 🛒",
+        "💥 Vreme je za prve prolećne krugove uz 𝟐𝟎% 𝐏𝐎𝐏𝐔𝐒𝐓𝐀 na sve za vožnju! ✨ 🛴 Trotineti, balans-bicikli, guralice, tricikli, roleri, skejtovi... sada imaju niže cene!\n\n⏳ Akcija važi od 16. do 22. marta, samo onlajn na www.dexy.co.rs.\n\n🎁 Besplatna dostava za porudžbine iznad 4.999 RSD.\n\n🛒 Poruči odmah!",
+        "{{product.brand}}"
+      ],
+      "enrichment": {
+        "contact": {
+          "name": "Dunja Borojević",
+          "email": "dunja.borojevic@dexy.co.rs",
+          "title": "Director of Brand Management",
+          "linkedin": "https://www.linkedin.com/in/dunja-borojević-056bbb119",
+          "seniority": "executive"
+        },
+        "enriched_at": "2026-03-16T21:27:16.328Z",
+        "instagram_reels": [
+          {
+            "url": "https://www.instagram.com/reel/DVgxRBhjFqV/",
+            "likes": -1,
+            "views": 1783,
+            "caption": "🌷 Kreativnost cveta uz LEGO Botanicals lale!\n\n✨ Iskoristite -20% popusta na odabrane LEGO® Botanical setove i obradujte nekoga posebnim poklonom. \nId",
+            "comments": 0,
+            "timestamp": "2026-03-05T18:00:00.000Z"
+          },
+          {
+            "url": "https://www.instagram.com/reel/DV0Wq3WgMkU/",
+            "likes": -1,
+            "views": 2849,
+            "caption": "🐈‍⬛ Ko kaže da je petak 13. baksuzan?\n\n🍀 Danas pravila ne važe! Razbij maler i ugrabi 𝐃𝐔𝐏𝐋𝐈 𝐏𝐎𝐏𝐔𝐒𝐓: 𝟏𝟑% + 𝟏𝟑% na odabrane igračke i k",
+            "comments": 0,
+            "timestamp": "2026-03-13T08:33:02.000Z"
+          }
+        ],
+        "instagram_profile": {
+          "bio": "Za svako dete od glave do pete.",
+          "url": "https://www.instagram.com/dexycokids/",
+          "username": "dexycokids",
+          "followers": 150554,
+          "following": 0,
+          "is_verified": false,
+          "posts_count": 5131,
+          "external_url": "http://lnk.bio/dexycokids",
+          "business_email": null,
+          "business_category": "Content & Apps"
+        },
+        "recommendation_reason": "Lead gen funnel detected — email sequences will convert leads before they go cold",
+        "service_recommendation": "ai_sales_systems"
+      },
+      "scraped_at": "2026-03-16T19:21:44.166Z",
+      "scrape_query": "https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=RS&q=akcija&search_type=keyword_unordered",
+      "ad_start_date": "2026-03-02 08:00:00",
+      "ad_library_url": "https://www.facebook.com/ads/library/?id=1986944158844039",
+      "page_followers": 154551,
+      "page_categories": [
+        "Games/toys"
+      ],
+      "active_ads_count": 12,
+      "facebook_page_id": "194848353914186",
+      "facebook_page_url": "https://www.facebook.com/DexyCoSrbija/",
+      "publisher_platforms": [
+        "FACEBOOK",
+        "INSTAGRAM"
+      ]
+    },
+    "email_draft": "Subject: Ko u Dexy Co odgovara kupcima na poruke? Stvarno nema smisla.\n\nDobar dan,\n\nStvarno nema smisla da neko u Dexy Co troši ceo ili deo radnog dana na komunikaciju sa potencijalnim kupcima — a da vi pritom nemate nikakav uvid u to gde odustaju od kupovine.\n\nMislim da biste imali manje haosa, a bolju prodaju i odnos sa kupcima, uz AI sistem koji radi 168 sati nedeljno za manje nego što vas taj isti posao košta sada.\nSistem radi 168 sati nedeljno. Košta manje od tog istog radnika. I za razliku od njega — pamti svaki razgovor.\n\nAli ovo nije šablonski chatbot. Jedini agent na tržištu koji ima analizu slika i videa, razume odgovore na stori, i vodi razgovor na tečnom srpskom — napravljen od nule, za srpsko tržište.\n\nPratim vaš Instagram — 150,554 pratilaca i 12 aktivnih oglasa. Svaki razgovor, svaki detalj na jednom mestu: ko je pisalo, šta traži, gde je stalo. Informacije koje trenutno jednostavno nemate.\n\nA kada bude spreman sadržaj koji zaista generiše te poruke — imate i sistem koji ih odmah prima i odgovara.\n\nRezultat? Više završenih kupovina. Manje napuštenih korpi. Klijenti koji se vraćaju.\n\nKada god imate 20 minuta slobodno, mogu da vam pokažem kako bi ovo izgledalo za Dexy Co — besplatno, bez obaveza i bez pritiska.\n\nVeliki pozdrav,\n\nNikola Guteša\nSmartflow\nSmartflow.rs\n+381 64 118 2200"
+  },
+  {
+    "id": "4e7d6d15-8104-4b3b-8c51-7062d421e7ee",
+    "company_name": "Dalmata",
+    "website": "https://dalmata.rs/",
+    "niche": "Furniture",
+    "status": "Sent",
+    "intake_data": null,
+    "email_draft": "Subject: Ko u Dalmata vodi digitalnu promociju? Stvarno nema smisla.\n\nDobar dan,\n\nStvarno nema smisla da Dalmata propušta prilike za privlačenje novih klijenata kroz video sadržaj — dok konkurencija zauzima tu publiku na Instagramu i TikToku.\n\nMislim da biste imali bolji povrat na investiciju uz profesionalni video sadržaj koji vaša publika zapravo gleda — bez skupih agencija, bez meseci čekanja i bez generičkih šablona. Holivudska produkcija za deo standardne cene.\n\nAli ovo nije generički AI sadržaj sa robotskim glasom i jeftinim efektima.\n\nGlas koji čujete zvuči kao pravi srpski govornik — vaša publika neće moći da prepozna da je AI. Vizuali su na nivou holivudske produkcije, a produkcija traje deo vremena i cene klasičnog snimanja.\n\nRezultat? Profesionalni video sadržaj. Prva publika koja se vraća. Digitalno prisustvo koje radi za vaš biznis.\n\nKada god imate 20 minuta slobodno, mogu da vam pokažem kako bi to izgledalo za Dalmata — i da napravim kratak besplatni sample video odmah. Besplatno, bez obaveza i bez smaranja.\n\nVeliki pozdrav,\n\nNikola Guteša\nSmartflow\nSmartflow.rs\n+381 64 118 2200"
+  },
+  {
+    "id": "70313ce1-6364-4cef-bf63-27e5bad76639",
+    "company_name": "Kompanija TRI O",
+    "website": "https://tri-o.rs",
+    "niche": "online_prodaja",
+    "status": "enriched",
+    "intake_data": {
+      "ad_cta": "Shop now",
+      "ad_title": "Kompanija TRI O",
+      "ad_copies": [
+        "Mali rituali koji svaki dan čine lepšim.\nIskoristi akcijske cene na VOX aparate za negu i pronađi sve za stilizovanje i negu na jednom mestu.\n✨ fenovi\n✨ prese i figara za kosu\n✨ epilatori\n\n🚨 Popusti do 23% na odabrane modele. \n\n🚚 Brza dostava na tvoju adresu\n💳 Odloženo plaćanje – kupi sada, plati kasnije!\n📅Akcija traje do 22.03.2026.\n\n📍 Poseti najbližu TRI O prodavnicu ili kupuj online\n\nTRI O – Jedno mesto za sve pametne kupovine!\nSrpski trgovinski lanac",
+        "Iskoristi specijalnu akciju na beauty aparate!\nFenovi, styleri, epilatori i aparati za negu – sve što treba za savršenu frizuru i negu kod kuće.\n✨ Revlon – 15% popusta na ceo asortiman\n✨ Braun – posebne cene na odabrane aparate\n\n🚚 Brza dostava na tvoju adresu\n💳 Odloženo plaćanje – kupi sada, plati kasnije!\n📅Akcija traje do 20.03.2026.\n\n📍 Poseti najbližu TRI O prodavnicu ili kupuj online\n\nTRI O – Jedno mesto za sve pametne kupovine!\nSrpski trgovinski lanac",
+        "TRI O i Beko poklanjaju Beko električni šporet našim vernim kupcima u Rumi! 🎁\n\nKupi bilo koje Beko aparate u vrednosti od minimum 25.000 dinara u TRI O prodavnici u Rumi i ostvaruješ pravo da učestvuješ u izvlačenju za poklon.\n\nUz to, trenutno traje i Beko akcija ceo mesec:\n🔹 10% popusta na velike kućne aparate\n🔹 15% popusta na male kućne aparate\n\n📅 Učešće traje do 18.03.\n🎥 19.03. izvlačimo dobitnika, a proglašenje objavljujemo na našim društvenim mrežama.\n\nDobitnik će biti kontaktiran i pozvan da preuzme poklon u TRI O prodavnici u Rumi.\n\nMožda baš ovaj šporet bude savršen poklon za nečije Mladence. Srećno svima koji učestvuju! 🍀\n\n📞 Za više informacija poseti našu prodavnicu u Rumi ili nas kontaktiraj telefonom: +381 66 82 28 848.\n\nTRI O – Jedno mesto za sve pametne kupovine!\nSrpski trgovinski lanac\n\n#beko #trio #kompanijatrio #poklon #giveaway",
+        "Zato smo za tebe pripremili posebnu akciju na Gorenje male kućne aparate – da zajednički dom opremiš pametno, po odličnim cenama.\n\nBlenderi, mikseri, aparati za kafu, tosteri i još mnogo toga – više od 30 modela čeka te u ponudi!\n\nJer kada tehnologija radi za tebe, ostaje ti više vremena za ono što je zaista važno – zajedničke trenutke.\n\n💳 Odloženo plaćanje – kupi sada, plati kasnije!\n🚚 Brza dostava na tvoju adresu\n🛒 Kupuj u TRI O prodavnicama ili online\n📅 Akcija traje do 31.03.2026.\n\nTRI O – Jedno mesto za sve pametne kupovine!\nSrpski trgovinski lanac",
+        "Niže cene, više razloga za kupovinu!\nKuća, dvorište ili kuhinja – izdvojili smo akciju za sve!\n\n📍 Poseti TRI O u Inđiji ili Rumi i završi sve na jednom mestu!\n📅Akcija traje do 30.03.2026.\n\nTRI O – Jedno mesto za sve pametne kupovine!\nSrpski trgovinski lanac"
+      ],
+      "enrichment": {
+        "contact": {
+          "name": "Stefan Colic",
+          "email": "stefan.colic@tri-o.rs",
+          "title": "Sales Director",
+          "linkedin": "https://www.linkedin.com/in/stefan-colic-45b473168",
+          "seniority": "executive"
+        },
+        "enriched_at": "2026-03-16T21:27:16.328Z",
+        "instagram_reels": [
+          {
+            "url": "https://www.instagram.com/reel/DVk8e6dDedD/",
+            "likes": -1,
+            "views": 6523,
+            "caption": "U TRI O te čekaju posebno niske cene na odabrani asortiman alata i još mnogo toga.\n\n🗓 Akcija traje do 14.03.2026.\n\nTRI O - Jedno mesto za sve pametne",
+            "comments": 8,
+            "timestamp": "2026-03-07T08:59:35.000Z"
+          },
+          {
+            "url": "https://www.instagram.com/reel/DMkKlHbNVAw/",
+            "likes": -1,
+            "views": 5413,
+            "caption": "Tražiš siguran posao?\nPridruži se TRI O timu!\n\n🔸️Na našem sajtu možeš da pogledaš sve otvorene pozicije i prijaviš se online!\n🔸️Ako ti je lakše, mož",
+            "comments": 0,
+            "timestamp": "2025-07-26T09:19:53.000Z"
+          },
+          {
+            "url": "https://www.instagram.com/reel/DVrIJMXDddt/",
+            "likes": -1,
+            "views": 6559,
+            "caption": "Odabrani Sencor aparati sada su na posebnoj akciji do 22. marta!\n\n🔸️SENCOR APARAT ZA ESSPRESO SES 7018BK - 26.990 rsd\n🔸️SENCOR FRITEZA SFR 1250BK - ",
+            "comments": 0,
+            "timestamp": "2026-03-09T19:07:32.000Z"
+          }
+        ],
+        "instagram_profile": {
+          "bio": "Jedno mesto za sve pametne kupovine!\n🛒 37 prodavnica",
+          "url": "https://www.instagram.com/kompanijatrio/",
+          "username": "kompanijatrio",
+          "followers": 35990,
+          "following": 0,
+          "is_verified": false,
+          "posts_count": 3805,
+          "external_url": "https://www.tri-o.rs/",
+          "business_email": null,
+          "business_category": "None,Shopping & retail"
+        },
+        "recommendation_reason": "Active e-commerce via social — too much DM volume to handle manually",
+        "service_recommendation": "social_media_system"
+      },
+      "scraped_at": "2026-03-16T19:21:44.165Z",
+      "scrape_query": "https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=RS&q=popust&search_type=keyword_unordered",
+      "ad_start_date": "2026-03-09 07:00:00",
+      "ad_library_url": "https://www.facebook.com/ads/library/?id=2234545780695597",
+      "page_followers": 32860,
+      "page_categories": [
+        "Electronics"
+      ],
+      "active_ads_count": 47,
+      "facebook_page_id": "384226071668117",
+      "facebook_page_url": "https://www.facebook.com/kompanijatrio/",
+      "publisher_platforms": [
+        "FACEBOOK",
+        "INSTAGRAM",
+        "AUDIENCE_NETWORK",
+        "MESSENGER",
+        "THREADS"
+      ]
+    },
+    "email_draft": "Subject: Ko u TRI O odgovara kupcima na poruke? Stvarno nema smisla.\n\nDobar dan,\n\nStvarno nema smisla da neko u TRI O troši ceo ili deo radnog dana na komunikaciju sa potencijalnim kupcima — a da vi pritom nemate nikakav uvid u to gde odustaju od kupovine.\n\nMislim da biste imali manje haosa, a bolju prodaju i odnos sa kupcima, uz AI sistem koji radi 168 sati nedeljno za manje nego što vas taj isti posao košta sada.\nSistem radi 168 sati nedeljno. Košta manje od tog istog radnika. I za razliku od njega — pamti svaki razgovor.\n\nAli ovo nije šablonski chatbot. Jedini agent na tržištu koji ima analizu slika i videa, razume odgovore na stori, i vodi razgovor na tečnom srpskom — napravljen od nule, za srpsko tržište.\n\nPratim vaš Instagram — 35,990 pratilaca i 47 aktivnih oglasa. Svaki razgovor, svaki detalj na jednom mestu: ko je pisalo, šta traži, gde je stalo. Informacije koje trenutno jednostavno nemate.\n\nA kada bude spreman sadržaj koji zaista generiše te poruke — imate i sistem koji ih odmah prima i odgovara.\n\nRezultat? Više završenih kupovina. Manje napuštenih korpi. Klijenti koji se vraćaju.\n\nKada god imate 20 minuta slobodno, mogu da vam pokažem kako bi ovo izgledalo za TRI O — besplatno, bez obaveza i bez pritiska.\n\nVeliki pozdrav,\n\nNikola Guteša\nSmartflow\nSmartflow.rs\n+381 64 118 2200"
+  },
+  {
+    "id": "d57178c5-5146-42c6-b6fa-e97f47f9751b",
+    "company_name": "Compensair",
+    "website": null,
+    "niche": "Air travel compensation",
+    "status": "No Draft",
+    "intake_data": null,
+    "email_draft": "Subject: Ko u Compensair vodi digitalnu promociju? Stvarno nema smisla.\n\nDobar dan,\n\nStvarno nema smisla da Compensair propušta prilike za privlačenje novih klijenata kroz video sadržaj — dok konkurencija zauzima tu publiku na Instagramu i TikToku.\n\nMislim da biste imali bolji povrat na investiciju uz profesionalni video sadržaj koji vaša publika zapravo gleda — bez skupih agencija, bez meseci čekanja i bez generičkih šablona. Holivudska produkcija za deo standardne cene.\n\nAli ovo nije generički AI sadržaj sa robotskim glasom i jeftinim efektima.\n\nGlas koji čujete zvuči kao pravi srpski govornik — vaša publika neće moći da prepozna da je AI. Vizuali su na nivou holivudske produkcije, a produkcija traje deo vremena i cene klasičnog snimanja.\n\nRezultat? Profesionalni video sadržaj. Prva publika koja se vraća. Digitalno prisustvo koje radi za vaš biznis.\n\nKada god imate 20 minuta slobodno, mogu da vam pokažem kako bi to izgledalo za Compensair — i da napravim kratak besplatni sample video odmah. Besplatno, bez obaveza i bez smaranja.\n\nVeliki pozdrav,\n\nNikola Guteša\nSmartflow\nSmartflow.rs\n+381 64 118 2200"
+  },
+  {
+    "id": "ecaff6e0-9918-49ac-b36c-07c9ec4424fe",
+    "company_name": "Angel therapy",
+    "website": "https://angeltherapy.rs",
+    "niche": "ostalo",
+    "status": "enriched",
+    "intake_data": {
+      "ad_cta": "Shop now",
+      "ad_title": "{{product.name}}",
+      "ad_copies": [
+        "🔥 AKCIJA KOJU NE SMEŠ PROPUSTITI! 🔥\n\n→ Kupi 2 ista proizvoda i ostvari 20% popusta\n→ Kupi 3 ista proizvoda i ostvari 30% popusta\n\n• Popust se obračunava automatski u korpi\n• Važi za sve proizvode na sajtu\n\n Požuri — ponuda traje ograničeno!"
+      ],
+      "enrichment": {
+        "contact": {
+          "name": null,
+          "email": "office@angeltherapy.rs",
+          "title": null,
+          "linkedin": null,
+          "seniority": null
+        },
+        "enriched_at": "2026-03-16T21:27:16.328Z",
+        "instagram_reels": [
+          {
+            "url": "https://www.instagram.com/reel/DV6SAUljdDH/",
+            "likes": 32,
+            "views": 3577,
+            "caption": "✨ Kratke i retke trepavice? Probaj ovo prirodno ulje!\n\nRicinusovo ulje je poznato po tome što hrani koren dlake i jača trepavice i obrve. Bogato je vi",
+            "comments": 1,
+            "timestamp": "2026-03-15T15:49:35.000Z"
+          },
+          {
+            "url": "https://www.instagram.com/reel/DV1OE1nDbWw/",
+            "likes": 91,
+            "views": 12866,
+            "caption": "👉 Kosa ti se umasti već sledeći dan posle pranja?\n\nAktivni ugalj deluje kao magnet za masnoću i nečistoće – dubinski čisti teme glave, osvežava kosu ",
+            "comments": 4,
+            "timestamp": "2026-03-13T16:43:52.000Z"
+          },
+          {
+            "url": "https://www.instagram.com/reel/DV3xMahllap/",
+            "likes": 52,
+            "views": 11661,
+            "caption": "Fleke i pege na licu… kako ih vi prekrivate? 🤔\n\nPuder, korektor ili možda negom rešavate problem?\n\nDa li ste probale Vitamin C serum ili kremu u svoj",
+            "comments": 3,
+            "timestamp": "2026-03-14T16:26:52.000Z"
+          }
+        ],
+        "instagram_profile": {
+          "bio": "Prirodni proizvodi 🍀\nVrhunski kvalitet 💪\nVeliki broj zadovoljnih korisnika 👫\n100% biljna ulja 🌰\n+381692022599",
+          "url": "https://www.instagram.com/angeltherapynovisad/",
+          "username": "angeltherapynovisad",
+          "followers": 143049,
+          "following": 0,
+          "is_verified": false,
+          "posts_count": 6298,
+          "external_url": "https://angeltherapy.rs/",
+          "business_email": null,
+          "business_category": "Health/beauty"
+        },
+        "recommendation_reason": "Default — social DM management is the most broadly applicable entry point",
+        "service_recommendation": "social_media_system"
+      },
+      "scraped_at": "2026-03-16T19:21:44.166Z",
+      "scrape_query": "https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=RS&q=popust&search_type=keyword_unordered",
+      "ad_start_date": "2026-03-01 08:00:00",
+      "ad_library_url": "https://www.facebook.com/ads/library/?id=1708150897203496",
+      "page_followers": 90579,
+      "page_categories": [
+        "Health/beauty"
+      ],
+      "active_ads_count": 12,
+      "facebook_page_id": "946184335442883",
+      "facebook_page_url": "https://www.facebook.com/angel.therapy.mask/",
+      "publisher_platforms": [
+        "FACEBOOK",
+        "INSTAGRAM",
+        "AUDIENCE_NETWORK",
+        "MESSENGER",
+        "THREADS"
+      ]
+    },
+    "email_draft": "Subject: Ko u Angel therapy vodi poruke od klijentkinja? Stvarno nema smisla.\n\nDobar dan,\n\nStvarno nema smisla da neko u Angel therapy troši ceo ili deo radnog dana na komunikaciju sa potencijalnim klijentkinjama — a da vi pritom nemate nikakav uvid u to gde odustaju od zakazivanja.\n\nMislim da biste imali manje haosa, a bolju prodaju i odnos sa klijentkinjama, uz AI sistem koji radi 168 sati nedeljno za manje nego što vas taj isti posao košta sada.\nSistem radi 168 sati nedeljno. Košta manje od tog istog radnika. I za razliku od njega — pamti svaki razgovor.\n\nAli ovo nije šablonski chatbot. Jedini agent na tržištu koji ima analizu slika i videa, razume odgovore na stori, i vodi razgovor na tečnom srpskom — napravljen od nule, za srpsko tržište.\n\nPratim vaš Instagram — 143,049 pratilaca i 12 aktivnih oglasa. Svaki razgovor, svaki detalj na jednom mestu: ko je pisalo, šta traži, gde je stalo. Informacije koje trenutno jednostavno nemate.\n\nA kada bude spreman sadržaj koji zaista generiše te poruke — imate i sistem koji ih odmah prima i odgovara.\n\nRezultat? Više zakazanih tretmana. Zadovoljnije klijentkinje. Bolja reputacija.\n\nKada god imate 20 minuta slobodno, mogu da vam pokažem kako bi ovo izgledalo za Angel therapy — besplatno, bez obaveza i bez pritiska.\n\nVeliki pozdrav,\n\nNikola Guteša\nSmartflow\nSmartflow.rs\n+381 64 118 2200"
+  },
+  {
+    "id": "368f8356-f7f1-4801-b2b8-5eb5aed7e64d",
+    "company_name": "Eko Box",
+    "website": null,
+    "niche": "Containers",
+    "status": "Sent",
+    "intake_data": null,
+    "email_draft": "Subject: Ko u Eko Box vodi digitalnu promociju? Stvarno nema smisla.\n\nDobar dan,\n\nStvarno nema smisla da Eko Box propušta prilike za privlačenje novih klijenata kroz video sadržaj — dok konkurencija zauzima tu publiku na Instagramu i TikToku.\n\nMislim da biste imali bolji povrat na investiciju uz profesionalni video sadržaj koji vaša publika zapravo gleda — bez skupih agencija, bez meseci čekanja i bez generičkih šablona. Holivudska produkcija za deo standardne cene.\n\nAli ovo nije generički AI sadržaj sa robotskim glasom i jeftinim efektima.\n\nGlas koji čujete zvuči kao pravi srpski govornik — vaša publika neće moći da prepozna da je AI. Vizuali su na nivou holivudske produkcije, a produkcija traje deo vremena i cene klasičnog snimanja.\n\nRezultat? Profesionalni video sadržaj. Prva publika koja se vraća. Digitalno prisustvo koje radi za vaš biznis.\n\nKada god imate 20 minuta slobodno, mogu da vam pokažem kako bi to izgledalo za Eko Box — i da napravim kratak besplatni sample video odmah. Besplatno, bez obaveza i bez smaranja.\n\nVeliki pozdrav,\n\nNikola Guteša\nSmartflow\nSmartflow.rs\n+381 64 118 2200"
+  },
+  {
+    "id": "a9094e18-f8c9-446a-a034-11527dc90aad",
+    "company_name": "Vitorog promet - salon nameštaja",
+    "website": "https://vitorogpromet.rs",
+    "niche": "klinika_wellness",
+    "status": "enriched",
+    "intake_data": {
+      "ad_cta": "Shop now",
+      "ad_title": null,
+      "ad_copies": [
+        "FESTIVAL POPUSTA – od 20% do 40% 💥\n-\nOd 16. do 20. marta u Vitorogu vas očekuju popusti na pažljivo odabrane komade nameštaja.\n-\nUgaone garniture, kuhinje, spavaće sobe i još mnogo detalja za uređenje doma sada su dostupni po sjajnim cenama.\n-\nPopusti važe i za kupovinu putem webshopa.\n-\nDodatni popust se ne obračunava na promotivni asortiman, belu tehniku, lim i kupatilski nameštaj.\n-\nOčekujemo vas u Vitorogu!",
+        "FESTIVAL POPUSTA – od 20% do 40%💥\n-\nOd 16. do 20. marta u Vitorogu vas očekuju popusti na pažljivo odabrane komade nameštaja.\n-\nUgaone garniture, kuhinje, spavaće sobe i još mnogo detalja za uređenje doma sada su dostupni po sjajnim cenama.\n-\nPopusti važe i za kupovinu putem webshopa vitorogpromet.rs.\n-\nDodatni popust se ne obračunava na promotivni asortiman, belu tehniku, lim i kupatilski nameštaj.\n-\nOčekujemo vas u Vitorogu!",
+        "{{product.brand}}",
+        "4 DANA VELIKIH POPUSTA u Vitorogu! 💥\n-\nIskoristite priliku da svoj dom opremite kvalitetnim nameštajem po izuzetnim cenama.\n-\nU periodu od 11. do 14. marta očekuje vas pažljivo odabran asortiman nameštaja za dnevnu sobu, spavaću sobu i trpezariju, uz popuste do 57%.\n-\nPosetite Vitorog salone ili Webshop vitorogpromet.rs  i izaberite komade koji će vaš svakodnevni život učiniti udobnijim, lepšim i funkcionalnijim.\n-\nOčekujemo vas!"
+      ],
+      "enrichment": {
+        "contact": {
+          "name": null,
+          "email": "outlet.zemun@vitorogpromet.rs",
+          "title": null,
+          "linkedin": null,
+          "seniority": null
+        },
+        "enriched_at": "2026-03-16T21:27:16.328Z",
+        "instagram_reels": [
+          {
+            "url": "https://www.instagram.com/reel/DV8hGqpgvpf/",
+            "likes": 92,
+            "views": 1467,
+            "caption": "04. april rezervisan je za Invictus Challenge! 🔥\nTrčimo, takmičimo se i pomeramo granice na Petrovaradinskoj tvrđavi. 💪\n-\nVitorog i ove godine podrž",
+            "comments": 0,
+            "timestamp": "2026-03-16T12:44:34.000Z"
+          }
+        ],
+        "instagram_profile": {
+          "bio": "Negujte svoj dom, jer dom nas okuplja 🏡\nKvalitetan nameštaj proizveden u Srbiji i Evropi 🌍\n32 godine sa vama!\n👇 Aktuelni popusti: 👇",
+          "url": "https://www.instagram.com/vitorogpromet_official/",
+          "username": "vitorogpromet_official",
+          "followers": 155915,
+          "following": 0,
+          "is_verified": false,
+          "posts_count": 3968,
+          "external_url": "http://vitorogpromet.rs/na-popustu",
+          "business_email": null,
+          "business_category": "None,Furniture"
+        },
+        "recommendation_reason": "Active e-commerce via social — too much DM volume to handle manually",
+        "service_recommendation": "social_media_system"
+      },
+      "scraped_at": "2026-03-16T19:21:44.165Z",
+      "scrape_query": "https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=RS&q=popust&search_type=keyword_unordered",
+      "ad_start_date": "2026-03-16 07:00:00",
+      "ad_library_url": "https://www.facebook.com/ads/library/?id=1413885799961889",
+      "page_followers": 109030,
+      "page_categories": [
+        "Furniture"
+      ],
+      "active_ads_count": 29,
+      "facebook_page_id": "719452254818731",
+      "facebook_page_url": "https://www.facebook.com/vitorogpromet/",
+      "publisher_platforms": [
+        "INSTAGRAM"
+      ]
+    },
+    "email_draft": "Subject: Ko u Vitorog prima upite za projekte? Stvarno nema smisla.\n\nDobar dan,\n\nStvarno nema smisla da neko u Vitorog troši ceo ili deo radnog dana na komunikaciju sa potencijalnim klijentima — a da vi pritom nemate nikakav uvid u to gde odustaju od prvog kontakta.\n\nMislim da biste imali manje haosa, a bolju prodaju i odnos sa klijentima, uz AI sistem koji radi 168 sati nedeljno za manje nego što vas taj isti posao košta sada.\nSistem radi 168 sati nedeljno. Košta manje od tog istog radnika. I za razliku od njega — pamti svaki razgovor.\n\nAli ovo nije šablonski chatbot. Jedini agent na tržištu koji ima analizu slika i videa, razume odgovore na stori, i vodi razgovor na tečnom srpskom — napravljen od nule, za srpsko tržište.\n\nPratim vaš Instagram — 155,915 pratilaca i 29 aktivnih oglasa. Svaki razgovor, svaki detalj na jednom mestu: ko je pisalo, šta traži, gde je stalo. Informacije koje trenutno jednostavno nemate.\n\nA kada bude spreman sadržaj koji zaista generiše te poruke — imate i sistem koji ih odmah prima i odgovara.\n\nRezultat? Više dogovorenih projekata. Brži odgovori. Klijenti koji se ne gube.\n\nKada god imate 20 minuta slobodno, mogu da vam pokažem kako bi ovo izgledalo za Vitorog — besplatno, bez obaveza i bez pritiska.\n\nVeliki pozdrav,\n\nNikola Guteša\nSmartflow\nSmartflow.rs\n+381 64 118 2200"
+  },
+  {
+    "id": "b328564f-5f3b-45ae-95ee-c9232d146ffc",
+    "company_name": "Rasveta Led Light",
+    "website": "https://ledlight.rs",
+    "niche": "dizajn_enterijer",
+    "status": "enriched",
+    "intake_data": {
+      "ad_cta": "Shop now",
+      "ad_title": "{{product.name}}",
+      "ad_copies": [
+        "OVO JE TRENUTAK! Ekskluzivna akcija rasvete koja menja prostor i štednju – lusteri, visilice, plafonjere i LED svetiljke sada su dostupni po rekordno niskim cenama. Online porudžbine idu direktno do tvoje kuće, brzo i bez muke. Ne čekaj – modeli odlaze munjevitom brzinom, a akcijske cene važe samo dok traje zaliha. Iskoristi priliku, ulepšaj svoj enterijer i uštedi ozbiljno. Klikni i poruči odmah na strani https://www.ledlight.rs/product-category/ponuda-meseca/."
+      ],
+      "enrichment": {
+        "contact": {
+          "name": null,
+          "email": "office@ledlight.rs",
+          "title": null,
+          "source": "hunter",
+          "linkedin": null,
+          "seniority": null
+        },
+        "enriched_at": "2026-03-20T10:33:42.892Z",
+        "decision_maker": {
+          "name": null,
+          "email": "office@ledlight.rs",
+          "title": null,
+          "source": "hunter",
+          "linkedin": null,
+          "seniority": null
+        },
+        "instagram_reels": [
+          {
+            "url": "https://www.instagram.com/reel/DNnkoyqP1CU/",
+            "likes": 1,
+            "views": 673,
+            "caption": "💥 NOVO U PONUDI 💥\n\nModeli:\nStepenišna rasveta BRY-STEP BH07-00382 senzor CCT color\nStepenišna rasveta BRY-STEP BH07-00381 senzor CCT color\nStepenišn",
+            "comments": 0,
+            "timestamp": "2025-08-21T13:13:44.000Z"
+          },
+          {
+            "url": "https://www.instagram.com/reel/DM-979qs2C5/",
+            "likes": 1,
+            "views": 407,
+            "caption": "RAZIGRANE SENKE PRIRODE U VAŠEM DOMU\nNova Ratan kolekcija je više od rasvete — to je umetnički akcenat u prostoru koji stvara intimnu atmosferu i dono",
+            "comments": 0,
+            "timestamp": "2025-08-05T18:45:49.000Z"
+          },
+          {
+            "url": "https://www.instagram.com/reel/DM_AkNxhEuV/",
+            "likes": 8,
+            "views": 1514,
+            "caption": "✨ NOVO u ponudi – visilice koje plene pogled ✨\nZlatna boja, stakleni difuzori u amber i smoky varijantama, profinjen dizajn i oblik koji se ističe — k",
+            "comments": 0,
+            "timestamp": "2025-08-05T19:08:37.000Z"
+          }
+        ],
+        "instagram_profile": {
+          "bio": "💡 Mi osvetljavamo Vas dom\n🛒 Online prodaja: www.LEDLIGHT.rs \n📧 Porucivanje putem sajta ili DM-a 24/7\n🚚 Dostava robe kurirskom sluzbom",
+          "url": "https://www.instagram.com/rasveta_online/",
+          "username": "rasveta_online",
+          "followers": 31751,
+          "following": 0,
+          "is_verified": false,
+          "posts_count": 1234,
+          "external_url": "https://ledlight.rs/product-category/ponuda-meseca/",
+          "business_email": null,
+          "business_category": "None,Lighting Store"
+        },
+        "recommendation_reason": "Active e-commerce via social — too much DM volume to handle manually",
+        "service_recommendation": "social_media_system"
+      },
+      "scraped_at": "2026-03-16T16:58:27.033Z",
+      "scrape_query": "https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=RS&q=enterijer&search_type=keyword_unordered",
+      "ad_start_date": "2026-02-28 08:00:00",
+      "ad_library_url": "https://www.facebook.com/ads/library/?id=928481716704304",
+      "page_followers": 16874,
+      "page_categories": [
+        "Home & Garden"
+      ],
+      "active_ads_count": 2,
+      "facebook_page_id": "601693246697367",
+      "facebook_page_url": "https://www.facebook.com/www.LEDLIGHT.rs/",
+      "publisher_platforms": [
+        "FACEBOOK",
+        "INSTAGRAM",
+        "AUDIENCE_NETWORK",
+        "THREADS"
+      ]
+    },
+    "email_draft": "Subject: Ko u Rasveta Led Light vodi poruke od klijentkinja? Stvarno nema smisla.\n\nDobar dan,\n\nStvarno nema smisla da neko u Rasveta Led Light troši ceo ili deo radnog dana na poruke sa društvenih mreža — a da vi pritom nemate nikakav uvid u to šta vam klijentkinje zapravo traže, šta ih zanima, i gde odustaju od zakazivanja.\n\nMislim da biste imali manje haosa, a bolju prodaju i odnos sa klijentkinjama, uz AI sistem koji radi 24/7 na svim mrežama za manje nego što vas taj isti posao košta sada.\nSistem radi 168 sati nedeljno. Košta manje od tog istog radnika. I za razliku od njega — pamti svaki razgovor.\n\nVodi razgovor na tečnom srpskom, razume fotografije koje klijentkinje šalju — kao vaš najbolji konsultant, samo bez pauze, bolovanja i propuštenih poruka.\nAli ovo nije šablonski chatbot. Ovo je jedini agent na tržištu koji ima analizu slika i videa, i razume odgovore na stori — napravljen od nule.\n\nSvaki razgovor, svaki detalj je na jednom mestu: ko je pisalo, za koji tretman pita, šta je zanima, gde je stala.\nDobijate konkretne podatke pomoću kojih možete da prilagodite ponudu, procese, marketing — sve na osnovu onoga što vam klijentkinje zapravo govore. Informacije koje trenutno jednostavno nemate.\n\nPratim vaš Instagram — 31,726 pratilaca i aktivne kampanje sa pozivom da vam se piše direktno. Pitanje je samo koliko tih poruka ostaje bez odgovora dok ste zauzeti.\n\nRezultat? Više zakazanih tretmana. Zadovoljnije klijentkinje. Bolja reputacija.\n\nKada god imate 20 minuta slobodno, mogu da vam pokažem kako bi ovo izgledalo za Rasveta Led Light — besplatno, bez obaveza i bez smaranja.\n\nVeliki pozdrav,\n\nNikola Guteša\nSmartflow\nSmartflow.rs\n+381 64 118 2200"
+  },
+  {
+    "id": "d0454538-24ea-495e-ba2c-b8dff7b80532",
+    "company_name": "Dr. Max Apoteka",
+    "website": "https://drmax.rs",
+    "niche": "ostalo",
+    "status": "enriched",
+    "intake_data": {
+      "ad_cta": "Learn more",
+      "ad_title": "{{product.name}}",
+      "ad_copies": [
+        "{{product.brand}}",
+        "Dr. Max brine o tvojoj koži, kosi i noktima! ✨\n\nOvo je period kada koži treba dodatna hidratacija, kosi jača podrška protiv opadanja, a noktima dodatni unos vitamina i minerala i zato te u svim Dr. Max apotekama očekuje odabran asortiman proizvoda za negu kože, kose i noktiju po sniženim cenama.\n\n📌Akcija traje do kraja meseca u svim Dr. Max i Super Dr. Max apotekama, kao i online na drmax.rs.\n\n#drmax #superdrmax",
+        "Iskoristite super cenu Bambo pelena od samo 1.499 RSD do kraja marta ✅⁣\n⁣\nMekane, pouzdane i nežne prema koži vaših najmlađih, ove pelene pružaju vrhunsku zaštitu i udobnost tokom celog dana 👼🏻⁣\n⁣\n📌 Akcija važi u svim Dr. Max apotekama ⁣i online\n⁣\nhttps://www.drmax.rs/brend/bambo",
+        "Iskoristite super cenu Bambo pelena od samo 1.499 RSD do kraja marta ✅⁣\n⁣\nMekane, pouzdane i nežne prema koži vaših najmlađih, ove pelene pružaju vrhunsku zaštitu i udobnost tokom celog dana 👼🏻⁣\n⁣\n📌 Akcija važi u svim Dr. Max apotekama ⁣i online\n⁣\n#drmax #drmaxapoteka #superdrmax #bambo"
+      ],
+      "enrichment": {
+        "contact": {
+          "name": "Martina Komadina",
+          "email": "martina.komadina@drmax.rs",
+          "title": "Regional Director",
+          "linkedin": "https://www.linkedin.com/in/martina-komadina-7164101a1",
+          "seniority": "executive"
+        },
+        "enriched_at": "2026-03-16T21:27:16.328Z",
+        "instagram_reels": [
+          {
+            "url": "https://www.instagram.com/reel/DV3b1-NN8Iq/",
+            "likes": 142,
+            "views": 2504,
+            "caption": "Malo atmosfere sa Beauty karnevala iz Super Dr. Max apoteke u Subotici! 💚\n\nHvala svim damama na poseti! Družimo se danas do 16h, a sutra do kraja dan",
+            "comments": 2,
+            "timestamp": "2026-03-14T13:16:09.000Z"
+          },
+          {
+            "url": "https://www.instagram.com/reel/DV5hfvNNvUu/",
+            "likes": 108,
+            "views": 1538,
+            "caption": "Beauty karneval u Super Dr. Max apoteci u Subotici se održao juče i hvala svima na druženju, savetovanju i ulepšavanju sa nama ✨\n\nSledeće subote 21.3.",
+            "comments": 0,
+            "timestamp": "2026-03-15T08:53:07.000Z"
+          }
+        ],
+        "instagram_profile": {
+          "bio": "Super Dr. Max - Više od apoteke: Beograd, Novi Sad, Niš, Bor, Kruševac, Loznica, Paraćin, Kraljevo, Subotica, Leskovac, Šabac, Smederevo, Aranđelovac",
+          "url": "https://www.instagram.com/drmaxapoteka/",
+          "username": "drmaxapoteka",
+          "followers": 104472,
+          "following": 0,
+          "is_verified": false,
+          "posts_count": 2206,
+          "external_url": "https://www.drmax.rs/",
+          "business_email": null,
+          "business_category": "None"
+        },
+        "recommendation_reason": "Default — social DM management is the most broadly applicable entry point",
+        "service_recommendation": "social_media_system"
+      },
+      "scraped_at": "2026-03-16T19:21:44.166Z",
+      "scrape_query": "https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=RS&q=akcija&search_type=keyword_unordered",
+      "ad_start_date": "2026-03-04 08:00:00",
+      "ad_library_url": "https://www.facebook.com/ads/library/?id=1900808840802239",
+      "page_followers": 72730,
+      "page_categories": [
+        "Pharmaceuticals"
+      ],
+      "active_ads_count": 9,
+      "facebook_page_id": "542597892849296",
+      "facebook_page_url": "https://www.facebook.com/apotekadrmax/",
+      "publisher_platforms": [
+        "FACEBOOK",
+        "INSTAGRAM",
+        "AUDIENCE_NETWORK",
+        "THREADS"
+      ]
+    },
+    "email_draft": "Subject: Ko u Dr. Max Apoteka odgovara kupcima na poruke? Stvarno nema smisla.\n\nDobar dan,\n\nStvarno nema smisla da neko u Dr. Max Apoteka troši ceo ili deo radnog dana na komunikaciju sa potencijalnim kupcima — a da vi pritom nemate nikakav uvid u to gde odustaju od kupovine.\n\nMislim da biste imali manje haosa, a bolju prodaju i odnos sa kupcima, uz AI sistem koji radi 168 sati nedeljno za manje nego što vas taj isti posao košta sada.\nSistem radi 168 sati nedeljno. Košta manje od tog istog radnika. I za razliku od njega — pamti svaki razgovor.\n\nAli ovo nije šablonski chatbot. Jedini agent na tržištu koji ima analizu slika i videa, razume odgovore na stori, i vodi razgovor na tečnom srpskom — napravljen od nule, za srpsko tržište.\n\nPratim vaš Instagram — 104,472 pratilaca i 9 aktivnih oglasa. Svaki razgovor, svaki detalj na jednom mestu: ko je pisalo, šta traži, gde je stalo. Informacije koje trenutno jednostavno nemate.\n\nA kada bude spreman sadržaj koji zaista generiše te poruke — imate i sistem koji ih odmah prima i odgovara.\n\nRezultat? Više završenih kupovina. Manje napuštenih korpi. Klijenti koji se vraćaju.\n\nKada god imate 20 minuta slobodno, mogu da vam pokažem kako bi ovo izgledalo za Dr. Max Apoteka — besplatno, bez obaveza i bez pritiska.\n\nVeliki pozdrav,\n\nNikola Guteša\nSmartflow\nSmartflow.rs\n+381 64 118 2200"
+  },
+  {
+    "id": "824a98e5-37a9-450f-b505-956160606cdb",
+    "company_name": "Star Tours Pančevo",
+    "website": "https://startours.rs/",
+    "niche": "Travel",
+    "status": "Sent",
+    "intake_data": null,
+    "email_draft": "Subject: Ko u Star Tours Pančevo vodi digitalnu promociju? Stvarno nema smisla.\n\nDobar dan,\n\nStvarno nema smisla da Star Tours Pančevo propušta prilike za privlačenje novih klijenata kroz video sadržaj — dok konkurencija zauzima tu publiku na Instagramu i TikToku.\n\nMislim da biste imali bolji povrat na investiciju uz profesionalni video sadržaj koji vaša publika zapravo gleda — bez skupih agencija, bez meseci čekanja i bez generičkih šablona. Holivudska produkcija za deo standardne cene.\n\nAli ovo nije generički AI sadržaj sa robotskim glasom i jeftinim efektima.\n\nGlas koji čujete zvuči kao pravi srpski govornik — vaša publika neće moći da prepozna da je AI. Vizuali su na nivou holivudske produkcije, a produkcija traje deo vremena i cene klasičnog snimanja.\n\nRezultat? Profesionalni video sadržaj. Prva publika koja se vraća. Digitalno prisustvo koje radi za vaš biznis.\n\nKada god imate 20 minuta slobodno, mogu da vam pokažem kako bi to izgledalo za Star Tours Pančevo — i da napravim kratak besplatni sample video odmah. Besplatno, bez obaveza i bez smaranja.\n\nVeliki pozdrav,\n\nNikola Guteša\nSmartflow\nSmartflow.rs\n+381 64 118 2200"
+  },
+  {
+    "id": "51e68679-4636-4c5e-abab-e2be8f45ecf4",
+    "company_name": "Vadras",
+    "website": null,
+    "niche": "Bed",
+    "status": "Sent",
+    "intake_data": null,
+    "email_draft": "Subject: Ko u Vadras vodi digitalnu promociju? Stvarno nema smisla.\n\nDobar dan,\n\nStvarno nema smisla da Vadras propušta prilike za privlačenje novih klijenata kroz video sadržaj — dok konkurencija zauzima tu publiku na Instagramu i TikToku.\n\nMislim da biste imali bolji povrat na investiciju uz profesionalni video sadržaj koji vaša publika zapravo gleda — bez skupih agencija, bez meseci čekanja i bez generičkih šablona. Holivudska produkcija za deo standardne cene.\n\nAli ovo nije generički AI sadržaj sa robotskim glasom i jeftinim efektima.\n\nGlas koji čujete zvuči kao pravi srpski govornik — vaša publika neće moći da prepozna da je AI. Vizuali su na nivou holivudske produkcije, a produkcija traje deo vremena i cene klasičnog snimanja.\n\nRezultat? Profesionalni video sadržaj. Prva publika koja se vraća. Digitalno prisustvo koje radi za vaš biznis.\n\nKada god imate 20 minuta slobodno, mogu da vam pokažem kako bi to izgledalo za Vadras — i da napravim kratak besplatni sample video odmah. Besplatno, bez obaveza i bez smaranja.\n\nVeliki pozdrav,\n\nNikola Guteša\nSmartflow\nSmartflow.rs\n+381 64 118 2200"
+  },
+  {
+    "id": "5f5c96c0-5759-4ac2-bf90-b5867e2fa25a",
+    "company_name": "ePlaneta",
+    "website": "https://eplaneta.rs",
+    "niche": "ostalo",
+    "status": "enriched",
+    "intake_data": {
+      "ad_cta": "Shop now",
+      "ad_title": "Iskoristi popust!",
+      "ad_copies": [
+        "Mali kućni aparati - velika ušteda! Iskoristi popuste i poruči već sada svoje favorite!",
+        "🛠️ Popusti za prave majstore! Zavrni rukave – iskoristi akciju i nabavi neophodan alat uz sjajnu uštedu!",
+        "Kupi eHomeStorage metalne police na popustu od 30%! Za dodatni prostor koji je uvek potreban! ✅",
+        "Spremi se za sjajne uštede! 📣 Iskoristi akciju na mobilne telefone i dodatnu opremu! 📱⚡",
+        "Iskoristi specijalne popuste i poruči Bauer uređaje po super cenama! To je to!"
+      ],
+      "enrichment": {
+        "contact": {
+          "name": null,
+          "email": "info@eplaneta.rs",
+          "title": null,
+          "linkedin": null,
+          "seniority": null
+        },
+        "enriched_at": "2026-03-16T21:27:16.328Z",
+        "instagram_reels": [
+          {
+            "url": "https://www.instagram.com/reel/DVqY4VMiL5h/",
+            "likes": 101,
+            "views": 12822,
+            "caption": "Pogledaj ponudu ČISTIMO ZALIHE🧹 na ePlaneti i iskoristi MAX POPUSTE na top artikle!\n\nOdeća, obuća, bela tehnika, kućni aparati, nameštaj i još mnogo ",
+            "comments": 2,
+            "timestamp": "2026-03-09T11:43:14.000Z"
+          },
+          {
+            "url": "https://www.instagram.com/reel/DVvW5tfiHWp/",
+            "likes": 2906,
+            "views": 20267,
+            "caption": "GIVEAWAY ZA MLADENCE!💍\n\nUčestvuj i osvoji Ariete uređaje za kuhinju:\n\n🔹Aparat za palačinke\n🔹Aparat za kokice\n🔹Aparat za sendviče, mafine i krofne\n",
+            "comments": 5682,
+            "timestamp": "2026-03-11T10:00:43.000Z"
+          },
+          {
+            "url": "https://www.instagram.com/reel/DV0jA0miHHP/",
+            "likes": 55,
+            "views": 3289,
+            "caption": "Pronađi sve što ti treba na jednom mestu!\n\nČekiraj top ponude na ePlaneti već danas, jer te čeka sjajna ušteda!⚡️\n\nTo je to!👌",
+            "comments": 1,
+            "timestamp": "2026-03-13T10:22:48.000Z"
+          }
+        ],
+        "instagram_profile": {
+          "bio": "⚡ Popusti svaki dan, najbolje cene online!\n💳 Mogućnost plaćanja do 18 mesečnih rata\n📦 Brza dostava širom Srbije\nTo je to!👌",
+          "url": "https://www.instagram.com/eplaneta_com/",
+          "username": "eplaneta_com",
+          "followers": 149303,
+          "following": 0,
+          "is_verified": false,
+          "posts_count": 2402,
+          "external_url": "http://eplaneta.rs/",
+          "business_email": null,
+          "business_category": "None,Shopping & retail"
+        },
+        "recommendation_reason": "Active e-commerce via social — too much DM volume to handle manually",
+        "service_recommendation": "social_media_system"
+      },
+      "scraped_at": "2026-03-16T19:21:44.165Z",
+      "scrape_query": "https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=RS&q=popust&search_type=keyword_unordered",
+      "ad_start_date": "2025-12-23 08:00:00",
+      "ad_library_url": "https://www.facebook.com/ads/library/?id=3579031842234770",
+      "page_followers": 71355,
+      "page_categories": [
+        "Website"
+      ],
+      "active_ads_count": 23,
+      "facebook_page_id": "101912918954391",
+      "facebook_page_url": "https://www.facebook.com/eplaneta.rs/",
+      "publisher_platforms": [
+        "FACEBOOK",
+        "INSTAGRAM",
+        "AUDIENCE_NETWORK",
+        "MESSENGER",
+        "THREADS"
+      ]
+    },
+    "email_draft": "Subject: Ko u ePlaneta odgovara kupcima na poruke? Stvarno nema smisla.\n\nDobar dan,\n\nStvarno nema smisla da neko u ePlaneta troši ceo ili deo radnog dana na komunikaciju sa potencijalnim kupcima — a da vi pritom nemate nikakav uvid u to gde odustaju od kupovine.\n\nMislim da biste imali manje haosa, a bolju prodaju i odnos sa kupcima, uz AI sistem koji radi 168 sati nedeljno za manje nego što vas taj isti posao košta sada.\nSistem radi 168 sati nedeljno. Košta manje od tog istog radnika. I za razliku od njega — pamti svaki razgovor.\n\nAli ovo nije šablonski chatbot. Jedini agent na tržištu koji ima analizu slika i videa, razume odgovore na stori, i vodi razgovor na tečnom srpskom — napravljen od nule, za srpsko tržište.\n\nPratim vaš Instagram — 149,303 pratilaca i 23 aktivnih oglasa. Svaki razgovor, svaki detalj na jednom mestu: ko je pisalo, šta traži, gde je stalo. Informacije koje trenutno jednostavno nemate.\n\nA kada bude spreman sadržaj koji zaista generiše te poruke — imate i sistem koji ih odmah prima i odgovara.\n\nRezultat? Više završenih kupovina. Manje napuštenih korpi. Klijenti koji se vraćaju.\n\nKada god imate 20 minuta slobodno, mogu da vam pokažem kako bi ovo izgledalo za ePlaneta — besplatno, bez obaveza i bez pritiska.\n\nVeliki pozdrav,\n\nNikola Guteša\nSmartflow\nSmartflow.rs\n+381 64 118 2200"
+  },
+  {
+    "id": "7259667f-4f39-4fbb-a71c-d7e401b85f2f",
+    "company_name": "Leone Fashion",
+    "website": "https://leonefashion.rs",
+    "niche": "ostalo",
+    "status": "enriched",
+    "intake_data": {
+      "ad_cta": "Shop now",
+      "ad_title": "{{product.current_price strip_zeros}} - {{product.name}}",
+      "ad_copies": [
+        "❄️ AKCIJA! ☃️ Do -60% na jesen-zima 2025/26 kolekciju i na sve prethodne sezone! Ugrabite među prvima svoje omiljene komade 🤩\n\n🚚 Brza dostava 2-3 radna dana\n🔐 Bezbedna i jednostavna online kupovina u par klikova\n🛒 Poruči odmah!",
+        "☀️ AKCIJA! Iskoristi 𝐝𝐨𝐝𝐚𝐭𝐧𝐢𝐡 -𝟏𝟎% 𝐮 𝐤𝐨𝐫𝐩𝐢 na celu kolekciju proleće-leto 2026 🌺 Nova kolekcija leto 2026 je stigla! ☀️ Ugrabite među prvima svoje omiljene komade 🤩\n\n🚚 Brza dostava 2-3 radna dana\n🔐 Bezbedna i jednostavna online kupovina u par klikova\n🛒 Poruči odmah!",
+        "🌸 AKCIJA! ☀️ Iskoristi dodatnih -10% u korpi na SVE i na već sniženo! Ugrabite među prvima svoje omiljene komade 🤩\n\n🚚 Brza dostava 2-3 radna dana\n🔐 Bezbedna i jednostavna online kupovina u par klikova\n🛒 Poruči odmah!",
+        "Od 13.03.. do 16.03.. ostvarite\ndodatnih 10% popusta na sve artikle u korpi prilikom online kupovine.\nPopust se automatski obračunava u korpi.\nKupujte brzo, sigurno i povoljnije nego ikad.\n🛒 Iskoristite priliku dok traje!"
+      ],
+      "enrichment": {
+        "contact": {
+          "name": null,
+          "email": "leoneamazon@gmail.com",
+          "title": null,
+          "linkedin": null,
+          "seniority": null
+        },
+        "enriched_at": "2026-03-16T21:27:16.328Z",
+        "instagram_reels": [
+          {
+            "url": "https://www.instagram.com/reel/DV9GDChgPCX/",
+            "likes": 13,
+            "views": 515,
+            "caption": "Kombinacija klasike i elegancije nikada ne izlazi iz mode ✨\n\n#Outfit:\n• @hugo_official majica\n• @soliver pantalone\n• @replay torba\n• @tamaris_official",
+            "comments": 0,
+            "timestamp": "2026-03-16T18:00:00.000Z"
+          },
+          {
+            "url": "https://www.instagram.com/reel/DV38dYfgBmC/",
+            "likes": 8,
+            "views": 436,
+            "caption": "Savršen spoj udobnosti i elegancije ✨\n\n#Outfit:\n• @commafashion bluza i pantalone\n• @guess torbica\n• @tamaris_official cipele\n\nPoruči online i stiže n",
+            "comments": 0,
+            "timestamp": "2026-03-14T18:00:00.000Z"
+          },
+          {
+            "url": "https://www.instagram.com/reel/DV6hPfwAjQl/",
+            "likes": 16,
+            "views": 966,
+            "caption": "Sportska elegancija je stil kojem se uvek vraćamo ✨\n\n#Outfit:\n• @guess majica i pantalone\n• @replay torbica i patike\n\nPoruči online i stiže na tvoju a",
+            "comments": 0,
+            "timestamp": "2026-03-15T18:00:00.000Z"
+          }
+        ],
+        "instagram_profile": {
+          "bio": "▪️Originalni svetski brendovi u našoj prodavnici\n▪️Online store 📦\n▪️Armani•Hugo Boss•Replay•Pepe Jeans•Guess•Tommy Hilfiger•Liu Jo•Gaudi•Steve Madden…",
+          "url": "https://www.instagram.com/leonefashionsrbija/",
+          "username": "leonefashionsrbija",
+          "followers": 56595,
+          "following": 0,
+          "is_verified": false,
+          "posts_count": 5643,
+          "external_url": "https://leonefashion.rs/",
+          "business_email": null,
+          "business_category": "None,Shopping & retail"
+        },
+        "recommendation_reason": "Active e-commerce via social — too much DM volume to handle manually",
+        "service_recommendation": "social_media_system"
+      },
+      "scraped_at": "2026-03-16T19:21:44.166Z",
+      "scrape_query": "https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=RS&q=akcija&search_type=keyword_unordered",
+      "ad_start_date": "2026-01-29 08:00:00",
+      "ad_library_url": "https://www.facebook.com/ads/library/?id=1601888894153653",
+      "page_followers": 18803,
+      "page_categories": [
+        "Shopping"
+      ],
+      "active_ads_count": 11,
+      "facebook_page_id": "872453272933068",
+      "facebook_page_url": "https://www.facebook.com/leonefashionsrbija/",
+      "publisher_platforms": [
+        "FACEBOOK",
+        "INSTAGRAM",
+        "AUDIENCE_NETWORK",
+        "MESSENGER"
+      ]
+    },
+    "email_draft": "Subject: Ko u Leone Fashion odgovara kupcima na poruke? Stvarno nema smisla.\n\nDobar dan,\n\nStvarno nema smisla da neko u Leone Fashion troši ceo ili deo radnog dana na komunikaciju sa potencijalnim kupcima — a da vi pritom nemate nikakav uvid u to gde odustaju od kupovine.\n\nMislim da biste imali manje haosa, a bolju prodaju i odnos sa kupcima, uz AI sistem koji radi 168 sati nedeljno za manje nego što vas taj isti posao košta sada.\nSistem radi 168 sati nedeljno. Košta manje od tog istog radnika. I za razliku od njega — pamti svaki razgovor.\n\nAli ovo nije šablonski chatbot. Jedini agent na tržištu koji ima analizu slika i videa, razume odgovore na stori, i vodi razgovor na tečnom srpskom — napravljen od nule, za srpsko tržište.\n\nPratim vaš Instagram — 56,595 pratilaca i 11 aktivnih oglasa. Svaki razgovor, svaki detalj na jednom mestu: ko je pisalo, šta traži, gde je stalo. Informacije koje trenutno jednostavno nemate.\n\nA kada bude spreman sadržaj koji zaista generiše te poruke — imate i sistem koji ih odmah prima i odgovara.\n\nRezultat? Više završenih kupovina. Manje napuštenih korpi. Klijenti koji se vraćaju.\n\nKada god imate 20 minuta slobodno, mogu da vam pokažem kako bi ovo izgledalo za Leone Fashion — besplatno, bez obaveza i bez pritiska.\n\nVeliki pozdrav,\n\nNikola Guteša\nSmartflow\nSmartflow.rs\n+381 64 118 2200"
+  },
+  {
+    "id": "c1f96799-4b0d-4c2c-a7c1-caf04caa7d7a",
+    "company_name": "Akcija24.rs",
+    "website": "https://akcija24.rs",
+    "niche": "ostalo",
+    "status": "enriched",
+    "intake_data": {
+      "ad_cta": "Shop now",
+      "ad_title": "{{product.name}}",
+      "ad_copies": [
+        "🎉 Nova godina, novi dom! Započni godinu sa potpuno osveženim domom – nameštaj i rasveta za svaku prostoriju, moderan dizajn, praktična rešenja i odlične cene. ✨ Savršen trenutak za promenu i stvaranje doma koji ćeš voleti, uz brzu dostavu direktno do tvog doma. 🏡 Naruči sada na 👉 akcija24.rs",
+        "NEMA ŠTA NEMA – A IMA SVE od ormara po najnižim cenama! ✨ Moderan dizajn, vrhunski kvalitet i prostorna organizacija za urednu spavaću sobu bez haosa. 👉 Naruči odmah na akcija24.rs 🛒",
+        "NEMA ŠTA NEMA – A IMA SVE od rasvetnih tela po najnižim cenama! ✨ Moderan dizajn, vrhunski kvalitet i svetlo koje za tren menja ceo ambijent. 👉 Naruči odmah na akcija24.rs 🛒",
+        "NEMA ŠTA NEMA – A IMA SVE od trpezarijskih stolova i šankova po najnižim cenama! ✨ Moderan dizajn, vrhunski kvalitet i savršeno mesto za svakodnevne obroke i druženja. 👉 Naruči odmah na akcija24.rs 🛒",
+        "{{product.brand}}"
+      ],
+      "enrichment": {
+        "contact": {
+          "name": null,
+          "email": "contact@akcija24.rs",
+          "title": null,
+          "linkedin": null,
+          "seniority": null
+        },
+        "enriched_at": "2026-03-16T21:27:16.328Z",
+        "recommendation_reason": "Default — social DM management is the most broadly applicable entry point",
+        "service_recommendation": "social_media_system"
+      },
+      "scraped_at": "2026-03-16T19:21:44.163Z",
+      "scrape_query": "https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=RS&q=akcija&search_type=keyword_unordered",
+      "ad_start_date": "2026-02-12 08:00:00",
+      "ad_library_url": "https://www.facebook.com/ads/library/?id=1268856641801472",
+      "page_followers": 85278,
+      "page_categories": [
+        "Brand"
+      ],
+      "active_ads_count": 57,
+      "facebook_page_id": "110823121855917",
+      "facebook_page_url": "https://www.facebook.com/akcija24.rs/",
+      "publisher_platforms": [
+        "FACEBOOK",
+        "INSTAGRAM",
+        "AUDIENCE_NETWORK",
+        "MESSENGER",
+        "THREADS"
+      ]
+    },
+    "email_draft": null
+  },
+  {
+    "id": "0f807ea9-45a7-4883-a7aa-db43b990e302",
+    "company_name": "Aksa",
+    "website": "https://aksa.rs",
+    "niche": "ostalo",
+    "status": "enriched",
+    "intake_data": {
+      "ad_cta": "Shop now",
+      "ad_title": "{{product.name}}",
+      "ad_copies": [
+        "{{product.brand}}",
+        "💚 Pampers MEGA UŠTEDA - samo online! 💚\n📅 02–31.03.2026.\n\nKombinuj omiljene Pampers pelene i vlažne maramice i uštedi više! 🛒✨\n\nKupovinom mesečnog pakovanja:\n✔️ Pampers Active Baby\n✔️ Pampers Premium Care\n✔️ Pampers Pants\n\nuz Pampers baby vlažne maramice:\n✔️ Sensitive 12x52\n✔️ Harmonie Aqua 15x48\n✔️ Fresh Clean 15x80\n\nostvaruješ sjajne akcijske cene 💸\n\n👉 Popust se obračunava u korpi kada dodaš oba artikla.\n🛍 Akcija važi samo online.\n\nNe propusti priliku da obezbediš zalihe za ceo mesec i uštediš pametno 💙",
+        "🔥 TOP ARTIKLI – martovska AKCIJA u Aksi! 🔥\nIzdvojili smo proizvode koje roditelji najviše vole – sada po još boljim cenama!\n\n🍼 Pampers – kupi 2 pakovanja po specijalnoj ceni\n🍎 Nutrino pouch 100g već od 149 din\n🛒 Chicco kolica, duo i trio sistemi uz ogromne uštede\n🧴 Chicco kozmetika do -20%\n🧺 Frosch asortiman do -15%\n🛏 Lillo & Pippo posteljine i pletenice -20%\n… i još mnogo TOP artikala na akciji!\n\nBilo da opremate bebin kutak, obnavljate kozmetiku ili pravite zalihe pelena – sada je pravi trenutak za kupovinu.\n\n📅 01.03–31.03.2026.\n\n👉 Pogledajte kompletnu ponudu na sajtu i iskoristite martovske popuste dok traju.\n\nAksa – sve za vašu bebu, na jednom mestu ❤️",
+        "✨ MESEC BRENDA CHICCO U AKSI ✨\n📅 03–30.03.2026.\n\nKada je u pitanju sigurnost, udobnost i kvalitet – birate Chicco.\nTokom celog marta očekuju vas posebne pogodnosti na odabrane Chicco proizvode!\n\n🍼 Kolica i auto-sedišta\n🛁 Kozmetika i oprema za negu\n🧸 Oprema za svakodnevne trenutke sa bebom\n\nIskoristite priliku da nabavite provereni kvalitet po povoljnijim cenama.\n\n👉 Pogledajte kompletnu ponudu na sajtu ili posetite najbližu Aksa prodavnicu.\n\nChicco – Live it. Love it.\nAksa – iskustvo od prvog dana. 💕"
+      ],
+      "enrichment": {
+        "contact": {
+          "name": "Daliborka Mirković",
+          "email": "daliborka.mirkovic@aksa.rs",
+          "title": "Junior Store Manager",
+          "linkedin": "https://www.linkedin.com/in/daliborka-mirković-a0a41b128",
+          "seniority": "executive"
+        },
+        "enriched_at": "2026-03-16T21:27:16.328Z",
+        "instagram_reels": [
+          {
+            "url": "https://www.instagram.com/reel/DV2_DNok7vq/",
+            "likes": 54,
+            "views": 2856,
+            "caption": "👶 Kada beba zaplače – ova Graco ljuljaška zna šta treba da uradi.\n\nZahvaljujući tehnologiji za detekciju plača, ugrađeni mikrofon prepoznaje kada beb",
+            "comments": 0,
+            "timestamp": "2026-03-14T09:04:16.000Z"
+          },
+          {
+            "url": "https://www.instagram.com/reel/DV0dCLOkSau/",
+            "likes": 148,
+            "views": 6562,
+            "caption": "Ako je suditi po najmlađima – izbor je jasan. 😉\n\nChicco mesec brenda u Aksi traje – vreme je za igračke koje osvajaju na prvi pogled.\n\nA pored igrača",
+            "comments": 9,
+            "timestamp": "2026-03-13T09:28:33.000Z"
+          },
+          {
+            "url": "https://www.instagram.com/reel/DV84X43E5yu/",
+            "likes": 34,
+            "views": 2397,
+            "caption": "Mix & Match groznica je već počela! 🛍️\n\nIgračke završavaju u korpama – prva u korpu, druga jeftinija -50%, treća za samo 1 RSD.\n\nMališani već biraju ",
+            "comments": 1,
+            "timestamp": "2026-03-16T16:01:23.000Z"
+          }
+        ],
+        "instagram_profile": {
+          "bio": "Iskusno od prvog dana 💙👶\n👇 Sve novosti za mame i tate:",
+          "url": "https://www.instagram.com/aksa_srbija/",
+          "username": "aksa_srbija",
+          "followers": 161152,
+          "following": 0,
+          "is_verified": false,
+          "posts_count": 4719,
+          "external_url": "https://linktr.ee/aksa.rs",
+          "business_email": null,
+          "business_category": "None,Baby goods/kids goods"
+        },
+        "recommendation_reason": "Default — social DM management is the most broadly applicable entry point",
+        "service_recommendation": "social_media_system"
+      },
+      "scraped_at": "2026-03-16T19:21:44.166Z",
+      "scrape_query": "https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=RS&q=popust&search_type=keyword_unordered",
+      "ad_start_date": "2026-03-02 08:00:00",
+      "ad_library_url": "https://www.facebook.com/ads/library/?id=1267924391981372",
+      "page_followers": 183504,
+      "page_categories": [
+        "Baby goods/kids goods"
+      ],
+      "active_ads_count": 11,
+      "facebook_page_id": "120752704633519",
+      "facebook_page_url": "https://www.facebook.com/AksaSrbija/",
+      "publisher_platforms": [
+        "FACEBOOK",
+        "INSTAGRAM"
+      ]
+    },
+    "email_draft": "Subject: Ko u Aksa vodi komunikaciju sa klijentima? Stvarno nema smisla.\n\nDobar dan,\n\nStvarno nema smisla da neko u Aksa troši ceo ili deo radnog dana na komunikaciju sa potencijalnim klijentima — a da vi pritom nemate nikakav uvid u to gde odustaju od prvog kontakta.\n\nMislim da biste imali manje haosa, a bolju prodaju i odnos sa klijentima, uz AI sistem koji radi 168 sati nedeljno za manje nego što vas taj isti posao košta sada.\nSistem radi 168 sati nedeljno. Košta manje od tog istog radnika. I za razliku od njega — pamti svaki razgovor.\n\nAli ovo nije šablonski chatbot. Jedini agent na tržištu koji ima analizu slika i videa, razume odgovore na stori, i vodi razgovor na tečnom srpskom — napravljen od nule, za srpsko tržište.\n\nPratim vaš Instagram — 161,152 pratilaca i 11 aktivnih oglasa. Svaki razgovor, svaki detalj na jednom mestu: ko je pisalo, šta traži, gde je stalo. Informacije koje trenutno jednostavno nemate.\n\nA kada bude spreman sadržaj koji zaista generiše te poruke — imate i sistem koji ih odmah prima i odgovara.\n\nRezultat? Više zakazanih sastanaka. Manje haosa. Klijenti koji se ne gube u inboxu.\n\nKada god imate 20 minuta slobodno, mogu da vam pokažem kako bi ovo izgledalo za Aksa — besplatno, bez obaveza i bez pritiska.\n\nVeliki pozdrav,\n\nNikola Guteša\nSmartflow\nSmartflow.rs\n+381 64 118 2200"
+  },
+  {
+    "id": "95a54926-fb7a-4619-a7a4-47ebb3565307",
+    "company_name": "Baby Shop kolica za bebe",
+    "website": "https://kolicazabebe.rs",
+    "niche": "online_prodaja",
+    "status": "enriched",
+    "intake_data": {
+      "ad_cta": "Shop now",
+      "ad_title": "{{product.name}}",
+      "ad_copies": [
+        "🎯 Akcija u Baby Shop-u je u toku! 👌\nNe propustite odlične popuste na pažljivo odabrane proizvode za vaše mališane!\n🛒 Čekamo vas u webshop-u i našim prodajnim objektima!\n📦 Poručite brzo, jednostavno i uz besplatnu dostavu na mnoge artikle!",
+        "🎉 SUPER AKCIJA u Baby Shop-u! 🎉\nPopusti do -40% na kolica i opremu za bebe koje prate vaše mališane u svakom koraku.\n\n🛒 Kolica, kreveci, hranilice, auto sedišta, tricikli i još mnogo toga – sve po specijalnim cenama!\n\nČekamo vas u webshop-u i u našim prodajnim objektima! 🥳\n\n✅ Kvalitet, sigurnost i praktičnost na jednom mestu\n✅ Idealno za bebe i roditelje u pokretu\n✅ Ograničena ponuda – iskoristite dok traje!\n\n📍 Poručite online ili nas posetite u prodavnici",
+        "🎉 SUPER AKCIJA u Baby Shop-u! 🎉\nPopusti do -35% na kolica i opremu za bebe koje prate vaše mališane u svakom koraku.\n\n🛒 Kolica, kreveci, hranilice, auto sedišta, tricikli i još mnogo toga – sve po specijalnim cenama!\n\n✨ Kvalitet, sigurnost i funkcionalnost na jednom mestu\n📦 Besplatna dostava širom Srbije\n\n👉 Kupujte online ili posetite naše prodajne objekte\n⏳ Požurite – akcija traje dok traju zalihe!\n\n💛 Baby Shop – sve za vaše mališane na jednom mestu!",
+        "🎉 SUPER AKCIJA u Baby Shop-u! 🎉\nPopusti do -35% na kolica i opremu za bebe koje prate vaše mališane u svakom koraku.\n\n🛒 Kolica, kreveci, hranilice, auto sedišta, tricikli i još mnogo toga – sve po specijalnim cenama!\n\n✨ Kvalitet, sigurnost i funkcionalnost na jednom mestu",
+        "Super Akcija u Baby Shop-u! Igračke sa popustom do -15% – obradujte vaše mališane već danas. \n🧸 Izaberite iz širokog asortimana: drvene kućice za lutke 🏠, edukativne igračke 📚, muzičke igračke 🎶, kuhinje za igru 🍳, puzle 🧩 i još mnogo toga!"
+      ],
+      "enrichment": {
+        "contact": {
+          "name": null,
+          "email": "prodaja@kolicazabebe.rs",
+          "title": null,
+          "linkedin": null,
+          "seniority": null
+        },
+        "enriched_at": "2026-03-16T21:27:16.328Z",
+        "recommendation_reason": "Lead gen funnel detected — email sequences will convert leads before they go cold",
+        "service_recommendation": "ai_sales_systems"
+      },
+      "scraped_at": "2026-03-16T19:21:44.165Z",
+      "scrape_query": "https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=RS&q=webshop&search_type=keyword_unordered",
+      "ad_start_date": "2025-10-09 07:00:00",
+      "ad_library_url": "https://www.facebook.com/ads/library/?id=24162700173408532",
+      "page_followers": 110677,
+      "page_categories": [
+        "Baby goods/kids goods"
+      ],
+      "active_ads_count": 17,
+      "facebook_page_id": "523034214389784",
+      "facebook_page_url": "https://www.facebook.com/KunertKolicaZaBebe/",
+      "publisher_platforms": [
+        "FACEBOOK",
+        "INSTAGRAM",
+        "AUDIENCE_NETWORK",
+        "MESSENGER"
+      ]
+    },
+    "email_draft": null
+  },
+  {
+    "id": "b6621344-9804-447d-aa8f-7efc63994e3e",
+    "company_name": "TehnoLider Shop Srbija",
+    "website": "https://tehnolidershop.rs",
+    "niche": "ostalo",
+    "status": "enriched",
+    "intake_data": {
+      "ad_cta": "Learn more",
+      "ad_title": "Velika vila za lutke sa 257 delova-dvorac iz snova za beskrajnu zabavu! - Tehno Lider Shop",
+      "ad_copies": [
+        "👑 Obradujte svoju princezu – Velika Vila za Lutke sa 257 delova! 🏰\n💖 4 sprata zabave sa sobama iz snova!\n🪑 Uključuje nameštaj i dodatke – opremite po svom ukusu!\n🎨 Podstiče maštu i kreativnost!\n👶 Bezbedna za decu, idealna za uzrast 3+!\n\n🎁 Poručite SADA uz popust od čak 33%! 🛒\nhttps://tehnolidershop.rs/proizvod/velika-vila-za-lutke-sa-257-delova-dvorac-iz-snova-za-beskrajnu-zabavu/",
+        "🌿✂️ Aku trimer za travu sa 2 baterije💪\n🔋 S dve baterije, ovaj trimer je spreman za dugotrajni rad!\n\n📏 Podesiva teleskopska ručka pruža udobnost i prilagođavanje visini od 90 cm do 120 cm.\n\n🔄 Sa podesivom glavom za 180 stepeni, nema mesta koje ne možeš dosegnuti!\n\n🌱 Bez buke i ekstra lak za upotrebu - savršen za sisanje trave i obrezivanje biljaka.\n\n⏱️ Brzo punjenje za samo 2-3 sata, sa brzim punjačem u kompletu!\n\n🔧 Dolazi sa bogatim paketom dodataka:\n– 2x baterija\n– 1x brzi punjac\n– 1x okrugli noz za siblje\n– 2x metalne ostrice za secenje i obrezivanje\n– 5x plasticni noz za kosenje travnjaka\n– alat za instalaciju",
+        "🌿 Organska maska od gline i zelenog čaja 🌿\n✅ Čisti pore i uklanja mitisere\n✅ Smanjuje akne i masnoću kože\n✅ Hidratacija + regeneracija za sve tipove kože\n\n✨ Jednostavna primena u stik pakovanju – lice postaje glatko, nežno i blistavo!\n🎁 Akcija 1+1 GRATIS – količine su ograničene!\n👉 https://is.gd/dEsxjt",
+        "🤩2u1 Ranac krevetac za bebe🤩\n👉Akcija: 2499din Rasprodaja!!!\nRanac koji se lako rasklapa u privremeni krevetac radi dremke ili povijanja deteta❤️\nPravi spas za sve roditelje!🤗",
+        "Višenamenski cipelarnik 3-u-1 – manje nereda, više prostora! 👟🧥\nUredite hodnik za nekoliko minuta!\nSve na jednom mestu – obuća, jakne, torbe i sitnice, bez zauzimanja mnogo prostora.\n\n✔ Kapacitet preko 20 pari obuće\n✔ 8 kukica za jakne i torbe\n✔ Gornja polica za ključeve, kape i dodatke\n✔ Zaštita od prašine + stabilna metalna konstrukcija\n✔ Idealan za stanove i manje prostore\n\nPraktično, moderno i funkcionalno rešenje za svaki dom!\n\nPoručite odmah – dok traje akcija! 🛒\nhttp://bit.ly/4qT5CLT"
+      ],
+      "enrichment": {
+        "contact": {
+          "name": null,
+          "email": "tehnolider22@gmail.com",
+          "title": null,
+          "linkedin": null,
+          "seniority": null
+        },
+        "enriched_at": "2026-03-16T21:27:16.328Z",
+        "recommendation_reason": "Active e-commerce via social — too much DM volume to handle manually",
+        "service_recommendation": "social_media_system"
+      },
+      "scraped_at": "2026-03-16T19:21:44.165Z",
+      "scrape_query": "https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=RS&q=popust&search_type=keyword_unordered",
+      "ad_start_date": "2026-02-28 08:00:00",
+      "ad_library_url": "https://www.facebook.com/ads/library/?id=1453715362866142",
+      "page_followers": 49607,
+      "page_categories": [
+        "Local business"
+      ],
+      "active_ads_count": 16,
+      "facebook_page_id": "357244735320",
+      "facebook_page_url": "https://www.facebook.com/100064523922437/",
+      "publisher_platforms": [
+        "FACEBOOK",
+        "INSTAGRAM",
+        "AUDIENCE_NETWORK",
+        "MESSENGER",
+        "THREADS"
+      ]
+    },
+    "email_draft": null
+  },
+  {
+    "id": "e6feb7e9-f9ab-46a3-8de0-312d2e725d3b",
+    "company_name": "Eklix.rs - Povoljna kupovina",
+    "website": "https://eklix.rs",
+    "niche": "ostalo",
+    "status": "enriched",
+    "intake_data": {
+      "ad_cta": "Shop now",
+      "ad_title": "Brusilica-žirafa za zidove 1200W - Sa LED svetlom",
+      "ad_copies": [
+        "Olakšajte renoviranje uz našu praktičnu brusilicu za zidove! 💪🏠\n\n✔️ Poseduje snažan motor od 1200W, teleskopsku dršku za lakši rad i 6 brusnih ploča za različite površine\n\n✔️ Brusna glava sa zglobnim ležajevima omogućava lako manevrisanje i rad na teško dostupnim mestima\n\n✔️ Regulacijom brzine prilagodite alat različitim površinama koje brusite\n\n✔️ Brusilica se brzo i jednostavno sklapa, lako je prenosiva i idealna za svaki projekat\n\n🛡️ Garancija 2 godine.\n\n🛒Jednostavno poručivanje putem sajta\n🚚 Brza dostava na kućnu adresu",
+        "{{product.brand}}",
+        "Osiguraj svoj komad pre nego što nestane sa zaliha. 👉Poruči uz popust!",
+        "🚫PRESKAČEMO VISOKE CENE!🚫\nObradujte svoje mališane, jer su tramboline sve popularnije, a ova ponuda nikog ne ostavlja ravnodušnim!\n\n👉Klikni \"Shop now\" dugme i poruči trampolinu po sjajnoj ceni.\n\n🌐 Lako poručivanje putem sajta ili 📞 pozivom na broj 065 35 89 321\n\n✅Kupuješ original\n\n📜Fiskalni račun i 2 godine garancije\n\n✔️Mogućnost plaćanja preko računa\n\n🚚Brza dostava na adresu - za samo 2-3 radna dana\n\n🤝Podrška stručnog i ljubaznog osoblja\n\n🧑 Hiljade zadovoljnih kupaca\n\n*Zalihe su ograničene",
+        "Ako si čekao pravi trenutak da kompletiraš radionicu – upravo si ga našao 👇\n\nVillager FUSE VLN Set 5u1 spaja tri najpotrebnija alata u jedan praktičan i mobilan paket.\nBušenje, brušenje i sečenje – sve pokriveno. Bez kablova, bez komplikacija.\n\nTri ključna alata + dve baterije + punjač.\n\n👉 Poruči sa sajta klikom na sliku.\n\n🔧 Šta dobijaš u kompletu?\n1️⃣ Aku bušilicu – odvijač (VLN 3220)\n\nLagana, precizna i idealna za svakodnevne zadatke.\n\n✔️ 18 V\n✔️ 35 Nm obrtnog momenta\n✔️ 2 brzine: 0–350 / 0–1300 rpm\n✔️ Futer 0.8–10 mm\n✔️ Samo 1.41 kg\n\nSavršena za sklapanje nameštaja, montaže, popravke i rad u kući ili radionici.\n\n2️⃣ Ugaonu brusilicu (VLN 4320)\n\nSnaga i sloboda pokreta bez kabla.\n\n⚙️ 18 V\n⚙️ 8000 rpm\n⚙️ Disk 115 mm\n⚙️ Navoj M14\n\nIdealna za sečenje metala, obradu materijala i brze intervencije tamo gde nema utičnice.\n\n3️⃣ Ubodnu testeru (VLN 1120)\n\nZa precizna i kontrolisana sečenja.\n\n✂️ 0–2400 rpm\n✂️ Hod lista 25.4 mm\n✂️ Sečenje drveta do 45 mm\n✂️ Sečenje metala do 6 mm\n✂️ Ugao 0°–45°\n\nOdlična za oblikovanje drveta, plastike i tanjih metalnih profila.\n\n🔋 Uz komplet dolazi i:\n\n✅ FUSE Li-ion baterija 18 V – 3.0 Ah\n✅ FUSE Li-ion baterija 18 V – 2.0 Ah\n✅ Punjač 2.4 A\n\nJedna platforma, dve baterije – maksimalna fleksibilnost i kontinuitet rada.\n\nVillager FUSE VLN Set 5u1 je pametno i svestrano rešenje za svakog hobi majstora koji želi pouzdan alat u jednoj torbi – bez gomilanja pojedinačnih kupovina.\n\n👉 Poruči sada i unapredi svoju radionicu jednim potezom."
+      ],
+      "enrichment": {
+        "contact": {
+          "name": "Suzana Cvijanov",
+          "email": "suzana@eklix.rs",
+          "title": "Office Manager",
+          "linkedin": "https://www.linkedin.com/in/suzana-cvijanov-a142a088",
+          "seniority": "senior"
+        },
+        "enriched_at": "2026-03-16T21:27:16.328Z",
+        "recommendation_reason": "Active e-commerce via social — too much DM volume to handle manually",
+        "service_recommendation": "social_media_system"
+      },
+      "scraped_at": "2026-03-16T19:21:44.166Z",
+      "scrape_query": "https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=RS&q=popust&search_type=keyword_unordered",
+      "ad_start_date": "2026-02-23 08:00:00",
+      "ad_library_url": "https://www.facebook.com/ads/library/?id=1637167873960158",
+      "page_followers": 36690,
+      "page_categories": [
+        "Website"
+      ],
+      "active_ads_count": 10,
+      "facebook_page_id": "1793734434279908",
+      "facebook_page_url": "https://www.facebook.com/eklix.rs/",
+      "publisher_platforms": [
+        "FACEBOOK",
+        "INSTAGRAM",
+        "AUDIENCE_NETWORK",
+        "MESSENGER",
+        "THREADS"
+      ]
+    },
+    "email_draft": null
+  },
+  {
+    "id": "3761bd52-ba2f-4857-9de3-190bf42a2d18",
+    "company_name": "Automultimedija Darko",
+    "website": "https://xenonsijalice.rs",
+    "niche": "dizajn_enterijer",
+    "status": "Lead",
+    "intake_data": {
+      "ad_cta": "Shop now",
+      "ad_title": "Automultimedija Darko",
+      "ad_copies": [
+        "Tvoj auto zaslužuje najbolje. Od svetla do stajlinga — sve na jednom mestu. 💯\nBilo da hoćeš da osvežiš izgled, nadogradiš enterijer ili zameniš dotrajale delove — mi imamo rešenje. 👇\n🎬 Android Multimedije — CarPlay, GPS, WiFi, Bluetooth, parking kamera. Za tvoj tačan model.\n💡 Xenon & LED oprema — Sijalice, balasti, LED barovi, dnevna svetla. Vidi i budi viđen.\n🔦 Stakla & kućišta za farove — OEM kvalitet, savršeno prianjanje, UV zaštita.\n🏎️ Body Kitovi — Branici, spojleri, pragovi, difuzori. BMW, Audi, Mercedes, VW, Porsche, Škoda...\n📊 Virtuelne digitalne table — Daj svom kokpitu moderan izgled sa digitalnim instrumentima.\n🔧 LED čipovi za farove — Reparacija farova bez zamene celog sklopa.\n✅ Garancija 12 meseci ✅ Profesionalna ugradnja u našem servisu u Beogradu ✅ Dostava na adresu širom Srbije\nNe menjaš auto — menjaš mu sve ostalo. 😎\n👉 Pogledaj kompletnu ponudu: xenonsijalice.rs 📞 +381 62 829 01 67 📍 Arčibalda Rajsa 11g, Beograd",
+        "PORSCHE MACAN Body Kit upgrade to 2024💥\n\nPorsche Macan unapredjen kompletnim body kitom u 2024. god. takodje smo osvežili i enterijer - Ugradjena je Tesla style multimedija kao i novi volan za bolji ugodjaj u vožnji.\n\n🖥️ Android auto & Apple Carplay \n\n🖥️www.xenonsijalice.rs\n\n📞060/17-28-773\n📞062/82-90-167\n\n📍Arčibalda Rajsa 11g, Beograd\n\n#carline #carplay #bodykit #steeringwheel #porschemacan"
+      ],
+      "enrichment": {
+        "enriched_at": "2026-03-20T10:35:54.473Z",
+        "instagram_reels": [
+          {
+            "url": "https://www.instagram.com/reel/Cs4EIuwIIGI/",
+            "likes": 2599,
+            "views": 226317,
+            "caption": "NOVO U PONUDI ‼️ AUDI VIRTUELNE TABLE 💥\nEkskluzivno u #CarLine\n\n🖥www.xenonsijalice.rs | 📱062/82-90-167| 📍Arčibalda Rajsa 11g, Beograd\n\n#CarLineAut",
+            "comments": 81,
+            "timestamp": "2023-05-30T17:40:00.000Z"
+          },
+          {
+            "url": "https://www.instagram.com/reel/CuhrBpnI4dY/",
+            "likes": -1,
+            "views": 60612,
+            "caption": "BMW X5\n\nVIRTUELNA DIGITALNA TABLA + 12,5 inča MULTIMEDIJA \n\n🖥www.xenonsijalice.rs | 📱062/82-90-167| 📍Arčibalda Rajsa 11g, Beograd\n\n#CarLineAutomult",
+            "comments": 2,
+            "timestamp": "2023-07-10T18:00:00.000Z"
+          },
+          {
+            "url": "https://www.instagram.com/reel/Cq5-SdXouzc/",
+            "likes": 1052,
+            "views": 77016,
+            "caption": "VIRTUELNA INSTRUMENT TABLA ZA BMW X5\n\n🖥www.xenonsijalice.rs | 📱062/82-90-167| 📍Arčibalda Rajsa 11g, Beograd\n\n#CarLineAutomultimedije",
+            "comments": 15,
+            "timestamp": "2023-04-11T18:26:01.000Z"
+          }
+        ],
+        "instagram_profile": {
+          "bio": "▪️Najveći izbor automultimedija po najboljim cenama\n▪️Kontakt: +381 62/82-90-167\n▪️Viber / WhatsApp\n#CarLineAutomultimedije",
+          "url": "https://www.instagram.com/automultimedije/",
+          "username": "automultimedije",
+          "followers": 58852,
+          "following": 0,
+          "is_verified": false,
+          "posts_count": 1864,
+          "external_url": "https://xenonsijalice.rs/auto-multimedije/",
+          "business_email": null,
+          "business_category": "Home & Auto"
+        },
+        "recommendation_reason": "Default — social DM management is the most broadly applicable entry point",
+        "service_recommendation": "social_media_system"
+      },
+      "scraped_at": "2026-03-16T16:58:27.033Z",
+      "scrape_query": "https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=RS&q=enterijer&search_type=keyword_unordered",
+      "ad_start_date": "2026-02-06 08:00:00",
+      "ad_library_url": "https://www.facebook.com/ads/library/?id=2143227409816909",
+      "page_followers": 23904,
+      "page_categories": [
+        "Motor vehicle company"
+      ],
+      "active_ads_count": 3,
+      "facebook_page_id": "1562983617096848",
+      "facebook_page_url": "https://www.facebook.com/automultimedije/",
+      "publisher_platforms": [
+        "FACEBOOK",
+        "INSTAGRAM",
+        "THREADS"
+      ]
+    },
+    "email_draft": "Subject: Ko u Automultimedija Darko vodi poruke od klijentkinja? Stvarno nema smisla.\n\nDobar dan,\n\nStvarno nema smisla da neko u Automultimedija Darko troši ceo ili deo radnog dana na poruke sa društvenih mreža — a da vi pritom nemate nikakav uvid u to šta vam klijentkinje zapravo traže, šta ih zanima, i gde odustaju od zakazivanja.\n\nMislim da biste imali manje haosa, a bolju prodaju i odnos sa klijentkinjama, uz AI sistem koji radi 24/7 na svim mrežama za manje nego što vas taj isti posao košta sada.\nSistem radi 168 sati nedeljno. Košta manje od tog istog radnika. I za razliku od njega — pamti svaki razgovor.\n\nVodi razgovor na tečnom srpskom, razume fotografije koje klijentkinje šalju — kao vaš najbolji konsultant, samo bez pauze, bolovanja i propuštenih poruka.\nAli ovo nije šablonski chatbot. Ovo je jedini agent na tržištu koji ima analizu slika i videa, i razume odgovore na stori — napravljen od nule.\n\nSvaki razgovor, svaki detalj je na jednom mestu: ko je pisalo, za koji tretman pita, šta je zanima, gde je stala.\nDobijate konkretne podatke pomoću kojih možete da prilagodite ponudu, procese, marketing — sve na osnovu onoga što vam klijentkinje zapravo govore. Informacije koje trenutno jednostavno nemate.\n\nPratim vaš Instagram — 58,864 pratilaca i 3 aktivnih oglasa. Sa tim dosegom, DM-ovi sigurno stižu — sistem koji ih prati 24/7 ne bi bio luksuz, bio bi logika.\n\nRezultat? Više zakazanih tretmana. Zadovoljnije klijentkinje. Bolja reputacija.\n\nKada god imate 20 minuta slobodno, mogu da vam pokažem kako bi ovo izgledalo za Automultimedija Darko — besplatno, bez obaveza i bez smaranja.\n\nVeliki pozdrav,\n\nNikola Guteša\nSmartflow\nSmartflow.rs\n+381 64 118 2200"
+  },
+  {
+    "id": "11101490-709b-4fb9-b030-dba71f7f86ef",
+    "company_name": "Jakov Sistem Online Shop",
+    "website": "https://www.jakov.rs/kancelarijske-stolice-akcija",
+    "niche": "online_prodaja",
+    "status": "enriched",
+    "intake_data": {
+      "ad_cta": "Learn more",
+      "ad_title": "Jakov Sistem Online Shop",
+      "ad_copies": [
+        "UGD stolice – ergonomski dizajn, vrhunska udobnost i podrška za svaki radni dan, bilo kod kuće ili u kancelariji.",
+        "🎁 DEČIJE IGRAČKE NA AKCIJI DO -50%! 🧸🎉\n\nObradujte svoje mališane uz fantastične popuste do -50% na širok asortiman dečijih igračaka.\n\n🚗 Autići i igračke na daljinsko upravljanje\n🧩 Edukativne, kreativne i drvene igračke\n🧸 Plišane igračke i oprema za bebe\n🎶 Muzičke igračke i instrumenti\n🛴 Trotineti, guralice, ljuljaške i igračke za dvorište\n📚 Knjige, puzzle, kocke i setovi za dečake i devojčice\n\n✨ Zabava, učenje i osmeh – sve na jednom mestu!\n👉 Iskoristite akciju i obradujte najmlađe:\n🔗 https://jakov.rs/igracke-za-decu-akcija\nili\n📞 Naručite pozivom:\n011 630 50 33 • 018 41 55 222 • 066 8 220 220\n\n#igrackezadecu #akcija #popust #do50posto #deca #pokloni #jakovrs  #jakovsistem #onlinekupovina",
+        "📺🔥 ATON nosači za TV – na akciji! 🔥📺\n\nStabilni, sigurni i jednostavni za montažu – idealni za različite veličine ekrana i tipove zidova.\n\n✅ Fiksni zidni nosači\n✅ Čvrsta konstrukcija i pouzdanost\n✅ Odličan odnos cene i kvaliteta\n\n👉 Iskoristite akcijske cene i obezbedite savršen nosač za vaš TV!\n\n🛒 Pogledajte ponudu: https://jakov.rs/aton-nosaci-za-tv-akcija\n\n#NosaciZaTV #Akcija #TehnikaNaPopustu #JakovRS #jakovsistem",
+        "Fantastični popusti do čak -25%",
+        "Kupite 4 ili više IKOS tonera i poštarina je BESPLATNA! 🚚🎉"
+      ],
+      "enrichment": {
+        "contact": {
+          "name": null,
+          "email": "podrska@jakov.rs",
+          "title": null,
+          "linkedin": null,
+          "seniority": null
+        },
+        "enriched_at": "2026-03-16T21:27:16.328Z",
+        "instagram_reels": [
+          {
+            "url": "https://www.instagram.com/reel/DFtKnQhsdiR/",
+            "likes": 13,
+            "views": 412,
+            "caption": "#decijakolica #kolicazabebe #kisobrankolica",
+            "comments": 0,
+            "timestamp": "2025-02-05T21:10:40.000Z"
+          },
+          {
+            "url": "https://www.instagram.com/reel/DNpjZ3Htwwk/",
+            "likes": 12,
+            "views": 363,
+            "caption": "Računar UGD Mystery: Tihi tigar među gejming računarima! | 7800X3D + RX 9070 XT\n\n#gaming #gamingsetup #gamingračunar #računari #desktop #gamingpc #AMD",
+            "comments": 0,
+            "timestamp": "2025-08-22T07:41:25.000Z"
+          },
+          {
+            "url": "https://www.instagram.com/reel/DMPbSuoSzHJ/",
+            "likes": 10,
+            "views": 131,
+            "caption": "🔥 Upoznajte UGD Ultra – ultimativni gejming računar za one koji ne pristaju na kompromise! 🔥\n\nU ovom videu predstavljamo moćnu konfiguraciju zasnova",
+            "comments": 0,
+            "timestamp": "2025-07-18T07:38:57.000Z"
+          }
+        ],
+        "instagram_profile": {
+          "bio": "Jakov Sistem - Online prodavnica laptop 💻  i desktop 🖥️ računara, televizora, bele tehnike i kućnih aparata, monitora, telefona, alata\n#jakovsistem",
+          "url": "https://www.instagram.com/jakovsistem/",
+          "username": "jakovsistem",
+          "followers": 4175,
+          "following": 0,
+          "is_verified": false,
+          "posts_count": 936,
+          "external_url": "https://www.jakov.rs/",
+          "business_email": null,
+          "business_category": "None,Computers (Brand)"
+        },
+        "recommendation_reason": "Lead gen funnel detected — email sequences will convert leads before they go cold",
+        "service_recommendation": "ai_sales_systems"
+      },
+      "scraped_at": "2026-03-16T19:21:44.166Z",
+      "scrape_query": "https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=RS&q=akcija&search_type=keyword_unordered",
+      "ad_start_date": "2025-09-23 07:00:00",
+      "ad_library_url": "https://www.facebook.com/ads/library/?id=815728134299496",
+      "page_followers": 37048,
+      "page_categories": [
+        "Електроника"
+      ],
+      "active_ads_count": 12,
+      "facebook_page_id": "279056858869258",
+      "facebook_page_url": "https://www.facebook.com/JakovSistemOnlineShop/",
+      "publisher_platforms": [
+        "FACEBOOK",
+        "INSTAGRAM"
+      ]
+    },
+    "email_draft": null
+  },
+  {
+    "id": "e9069a3b-d962-4b9d-822f-f76650f67acf",
+    "company_name": "Komunikacione Veštine - NLP Trening Akademija",
+    "website": "https://www.nlpakademija.rs",
+    "niche": "klinika_wellness",
+    "status": "enriched",
+    "intake_data": {
+      "ad_cta": "Order now",
+      "ad_title": "Zašto te niko ne sluša? (Nisu oni gluvi, ti si na pogrešnoj frekvenciji)",
+      "ad_copies": [
+        "Vrhunski komunikator ne priča \"lepše\". On ne koristi komplikovane reči. On ne drži monologe.\n\nOn te pročita. On te otključa. I onda ti proda ideju pre nego što si shvatio/la šta se desilo.\n\nTo nije talenat. To je mehanika.\n\nVećina ljudi pravi istu grešku: Pokušavaju da objasne SVOJU logiku, umesto da uđu u TVOJU glavu.\n\nRezultat? \n❌ \"Poslaću ti mail\" (i nikad se ne jave) \n❌ Prazni pogledi na sastancima \n❌ Svađe oko gluposti sa partnerom \n❌ Osećaj da pričaš zidu\n\nZaustavi to. Odmah.\n\nKomunikacija nije umetnost, to je algoritam. Ako imaš pravi kod, otključavaš svaka vrata.\n\nSpakovao sam taj kod u trening GOSPODAR LJUDI. To nije \"kurs lepog govora\". To je set od 6 alata za psihološku dominaciju (izvučenih iz NLP Practitioner treninga).\n\nZa 17€ (umesto 197€), dobijaš alate da:\n\n🤝 Instaliraš Poverenje (Rapport): Hakuj njihov \"odbrambeni sistem\" za 60 sekundi. \n👀 Čitaš Misli (VAKOG): Prepoznaj da li su Vizuelci, Auditivci ili Kinestetičari i pričaj jezikom koji njihov mozak mora da prihvati. \n🧭 Vodiš bez Otpora (Pace-Lead): Navedi ih na tvoj zaključak, a da misle da je njihova ideja. \n🔍 Gasiš Konflikte (Perceptualni Shift): Reši svaku svađu promenom ugla gledanja.\n\nBez \"lepe priče\". Bez improvizacije. Samo čista, hirurški precizna komunikacija koja donosi: \n✅ Više prodaje \n✅ Više autoriteta \n✅ Manje stresa\n\nOvo je tvoje \"Uputstvo za upotrebu ljudi\".\n\nCena je smešna (17€) jer želim da se uveriš da ovo radi. Rizik je moj (garancija 30 dana).\n\nKlikni dole i preuzmi kontrolu nad svakim razgovorom koji ćeš voditi do kraja života.\n\n👇👇👇 \nhttps://www.nlpakademija.rs/gospodar-ljudi2\n\nP.S. Ljudi nisu \"teški\". Ljudi samo imaju različite operativne sisteme. Nauči da ih koristiš.",
+        "Šta ako bi mogao da znaš da li neko konstruiše laž ili se priseća istine, samo gledajući u koji ugao usmerava oči pre nego što progovori?\n\nVećina ljudi misli da je komunikacija samo ono što izgovorimo. Greška.\n\nPravi razgovor se dešava „ispod površine“. Dok tvoj sagovornik priča, njegov mozak šalje signale koje 99% ljudi ne vidi. Ti signali su zapisani u pokretima očiju (tzv. Eye Accessing Cues).\n\nKada naučiš da ih čitaš, dobijaš „naočare za noćno osmatranje“ u svakom razgovoru:\n✅ U prodaji: Znaš da li klijent stvarno razmatra ponudu ili traži izgovor.\n✅ U pregovorima: Vidiš trenutak kada su spremni na dogovor, pre nego što to kažu.\n✅ U odnosima: Prepoznaješ nesigurnost ili skrivenu nameru pre nego što postane problem.\n\nOvo nije magija. Ovo je alat iz I modula NLP Practitioner edukacije koji sam spakovao u intenzivan trening „GOSPODAR LJUDI“.\n\nZa samo 17€ dobijaš 7 sati materijala i 6 hirurški preciznih alata:\n🛠 ALAT #1: Detektor laži (Eye Cues)\n🛠 ALAT #2: Protokol poverenja (Rapport)\n🛠 ALAT #3: Formula za \"DA\" (Pace-Pace-Lead)\n...i još 3 moćna alata koja menjaju tvoju igru sa ljudima.\n\nCena od 17€ je promo cena u ovoj fazi – zadržavamo pravo da je vratimo na 197€ bez najave.\n\nPreuzmi svoju nefer prednost ovde:\n👉 https://www.nlpakademija.rs/gospodar-ljudi2\n\nP.S. Dobijaš i 30 dana „Sulude garancije“. Ako ne vidiš razliku u tome kako ljudi reaguju na tebe – vraćam ti novac. Bez pitanja.",
+        "Većina ljudi čeka da sagovornik završi rečenicu da bi „shvatili“ šta misli. Greška. Dok on priča, njegovi neuro-procesori šalju signale direktno u njegove oči – a on toga nije ni svestan.\n\nAko ne znaš da čitaš te signale, ti zapravo vodiš razgovor vezanih očiju. NLP alat Eye Accessing Cues ti omogućava da vidiš da li osoba „vidi“ tvoju ponudu, „čuje“ tvoje argumente ili bukvalno pokušava da konstruiše odgovor koji nije istina.\n\nOvo nije magija. Ovo je alat iz I modula NLP Practitioner edukacije koji sam spakovao u intenzivan trening „GOSPODAR LJUDI“.\n\nZa samo 17€ dobijaš 7 sati materijala i 6 hirurški preciznih alata:\n🛠 ALAT #1: Detektor laži (Eye Cues)\n🛠 ALAT #2: Protokol poverenja (Rapport)\n🛠 ALAT #3: Formula za \"DA\" (Pace-Pace-Lead)\n...i još 3 moćna alata koja menjaju tvoju igru sa ljudima.\n\nCena od 17€ je promo cena u ovoj fazi – zadržavamo pravo da je vratimo na 197€ bez najave.\n\nPreuzmi svoju nefer prednost ovde:\n👉 https://www.nlpakademija.rs/gospodar-ljudi2\nP.S. Dobijaš i 30 dana „Sulude garancije“. Ako ne vidiš razliku u tome kako ljudi reaguju na tebe – vraćam ti novac. Bez pitanja.",
+        "Ovo može zvučati čudno…\n\nAli razlog zašto većina ljudi ne dobije ono što želi u životu\nnije nedostatak znanja.\nNego…\nne znaju da vode razgovor.\n\nGodinama slušam iste priče od klijenata:\nLjudi ih prekidaju.\nNe shvataju ih ozbiljno.\nProdaja se raspadne u razgovoru.\nDogovor nikad ne dođe do kraja.\n\nI onda pokušavaju sve moguće:\n– još objašnjavanja\n– još argumenata\n– još energije\n\nAli rezultat je isti.\nRazgovor ide u pogrešnom smeru.\n\nIstina je jednostavna.\nU svakom razgovoru postoji samo jedno pitanje:\nKo vodi razgovor?\nJer osoba koja vodi razgovor\nna kraju vodi i odluku.\n\nPosle hiljada sati rada sa preduzetnicima, liderima i prodavcima…\notkrio sam nešto zanimljivo.\nLjudi koji dobijaju \"DA\" u razgovorima\nne pričaju više.\nOni vode razgovor.\n\nTo je veština.\nI može da se nauči.\nZato sam napravio NLP trening:\n🔥 GOSPODAR LJUDI\nTrening komunikacije gde učim:\n✔ kako da vodiš razgovor\n✔ kako da ljudi slušaju\n✔ kako da pregovori idu u tvom smeru\n✔ kako da dobiješ \"DA\" bez rasprave\n👉 https://www.nlpakademija.rs/gospodar-ljudi2\n\nU pitanju je:\n• 7 sati NLP treninga\n• 6 konkretnih komunikacionih alata\n• 18 video lekcija\nSve jasno, praktično i odmah primenjivo.\nCena je trenutno samo 17€.\n\nAko želiš da vidiš kako razgovori mogu da počnu da rade za tebe…\npogledaj sve detalje ovde:\n👉 https://www.nlpakademija.rs/gospodar-ljudi2\n\nPS\nJedna mala tajna iz sveta biznisa:\nNajskuplja veština na svetu\nnije marketing.\nNije prodaja.\nNego sposobnost da te ljudi slušaju."
+      ],
+      "enrichment": {
+        "contact": {
+          "name": null,
+          "email": "office@nlpakademija.rs",
+          "title": null,
+          "linkedin": null,
+          "seniority": null
+        },
+        "enriched_at": "2026-03-16T21:27:16.328Z",
+        "instagram_reels": [
+          {
+            "url": "https://www.instagram.com/reel/C9mB3VUMCT-/",
+            "likes": 15111,
+            "views": 362235,
+            "caption": "PAROVI KOJI SE SVADJAJU\n#zorandrobnjak #nlp #ljubav #coaching",
+            "comments": 133,
+            "timestamp": "2024-07-19T06:28:51.000Z"
+          },
+          {
+            "url": "https://www.instagram.com/reel/C_IN1R-NSBI/",
+            "likes": 11707,
+            "views": 250245,
+            "caption": "DAMA U NEVOLJI\n#zorandrobnjak #nlp #licnirazvoj #komunikacija #coaching #psiha",
+            "comments": 325,
+            "timestamp": "2024-08-26T09:39:29.000Z"
+          },
+          {
+            "url": "https://www.instagram.com/reel/DV6Tugkj-Vc/",
+            "likes": 172,
+            "views": 103,
+            "caption": "",
+            "comments": 0,
+            "timestamp": "2026-03-15T16:02:42.000Z"
+          }
+        ],
+        "instagram_profile": {
+          "bio": "NLP AKADEMIJA\nNajefikasnija INSTITUCIJA Ličnog Razvoja na Balkanu\n💡📈3G NLP ONLINE🚀🌍\n💡📈PREMIJUM BIZNIS KOUČING🚀🌍",
+          "url": "https://www.instagram.com/nlp.akademija/",
+          "username": "nlp.akademija",
+          "followers": 30699,
+          "following": 0,
+          "is_verified": false,
+          "posts_count": 1937,
+          "external_url": "https://www.skool.com/3g-nlp",
+          "business_email": null,
+          "business_category": "Education"
+        },
+        "recommendation_reason": "Lead gen funnel detected — email sequences will convert leads before they go cold",
+        "service_recommendation": "ai_sales_systems"
+      },
+      "scraped_at": "2026-03-16T19:21:44.166Z",
+      "scrape_query": "https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=RS&q=akademija&search_type=keyword_unordered",
+      "ad_start_date": "2026-02-20 08:00:00",
+      "ad_library_url": "https://www.facebook.com/ads/library/?id=776166268865198",
+      "page_followers": 32502,
+      "page_categories": [
+        "Education"
+      ],
+      "active_ads_count": 11,
+      "facebook_page_id": "155544131146266",
+      "facebook_page_url": "https://www.facebook.com/nlptreningakademija/",
+      "publisher_platforms": [
+        "FACEBOOK",
+        "INSTAGRAM",
+        "AUDIENCE_NETWORK",
+        "MESSENGER",
+        "THREADS"
+      ]
+    },
+    "email_draft": null
+  },
+  {
+    "id": "292a8dbf-01cd-4165-8695-0671c2ec344b",
+    "company_name": "Travel2Study",
+    "website": "https://travel2study.eu/",
+    "niche": "Study program",
+    "status": "Sent",
+    "intake_data": null,
+    "email_draft": "Subject: Ko u Travel2Study vodi digitalnu promociju? Stvarno nema smisla.\n\nDobar dan,\n\nStvarno nema smisla da Travel2Study propušta prilike za privlačenje novih klijenata kroz video sadržaj — dok konkurencija zauzima tu publiku na Instagramu i TikToku.\n\nMislim da biste imali bolji povrat na investiciju uz profesionalni video sadržaj koji vaša publika zapravo gleda — bez skupih agencija, bez meseci čekanja i bez generičkih šablona. Holivudska produkcija za deo standardne cene.\n\nAli ovo nije generički AI sadržaj sa robotskim glasom i jeftinim efektima.\n\nGlas koji čujete zvuči kao pravi srpski govornik — vaša publika neće moći da prepozna da je AI. Vizuali su na nivou holivudske produkcije, a produkcija traje deo vremena i cene klasičnog snimanja.\n\nRezultat? Profesionalni video sadržaj. Prva publika koja se vraća. Digitalno prisustvo koje radi za vaš biznis.\n\nKada god imate 20 minuta slobodno, mogu da vam pokažem kako bi to izgledalo za Travel2Study — i da napravim kratak besplatni sample video odmah. Besplatno, bez obaveza i bez smaranja.\n\nVeliki pozdrav,\n\nNikola Guteša\nSmartflow\nSmartflow.rs\n+381 64 118 2200"
+  },
+  {
+    "id": "044d6a21-5e01-499f-af03-ddd4c52200a7",
+    "company_name": "Kiddy JOY",
+    "website": "https://kiddyjoy.rs/pretraga?ponuda=akcija",
+    "niche": "ostalo",
+    "status": "Lead",
+    "intake_data": {
+      "ad_cta": "Learn more",
+      "ad_title": "Kiddy JOY",
+      "ad_copies": [
+        "💥 U našim radnjama 💥 Nikad veća AKCIJA 💥 Veliki izbor bebi opreme! Od krevetića do kolica! 💥LOKACIJE 👇 :  \n📍Braće Radovanović 17, Kapije Vračara \n📍 Mileve Marić Ajnštajn 36/2 i 32/5, Novi Beograd\n\nRadno vreme: \npon - petak: 12-19h\nsubota: 12-18h",
+        "💥 AKCIJA! Oprema za bebe 💥 Svratite u Kiddy Joy i otkrijte šta smo spremili! 🤰🏻",
+        "Philips Avent × Kiddy Joy x Mesečna akcija\n🔥 Top ponude tokom celog februara. U radnjama i online — ne propustite! Vaš izbor poverenja – Philips Avent u Kiddy Joy-u.",
+        "🎁 Mesečna akcija × Velika ušteda u Kiddy Joy! ✨ Svratite u radnje ili poručite online! 😀",
+        "🧸 Mesečna akcija × Velike uštede u Kiddy Joy! ✨ Sve za bebe — od krevetića do igračaka. 🎁 Online i u radnjama — dobrodošli! 👌 👍"
+      ],
+      "enrichment": {
+        "enriched_at": "2026-03-20T10:35:54.472Z",
+        "instagram_reels": [
+          {
+            "url": "https://www.instagram.com/reel/DV-61qdlXsU/",
+            "likes": 2,
+            "views": 827,
+            "caption": "Moni Vamos auto sedište za decu 40-150cm - Kiddy Joy - prezentacija. Posetite naše radnje na Novom Beogradu ili Vračaru, ili kupite preko naše interne",
+            "comments": 0,
+            "timestamp": "2026-03-17T11:01:23.000Z"
+          },
+          {
+            "url": "https://www.instagram.com/reel/DWEEca3iKyI/",
+            "likes": 3,
+            "views": 178,
+            "caption": "Joie i-Plenti Isofix auto sedište za bebe 76-150 cm - Kiddy Joy - prezentacija. Posetite naše radnje na Novom Beogradu ili Vračaru, ili kupite preko n",
+            "comments": 0,
+            "timestamp": "2026-03-19T11:01:39.000Z"
+          },
+          {
+            "url": "https://www.instagram.com/reel/DWBeFHIEeOB/",
+            "likes": 19,
+            "views": 971,
+            "caption": "Canpol Babies flašice - Kiddy Joy - prezentacija. Posetite naše radnje na Novom Beogradu ili Vračaru, ili kupite preko naše internet stranice: kiddyjo",
+            "comments": 0,
+            "timestamp": "2026-03-18T10:47:52.000Z"
+          }
+        ],
+        "instagram_profile": {
+          "bio": "@kiddyjoy - Posetite naše radnje na Novom Beogradu i Vračaru. Vaše mesto za najveći izbor opreme za bebe. Dobrodošli ste! 😊",
+          "url": "https://www.instagram.com/kiddyjoy.rs/",
+          "username": "kiddyjoy.rs",
+          "followers": 52726,
+          "following": 0,
+          "is_verified": false,
+          "posts_count": 5101,
+          "external_url": "https://kiddyjoy.rs/joyalty",
+          "business_email": null,
+          "business_category": "None,Baby goods/kids goods"
+        },
+        "recommendation_reason": "Active e-commerce via social — too much DM volume to handle manually",
+        "service_recommendation": "social_media_system"
+      },
+      "scraped_at": "2026-03-16T19:21:44.165Z",
+      "scrape_query": "https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=RS&q=akcija&search_type=keyword_unordered",
+      "ad_start_date": "2024-01-30 08:00:00",
+      "ad_library_url": "https://www.facebook.com/ads/library/?id=618417653748987",
+      "page_followers": 81292,
+      "page_categories": [
+        "Baby goods/kids goods"
+      ],
+      "active_ads_count": 15,
+      "facebook_page_id": "677445105608741",
+      "facebook_page_url": "https://www.facebook.com/kiddyjoy.rs/",
+      "publisher_platforms": [
+        "FACEBOOK",
+        "INSTAGRAM",
+        "AUDIENCE_NETWORK"
+      ]
+    },
+    "email_draft": "Subject: Ko u Kiddy JOY odgovara kupcima na poruke? Stvarno nema smisla.\n\nDobar dan,\n\nStvarno nema smisla da neko u Kiddy JOY troši ceo ili deo radnog dana na komunikaciju sa potencijalnim kupcima — a da vi pritom nemate nikakav uvid u to gde odustaju od kupovine.\n\nMislim da biste imali manje haosa, a bolju prodaju i odnos sa kupcima, uz AI sistem koji radi 168 sati nedeljno za manje nego što vas taj isti posao košta sada.\nSistem radi 168 sati nedeljno. Košta manje od tog istog radnika. I za razliku od njega — pamti svaki razgovor.\n\nAli ovo nije šablonski chatbot. Jedini agent na tržištu koji ima analizu slika i videa, razume odgovore na stori, i vodi razgovor na tečnom srpskom — napravljen od nule, za srpsko tržište.\n\nPratim vaš Instagram — 52,657 pratilaca i 15 aktivnih oglasa. Svaki razgovor, svaki detalj na jednom mestu: ko je pisalo, šta traži, gde je stalo. Informacije koje trenutno jednostavno nemate.\n\nA kada bude spreman sadržaj koji zaista generiše te poruke — imate i sistem koji ih odmah prima i odgovara.\n\nRezultat? Više završenih kupovina. Manje napuštenih korpi. Klijenti koji se vraćaju.\n\nKada god imate 20 minuta slobodno, mogu da vam pokažem kako bi ovo izgledalo za Kiddy JOY — besplatno, bez obaveza i bez pritiska.\n\nVeliki pozdrav,\n\nNikola Guteša\nSmartflow\nSmartflow.rs\n+381 64 118 2200"
+  },
+  {
+    "id": "6c4f24e5-bc1e-4eec-9187-9439cf40cac0",
+    "company_name": "Ajo Leather",
+    "website": "ajo.rs",
+    "niche": "ostalo",
+    "status": "Novi Lead",
+    "intake_data": {
+      "ad_cta": "",
+      "ad_copies": [],
+      "enrichment": {
+        "enriched_at": "2026-03-20T10:35:54.473Z",
+        "instagram_reels": [
+          {
+            "url": "https://www.instagram.com/reel/CiK14nhKOHn/",
+            "likes": 472,
+            "views": 31991,
+            "caption": "⚡️MOST WANTED⚡️",
+            "comments": 25,
+            "timestamp": "2022-09-06T14:57:05.000Z"
+          },
+          {
+            "url": "https://www.instagram.com/reel/DU5555giCV1/",
+            "likes": 60,
+            "views": 3620,
+            "caption": "• Hvala na poverenju koje pružate i verujete u kvalitet i posvećenost❤️\n• Posebno nam je drago na vašim feedbekovima o procesu porucivanja i strpljenj",
+            "comments": 0,
+            "timestamp": "2026-02-18T15:48:53.000Z"
+          },
+          {
+            "url": "https://www.instagram.com/reel/DUqcyxgiG9w/",
+            "likes": 161,
+            "views": 20928,
+            "caption": "KEŠ WALLET - OGRANIČENA KOLIČINA!\n⭐️ Ako želiš kul novčanik, ne traži dalje💰💶\n⭐️ NEOGRANIČENA GARANCIJA na ⭐️ ajo.rs ⭐️",
+            "comments": 11,
+            "timestamp": "2026-02-12T15:47:19.000Z"
+          }
+        ],
+        "instagram_profile": {
+          "bio": "Pravimo vam novčanik ili aksesoar koji će trajati koliko i vi, a to i GARANTUJEMO! \nRučna izrada, i \"prava\" koža što se kaže, i to italijanska👌🏼🇮🇹",
+          "url": "https://www.instagram.com/ajo_leather/",
+          "username": "ajo_leather",
+          "followers": 75251,
+          "following": 0,
+          "is_verified": false,
+          "posts_count": 651,
+          "external_url": "http://www.ajo.rs/",
+          "business_email": null,
+          "business_category": "None"
+        },
+        "recommendation_reason": "Default — social DM management is the most broadly applicable entry point",
+        "service_recommendation": "social_media_system"
+      },
+      "active_ads_count": 0
+    },
+    "email_draft": "Subject: Ko u Ajo Leather vodi komunikaciju sa klijentima? Stvarno nema smisla.\n\nDobar dan,\n\nStvarno nema smisla da neko u Ajo Leather troši ceo ili deo radnog dana na komunikaciju sa potencijalnim klijentima — a da vi pritom nemate nikakav uvid u to gde odustaju od prvog kontakta.\n\nMislim da biste imali manje haosa, a bolju prodaju i odnos sa klijentima, uz AI sistem koji radi 168 sati nedeljno za manje nego što vas taj isti posao košta sada.\nSistem radi 168 sati nedeljno. Košta manje od tog istog radnika. I za razliku od njega — pamti svaki razgovor.\n\nAli ovo nije šablonski chatbot. Jedini agent na tržištu koji ima analizu slika i videa, razume odgovore na stori, i vodi razgovor na tečnom srpskom — napravljen od nule, za srpsko tržište.\n\nPratim vaš Instagram — 75,200 pratilaca. Svaki razgovor, svaki detalj na jednom mestu: ko je pisalo, šta traži, gde je stalo. Informacije koje trenutno jednostavno nemate.\n\nA kada bude spreman sadržaj koji zaista generiše te poruke — imate i sistem koji ih odmah prima i odgovara.\n\nRezultat? Više zakazanih sastanaka. Manje haosa. Klijenti koji se ne gube u inboxu.\n\nKada god imate 20 minuta slobodno, mogu da vam pokažem kako bi ovo izgledalo za Ajo Leather — besplatno, bez obaveza i bez pritiska.\n\nVeliki pozdrav,\n\nNikola Guteša\nSmartflow\nSmartflow.rs\n+381 64 118 2200"
+  },
+  {
+    "id": "2c123364-c0d4-4227-96ce-3e89e947151f",
+    "company_name": "Vatan Med",
+    "website": null,
+    "niche": "Hair transplant",
+    "status": "Sent",
+    "intake_data": null,
+    "email_draft": "Subject: Ko u Vatan Med vodi digitalnu promociju? Stvarno nema smisla.\n\nDobar dan,\n\nStvarno nema smisla da Vatan Med propušta prilike za privlačenje novih klijenata kroz video sadržaj — dok konkurencija zauzima tu publiku na Instagramu i TikToku.\n\nMislim da biste imali bolji povrat na investiciju uz profesionalni video sadržaj koji vaša publika zapravo gleda — bez skupih agencija, bez meseci čekanja i bez generičkih šablona. Holivudska produkcija za deo standardne cene.\n\nAli ovo nije generički AI sadržaj sa robotskim glasom i jeftinim efektima.\n\nGlas koji čujete zvuči kao pravi srpski govornik — vaša publika neće moći da prepozna da je AI. Vizuali su na nivou holivudske produkcije, a produkcija traje deo vremena i cene klasičnog snimanja.\n\nRezultat? Profesionalni video sadržaj. Prva publika koja se vraća. Digitalno prisustvo koje radi za vaš biznis.\n\nKada god imate 20 minuta slobodno, mogu da vam pokažem kako bi to izgledalo za Vatan Med — i da napravim kratak besplatni sample video odmah. Besplatno, bez obaveza i bez smaranja.\n\nVeliki pozdrav,\n\nNikola Guteša\nSmartflow\nSmartflow.rs\n+381 64 118 2200"
+  },
+  {
+    "id": "a1a51e3a-fcb1-446d-8cac-e7f6925ab058",
+    "company_name": "Vacasa Design",
+    "website": "https://www.vacasa.rs/",
+    "niche": "Furniture",
+    "status": "No Email",
+    "intake_data": null,
+    "email_draft": "Subject: Ko u Vacasa Design vodi digitalnu promociju? Stvarno nema smisla.\n\nDobar dan,\n\nStvarno nema smisla da Vacasa Design propušta prilike za privlačenje novih klijenata kroz video sadržaj — dok konkurencija zauzima tu publiku na Instagramu i TikToku.\n\nMislim da biste imali bolji povrat na investiciju uz profesionalni video sadržaj koji vaša publika zapravo gleda — bez skupih agencija, bez meseci čekanja i bez generičkih šablona. Holivudska produkcija za deo standardne cene.\n\nAli ovo nije generički AI sadržaj sa robotskim glasom i jeftinim efektima.\n\nGlas koji čujete zvuči kao pravi srpski govornik — vaša publika neće moći da prepozna da je AI. Vizuali su na nivou holivudske produkcije, a produkcija traje deo vremena i cene klasičnog snimanja.\n\nRezultat? Profesionalni video sadržaj. Prva publika koja se vraća. Digitalno prisustvo koje radi za vaš biznis.\n\nKada god imate 20 minuta slobodno, mogu da vam pokažem kako bi to izgledalo za Vacasa Design — i da napravim kratak besplatni sample video odmah. Besplatno, bez obaveza i bez smaranja.\n\nVeliki pozdrav,\n\nNikola Guteša\nSmartflow\nSmartflow.rs\n+381 64 118 2200"
+  },
+  {
+    "id": "3f65a65a-b2a8-49a7-b6e1-8c62dc73211c",
+    "company_name": "eKupi.rs",
+    "website": "https://ekupi.rs",
+    "niche": "ostalo",
+    "status": "enriched",
+    "intake_data": {
+      "ad_cta": "Shop now",
+      "ad_title": "{{product.name}}",
+      "ad_copies": [
+        "{{product.brand}}",
+        "Tražiš vrhunsku tehnologiju koja stiže na tvoju adresu bez čekanja? ⚡️ Iskoristi neverovatne popuste na laptope, monitore i štampače uz isporuku odmah! 📦"
+      ],
+      "enrichment": {
+        "contact": {
+          "name": null,
+          "email": "podrska@ekupi.rs",
+          "title": null,
+          "linkedin": null,
+          "seniority": null
+        },
+        "enriched_at": "2026-03-16T21:27:16.328Z",
+        "instagram_reels": [
+          {
+            "url": "https://www.instagram.com/reel/DVno29WDUYq/",
+            "likes": 5,
+            "views": 154,
+            "caption": "",
+            "comments": 0,
+            "timestamp": "2026-03-08T10:01:48.000Z"
+          },
+          {
+            "url": "https://www.instagram.com/reel/DSCXOCJkxOV/",
+            "likes": 5,
+            "views": 230,
+            "caption": "Skokni na eKupi po onaj koji je baš po tvojoj meri. 💻\nPotraga za njim biće manje stresna od ovog videa! 😅\n\n#eKupi #laptopi",
+            "comments": 1,
+            "timestamp": "2025-12-09T09:01:27.000Z"
+          },
+          {
+            "url": "https://www.instagram.com/reel/DR4EF03E3QM/",
+            "likes": 3,
+            "views": 186,
+            "caption": "🛑✋ STANI! ✋🛑\n\nIspravi se! ☝️\n\nOk, nastavi skrolovanje. 👋\n\nP.S. Najbolju gejming ponudu otkrij na eKupi. 🎮\n\n#eKupi #gaming #PlayStation5",
+            "comments": 0,
+            "timestamp": "2025-12-05T09:01:55.000Z"
+          }
+        ],
+        "instagram_profile": {
+          "bio": "🔝 Vaša internet prodavnica\n🎉 14 godina s vama\n📷 #ekupi #ekupirs\n🛒 Kreni u online shopping!",
+          "url": "https://www.instagram.com/ekupi_rs/",
+          "username": "ekupi_rs",
+          "followers": 6128,
+          "following": 0,
+          "is_verified": false,
+          "posts_count": 508,
+          "external_url": "https://www.ekupi.rs/",
+          "business_email": null,
+          "business_category": "Personal Goods & General Merchandise Stores"
+        },
+        "recommendation_reason": "Default — social DM management is the most broadly applicable entry point",
+        "service_recommendation": "social_media_system"
+      },
+      "scraped_at": "2026-03-16T19:21:44.166Z",
+      "scrape_query": "https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=RS&q=popust&search_type=keyword_unordered",
+      "ad_start_date": "2026-03-02 08:00:00",
+      "ad_library_url": "https://www.facebook.com/ads/library/?id=1469017474598417",
+      "page_followers": 70748,
+      "page_categories": [
+        "Shopping"
+      ],
+      "active_ads_count": 7,
+      "facebook_page_id": "185625248177395",
+      "facebook_page_url": "https://www.facebook.com/eKupi.rs/",
+      "publisher_platforms": [
+        "FACEBOOK",
+        "INSTAGRAM",
+        "AUDIENCE_NETWORK",
+        "MESSENGER",
+        "THREADS"
+      ]
+    },
+    "email_draft": null
+  },
+  {
+    "id": "516c4123-69fa-4eee-b33c-ef0d3bd85c8a",
+    "company_name": "Kredium",
+    "website": null,
+    "niche": "Credit Agency",
+    "status": "No Draft",
+    "intake_data": null,
+    "email_draft": "Subject: Ko u Kredium vodi digitalnu promociju? Stvarno nema smisla.\n\nDobar dan,\n\nStvarno nema smisla da Kredium propušta prilike za privlačenje novih klijenata kroz video sadržaj — dok konkurencija zauzima tu publiku na Instagramu i TikToku.\n\nMislim da biste imali bolji povrat na investiciju uz profesionalni video sadržaj koji vaša publika zapravo gleda — bez skupih agencija, bez meseci čekanja i bez generičkih šablona. Holivudska produkcija za deo standardne cene.\n\nAli ovo nije generički AI sadržaj sa robotskim glasom i jeftinim efektima.\n\nGlas koji čujete zvuči kao pravi srpski govornik — vaša publika neće moći da prepozna da je AI. Vizuali su na nivou holivudske produkcije, a produkcija traje deo vremena i cene klasičnog snimanja.\n\nRezultat? Profesionalni video sadržaj. Prva publika koja se vraća. Digitalno prisustvo koje radi za vaš biznis.\n\nKada god imate 20 minuta slobodno, mogu da vam pokažem kako bi to izgledalo za Kredium — i da napravim kratak besplatni sample video odmah. Besplatno, bez obaveza i bez smaranja.\n\nVeliki pozdrav,\n\nNikola Guteša\nSmartflow\nSmartflow.rs\n+381 64 118 2200"
+  },
+  {
+    "id": "66d9e7e0-d07d-4046-b4d5-d8825fe8ef66",
+    "company_name": "mJob",
+    "website": null,
+    "niche": null,
+    "status": "Lost",
+    "intake_data": null,
+    "email_draft": "Subject: Ko u mJob vodi digitalnu promociju? Stvarno nema smisla.\n\nDobar dan,\n\nStvarno nema smisla da mJob propušta prilike za privlačenje novih klijenata kroz video sadržaj — dok konkurencija zauzima tu publiku na Instagramu i TikToku.\n\nMislim da biste imali bolji povrat na investiciju uz profesionalni video sadržaj koji vaša publika zapravo gleda — bez skupih agencija, bez meseci čekanja i bez generičkih šablona. Holivudska produkcija za deo standardne cene.\n\nAli ovo nije generički AI sadržaj sa robotskim glasom i jeftinim efektima.\n\nGlas koji čujete zvuči kao pravi srpski govornik — vaša publika neće moći da prepozna da je AI. Vizuali su na nivou holivudske produkcije, a produkcija traje deo vremena i cene klasičnog snimanja.\n\nRezultat? Profesionalni video sadržaj. Prva publika koja se vraća. Digitalno prisustvo koje radi za vaš biznis.\n\nKada god imate 20 minuta slobodno, mogu da vam pokažem kako bi to izgledalo za mJob — i da napravim kratak besplatni sample video odmah. Besplatno, bez obaveza i bez smaranja.\n\nVeliki pozdrav,\n\nNikola Guteša\nSmartflow\nSmartflow.rs\n+381 64 118 2200"
+  },
+  {
+    "id": "2bca0bb2-1594-4259-b2c9-7ae613ea8dc0",
+    "company_name": "Nijansa NBC",
+    "website": "https://www.nijansa.rs",
+    "niche": "dizajn_enterijer",
+    "status": "enriched",
+    "intake_data": {
+      "ad_cta": "Learn more",
+      "ad_title": "Posetite nas u Zemunu!",
+      "ad_copies": [
+        "Velika akcija u Zemunu! Samo do kraja Marta!\n\n🎯 Popusti od 15% do čak 50% na podove i enterijer: parketi, pločice, WPC deking, sigurnosna vrata, ogledala i harmonika vrata!\n\nU radnji možeš da vidiš uzorke uživo, uporediš teksture i boje, i na licu mesta dobiješ predlog kombinacija (pod + vrata + lajsne).\n\n 🅿️ BESPLATAN PARKING ispred objekta \n\n🧑‍🎨 Arhitekta u radnji ti pomaže da brzo izabereš najbolje rešenje za svoj stan, kuću ili lokal.\n\n📍 Akcija je isključivo u Zemunu – Cara Dušana 73A \n\n• Dođi, izaberi i uštedi do 50%, samo do kraja Marta!",
+        "Velika akcija u Nišu! Samo do kraja Marta!\n\n🎯 Popusti od 20% do čak 50% na podove i enterijer: parketi, pločice, WPC deking, sigurnosna vrata, ogledala i harmonika vrata!\n\nU radnji možeš da vidiš uzorke uživo, uporediš teksture i boje, i na licu mesta dobiješ predlog kombinacija (pod + vrata + lajsne).\n\n🅿️ BESPLATAN PARKING ispred objekta\n\n🧑‍🎨 Arhitekta u radnji ti pomaže da brzo izabereš najbolje rešenje za svoj stan, kuću ili lokal.\n\n📍 Akcija je isključivo u Nišu - Knjaževačka 68\n\nDođi, izaberi i uštedi do 50%, samo do kraja Januara!",
+        "Mesec Parketa i Podova u Nijansa.rs!\nUštedi do 25% na odabrane cokle i lajsne!\n\n✨ Moderan završetak prostora  elegantne MDF lajsne u beloj boji daju čist i savremen izgled svakom enterijeru.\n🛡️ Zaštita zidova i poda – kvalitetna izrada štiti spojeve od udaraca, prljanja i svakodnevnog habanja.\n🔧 Jednostavna montaža – praktične dimenzije i lagan materijal omogućavaju brzo i lako postavljanje.\n🧹 Funkcionalnost i lako održavanje – PVC cokle omogućavaju skrivanje kablova, otpornost na vlagu i jednostavno čišćenje.\n\n📦Poručite preko sajta nijansa.rs ili posetite nas u:\n\nBeogradu (Zemun)\nNišu,\nLeskovcu,\nPirotu!\n\n📞Kontakt telefon: 064 8276578\n\nAkcija traje do kraja Marta!",
+        "🔥 Čak 25% popusta na Forte pločica 31x61,8 Vega Antracite Mat – samo u Zemunu do kraja marta!\nUštedi 16.500 rsd na 50 m²!\n\n🖤 Antracit nijansa – moderan i urban izgled koji prostoru daje eleganciju i karakter.\n📏 Format 31x61,8 cm – praktična dimenzija idealna za različite rasporede postavljanja.\n🌟 Mat završna obrada – prirodan izgled bez odsjaja, laka za održavanje.\n🏠 Pogodna za zidne površine – kvalitetna i dugotrajna keramika.\n\n🅿️ BESPLATAN PARKING ispred objekta\n\n🧑‍🎨 Arhitekta u radnji ti pomaže da brzo izabereš najbolje rešenje za svoj stan, kuću ili lokal.\n\n📍 Akcija je isključivo u Zemunu – Cara Dušana 73A\n\nPrethodna cena: 1.320 rsd/m²\nAkciona cena: 990 rsd/m²\n\nPosetite nas! Akcija traje do 31. marta 2026.",
+        "Mesec Parketa i Podova u Nijansa.rs!\nIskoristite super cene na odabranu kolekciju višeslojnog parketa!\n\n✨ Prirodan izgled drveta – plemenita površina pravog drveta donosi eleganciju i toplinu svakom enterijeru.\n🏠 Za stambene i poslovne prostore – idealan izbor za dnevne sobe, spavaće sobe, hodnike i kancelarije.\n🦶 Stabilnost i udobno hodanje – višeslojna konstrukcija smanjuje rad drveta i pruža prijatan osećaj pri svakom koraku.\n🛡️ Dug vek trajanja – otporna struktura omogućava dugotrajnu upotrebu i očuvan izgled poda kroz godine.\n\n📦Poručite preko sajta nijansa.rs ili posetite nas u:\n\nBeogradu (Zemun)\n\nNišu,\n\nLeskovcu,\n\nPirotu!\n\n📞Kontakt telefon: 064 8276578\n\nAkcija traje do kraja Marta!"
+      ],
+      "enrichment": {
+        "contact": {
+          "name": "Miodrag Ignjatović",
+          "email": "miodrag@nijansa.rs",
+          "title": "Retail Manager",
+          "linkedin": "https://www.linkedin.com/in/miodrag-ignjatović-28b76311a",
+          "seniority": "senior"
+        },
+        "enriched_at": "2026-03-16T21:27:16.328Z",
+        "instagram_reels": [
+          {
+            "url": "https://www.instagram.com/nijansa.nbc",
+            "likes": 0,
+            "views": 0,
+            "caption": "",
+            "comments": 0,
+            "timestamp": null
+          }
+        ],
+        "instagram_profile": {
+          "bio": null,
+          "url": "https://www.instagram.com/nijansa.rs/",
+          "username": "nijansa.rs",
+          "followers": 0,
+          "following": 0,
+          "is_verified": false,
+          "posts_count": 0,
+          "external_url": null,
+          "business_email": null,
+          "business_category": null
+        },
+        "recommendation_reason": "Active e-commerce via social — too much DM volume to handle manually",
+        "service_recommendation": "social_media_system"
+      },
+      "scraped_at": "2026-03-16T19:21:44.165Z",
+      "scrape_query": "https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=RS&q=akcija&search_type=keyword_unordered",
+      "ad_start_date": "2026-03-03 08:00:00",
+      "ad_library_url": "https://www.facebook.com/ads/library/?id=1444783467001849",
+      "page_followers": 26668,
+      "page_categories": [
+        "Building Materials"
+      ],
+      "active_ads_count": 37,
+      "facebook_page_id": "323056061604225",
+      "facebook_page_url": "https://www.facebook.com/Nijansa.NBC/",
+      "publisher_platforms": [
+        "FACEBOOK",
+        "INSTAGRAM",
+        "AUDIENCE_NETWORK",
+        "MESSENGER",
+        "THREADS"
+      ]
+    },
+    "email_draft": "Subject: 37 aktivnih oglasa — zanima me šta se dešava sa klicima posle.\n\nDobar dan,\n\nPratim vaše kampanje — 37 aktivnih oglasa koji svaki dan privlače potencijalne klijente. Ono što vidim kod većine biznisa nije da nemaju sistem, već da taj sistem nije optimizovan — \"leaky bucket\" gde većina lead-ova koji ne konvertuju odmah nestane u roku od 48 sati bez ijednog follow-upa.\n\nTu na scenu stupa onaj pravi \"WOW\" faktor — integracija AI sistema u vaš postojeći prodajni proces. Sistem automatski komunicira, neguje lead-ove (nurturing), beleži nameru i prati svaki korak ka zatvaranju prodaje.\n\nOvo nije još samo jedan CRM iz kog ručno šaljete poruke. Ovo je automatizovana pametna infrastruktura koja super-optimizuje trud koji već ulažete — bez meseci implementacije i prekomplikovanih alata.\n\nRezultat? Vaš ad budžet se mnogo bolje iskoristi, zatvarate više lead-ova koji bi inače propali, i dobijate nivo automatizacije kakav trenutno ima jako mali broj biznisa na našem tržištu. A kada bude spreman sadržaj koji privlači bolje lead-ove — imate i sistem koji ih zatvara.\n\nKada god imate 20 minuta slobodno, mogu da vam pokažem kako bi ovo izgledalo za Nijansa NBC — besplatno, bez obaveza i bez pritiska.\n\nVeliki pozdrav,\n\nNikola Guteša\nSmartflow\nSmartflow.rs\n+381 64 118 2200"
+  },
+  {
+    "id": "bbec95d8-d1ed-48b0-92b2-6f58afa3fd89",
+    "company_name": "Prodavnica alata",
+    "website": "https://prodavnicaalata.rs",
+    "niche": "online_prodaja",
+    "status": "enriched",
+    "intake_data": {
+      "ad_cta": "Shop now",
+      "ad_title": "Prodavnica alata",
+      "ad_copies": [
+        "🔥 Do 40% popusta na Knipex alat!\nPrecizni i izdržljivi alati za svaki zadatak – zalihe se tope! ⏳\n➡️ Nabavite svoj Knipex sada i ne propustite priliku!",
+        "🛠️ Kvalitet koji se vidi u svakom potezu!\n\nKnipex klješta i alati sa popustom do 50.000 RSD 💰. Preciznost, snaga 💪 i pouzdanost – sve što ti treba da završiš posao lako i brzo 🚀. Ponuda važi dok zalihe traju ⏳.\n\nNe čekaj – ugrabite svoj alat sada! ✅",
+        "💪 Tvoj posao zaslužuje najbolji alat!\n🔥 Bosch bušilice, šrafcigeri i više – popust do 23 000RSD!\n🛒 Ne čekaj, dodaj u korpu odmah i uštedi!",
+        "🔴 Einhell alati sada na akciji – uštedi do 26.000 RSD!\nOd aku bušilica i testera do brusilica i kompresora – kvalitetan alat po ceni koja se ne propušta. \n\nPonuda važi dok traju zalihe ⏳.",
+        "🔧 Najveći izbor alata na jednom mestu!\nNajpoznatiji brendovi odmah dostupni – ceo asortiman na akciji 💥\nBesplatna dostava za porudžbine preko 15000 RSD 👉 Poruči sada!"
+      ],
+      "enrichment": {
+        "contact": {
+          "name": null,
+          "email": "office@prodavnicaalata.rs",
+          "title": null,
+          "linkedin": null,
+          "seniority": null
+        },
+        "enriched_at": "2026-03-16T21:27:16.328Z",
+        "instagram_reels": [
+          {
+            "url": "https://www.instagram.com/reel/DV1l_uuCAJb/",
+            "likes": 17,
+            "views": 492,
+            "caption": "Kada je potrebno precizno i čisto sečenje plastičnih cevi, Knipex 90 22 01 pruža pouzdanost i kontrolu u svakom rezu. Ova klešta omogućavaju brzo i ra",
+            "comments": 0,
+            "timestamp": "2026-03-13T20:06:18.000Z"
+          },
+          {
+            "url": "https://www.instagram.com/reel/DV1mqYLCKyx/",
+            "likes": 6,
+            "views": 273,
+            "caption": "Uskoro par novih stvari od Wihe u ponudi!\n\n#prodavnicaalata #prodajaalata #wiha #wihasrbija",
+            "comments": 0,
+            "timestamp": "2026-03-13T20:12:04.000Z"
+          },
+          {
+            "url": "https://www.instagram.com/reel/DVnxO06jBpp/",
+            "likes": 9,
+            "views": 122,
+            "caption": "Da li ste primetili ove Knipex novitete i na vašim kleštima?\n\n#knipex #prodavnicaalata #prodajaalata #knipexsrbija",
+            "comments": 0,
+            "timestamp": "2026-03-08T11:15:39.000Z"
+          }
+        ],
+        "instagram_profile": {
+          "bio": "🌐Najveća online prodavnica alata\n🥇Najbolji distributer Bosch alata u Srbiji\n📞Broj telefona: 011-4520-171",
+          "url": "https://www.instagram.com/prodavnicaalata/",
+          "username": "prodavnicaalata",
+          "followers": 7726,
+          "following": 0,
+          "is_verified": false,
+          "posts_count": 385,
+          "external_url": "https://prodavnicaalata.rs/",
+          "business_email": null,
+          "business_category": "None,Product/service"
+        },
+        "recommendation_reason": "Lead gen funnel detected — email sequences will convert leads before they go cold",
+        "service_recommendation": "ai_sales_systems"
+      },
+      "scraped_at": "2026-03-16T19:21:44.165Z",
+      "scrape_query": "https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=RS&q=online%20prodavnica&search_type=keyword_unordered",
+      "ad_start_date": "2026-02-03 08:00:00",
+      "ad_library_url": "https://www.facebook.com/ads/library/?id=822627244164570",
+      "page_followers": 11815,
+      "page_categories": [
+        "Product/service"
+      ],
+      "active_ads_count": 15,
+      "facebook_page_id": "580318492023779",
+      "facebook_page_url": "https://www.facebook.com/prodavnicaalataa/",
+      "publisher_platforms": [
+        "FACEBOOK",
+        "INSTAGRAM"
+      ]
+    },
+    "email_draft": null
+  },
+  {
+    "id": "01f281dd-c864-4d21-86df-4140ac00c546",
+    "company_name": "Wayout",
+    "website": null,
+    "niche": "Travel",
+    "status": "Sent",
+    "intake_data": null,
+    "email_draft": "Subject: Ko u Wayout vodi digitalnu promociju? Stvarno nema smisla.\n\nDobar dan,\n\nStvarno nema smisla da Wayout propušta prilike za privlačenje novih klijenata kroz video sadržaj — dok konkurencija zauzima tu publiku na Instagramu i TikToku.\n\nMislim da biste imali bolji povrat na investiciju uz profesionalni video sadržaj koji vaša publika zapravo gleda — bez skupih agencija, bez meseci čekanja i bez generičkih šablona. Holivudska produkcija za deo standardne cene.\n\nAli ovo nije generički AI sadržaj sa robotskim glasom i jeftinim efektima.\n\nGlas koji čujete zvuči kao pravi srpski govornik — vaša publika neće moći da prepozna da je AI. Vizuali su na nivou holivudske produkcije, a produkcija traje deo vremena i cene klasičnog snimanja.\n\nRezultat? Profesionalni video sadržaj. Prva publika koja se vraća. Digitalno prisustvo koje radi za vaš biznis.\n\nKada god imate 20 minuta slobodno, mogu da vam pokažem kako bi to izgledalo za Wayout — i da napravim kratak besplatni sample video odmah. Besplatno, bez obaveza i bez smaranja.\n\nVeliki pozdrav,\n\nNikola Guteša\nSmartflow\nSmartflow.rs\n+381 64 118 2200"
+  },
+  {
+    "id": "ac0c2df7-8972-443f-a06f-466481b81746",
+    "company_name": "Žan Vulić",
+    "website": "https://www.zanvulic.rs/",
+    "niche": "Physical Therapy",
+    "status": "Sent",
+    "intake_data": null,
+    "email_draft": "Subject: Ko u Žan Vulić vodi digitalnu promociju? Stvarno nema smisla.\n\nDobar dan,\n\nStvarno nema smisla da Žan Vulić propušta prilike za privlačenje novih klijenata kroz video sadržaj — dok konkurencija zauzima tu publiku na Instagramu i TikToku.\n\nMislim da biste imali bolji povrat na investiciju uz profesionalni video sadržaj koji vaša publika zapravo gleda — bez skupih agencija, bez meseci čekanja i bez generičkih šablona. Holivudska produkcija za deo standardne cene.\n\nAli ovo nije generički AI sadržaj sa robotskim glasom i jeftinim efektima.\n\nGlas koji čujete zvuči kao pravi srpski govornik — vaša publika neće moći da prepozna da je AI. Vizuali su na nivou holivudske produkcije, a produkcija traje deo vremena i cene klasičnog snimanja.\n\nRezultat? Profesionalni video sadržaj. Prva publika koja se vraća. Digitalno prisustvo koje radi za vaš biznis.\n\nKada god imate 20 minuta slobodno, mogu da vam pokažem kako bi to izgledalo za Žan Vulić — i da napravim kratak besplatni sample video odmah. Besplatno, bez obaveza i bez smaranja.\n\nVeliki pozdrav,\n\nNikola Guteša\nSmartflow\nSmartflow.rs\n+381 64 118 2200"
+  },
+  {
+    "id": "cd7f8b44-e39a-4af3-ab52-53c846ca02a0",
+    "company_name": "Metalne  Police",
+    "website": "https://metalnepolice.rs",
+    "niche": "ostalo",
+    "status": "Lead",
+    "intake_data": {
+      "ad_cta": "Shop now",
+      "ad_title": "🔩 Metalna polica 200×100×40 – čak 7 nivoa!",
+      "ad_copies": [
+        "🔩 Metalna polica 200×100×40 – čak 7 nivoa!\n\nTreba vam više prostora za odlaganje u garaži, radionici, podrumu ili magacinu?\nOva čvrsta metalna polica sa ivericom je idealno rešenje.\n\n📏 Dimenzije: 200 × 100 × 40 cm\n📦 7 nivoa polica\n💪 Nosivost po nivou: 175 kg\n⚖️ Ukupna nosivost: 1225 kg\n\n🔧 Pametan sistem konstrukcije\nVisina police formira se od dva stubića od 100 cm koji se spajaju spojnicom u 200 cm\nStubovi od čvrstog L profila 30×30 mm\nPerforacija omogućava podešavanje visine polica po želji\n\n💰 Cena: 7.590 din\n🚚 Besplatna dostava\n\n📲 Poruči odmah dok traje akcija!\n📞 060 606 4900\n🌐 https://metalnepolice.rs/product/polica-metal-medijapan-200x100x40-7x175kg/\n\n⏳ Velika nosivost + odlična cena = profesionalno skladištenje bez kompromisa!",
+        "🔩 Metalna polica 213×90×60 – Nosivost čak 2100 kg\n\nPotrebna vam je izuzetno jaka polica za garažu, radionicu ili magacin?\nOva metalna polica sa medijapan nivoima pruža maksimalnu nosivost i stabilnost.\n\n📏 Dimenzije:\n\nVisina: 213 cm\n\nŠirina: 90 cm\n\nDubina: 60 cm\n\n📦 6 nivoa polica\n💪 Nosivost po nivou: 350 kg\n⚖️ Ukupna nosivost: 2100 kg\n\n⚙️ Prednosti:\n\nČvrsta metalna konstrukcija\n\nGalvanizovana zaštita protiv habanja i korozije\n\nStabilna i dugotrajna konstrukcija\n\nIdealna za garaže, radionice i magacine\n\n💰 Cena: 8.690 din\n\n📲 Poruči odmah!\n📞 060 606 4900\n🌐 https://metalnepolice.rs/product/polica-metal-medijapan-213x90x60-5x350kg-galva/",
+        "🔩 Metalna polica 195×100×50 – Nosivost čak 1300 kg\n\nPotrebna vam je jaka i dugotrajna polica za garažu, radionicu ili magacin?\nOva potpuno metalna polica pruža veliku stabilnost i maksimalnu nosivost.\n\n📏 Dimenzije: 195 × 100 × 50 cm\n📦 5 nivoa polica\n💪 Nosivost po nivou: 260 kg\n⚖️ Ukupna nosivost: 1300 kg\n\n⚙️ Kvalitetna metalna konstrukcija\n\nMetalni stubovi sa perforacijom\n\nPodešavanje visine polica po potrebi\n\nMetalni nivoi za dodatnu čvrstinu i dug vek trajanja\n\nGalvanizovana konstrukcija otporna na habanje\n\n💰 Cena: 10.990 din\n\n📲 Poruči odmah!\n📞 060 606 4900\n🌐 https://metalnepolice.rs/product/polica-metal-metal-195x100x50cm-5x260kg-galva/\n\n⏳ Odličan odnos cene i kvaliteta – stabilno i uredno skladištenje bez velikog ulaganja!",
+        "🚗 Polica za gume 177×120×50 – Organizujte garažu\n\nImate problem sa odlaganjem zimskih ili letnjih guma?\nOva specijalna metalna polica za gume omogućava uredno i bezbedno skladištenje.\n\n📏 Dimenzije:\n\nVisina: 177 cm\n\nŠirina: 120 cm\n\nDubina: 50 cm\n\n📦 3 nivoa\n💪 Nosivost po nivou: 150 kg\n⚖️ Ukupna nosivost: 450 kg\n\n🔧 Prednosti:\n\nStabilna metalna konstrukcija\n\nIdealna za garaže, servise i magacine\n\nPraktično i organizovano odlaganje guma\n\nŠtedi prostor u garaži\n\n💰 Cena: 8.590 din\n\n📲 Poruči odmah!\n📞 060 606 4900\n🌐 https://metalnepolice.rs/product/polica-za-gume-177x120x50cm/",
+        "🔩 Super izdržljiva metalna polica – Nosivost do 1250 kg!\n\nPotrebna vam je jaka i stabilna polica za garažu, radionicu, magacin ili podrum?\n\n✅ Metalna polica sa medijapan pločama\n📏 Dimenzije: 180 × 90 × 60 cm\n📦 5 nivoa – svaki nosi do 250 kg\n💪 Ukupna nosivost: 1250 kg\n\n⚙️ Stubovi od čvrstog L profila 30×30 mm sa perforacijom koja omogućava podešavanje visine polica po želji.\n\n🔧 RIVET tehnologija sklapanja\n\nbrzo i lako montiranje\n\nveća stabilnost\n\ndugotrajna upotreba\n\n💰 Cena: 6.490 din\n🚚 Besplatna dostava\n\n📞 Poručite odmah: 060 606 4900\n📧 info@metalnepolice.rs\n🛒 Pogledajte proizvod:\nhttps://metalnepolice.rs/product/police-metal-medijapan-180x90x60cm-5x250kg-rivet-galva-2/"
+      ],
+      "enrichment": {
+        "enriched_at": "2026-03-16T21:27:16.328Z",
+        "recommendation_reason": "Lead gen funnel detected — email sequences will convert leads before they go cold",
+        "service_recommendation": "ai_sales_systems"
+      },
+      "scraped_at": "2026-03-16T19:21:44.166Z",
+      "scrape_query": "https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=RS&q=akcija&search_type=keyword_unordered",
+      "ad_start_date": "2026-03-13 07:00:00",
+      "ad_library_url": "https://www.facebook.com/ads/library/?id=766136412951715",
+      "page_followers": 13316,
+      "page_categories": [
+        "Home Repair"
+      ],
+      "active_ads_count": 8,
+      "facebook_page_id": "1561439090653092",
+      "facebook_page_url": "https://www.facebook.com/metalnepolice.rs/",
+      "publisher_platforms": [
+        "FACEBOOK",
+        "INSTAGRAM",
+        "AUDIENCE_NETWORK",
+        "MESSENGER",
+        "THREADS"
+      ]
+    },
+    "email_draft": null
+  },
+  {
+    "id": "e0694415-3e3c-4715-8703-1d7fdc5cc546",
+    "company_name": "Naturia",
+    "website": null,
+    "niche": "Bed",
+    "status": "Sent",
+    "intake_data": null,
+    "email_draft": "Subject: Ko u Naturia vodi digitalnu promociju? Stvarno nema smisla.\n\nDobar dan,\n\nStvarno nema smisla da Naturia propušta prilike za privlačenje novih klijenata kroz video sadržaj — dok konkurencija zauzima tu publiku na Instagramu i TikToku.\n\nMislim da biste imali bolji povrat na investiciju uz profesionalni video sadržaj koji vaša publika zapravo gleda — bez skupih agencija, bez meseci čekanja i bez generičkih šablona. Holivudska produkcija za deo standardne cene.\n\nAli ovo nije generički AI sadržaj sa robotskim glasom i jeftinim efektima.\n\nGlas koji čujete zvuči kao pravi srpski govornik — vaša publika neće moći da prepozna da je AI. Vizuali su na nivou holivudske produkcije, a produkcija traje deo vremena i cene klasičnog snimanja.\n\nRezultat? Profesionalni video sadržaj. Prva publika koja se vraća. Digitalno prisustvo koje radi za vaš biznis.\n\nKada god imate 20 minuta slobodno, mogu da vam pokažem kako bi to izgledalo za Naturia — i da napravim kratak besplatni sample video odmah. Besplatno, bez obaveza i bez smaranja.\n\nVeliki pozdrav,\n\nNikola Guteša\nSmartflow\nSmartflow.rs\n+381 64 118 2200"
+  },
+  {
+    "id": "827fc9ba-f70b-4697-b44d-14727b9a4e9f",
+    "company_name": "Eurosalon Fabrika",
+    "website": null,
+    "niche": "Furniture",
+    "status": "Sent",
+    "intake_data": null,
+    "email_draft": "Subject: Ko u Eurosalon Fabrika vodi digitalnu promociju? Stvarno nema smisla.\n\nDobar dan,\n\nStvarno nema smisla da Eurosalon Fabrika propušta prilike za privlačenje novih klijenata kroz video sadržaj — dok konkurencija zauzima tu publiku na Instagramu i TikToku.\n\nMislim da biste imali bolji povrat na investiciju uz profesionalni video sadržaj koji vaša publika zapravo gleda — bez skupih agencija, bez meseci čekanja i bez generičkih šablona. Holivudska produkcija za deo standardne cene.\n\nAli ovo nije generički AI sadržaj sa robotskim glasom i jeftinim efektima.\n\nGlas koji čujete zvuči kao pravi srpski govornik — vaša publika neće moći da prepozna da je AI. Vizuali su na nivou holivudske produkcije, a produkcija traje deo vremena i cene klasičnog snimanja.\n\nRezultat? Profesionalni video sadržaj. Prva publika koja se vraća. Digitalno prisustvo koje radi za vaš biznis.\n\nKada god imate 20 minuta slobodno, mogu da vam pokažem kako bi to izgledalo za Eurosalon Fabrika — i da napravim kratak besplatni sample video odmah. Besplatno, bez obaveza i bez smaranja.\n\nVeliki pozdrav,\n\nNikola Guteša\nSmartflow\nSmartflow.rs\n+381 64 118 2200"
+  },
+  {
+    "id": "61d4416a-30a8-4067-99a1-6d05d82db1a5",
+    "company_name": "BalkanFun",
+    "website": null,
+    "niche": "Travel",
+    "status": "Sent",
+    "intake_data": null,
+    "email_draft": "Subject: Ko u BalkanFun vodi digitalnu promociju? Stvarno nema smisla.\n\nDobar dan,\n\nStvarno nema smisla da BalkanFun propušta prilike za privlačenje novih klijenata kroz video sadržaj — dok konkurencija zauzima tu publiku na Instagramu i TikToku.\n\nMislim da biste imali bolji povrat na investiciju uz profesionalni video sadržaj koji vaša publika zapravo gleda — bez skupih agencija, bez meseci čekanja i bez generičkih šablona. Holivudska produkcija za deo standardne cene.\n\nAli ovo nije generički AI sadržaj sa robotskim glasom i jeftinim efektima.\n\nGlas koji čujete zvuči kao pravi srpski govornik — vaša publika neće moći da prepozna da je AI. Vizuali su na nivou holivudske produkcije, a produkcija traje deo vremena i cene klasičnog snimanja.\n\nRezultat? Profesionalni video sadržaj. Prva publika koja se vraća. Digitalno prisustvo koje radi za vaš biznis.\n\nKada god imate 20 minuta slobodno, mogu da vam pokažem kako bi to izgledalo za BalkanFun — i da napravim kratak besplatni sample video odmah. Besplatno, bez obaveza i bez smaranja.\n\nVeliki pozdrav,\n\nNikola Guteša\nSmartflow\nSmartflow.rs\n+381 64 118 2200"
+  },
+  {
+    "id": "16395d56-f2de-40cd-99df-7bc987940397",
+    "company_name": "Health and More",
+    "website": null,
+    "niche": "Ecom - Health",
+    "status": "Sent",
+    "intake_data": null,
+    "email_draft": "Subject: Ko u Health and More vodi digitalnu promociju? Stvarno nema smisla.\n\nDobar dan,\n\nStvarno nema smisla da Health and More propušta prilike za privlačenje novih klijenata kroz video sadržaj — dok konkurencija zauzima tu publiku na Instagramu i TikToku.\n\nMislim da biste imali bolji povrat na investiciju uz profesionalni video sadržaj koji vaša publika zapravo gleda — bez skupih agencija, bez meseci čekanja i bez generičkih šablona. Holivudska produkcija za deo standardne cene.\n\nAli ovo nije generički AI sadržaj sa robotskim glasom i jeftinim efektima.\n\nGlas koji čujete zvuči kao pravi srpski govornik — vaša publika neće moći da prepozna da je AI. Vizuali su na nivou holivudske produkcije, a produkcija traje deo vremena i cene klasičnog snimanja.\n\nRezultat? Profesionalni video sadržaj. Prva publika koja se vraća. Digitalno prisustvo koje radi za vaš biznis.\n\nKada god imate 20 minuta slobodno, mogu da vam pokažem kako bi to izgledalo za Health and More — i da napravim kratak besplatni sample video odmah. Besplatno, bez obaveza i bez smaranja.\n\nVeliki pozdrav,\n\nNikola Guteša\nSmartflow\nSmartflow.rs\n+381 64 118 2200"
+  },
+  {
+    "id": "698b494c-a59e-4e0d-955b-419079c86e43",
+    "company_name": "Crowndental",
+    "website": null,
+    "niche": "Dental clinic",
+    "status": "Sent",
+    "intake_data": null,
+    "email_draft": "Subject: Ko u Crowndental vodi digitalnu promociju? Stvarno nema smisla.\n\nDobar dan,\n\nStvarno nema smisla da Crowndental propušta prilike za privlačenje novih klijenata kroz video sadržaj — dok konkurencija zauzima tu publiku na Instagramu i TikToku.\n\nMislim da biste imali bolji povrat na investiciju uz profesionalni video sadržaj koji vaša publika zapravo gleda — bez skupih agencija, bez meseci čekanja i bez generičkih šablona. Holivudska produkcija za deo standardne cene.\n\nAli ovo nije generički AI sadržaj sa robotskim glasom i jeftinim efektima.\n\nGlas koji čujete zvuči kao pravi srpski govornik — vaša publika neće moći da prepozna da je AI. Vizuali su na nivou holivudske produkcije, a produkcija traje deo vremena i cene klasičnog snimanja.\n\nRezultat? Profesionalni video sadržaj. Prva publika koja se vraća. Digitalno prisustvo koje radi za vaš biznis.\n\nKada god imate 20 minuta slobodno, mogu da vam pokažem kako bi to izgledalo za Crowndental — i da napravim kratak besplatni sample video odmah. Besplatno, bez obaveza i bez smaranja.\n\nVeliki pozdrav,\n\nNikola Guteša\nSmartflow\nSmartflow.rs\n+381 64 118 2200"
+  },
+  {
+    "id": "e2965530-f47b-4289-8691-38987ff1515a",
+    "company_name": "Diva clinic",
+    "website": null,
+    "niche": "Polyclinic",
+    "status": "Sent",
+    "intake_data": null,
+    "email_draft": "Subject: Ko u Diva clinic vodi digitalnu promociju? Stvarno nema smisla.\n\nDobar dan,\n\nStvarno nema smisla da Diva clinic propušta prilike za privlačenje novih klijenata kroz video sadržaj — dok konkurencija zauzima tu publiku na Instagramu i TikToku.\n\nMislim da biste imali bolji povrat na investiciju uz profesionalni video sadržaj koji vaša publika zapravo gleda — bez skupih agencija, bez meseci čekanja i bez generičkih šablona. Holivudska produkcija za deo standardne cene.\n\nAli ovo nije generički AI sadržaj sa robotskim glasom i jeftinim efektima.\n\nGlas koji čujete zvuči kao pravi srpski govornik — vaša publika neće moći da prepozna da je AI. Vizuali su na nivou holivudske produkcije, a produkcija traje deo vremena i cene klasičnog snimanja.\n\nRezultat? Profesionalni video sadržaj. Prva publika koja se vraća. Digitalno prisustvo koje radi za vaš biznis.\n\nKada god imate 20 minuta slobodno, mogu da vam pokažem kako bi to izgledalo za Diva clinic — i da napravim kratak besplatni sample video odmah. Besplatno, bez obaveza i bez smaranja.\n\nVeliki pozdrav,\n\nNikola Guteša\nSmartflow\nSmartflow.rs\n+381 64 118 2200"
+  },
+  {
+    "id": "f1ed5dfd-d4ed-40b1-8c11-efe6cf86e11b",
+    "company_name": "Mjob",
+    "website": null,
+    "niche": "Zadruga",
+    "status": "Sent",
+    "intake_data": null,
+    "email_draft": "Subject: Ko u Mjob vodi digitalnu promociju? Stvarno nema smisla.\n\nDobar dan,\n\nStvarno nema smisla da Mjob propušta prilike za privlačenje novih klijenata kroz video sadržaj — dok konkurencija zauzima tu publiku na Instagramu i TikToku.\n\nMislim da biste imali bolji povrat na investiciju uz profesionalni video sadržaj koji vaša publika zapravo gleda — bez skupih agencija, bez meseci čekanja i bez generičkih šablona. Holivudska produkcija za deo standardne cene.\n\nAli ovo nije generički AI sadržaj sa robotskim glasom i jeftinim efektima.\n\nGlas koji čujete zvuči kao pravi srpski govornik — vaša publika neće moći da prepozna da je AI. Vizuali su na nivou holivudske produkcije, a produkcija traje deo vremena i cene klasičnog snimanja.\n\nRezultat? Profesionalni video sadržaj. Prva publika koja se vraća. Digitalno prisustvo koje radi za vaš biznis.\n\nKada god imate 20 minuta slobodno, mogu da vam pokažem kako bi to izgledalo za Mjob — i da napravim kratak besplatni sample video odmah. Besplatno, bez obaveza i bez smaranja.\n\nVeliki pozdrav,\n\nNikola Guteša\nSmartflow\nSmartflow.rs\n+381 64 118 2200"
+  },
+  {
+    "id": "1b2a0aee-0b65-418a-963d-c877546e2923",
+    "company_name": "Green Laminati",
+    "website": "https://greenlaminati.rs",
+    "niche": "ostalo",
+    "status": "enriched",
+    "intake_data": {
+      "ad_cta": "Learn more",
+      "ad_title": null,
+      "ad_copies": [
+        "AKCIJA NIŠ, ČAČAK i KRAGUJEVAC – MART\nOdaberite GREEN LAMINATE, jer mi postavljamo standarde!\nAKCIJA - https://greenlaminati.rs/kategorija/akcija/\nKOLEKCIJA - https://greenlaminati.rs/kategorija/kolekcija/\nVRATA - https://greenlaminati.rs/kategorija/sobna-vrata/\nLOKACIJE - https://greenlaminati.rs/kontakt/",
+        "AKCIJA BEOGRAD – MART\nOdaberite GREEN LAMINATE, jer mi postavljamo standarde!\nAKCIJA - https://greenlaminati.rs/kategorija/akcija/\nKOLEKCIJA - https://greenlaminati.rs/kategorija/kolekcija/\nVRATA - https://greenlaminati.rs/kategorija/sobna-vrata/\nLOKACIJE - https://greenlaminati.rs/kontakt/"
+      ],
+      "enrichment": {
+        "contact": {
+          "name": null,
+          "email": "maloprodaja4@greenlaminati.rs",
+          "title": null,
+          "linkedin": null,
+          "seniority": null
+        },
+        "enriched_at": "2026-03-16T21:27:16.328Z",
+        "recommendation_reason": "Default — social DM management is the most broadly applicable entry point",
+        "service_recommendation": "social_media_system"
+      },
+      "scraped_at": "2026-03-16T19:21:44.166Z",
+      "scrape_query": "https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=RS&q=akcija&search_type=keyword_unordered",
+      "ad_start_date": "2026-03-08 08:00:00",
+      "ad_library_url": "https://www.facebook.com/ads/library/?id=1441232257456887",
+      "page_followers": 33370,
+      "page_categories": [
+        "Home Repair"
+      ],
+      "active_ads_count": 9,
+      "facebook_page_id": "1833277790221027",
+      "facebook_page_url": "https://www.facebook.com/greenlaminati/",
+      "publisher_platforms": [
+        "FACEBOOK"
+      ]
+    },
+    "email_draft": null
+  },
+  {
+    "id": "a33aedd0-7284-4a64-8085-c32ac7294ddc",
+    "company_name": "DaLux",
+    "website": "https://dalux.rs",
+    "niche": "dizajn_enterijer",
+    "status": "enriched",
+    "intake_data": {
+      "ad_cta": "Learn more",
+      "ad_title": "Od konsultacija do montaže",
+      "ad_copies": [
+        "Od konsultacija do savršeno uklopljenih zavesa uz vaš enterijer.\nSve na jednom mestu 👇🏼\n\n👩🏻‍💼 Stručne konsultacije\nIzlazak na teren 📏\n🧵 Prezentacija materijala\nŠivenje po meri 🪡\n🪜 Profesionalna montaža\nOdržavanje zavesa 🫧\n\nPosetite naš izložbeni salon 👇🏼\n📍 Požeška 148A, Banovo brdo\n--------------------------------------\nPozovite nas 👇🏼\n📞 066/8040-980 ili 064/1185-059\n-------------------------------------------\n🌍 Online prodavnica 👉🏼 www.dalux.rs",
+        "Da li ste znali za ovaj sjajan trik? 👌\n\n🚚 Mogućnost dostave na teritoriji cele Srbije.\n📐 Izrada po meri\n\n➡️️ Komarnici su otporni na sve vremenske prilike, ne propuštaju UV zrake i imaju dug vek trajanja.\n➡️ Boja rama se može plastificirati po vašoj želji.\n➡️ Plise komarnici mogu se adaptirati za različite dimenzije prozora i vrata.\n\nKontaktirajte nas putem:\n☎️ 066/8040-980 ili 064/1185-059\n📩 DM-a\n\nPosetite naš izložbeni salon na lokaciji:\n📍Požeška 148a, Banovo brdo, Beograd\n\nPosetite naš sajt:\n🌐 www.dalux.rs/shop - Online prodavnica\n\n#komarnici #komarnicibeograd #dalux #komarnicipomeri #komarac #komarnicizaprozore #komarnicizavrata #komarnicizaprozor #komarnik #komarnikzavrata #uredidom #uredjenjekuce #uredjenjeterase #uredjenjestana #enterijerstana #enterijer #dvoriste #uredjenjedvorista #insekti #bube #plisekomarnici #uradisam #uradisama #montaza",
+        "✨ Detalji su ti koji prave razliku u enterijeru.\n\nU ovom prostoru postavili smo trokanalne garnišne koje omogućavaju savršeno slojevit izgled prozora.\n\nKombinovali smo Zinet zavese, koje prostoru daju lakoću i propuštaju prirodnu svetlost, sa Dalux Dimout draperijama koje obezbeđuju dodatnu privatnost i kontrolu svetla. 🌞\n\nRezultat? 👉🏻 Enterijer koji je istovremeno funkcionalan, elegantan i prijatan za boravak.\n\nAko želite zavese i draperije po meri vašeg prostora, posetite naš izložbeni salon u 📍 Požeškoj 148A, na Banovom brdu, u Beogradu.\n—————————————\nPozovite 👇🏼\n📞 066/8040-980 ili 064/1185-059\n-——————————————\n🌍 Online prodavnica 👉🏼 www.dalux.rs\n\n#dalux #draperije #zavese #zavesepomeri #draperije",
+        "Ako tražiš praktično rešenje za zavese bez bušenja plafona i kačenja - ovo je kao stvoreno za tebe ✅\n\nMini paketo - zavese koje se kače direktno na PVC stolariju, bez bušenja.\n\nOsveži enterijer svog doma mini paketo zavesama - koje se postavljaju za manje od 2 minuta.\n\nPosetite naš sajt za veiki izbor boja i dezena 👇🏻 \nhttps://dalux.rs/proizvod/mini-paketo-zavese/",
+        "Jednostavna montaža plise komarnika u samo par koraka i još lakša upotreba! 🛠️\n\n🚚 Mogućnost dostave na teritoriji cele Srbije.\n📐 Izrada po meri\n\n➡️️ Komarnici su otporni na sve vremenske prilike, ne propuštaju UV zrake i imaju dug vek trajanja.\n➡️ Boja rama se može plastificirati po vašoj želji.\n➡️ Plise komarnici mogu se adaptirati za različite dimenzije prozora i vrata.\n\nKontaktirajte nas putem:\n☎️ 066/8040-980 ili 064/1185-059\n📩 DM-a\n\nPosetite naš izložbeni salon na lokaciji:\n📍Požeška 148a, Banovo brdo, Beograd\n\nPosetite naš sajt:\n🌐 www.dalux.rs/shop - Online shop\n\n#komarnici #komarnicibeograd #dalux #komarnicipomeri #komarac #komarnicizaprozore #komarnicizavrata #komarnicizaprozor #komarnik #komarnikzavrata #uredidom #uredjenjekuce #uredjenjeterase #uredjenjestana #enterijerstana #enterijer #dvoriste #uredjenjedvorista #insekti #bube #plisekomarnici #uradisam #uradisama #montaza"
+      ],
+      "enrichment": {
+        "contact": {
+          "name": null,
+          "email": "info@dalux.rs",
+          "title": null,
+          "linkedin": null,
+          "seniority": null
+        },
+        "enriched_at": "2026-03-16T21:27:16.328Z",
+        "instagram_reels": [
+          {
+            "url": "https://www.instagram.com/zavese_dalux",
+            "likes": 0,
+            "views": 0,
+            "caption": "",
+            "comments": 0,
+            "timestamp": null
+          }
+        ],
+        "instagram_profile": {
+          "bio": null,
+          "url": "https://www.instagram.com/zavese_dalux/",
+          "username": "zavese_dalux",
+          "followers": 0,
+          "following": 0,
+          "is_verified": false,
+          "posts_count": 0,
+          "external_url": null,
+          "business_email": null,
+          "business_category": null
+        },
+        "recommendation_reason": "Lead gen funnel detected — email sequences will convert leads before they go cold",
+        "service_recommendation": "ai_sales_systems"
+      },
+      "scraped_at": "2026-03-16T19:21:44.165Z",
+      "scrape_query": "https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=RS&q=online%20prodavnica&search_type=keyword_unordered",
+      "ad_start_date": "2026-02-02 08:00:00",
+      "ad_library_url": "https://www.facebook.com/ads/library/?id=872295465775929",
+      "page_followers": 43208,
+      "page_categories": [
+        "Home & Garden"
+      ],
+      "active_ads_count": 16,
+      "facebook_page_id": "140537409334278",
+      "facebook_page_url": "https://www.facebook.com/dalux.zavese/",
+      "publisher_platforms": [
+        "FACEBOOK",
+        "INSTAGRAM",
+        "AUDIENCE_NETWORK",
+        "MESSENGER",
+        "THREADS"
+      ]
+    },
+    "email_draft": "Subject: 16 aktivnih oglasa — zanima me šta se dešava sa klicima posle.\n\nDobar dan,\n\nPratim vaše kampanje — 16 aktivnih oglasa koji svaki dan privlače potencijalne klijente. Ono što vidim kod većine biznisa nije da nemaju sistem, već da taj sistem nije optimizovan — \"leaky bucket\" gde većina lead-ova koji ne konvertuju odmah nestane u roku od 48 sati bez ijednog follow-upa.\n\nTu na scenu stupa onaj pravi \"WOW\" faktor — integracija AI sistema u vaš postojeći prodajni proces. Sistem automatski komunicira, neguje lead-ove (nurturing), beleži nameru i prati svaki korak ka zatvaranju prodaje.\n\nOvo nije još samo jedan CRM iz kog ručno šaljete poruke. Ovo je automatizovana pametna infrastruktura koja super-optimizuje trud koji već ulažete — bez meseci implementacije i prekomplikovanih alata.\n\nRezultat? Vaš ad budžet se mnogo bolje iskoristi, zatvarate više lead-ova koji bi inače propali, i dobijate nivo automatizacije kakav trenutno ima jako mali broj biznisa na našem tržištu. A kada bude spreman sadržaj koji privlači bolje lead-ove — imate i sistem koji ih zatvara.\n\nKada god imate 20 minuta slobodno, mogu da vam pokažem kako bi ovo izgledalo za DaLux — besplatno, bez obaveza i bez pritiska.\n\nVeliki pozdrav,\n\nNikola Guteša\nSmartflow\nSmartflow.rs\n+381 64 118 2200"
+  },
+  {
+    "id": "44d0d80b-1574-4ea0-870e-c6fe03ddebea",
+    "company_name": "Ja, Preduzetnik",
+    "website": "https://akademija.japreduzetnik.rs",
+    "niche": "ostalo",
+    "status": "enriched",
+    "intake_data": {
+      "ad_cta": "Learn more",
+      "ad_title": "AKADEMIJA JA PREDUZETNIK",
+      "ad_copies": [
+        "Izgradite trajni uspeh za svoj biznis uz Ja Preduzetnik Akademiju!\n\n🚀 6 predavača\n📚 7 modula\n✅ Praktični saveti\n💯 100% Garancija zadovoljstva\n👥 Uključuje dve osobe iz firme\n\nNastavni plan i program je dizajniran da odgovara specifičnim fazama vašeg poslovnog razvoja, vođen iskusnim preduzetnicima i stručnjacima u oblasti. \n\nNalazimo se na četiri lokacije :\n\n📍 Beograd\n📍 Podgorica\n📍 Banjaluka\n📍 Sarajevo\n\nPrijavite se odmah za Ja Preduzetnik Akademiju i krenite ka dugoročnom uspehu. \n\nPožurite, mesta su ograničena!",
+        "{{product.brand}}"
+      ],
+      "enrichment": {
+        "contact": {
+          "name": null,
+          "email": "anita@japreduzetnik.rs",
+          "title": null,
+          "linkedin": null,
+          "seniority": null
+        },
+        "enriched_at": "2026-03-16T21:27:16.328Z",
+        "instagram_reels": [
+          {
+            "url": "https://www.instagram.com/reel/DV6hTqYDtVS/",
+            "likes": 1,
+            "views": 251,
+            "caption": "Trud, rad, posvećenost, fokus i vera - Tanja Urošević, STS Kan Group #japreduzetnik #biznis #preduzetnistvo",
+            "comments": 0,
+            "timestamp": "2026-03-15T18:01:18.000Z"
+          },
+          {
+            "url": "https://www.instagram.com/reel/DV9GIZXDCfb/",
+            "likes": 5,
+            "views": 521,
+            "caption": "Lokal patriotizam - Miroslav Radišić, Miškone Plastika #japreduzetnik #preduzetnistvo #biznis",
+            "comments": 0,
+            "timestamp": "2026-03-16T18:01:34.000Z"
+          },
+          {
+            "url": "https://www.instagram.com/reel/DV8BdBkiDg8/",
+            "likes": 3,
+            "views": 272,
+            "caption": "Izlaz -  Sanja Stanimirović, Testeral #japreduzetnik #preduzetnistvo #biznis",
+            "comments": 0,
+            "timestamp": "2026-03-16T08:01:32.000Z"
+          }
+        ],
+        "instagram_profile": {
+          "bio": "Najveća preduzetnička platforma u regionu.",
+          "url": "https://www.instagram.com/serijal_ja_preduzetnik/",
+          "username": "serijal_ja_preduzetnik",
+          "followers": 35801,
+          "following": 0,
+          "is_verified": false,
+          "posts_count": 4272,
+          "external_url": "https://youtube.com/@japreduzetnik",
+          "business_email": null,
+          "business_category": "None,Entrepreneur"
+        },
+        "recommendation_reason": "Default — social DM management is the most broadly applicable entry point",
+        "service_recommendation": "social_media_system"
+      },
+      "scraped_at": "2026-03-16T19:21:44.165Z",
+      "scrape_query": "https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=RS&q=konsultant&search_type=keyword_unordered",
+      "ad_start_date": "2026-03-09 07:00:00",
+      "ad_library_url": "https://www.facebook.com/ads/library/?id=2422184351555021",
+      "page_followers": 60052,
+      "page_categories": [
+        "Education website"
+      ],
+      "active_ads_count": 18,
+      "facebook_page_id": "1711288605635666",
+      "facebook_page_url": "https://www.facebook.com/japreduzetnik/",
+      "publisher_platforms": [
+        "FACEBOOK",
+        "INSTAGRAM",
+        "AUDIENCE_NETWORK",
+        "MESSENGER",
+        "THREADS"
+      ]
+    },
+    "email_draft": null
+  },
+  {
+    "id": "dd445f45-fc0d-4d57-9edd-bc06386230d9",
+    "company_name": "Orion Telekom",
+    "website": "https://oriontelekom.rs/biznis-internet-akcija/",
+    "niche": "ostalo",
+    "status": "enriched",
+    "intake_data": {
+      "ad_cta": "Get quote",
+      "ad_title": "{{product.name}}",
+      "ad_copies": [
+        "{{product.brand}}",
+        "🔥 JEDINSTVENA AKCIJA ZA PRAVNA LICA: Prva 3 meseca Biznis Optičkog Interneta koštaju vas samo po 1 dinar! 💰 Obezbedite svojoj kompaniji 8 Gb/s optički internet uz paket koji uključuje sve: Statičku IP adresu, SSD hosting, .RS domen i SSL sertifikat.\n\n📞 Pozovite odmah i proverite dostupnost na Vašoj lokaciji. Akcija važi isključivo za nova pravna lica."
+      ],
+      "enrichment": {
+        "contact": {
+          "name": "Jovan Tomic",
+          "email": "jovan.tomic@oriontelekom.rs",
+          "title": "Regional Sales Director",
+          "linkedin": "https://www.linkedin.com/in/jovan-tomic-500706b",
+          "seniority": "executive"
+        },
+        "enriched_at": "2026-03-16T21:27:16.328Z",
+        "recommendation_reason": "Default — social DM management is the most broadly applicable entry point",
+        "service_recommendation": "social_media_system"
+      },
+      "scraped_at": "2026-03-16T19:21:44.166Z",
+      "scrape_query": "https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=RS&q=akcija&search_type=keyword_unordered",
+      "ad_start_date": "2026-02-06 08:00:00",
+      "ad_library_url": "https://www.facebook.com/ads/library/?id=1621574018857870",
+      "page_followers": 46526,
+      "page_categories": [
+        "Public Utility"
+      ],
+      "active_ads_count": 15,
+      "facebook_page_id": "114611245248684",
+      "facebook_page_url": "https://www.facebook.com/orion.rs/",
+      "publisher_platforms": [
+        "FACEBOOK",
+        "INSTAGRAM",
+        "AUDIENCE_NETWORK",
+        "MESSENGER",
+        "THREADS"
+      ]
+    },
+    "email_draft": null
+  },
+  {
+    "id": "e4d203a2-6246-468b-be9c-6fcfc6fe25b3",
+    "company_name": "Cassini",
+    "website": null,
+    "niche": "Interior design",
+    "status": "Sent",
+    "intake_data": null,
+    "email_draft": "Subject: Ko u Cassini vodi digitalnu promociju? Stvarno nema smisla.\n\nDobar dan,\n\nStvarno nema smisla da Cassini propušta prilike za privlačenje novih klijenata kroz video sadržaj — dok konkurencija zauzima tu publiku na Instagramu i TikToku.\n\nMislim da biste imali bolji povrat na investiciju uz profesionalni video sadržaj koji vaša publika zapravo gleda — bez skupih agencija, bez meseci čekanja i bez generičkih šablona. Holivudska produkcija za deo standardne cene.\n\nAli ovo nije generički AI sadržaj sa robotskim glasom i jeftinim efektima.\n\nGlas koji čujete zvuči kao pravi srpski govornik — vaša publika neće moći da prepozna da je AI. Vizuali su na nivou holivudske produkcije, a produkcija traje deo vremena i cene klasičnog snimanja.\n\nRezultat? Profesionalni video sadržaj. Prva publika koja se vraća. Digitalno prisustvo koje radi za vaš biznis.\n\nKada god imate 20 minuta slobodno, mogu da vam pokažem kako bi to izgledalo za Cassini — i da napravim kratak besplatni sample video odmah. Besplatno, bez obaveza i bez smaranja.\n\nVeliki pozdrav,\n\nNikola Guteša\nSmartflow\nSmartflow.rs\n+381 64 118 2200"
+  },
+  {
+    "id": "1b27b670-ac46-46de-9439-ec3c974e4e51",
+    "company_name": "Sweet fit",
+    "website": null,
+    "niche": "Ecom - Health",
+    "status": "Sent",
+    "intake_data": null,
+    "email_draft": "Subject: Ko u Sweet fit vodi digitalnu promociju? Stvarno nema smisla.\n\nDobar dan,\n\nStvarno nema smisla da Sweet fit propušta prilike za privlačenje novih klijenata kroz video sadržaj — dok konkurencija zauzima tu publiku na Instagramu i TikToku.\n\nMislim da biste imali bolji povrat na investiciju uz profesionalni video sadržaj koji vaša publika zapravo gleda — bez skupih agencija, bez meseci čekanja i bez generičkih šablona. Holivudska produkcija za deo standardne cene.\n\nAli ovo nije generički AI sadržaj sa robotskim glasom i jeftinim efektima.\n\nGlas koji čujete zvuči kao pravi srpski govornik — vaša publika neće moći da prepozna da je AI. Vizuali su na nivou holivudske produkcije, a produkcija traje deo vremena i cene klasičnog snimanja.\n\nRezultat? Profesionalni video sadržaj. Prva publika koja se vraća. Digitalno prisustvo koje radi za vaš biznis.\n\nKada god imate 20 minuta slobodno, mogu da vam pokažem kako bi to izgledalo za Sweet fit — i da napravim kratak besplatni sample video odmah. Besplatno, bez obaveza i bez smaranja.\n\nVeliki pozdrav,\n\nNikola Guteša\nSmartflow\nSmartflow.rs\n+381 64 118 2200"
+  },
+  {
+    "id": "8e11d437-a235-45f1-ae54-f6b41f64be58",
+    "company_name": "Savladaj Nemački",
+    "website": null,
+    "niche": "Language school",
+    "status": "Sent",
+    "intake_data": null,
+    "email_draft": "Subject: Ko u Savladaj Nemački vodi digitalnu promociju? Stvarno nema smisla.\n\nDobar dan,\n\nStvarno nema smisla da Savladaj Nemački propušta prilike za privlačenje novih klijenata kroz video sadržaj — dok konkurencija zauzima tu publiku na Instagramu i TikToku.\n\nMislim da biste imali bolji povrat na investiciju uz profesionalni video sadržaj koji vaša publika zapravo gleda — bez skupih agencija, bez meseci čekanja i bez generičkih šablona. Holivudska produkcija za deo standardne cene.\n\nAli ovo nije generički AI sadržaj sa robotskim glasom i jeftinim efektima.\n\nGlas koji čujete zvuči kao pravi srpski govornik — vaša publika neće moći da prepozna da je AI. Vizuali su na nivou holivudske produkcije, a produkcija traje deo vremena i cene klasičnog snimanja.\n\nRezultat? Profesionalni video sadržaj. Prva publika koja se vraća. Digitalno prisustvo koje radi za vaš biznis.\n\nKada god imate 20 minuta slobodno, mogu da vam pokažem kako bi to izgledalo za Savladaj Nemački — i da napravim kratak besplatni sample video odmah. Besplatno, bez obaveza i bez smaranja.\n\nVeliki pozdrav,\n\nNikola Guteša\nSmartflow\nSmartflow.rs\n+381 64 118 2200"
+  },
+  {
+    "id": "1821139b-2525-4b11-a185-d59f0acec89d",
+    "company_name": "Go2",
+    "website": null,
+    "niche": "Travel",
+    "status": "Sent",
+    "intake_data": null,
+    "email_draft": "Subject: Ko u Go2 vodi digitalnu promociju? Stvarno nema smisla.\n\nDobar dan,\n\nStvarno nema smisla da Go2 propušta prilike za privlačenje novih klijenata kroz video sadržaj — dok konkurencija zauzima tu publiku na Instagramu i TikToku.\n\nMislim da biste imali bolji povrat na investiciju uz profesionalni video sadržaj koji vaša publika zapravo gleda — bez skupih agencija, bez meseci čekanja i bez generičkih šablona. Holivudska produkcija za deo standardne cene.\n\nAli ovo nije generički AI sadržaj sa robotskim glasom i jeftinim efektima.\n\nGlas koji čujete zvuči kao pravi srpski govornik — vaša publika neće moći da prepozna da je AI. Vizuali su na nivou holivudske produkcije, a produkcija traje deo vremena i cene klasičnog snimanja.\n\nRezultat? Profesionalni video sadržaj. Prva publika koja se vraća. Digitalno prisustvo koje radi za vaš biznis.\n\nKada god imate 20 minuta slobodno, mogu da vam pokažem kako bi to izgledalo za Go2 — i da napravim kratak besplatni sample video odmah. Besplatno, bez obaveza i bez smaranja.\n\nVeliki pozdrav,\n\nNikola Guteša\nSmartflow\nSmartflow.rs\n+381 64 118 2200"
+  },
+  {
+    "id": "abab9170-28fe-4632-a197-a9a5f1e50c7b",
+    "company_name": "Lilly Drogerie",
+    "website": "https://lilly.rs",
+    "niche": "ostalo",
+    "status": "enriched",
+    "intake_data": {
+      "ad_cta": "Shop now",
+      "ad_title": null,
+      "ad_copies": [
+        "Jaka, blistava i zdrava kosa! 💫\n\nAlama Professional Repair linija sa keratinom obnavlja strukturu vlasi i čini kosu snažnijom, otpornijom i vidljivo negovanijom već nakon prvih pranja.\n\nAlama Professional proizvodi za negu kose sniženi su -30% samo u Lilly Drogerijama i na lilly.rs \n\n*Akcija traje do 29.03.\n.\n.\n.\n#lillydrogerie #alamaprofessional #haircare #negakose",
+        "{{product.brand}}",
+        "Oseti na svojoj koži blagotvorne moći Mrtvog mora! 💙🌊\nPotražite Alma K. proizvode za negu lica snižene -25% samo u Lilly Drogerijama i na lilly.rs\n*Akcija važi do 31.03.",
+        "Dobra četka menja sve. 💁‍♀️🌿\nKupi bilo koje dve Yesss! Bamboo četke za kosu za 699 dinara.\n*Akcija traje do 31.03.",
+        "Mamma&baby pelene čuvaju kožu, pružaju potpunu slobodu pokreta i olakšavaju svaki dan. 💜\n\nSnižene su do -19% u Lilly Drogerijama i lilly.rs\n\nUz Loyalty karticu ostvarujete i dodatnih -10% popusta u okviru Lilly junior programa.  \n*Akcija traje do 31.03."
+      ],
+      "enrichment": {
+        "contact": {
+          "name": "Tatjana Sipetic",
+          "email": "tatjana.sipetic@lilly.rs",
+          "title": "Chief Pharmacy Officer",
+          "linkedin": "https://www.linkedin.com/in/tatjanasipetic",
+          "seniority": "executive"
+        },
+        "enriched_at": "2026-03-16T21:27:16.328Z",
+        "recommendation_reason": "Default — social DM management is the most broadly applicable entry point",
+        "service_recommendation": "social_media_system"
+      },
+      "scraped_at": "2026-03-16T19:21:44.165Z",
+      "scrape_query": "https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=RS&q=online%20prodavnica&search_type=keyword_unordered",
+      "ad_start_date": "2026-03-10 07:00:00",
+      "ad_library_url": "https://www.facebook.com/ads/library/?id=906760645320372",
+      "page_followers": 278185,
+      "page_categories": [
+        "Shopping"
+      ],
+      "active_ads_count": 17,
+      "facebook_page_id": "182334025113506",
+      "facebook_page_url": "https://www.facebook.com/LillyDrogerieRS/",
+      "publisher_platforms": [
+        "INSTAGRAM"
+      ]
+    },
+    "email_draft": null
+  },
+  {
+    "id": "05fc964a-b1fd-4683-a78c-2a190ee4ac5c",
+    "company_name": "Hedera Vita natural cosmetics",
+    "website": "https://www.hederavita.rs",
+    "niche": "ostalo",
+    "status": "enriched",
+    "intake_data": {
+      "ad_cta": "Shop now",
+      "ad_title": "Fluidi koje Sanja koristi, sada na popustu",
+      "ad_copies": [
+        "Sanja Marinković u emisiji Magazin In otkriva fluide koji su prava mala čuda za lice — “botoksi u bočici” za blistav i mladolik izgled.\nFormula koja neguje, hidrira i štiti kožu, i već ima fanove među gostima emisije.\nNa sajtu Hedera Vite čeka te popust do 35% na setove fluida.\nPoruči odmah i zasijaj bez filtera.",
+        "Sanja Marinković u emisiji Magazin In otkriva fluide koji su prava mala čuda za lice — “botoksi u bočici” za blistav i mladolik izgled, sada i u putnoj varijanti.\nFormula koja neguje, hidrira i štiti kožu, i već ima fanove među gostima emisije.\nNa sajtu Hedera Vite čeka te popust od 30% na Glow And Go set.\nPoruči odmah i zasijaj bez filtera.",
+        "Prirodno, čisto, bez štetnih sastojaka.\nEarth to Skin, nežnost za osetljivu kožu.\n10% popusta na sve setove. Dodaj u svoju rutinu.",
+        "Blistav ten bez fleka.\nAnti-Ox kolekcija osvežava i ujednačava kožu. Ona je tvoja dnevna doza sjaja.\n10% popusta na sve setove. Naruči odmah.",
+        "Kosa koja diše, mekša nego ikad.\nMakadamija kolekcija vraća život svakoj dlaci.\nIskoristi trajni popust od 10% na setove. Probaj sada."
+      ],
+      "enrichment": {
+        "contact": {
+          "name": "Olgica Samoilovic",
+          "email": "olgicasamoilovic@hederavita.rs",
+          "title": "CEO",
+          "linkedin": "https://www.linkedin.com/in/olgica-samoilovic-38268854",
+          "seniority": "executive"
+        },
+        "enriched_at": "2026-03-16T21:27:16.328Z",
+        "instagram_reels": [
+          {
+            "url": "https://www.instagram.com/reel/DVyKdNij6gx/",
+            "likes": 37,
+            "views": 1995,
+            "caption": "Ako želiš da ti šminka izgleda savršeno i posle 8 sati, nije do pudera, do pripreme kože je. ✨\n\nSve počinje dobrim čišćenjem. Cleanser sa aktivnim ugl",
+            "comments": 4,
+            "timestamp": "2026-03-12T12:11:31.000Z"
+          },
+          {
+            "url": "https://www.instagram.com/reel/DVvYmp1D98q/",
+            "likes": 91,
+            "views": 1314,
+            "caption": "✨ Glow & Go Set – sve što vam treba za savršenu negu bilo gde, bilo kada! ✨\n\nMini pakovanja, moćni efekti!\n✅ Instant lifting i prirodan sjaj\n✅ Dubinsk",
+            "comments": 4,
+            "timestamp": "2026-03-11T10:14:22.000Z"
+          }
+        ],
+        "instagram_profile": {
+          "bio": "•Prirodni sastojci\n•Hedera Vita radnje: Loznica, Beograd, Novi Sad, Subotica \n•Poručite online proizvode ⬇️",
+          "url": "https://www.instagram.com/hederavita/",
+          "username": "hederavita",
+          "followers": 79153,
+          "following": 0,
+          "is_verified": false,
+          "posts_count": 2214,
+          "external_url": "https://www.hederavita.rs/",
+          "business_email": null,
+          "business_category": "None,Entrepreneur"
+        },
+        "recommendation_reason": "Active e-commerce via social — too much DM volume to handle manually",
+        "service_recommendation": "social_media_system"
+      },
+      "scraped_at": "2026-03-16T19:21:44.165Z",
+      "scrape_query": "https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=RS&q=popust&search_type=keyword_unordered",
+      "ad_start_date": "2026-01-15 08:00:00",
+      "ad_library_url": "https://www.facebook.com/ads/library/?id=918583677173092",
+      "page_followers": 22907,
+      "page_categories": [
+        "Beauty Supplies"
+      ],
+      "active_ads_count": 16,
+      "facebook_page_id": "1479178689059136",
+      "facebook_page_url": "https://www.facebook.com/hederavitanaturalcosmetics/",
+      "publisher_platforms": [
+        "FACEBOOK",
+        "INSTAGRAM"
+      ]
+    },
+    "email_draft": "Subject: Ko u Hedera Vita vodi poruke od klijentkinja? Stvarno nema smisla.\n\nDobar dan,\n\nStvarno nema smisla da neko u Hedera Vita troši ceo ili deo radnog dana na komunikaciju sa potencijalnim klijentkinjama — a da vi pritom nemate nikakav uvid u to gde odustaju od zakazivanja.\n\nMislim da biste imali manje haosa, a bolju prodaju i odnos sa klijentkinjama, uz AI sistem koji radi 168 sati nedeljno za manje nego što vas taj isti posao košta sada.\nSistem radi 168 sati nedeljno. Košta manje od tog istog radnika. I za razliku od njega — pamti svaki razgovor.\n\nAli ovo nije šablonski chatbot. Jedini agent na tržištu koji ima analizu slika i videa, razume odgovore na stori, i vodi razgovor na tečnom srpskom — napravljen od nule, za srpsko tržište.\n\nPratim vaš Instagram — 79,153 pratilaca i 16 aktivnih oglasa. Svaki razgovor, svaki detalj na jednom mestu: ko je pisalo, šta traži, gde je stalo. Informacije koje trenutno jednostavno nemate.\n\nA kada bude spreman sadržaj koji zaista generiše te poruke — imate i sistem koji ih odmah prima i odgovara.\n\nRezultat? Više zakazanih tretmana. Zadovoljnije klijentkinje. Bolja reputacija.\n\nKada god imate 20 minuta slobodno, mogu da vam pokažem kako bi ovo izgledalo za Hedera Vita — besplatno, bez obaveza i bez pritiska.\n\nVeliki pozdrav,\n\nNikola Guteša\nSmartflow\nSmartflow.rs\n+381 64 118 2200"
+  },
+  {
+    "id": "cb15b7a2-e04f-4a7d-a34e-f823cce6847e",
+    "company_name": "mömax Srbija",
+    "website": "https://moemax.rs",
+    "niche": "ostalo",
+    "status": "enriched",
+    "intake_data": {
+      "ad_cta": "Sign up",
+      "ad_title": "{{product.name}}",
+      "ad_copies": [
+        "{{product.brand}}",
+        "Još uvek tražite idealan komad nameštaja za vaš dom? Vratite se na moemax webshop i ne propustite proizvode koji će uneti stil i funkcionalnost u vaš prostor. 🛋️💡"
+      ],
+      "enrichment": {
+        "contact": {
+          "name": null,
+          "email": "mgr.kitchen.b3@moemax.rs",
+          "title": null,
+          "linkedin": null,
+          "seniority": null
+        },
+        "enriched_at": "2026-03-16T21:27:16.328Z",
+        "recommendation_reason": "Active e-commerce via social — too much DM volume to handle manually",
+        "service_recommendation": "social_media_system"
+      },
+      "scraped_at": "2026-03-16T19:21:44.166Z",
+      "scrape_query": "https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=RS&q=popust&search_type=keyword_unordered",
+      "ad_start_date": "2025-03-18 07:00:00",
+      "ad_library_url": "https://www.facebook.com/ads/library/?id=4438472733046007",
+      "page_followers": 39341,
+      "page_categories": [
+        "Furniture"
+      ],
+      "active_ads_count": 7,
+      "facebook_page_id": "171036372763464",
+      "facebook_page_url": "https://www.facebook.com/momaxsrbija/",
+      "publisher_platforms": [
+        "FACEBOOK",
+        "INSTAGRAM",
+        "AUDIENCE_NETWORK",
+        "MESSENGER"
+      ]
+    },
+    "email_draft": null
+  },
+  {
+    "id": "59cc2f8f-4998-49f6-957b-d9f98103bdec",
+    "company_name": "La Force",
+    "website": "https://laforcefashion.rs",
+    "niche": "ostalo",
+    "status": "enriched",
+    "intake_data": {
+      "ad_cta": "Shop now",
+      "ad_title": "{{product.name}}",
+      "ad_copies": [
+        "𝐀𝐤𝐜𝐢𝐣𝐚 𝐩𝐫𝐞𝐤𝐨 𝟒𝟎𝟎 𝐦𝐨𝐝𝐞𝐥𝐚 𝐤𝐨ž𝐧𝐢𝐡 𝐣𝐚𝐤𝐧𝐢!\nPostani trend koji drugi pokušavaju da prate. ✨",
+        "𝐀𝐤𝐜𝐢𝐣𝐚 𝐩𝐫𝐞𝐤𝐨 2𝟎𝟎 𝐦𝐨𝐝𝐞𝐥𝐚 𝐤𝐨ž𝐧𝐢𝐡 𝐣𝐚𝐤𝐧𝐢!\nPostani trend koji drugi pokušavaju da prate. ✨",
+        "🔥Akcija! Preko 200 modela kožnih jakni počev od 14.990 RSD! 🧥\nCene koje privlače pažnju, modeli koji ostavljaju utisak.\nSada je prava prilika da obezbedite kožnu jaknu po specijalnoj akcijskoj ceni.\n⏳ Količine su ograničene, a izbor se brzo smanjuje.\nIzaberite svoj model dok su veličine dostupne.",
+        "Akcija! 14.990 – 15.990 RSD preko 80 modela!🧥\nŽenske kožne jakne koje ostavljaju snažan utisak – sada dostupne po ceni koja se ne propušta.\nSavršen trenutak da osvežite garderobu komadom koji nosi karakter.\n💥 Količine su ograničene, veličine se brzo rasprodaju.\nReagujte na vreme.",
+        "Finalno čišćenje! Preko 150 modela zimskih jakni, montona i kaputa na finalnoj akciji! 🧥\n🔥 Završni talas sniženja je počeo i količine se ubrzano smanjuju.\nModeli koji su obeležili sezonu sada su dostupni po najnižim cenama.\n⏳ Ne čekajte da ostanete bez vaše veličine.\nObezbedite svoj komad dok traje finalna akcija."
+      ],
+      "enrichment": {
+        "contact": {
+          "name": null,
+          "email": "office@laforcefashion.rs",
+          "title": null,
+          "linkedin": null,
+          "seniority": null
+        },
+        "enriched_at": "2026-03-16T21:27:16.328Z",
+        "instagram_reels": [
+          {
+            "url": "https://www.instagram.com/reel/DKkOdcACwtz/",
+            "likes": 35,
+            "views": 1578,
+            "caption": "🌸 Klasična elegancija i urbana hrabrost spojeni u jednom komadu. La Force kožne jakne dizajnirane su za žene koje znaju šta žele – i kako da to nose.",
+            "comments": 0,
+            "timestamp": "2025-06-06T16:28:39.000Z"
+          },
+          {
+            "url": "https://www.instagram.com/reel/DJ66_9hiwd8/",
+            "likes": 22,
+            "views": 495,
+            "caption": "💋 Ko kaže da nežno ne može biti moćno?\n\n👑 La Force ženske kožne jakne u puder roze nijansi donose savršeni balans između ženstvenosti i stava. Savrš",
+            "comments": 0,
+            "timestamp": "2025-05-21T15:29:09.000Z"
+          },
+          {
+            "url": "https://www.instagram.com/reel/DKCwddFi89Q/",
+            "likes": 26,
+            "views": 1328,
+            "caption": "🤎 Klasičan stil. Moderna sloboda.\n🌏 La Force kožne jakne – za one koji znaju da je stil više od odeće. 🪐\nMinimalistički dizajn. Maksimalan utisak.\n",
+            "comments": 0,
+            "timestamp": "2025-05-24T16:30:55.000Z"
+          }
+        ],
+        "instagram_profile": {
+          "bio": "Beograd, YUBC\n🔴 Butik 1: Bul. Mihajla Pupina 10a, 28/L\n⚫️ Butik 2: Bul. Mihajla Pupina 10d, 28/NP",
+          "url": "https://www.instagram.com/laforce.fashion/",
+          "username": "laforce.fashion",
+          "followers": 52448,
+          "following": 0,
+          "is_verified": false,
+          "posts_count": 1004,
+          "external_url": "http://www.laforcefashion.rs/",
+          "business_email": null,
+          "business_category": "None"
+        },
+        "recommendation_reason": "Default — social DM management is the most broadly applicable entry point",
+        "service_recommendation": "social_media_system"
+      },
+      "scraped_at": "2026-03-16T19:21:44.165Z",
+      "scrape_query": "https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=RS&q=akcija&search_type=keyword_unordered",
+      "ad_start_date": "2025-10-13 07:00:00",
+      "ad_library_url": "https://www.facebook.com/ads/library/?id=2034695720697777",
+      "page_followers": 164580,
+      "page_categories": [
+        "Clothing"
+      ],
+      "active_ads_count": 17,
+      "facebook_page_id": "904559719597611",
+      "facebook_page_url": "https://www.facebook.com/LaForceFashion/",
+      "publisher_platforms": [
+        "FACEBOOK",
+        "INSTAGRAM",
+        "AUDIENCE_NETWORK",
+        "MESSENGER",
+        "THREADS"
+      ]
+    },
+    "email_draft": "Subject: Ko u La Force odgovara kupcima na poruke? Stvarno nema smisla.\n\nDobar dan,\n\nStvarno nema smisla da neko u La Force troši ceo ili deo radnog dana na komunikaciju sa potencijalnim kupcima — a da vi pritom nemate nikakav uvid u to gde odustaju od kupovine.\n\nMislim da biste imali manje haosa, a bolju prodaju i odnos sa kupcima, uz AI sistem koji radi 168 sati nedeljno za manje nego što vas taj isti posao košta sada.\nSistem radi 168 sati nedeljno. Košta manje od tog istog radnika. I za razliku od njega — pamti svaki razgovor.\n\nAli ovo nije šablonski chatbot. Jedini agent na tržištu koji ima analizu slika i videa, razume odgovore na stori, i vodi razgovor na tečnom srpskom — napravljen od nule, za srpsko tržište.\n\nPratim vaš Instagram — 52,448 pratilaca i 17 aktivnih oglasa. Svaki razgovor, svaki detalj na jednom mestu: ko je pisalo, šta traži, gde je stalo. Informacije koje trenutno jednostavno nemate.\n\nA kada bude spreman sadržaj koji zaista generiše te poruke — imate i sistem koji ih odmah prima i odgovara.\n\nRezultat? Više završenih kupovina. Manje napuštenih korpi. Klijenti koji se vraćaju.\n\nKada god imate 20 minuta slobodno, mogu da vam pokažem kako bi ovo izgledalo za La Force — besplatno, bez obaveza i bez pritiska.\n\nVeliki pozdrav,\n\nNikola Guteša\nSmartflow\nSmartflow.rs\n+381 64 118 2200"
+  },
+  {
+    "id": "052295d8-82ea-4609-bb6b-30b21ecc6abb",
+    "company_name": "BAA Training",
+    "website": "baatraining.com",
+    "niche": "edukacija",
+    "status": "enriched",
+    "intake_data": {
+      "ad_cta": "",
+      "ad_copies": [],
+      "enrichment": {
+        "contact": {
+          "name": "Ashima Sareen",
+          "email": "a.sareen@baatraining.com",
+          "title": "Director of Administration",
+          "source": "hunter",
+          "linkedin": "https://www.linkedin.com/in/ashima-sareen-16607b95",
+          "seniority": "executive"
+        },
+        "instagram_reels": [],
+        "instagram_profile": {
+          "username": "baatraining",
+          "followers": 39800,
+          "posts_count": 1166
+        }
+      },
+      "active_ads_count": 0
+    },
+    "email_draft": "Subject: Primetio sam nešto u BAA Training prodajnom procesu.\n\nDobar dan,\n\nVidim da BAA Training aktivno privlači klijente. Ono što vidim kod većine biznisa nije da nemaju sistem, već da taj sistem nije optimizovan — \"leaky bucket\" gde većina lead-ova koji ne konvertuju odmah nestane u roku od 48 sati bez ijednog follow-upa.\n\nTu na scenu stupa onaj pravi \"WOW\" faktor — integracija AI sistema u vaš postojeći prodajni proces. Sistem automatski komunicira, neguje lead-ove (nurturing), beleži nameru i prati svaki korak ka zatvaranju prodaje.\n\nOvo nije još samo jedan CRM iz kog ručno šaljete poruke. Ovo je automatizovana pametna infrastruktura koja super-optimizuje trud koji već ulažete — bez meseci implementacije i prekomplikovanih alata.\n\nRezultat? Vaš ad budžet se mnogo bolje iskoristi, zatvarate više lead-ova koji bi inače propali, i dobijate nivo automatizacije kakav trenutno ima jako mali broj biznisa na našem tržištu. A kada bude spreman sadržaj koji privlači bolje lead-ove — imate i sistem koji ih zatvara.\n\nKada god imate 20 minuta slobodno, mogu da vam pokažem kako bi ovo izgledalo za BAA Training — besplatno, bez obaveza i bez pritiska.\n\nVeliki pozdrav,\n\nNikola Guteša\nSmartflow\nSmartflow.rs\n+381 64 118 2200"
+  },
+  {
+    "id": "99b96c24-47c5-455c-83ab-f475ac594c42",
+    "company_name": "Tudors Srbija",
+    "website": "https://tudors.rs",
+    "niche": "ostalo",
+    "status": "Lead",
+    "intake_data": {
+      "ad_cta": "Shop now",
+      "ad_title": "{{product.name}}",
+      "ad_copies": [
+        "{{product.brand}}",
+        "Kupujte po sniženim cenama i nosite tokom cele sezone! Otkrijte moderne i praktične majice za posao, svakodnevne i vikend kombinacije. Započnite kupovinu!",
+        "Kupujte po sniženim cenama i nosite tokom cele sezone! Otkrijte moderne i praktične košulje za posao, svakodnevne i vikend kombinacije. Započnite kupovinu!"
+      ],
+      "enrichment": {
+        "enriched_at": "2026-03-20T10:35:54.473Z",
+        "instagram_reels": [
+          {
+            "url": "https://www.instagram.com/reel/DVUDY-EkUlS/",
+            "likes": 7,
+            "views": 257,
+            "caption": "Džempere sa ili bez rajsferšlusa spaja udobnost i eleganciju u svakoj sezoni.\n#Džemperi #Tudors",
+            "comments": 0,
+            "timestamp": "2026-02-28T19:28:44.000Z"
+          },
+          {
+            "url": "https://www.instagram.com/reel/DU8eq7ojLqQ/",
+            "likes": 17,
+            "views": 1735,
+            "caption": "🔥 Veliki popusti na prsluke modernog kroja – spoj urbanog stila i maksimalne praktičnosti.\nLagani, funkcionalni i savršeni za slojevito oblačenje u p",
+            "comments": 0,
+            "timestamp": "2026-02-19T15:46:59.000Z"
+          },
+          {
+            "url": "https://www.instagram.com/reel/DVMR3C5D_2S/",
+            "likes": 7,
+            "views": 138,
+            "caption": "Neka tvoj svakodnevni stil bude jednostavan, ali efektan.\nUvek ostani cool uz hoodie.\n#Hoodie #Tudors #Zima",
+            "comments": 0,
+            "timestamp": "2026-02-25T19:01:17.000Z"
+          }
+        ],
+        "instagram_profile": {
+          "bio": "Tudors kraljevstvo košulja u Srbiji! 👔🇷🇸\nOtkrijte promocije i popuste na našem sajtu. 👇🏻🛍",
+          "url": "https://www.instagram.com/tudors_serbia/",
+          "username": "tudors_serbia",
+          "followers": 25005,
+          "following": 0,
+          "is_verified": false,
+          "posts_count": 2291,
+          "external_url": "https://tudors.rs/",
+          "business_email": null,
+          "business_category": "None"
+        },
+        "recommendation_reason": "Default — social DM management is the most broadly applicable entry point",
+        "service_recommendation": "social_media_system"
+      },
+      "scraped_at": "2026-03-16T19:21:44.166Z",
+      "scrape_query": "https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=RS&q=akcija&search_type=keyword_unordered",
+      "ad_start_date": "2026-03-05 08:00:00",
+      "ad_library_url": "https://www.facebook.com/ads/library/?id=1878971836092168",
+      "page_followers": 26205,
+      "page_categories": [
+        "Men's Clothing"
+      ],
+      "active_ads_count": 10,
+      "facebook_page_id": "652514308160477",
+      "facebook_page_url": "https://www.facebook.com/TudorsRS/",
+      "publisher_platforms": [
+        "FACEBOOK",
+        "INSTAGRAM",
+        "AUDIENCE_NETWORK",
+        "MESSENGER",
+        "THREADS"
+      ]
+    },
+    "email_draft": "Subject: Ko u Tudors Srbija prima upite za projekte? Stvarno nema smisla.\n\nDobar dan,\n\nStvarno nema smisla da neko u Tudors Srbija troši ceo ili deo radnog dana na komunikaciju sa potencijalnim klijentima — a da vi pritom nemate nikakav uvid u to gde odustaju od prvog kontakta.\n\nMislim da biste imali manje haosa, a bolju prodaju i odnos sa klijentima, uz AI sistem koji radi 168 sati nedeljno za manje nego što vas taj isti posao košta sada.\nSistem radi 168 sati nedeljno. Košta manje od tog istog radnika. I za razliku od njega — pamti svaki razgovor.\n\nAli ovo nije šablonski chatbot. Jedini agent na tržištu koji ima analizu slika i videa, razume odgovore na stori, i vodi razgovor na tečnom srpskom — napravljen od nule, za srpsko tržište.\n\nPratim vaš Instagram — 24,988 pratilaca i 10 aktivnih oglasa. Svaki razgovor, svaki detalj na jednom mestu: ko je pisalo, šta traži, gde je stalo. Informacije koje trenutno jednostavno nemate.\n\nA kada bude spreman sadržaj koji zaista generiše te poruke — imate i sistem koji ih odmah prima i odgovara.\n\nRezultat? Više dogovorenih projekata. Brži odgovori. Klijenti koji se ne gube.\n\nKada god imate 20 minuta slobodno, mogu da vam pokažem kako bi ovo izgledalo za Tudors Srbija — besplatno, bez obaveza i bez pritiska.\n\nVeliki pozdrav,\n\nNikola Guteša\nSmartflow\nSmartflow.rs\n+381 64 118 2200"
+  },
+  {
+    "id": "b2a0086c-18b2-4f97-b79b-ac515918be70",
+    "company_name": "Vatanmed Serbia",
+    "website": "vatanmed.rs",
+    "niche": "klinika_wellness",
+    "status": "enriched",
+    "intake_data": {
+      "ad_cta": "apply now",
+      "ad_copies": [
+        "Popuni formu na web sajtu www.vatanmed.rs i ostvari popust od 250€ na zahvat. Reši trajno problem ćelavosti."
+      ],
+      "enrichment": {
+        "contact": {
+          "name": null,
+          "email": "serbia@vatanmed.com",
+          "title": null,
+          "source": "website_scrape",
+          "linkedin": null,
+          "seniority": null
+        },
+        "instagram_reels": [],
+        "instagram_profile": {
+          "username": "vatanmedserbia",
+          "followers": 0,
+          "posts_count": 0
+        }
+      },
+      "active_ads_count": 8
+    },
+    "email_draft": "Subject: Primetio sam Vatanmed Serbia kampanje. Jedna stvar.\n\nDobar dan,\n\nPratim vaše kampanje — 8 aktivnih oglasa koji svaki dan privlače potencijalne klijente. Ono što vidim kod većine biznisa nije da nemaju sistem, već da taj sistem nije optimizovan — \"leaky bucket\" gde potencijalni pacijenti koji se raspitaju i ne dobiju odgovor odmah najčešće zakazuju kod konkurencije.\n\nTu na scenu stupa onaj pravi \"WOW\" faktor — integracija AI sistema u vaš postojeći prodajni proces. Sistem automatski komunicira, neguje lead-ove (nurturing), beleži nameru i prati svaki korak ka zatvaranju prodaje.\n\nOvo nije još samo jedan CRM iz kog ručno šaljete poruke. Ovo je automatizovana pametna infrastruktura koja super-optimizuje trud koji već ulažete — bez meseci implementacije i prekomplikovanih alata.\n\nRezultat? Vaš ad budžet se mnogo bolje iskoristi, zatvarate više lead-ova koji bi inače propali, i dobijate nivo automatizacije kakav trenutno ima jako mali broj biznisa na našem tržištu. A kada bude spreman sadržaj koji privlači bolje lead-ove — imate i sistem koji ih zatvara.\n\nKada god imate 20 minuta slobodno, mogu da vam pokažem kako bi ovo izgledalo za Vatanmed Serbia — besplatno, bez obaveza i bez pritiska.\n\nVeliki pozdrav,\n\nNikola Guteša\nSmartflow\nSmartflow.rs\n+381 64 118 2200"
+  },
+  {
+    "id": "926f78db-1344-44bc-a665-6e615c2595c2",
+    "company_name": "Pantera Shop",
+    "website": "https://pantera.rs",
+    "niche": "ostalo",
+    "status": "enriched",
+    "intake_data": {
+      "ad_cta": "Shop now",
+      "ad_title": "{{product.name}}",
+      "ad_copies": [
+        "❄️ AKCIJA! ☃️ Do -60% na jesen-zima 2025/26 kolekciju i na sve prethodne sezone! Ugrabite među prvima svoje omiljene komade 🤩\n\n🚚 Brza dostava 2-3 radna dana\n🔐 Bezbedna i jednostavna online kupovina u par klikova\n🛒 Poruči odmah!",
+        "📢 AKCIJA 📢 Iskoristi dodatnih -10% u korpi na SVE ⚡️ Uplovi u more prelepih modela i neka uživanje u shopingu krene u našem WEB SHOPU!!!",
+        "📢 AKCIJA 📢 Do -60% na SS25 ⚡️ Uplovi u more prelepih modela i neka uživanje u shopingu krene u našem WEB SHOPU!!!"
+      ],
+      "enrichment": {
+        "contact": {
+          "name": null,
+          "email": "panteraunico@gmail.com",
+          "title": null,
+          "linkedin": null,
+          "seniority": null
+        },
+        "enriched_at": "2026-03-16T21:27:16.328Z",
+        "instagram_reels": [
+          {
+            "url": "https://www.instagram.com/reel/DV5eq6jjTE6/",
+            "likes": 15,
+            "views": 836,
+            "caption": "@tomtailor_official suknja lepog dezena – savršena za svaki dan. ⭐\n\n#Outfit:\n• @tomtailor_official majica i suknja.\n• @tommyhilfiger patike.\n• @guess ",
+            "comments": 0,
+            "timestamp": "2026-03-15T08:19:04.000Z"
+          },
+          {
+            "url": "https://www.instagram.com/reel/DV2_DVIjUv0/",
+            "likes": 370,
+            "views": 13731,
+            "caption": "@guess trenerka iz nove kolekcije postaje novi favorit – udobna, moderna i savršena za svaki dan. ✨\n\n#Outfit:\n• @guess komplet trenerka.\n• @replay pat",
+            "comments": 24,
+            "timestamp": "2026-03-14T09:04:28.000Z"
+          },
+          {
+            "url": "https://www.instagram.com/reel/DV8OR1GDVBo/",
+            "likes": 14,
+            "views": 510,
+            "caption": "@tommyhilfiger nova kolekcija donosi basic komade koji spajaju jednostavnost, kvalitet i prepoznatljiv stil za svaki dan. ✨ \n\n#Outfit:\n• @tommyhilfige",
+            "comments": 0,
+            "timestamp": "2026-03-16T09:53:26.000Z"
+          }
+        ],
+        "instagram_profile": {
+          "bio": "Online shop store. 📦\n▪️ A|X, Hugo, Boss, Guess, CK, Tommy, LIU•JO, SM..\n▪️ 𝐓𝐢𝐤𝐓𝐨𝐤 | panteraunico \n▪️Zrenjanin • Pupinova 12\n▪️Kikinda • Braće Tatić 2",
+          "url": "https://www.instagram.com/panteraunico/",
+          "username": "panteraunico",
+          "followers": 55483,
+          "following": 0,
+          "is_verified": false,
+          "posts_count": 7526,
+          "external_url": "http://pantera.rs/",
+          "business_email": null,
+          "business_category": "Shopping & retail"
+        },
+        "recommendation_reason": "Active e-commerce via social — too much DM volume to handle manually",
+        "service_recommendation": "social_media_system"
+      },
+      "scraped_at": "2026-03-16T19:21:44.166Z",
+      "scrape_query": "https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=RS&q=akcija&search_type=keyword_unordered",
+      "ad_start_date": "2026-01-29 08:00:00",
+      "ad_library_url": "https://www.facebook.com/ads/library/?id=2553122255085131",
+      "page_followers": 38524,
+      "page_categories": [
+        "Design & Fashion"
+      ],
+      "active_ads_count": 9,
+      "facebook_page_id": "184397045237436",
+      "facebook_page_url": "https://www.facebook.com/panteraunico.zrenjanin/",
+      "publisher_platforms": [
+        "FACEBOOK",
+        "INSTAGRAM",
+        "AUDIENCE_NETWORK",
+        "MESSENGER",
+        "THREADS"
+      ]
+    },
+    "email_draft": "Subject: Ko u Pantera Shop odgovara kupcima na poruke? Stvarno nema smisla.\n\nDobar dan,\n\nStvarno nema smisla da neko u Pantera Shop troši ceo ili deo radnog dana na komunikaciju sa potencijalnim kupcima — a da vi pritom nemate nikakav uvid u to gde odustaju od kupovine.\n\nMislim da biste imali manje haosa, a bolju prodaju i odnos sa kupcima, uz AI sistem koji radi 168 sati nedeljno za manje nego što vas taj isti posao košta sada.\nSistem radi 168 sati nedeljno. Košta manje od tog istog radnika. I za razliku od njega — pamti svaki razgovor.\n\nAli ovo nije šablonski chatbot. Jedini agent na tržištu koji ima analizu slika i videa, razume odgovore na stori, i vodi razgovor na tečnom srpskom — napravljen od nule, za srpsko tržište.\n\nPratim vaš Instagram — 55,483 pratilaca i 9 aktivnih oglasa. Svaki razgovor, svaki detalj na jednom mestu: ko je pisalo, šta traži, gde je stalo. Informacije koje trenutno jednostavno nemate.\n\nA kada bude spreman sadržaj koji zaista generiše te poruke — imate i sistem koji ih odmah prima i odgovara.\n\nRezultat? Više završenih kupovina. Manje napuštenih korpi. Klijenti koji se vraćaju.\n\nKada god imate 20 minuta slobodno, mogu da vam pokažem kako bi ovo izgledalo za Pantera Shop — besplatno, bez obaveza i bez pritiska.\n\nVeliki pozdrav,\n\nNikola Guteša\nSmartflow\nSmartflow.rs\n+381 64 118 2200"
+  },
+  {
+    "id": "fb5d5fb6-540c-4d7c-b5b8-7436936df15d",
+    "company_name": "Perfectil Srbija",
+    "website": "oliva.rs",
+    "niche": "klinika_wellness",
+    "status": "enriched",
+    "intake_data": {
+      "ad_cta": "learn more",
+      "ad_copies": [],
+      "enrichment": {
+        "contact": {
+          "name": "Jovan Obradovic",
+          "email": "jovan.obradovic@oliva.rs",
+          "title": null,
+          "source": "hunter",
+          "linkedin": null,
+          "seniority": null
+        },
+        "instagram_reels": [
+          {
+            "likes": 0,
+            "views": 624,
+            "caption": "Svaki dan: jednom nedeljno: svaka 2-3 meseca"
+          },
+          {
+            "likes": 0,
+            "views": 82500,
+            "caption": "Namirnice koje treba izbegavati sa dr Nedom Grbović"
+          },
+          {
+            "likes": 0,
+            "views": 112000,
+            "caption": "Kolagen tečni vs kapsule sa dr Nedom Grbović"
+          }
+        ],
+        "instagram_profile": {
+          "username": "perfectil_rs",
+          "followers": 2886,
+          "posts_count": 143
+        }
+      },
+      "active_ads_count": 0
+    },
+    "email_draft": "Subject: Primetio sam nešto u digitalnom prisustvu Perfectil Srbija-a.\n\nDobar dan,\n\nPratio sam digitalno prisustvo Perfectil Srbija-a — vidim prostor koji vaša konkurencija već počinje da zauzima na Instagramu i TikToku.\n\nPravim profesionalni AI video sadržaj za srpsko tržište — video rezultata tretmana, atmosfera klinike i edukativni sadržaj koji gradi poverenje pre prvog dolaska. Agencije su često spore, skupe i forsiraju svoj stil. Moj sistem se u potpunosti prilagođava onome što Perfectil Srbija i vaše tržište zahtevaju — brže i uz mnogo veće kreativne mogućnosti. Srpski govornik koji zvuči kao pravi, cinematic vizuali, bez mesečnih ugovora sa agencijom.\n\nAko bi vam pomoglo da vidite kako bi to izgledalo za Perfectil Srbija — odgovorite sa jednom rečju \"Da\" i napravim vam besplatan sample video odmah.\n\nVeliki pozdrav,\n\nNikola Guteša\nSmartflow\nSmartflow.rs\n+381 64 118 2200"
+  },
+  {
+    "id": "48864b83-25e5-4d1f-9df9-d3c08df3a106",
+    "company_name": "Hedera Vita",
+    "website": "hederavita.rs",
+    "niche": "klinika_wellness",
+    "status": "enriched",
+    "intake_data": {
+      "ad_cta": "",
+      "ad_copies": [],
+      "enrichment": {
+        "contact": {
+          "name": "Olgica Samoilovic",
+          "email": "olgicasamoilovic@hederavita.rs",
+          "title": "CEO",
+          "source": "hunter",
+          "linkedin": "https://www.linkedin.com/in/olgica-samoilovic-38268854",
+          "seniority": "executive"
+        },
+        "instagram_reels": [],
+        "instagram_profile": {
+          "username": "hederavita",
+          "followers": 79200,
+          "posts_count": 2217
+        }
+      },
+      "active_ads_count": 0
+    },
+    "email_draft": "Subject: Ko u Hedera Vita vodi poruke od klijentkinja? Stvarno nema smisla.\n\nDobar dan,\n\nStvarno nema smisla da neko u Hedera Vita troši ceo ili deo radnog dana na komunikaciju sa potencijalnim klijentkinjama — a da vi pritom nemate nikakav uvid u to gde odustaju od zakazivanja.\n\nMislim da biste imali manje haosa, a bolju prodaju i odnos sa klijentkinjama, uz AI sistem koji radi 168 sati nedeljno za manje nego što vas taj isti posao košta sada.\nSistem radi 168 sati nedeljno. Košta manje od tog istog radnika. I za razliku od njega — pamti svaki razgovor.\n\nAli ovo nije šablonski chatbot. Jedini agent na tržištu koji ima analizu slika i videa, razume odgovore na stori, i vodi razgovor na tečnom srpskom — napravljen od nule, za srpsko tržište.\n\nPratim vaš Instagram — 79,200 pratilaca. Svaki razgovor, svaki detalj na jednom mestu: ko je pisalo, šta traži, gde je stalo. Informacije koje trenutno jednostavno nemate.\n\nA kada bude spreman sadržaj koji zaista generiše te poruke — imate i sistem koji ih odmah prima i odgovara.\n\nRezultat? Više zakazanih tretmana. Zadovoljnije klijentkinje. Bolja reputacija.\n\nKada god imate 20 minuta slobodno, mogu da vam pokažem kako bi ovo izgledalo za Hedera Vita — besplatno, bez obaveza i bez pritiska.\n\nVeliki pozdrav,\n\nNikola Guteša\nSmartflow\nSmartflow.rs\n+381 64 118 2200"
+  },
+  {
+    "id": "c94a742b-1c43-46e5-be10-b415fd3c6b3e",
+    "company_name": "Stop Auto Shop",
+    "website": "https://stopautoshop.rs/collections/rucice-menjaca",
+    "niche": "ostalo",
+    "status": "Lead",
+    "intake_data": {
+      "ad_cta": "Shop now",
+      "ad_title": "{{product.name}}",
+      "ad_copies": [
+        "{{product.brand}}",
+        "Blato, sneg i prljavština više nisu tvoj problem. 🚗\n\nKadica za gepek savršeno se uklapa u oblik prtljažnika i štiti enterijer od svake muke.\nSamo izvadi, operi i nastavi dalje — čista kola za manje od minuta!\n\nOdaberi svoj model sada i zaboravi na pranje gepeka zauvek.👇\nstopautoshop.rs/collections/kadice-za-gepek",
+        "Tvoj auto izgleda skupo spolja… a unutra kao svaki drugi? 🚗💨\n\nDodaj ambijentalno RGB osvetljenje i pretvori kabinu u enterijer iz premium klase.\n\n✅ Veliki izbor boja – menjaš po raspoloženju\n✅ Jednostavna montaža – bez oštećenja\n✅ Daljinsko upravljanje i efekti\n\nZalihe brzo nestaju – naruči sada i vozi u stilu!\n\n👉 stopautoshop.rs/products/ambijentalno-rgb-osvetljenje-za-automobil",
+        "Zima prolazi, a ti svakako voliš da sačuvaš enterijer automobila, ne samo od blata već i od habanja, držanja noge na gasu?\n\nOnda su tipske gumene patosnice pravo rešenje za tebe jer nude zaštitu, izgled, i kvalitet.\n\nA sve to po akcijskoj ceni, jer su zalihe pri kraju i neće ih biti do oktobra.\n\n🛒Poruči odmah\nhttps://stopautoshop.rs/collections/auto-patosnice",
+        "Pretvorite svoje svakodnevno putovanje na posao u uzbudljivu avanturu uz najnovije automobilske proizvode i dodatnu opremu! 😎"
+      ],
+      "enrichment": {
+        "enriched_at": "2026-03-16T21:27:16.328Z",
+        "instagram_reels": [
+          {
+            "url": "https://www.instagram.com/reel/DVt3IEBCci4/",
+            "likes": 11,
+            "views": 866,
+            "caption": "🚗 Rešenje svih Vaših problema u vožnji - ergonomski jastuci za leđa i vrat\n\nSvako Vaše putovanje pretvorite u pravo uživanje, bez obzira da li se voz",
+            "comments": 0,
+            "timestamp": "2026-03-10T20:02:09.000Z"
+          },
+          {
+            "url": "https://www.instagram.com/reel/DV1enthgVIO/",
+            "likes": 24,
+            "views": 1239,
+            "caption": "🚗Uredna kabina bez nereda\n\nFlašice, telefoni, igračke i sitnice često završe svuda po autu.\nOvi praktični organizeri za auto sedište pomažu da sve im",
+            "comments": 0,
+            "timestamp": "2026-03-13T19:01:46.000Z"
+          },
+          {
+            "url": "https://www.instagram.com/reel/DVwVJiWDRyx/",
+            "likes": 43,
+            "views": 1527,
+            "caption": "🔥 Praškasti protivpožarni aparat S1 (1 kg) – deo obavezne opreme u vozilu.\n\nPruža brzu i efikasnu zaštitu u slučaju početnog požara.\n\nPoruči na:\nwww.",
+            "comments": 2,
+            "timestamp": "2026-03-11T19:02:51.000Z"
+          }
+        ],
+        "instagram_profile": {
+          "bio": "📥 Poručivanje putem sajta ili slanjem poruke\n💰 Plaćanje pouzećem\n🕗 00-24h\n🚚 Dostava na teritoriji Srbije\n📦 Besplatna poštarina preko 6000 rsd",
+          "url": "https://www.instagram.com/stop_auto_shop/",
+          "username": "stop_auto_shop",
+          "followers": 10672,
+          "following": 0,
+          "is_verified": false,
+          "posts_count": 241,
+          "external_url": "http://www.stopautoshop.rs/",
+          "business_email": null,
+          "business_category": "None,Automotive Parts Store"
+        },
+        "recommendation_reason": "Active e-commerce via social — too much DM volume to handle manually",
+        "service_recommendation": "social_media_system"
+      },
+      "scraped_at": "2026-03-16T19:21:44.166Z",
+      "scrape_query": "https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=RS&q=akcija&search_type=keyword_unordered",
+      "ad_start_date": "2026-03-15 07:00:00",
+      "ad_library_url": "https://www.facebook.com/ads/library/?id=1413680706635729",
+      "page_followers": 10315,
+      "page_categories": [
+        "Auto Supplies"
+      ],
+      "active_ads_count": 10,
+      "facebook_page_id": "100444968543939",
+      "facebook_page_url": "https://www.facebook.com/stopautoshoprs/",
+      "publisher_platforms": [
+        "FACEBOOK",
+        "INSTAGRAM",
+        "AUDIENCE_NETWORK",
+        "MESSENGER",
+        "THREADS"
+      ]
+    },
+    "email_draft": "Subject: Ko u Stop Auto Shop odgovara kupcima na poruke? Stvarno nema smisla.\n\nDobar dan,\n\nStvarno nema smisla da neko u Stop Auto Shop troši ceo ili deo radnog dana na komunikaciju sa potencijalnim kupcima — a da vi pritom nemate nikakav uvid u to gde odustaju od kupovine.\n\nMislim da biste imali manje haosa, a bolju prodaju i odnos sa kupcima, uz AI sistem koji radi 168 sati nedeljno za manje nego što vas taj isti posao košta sada.\nSistem radi 168 sati nedeljno. Košta manje od tog istog radnika. I za razliku od njega — pamti svaki razgovor.\n\nAli ovo nije šablonski chatbot. Jedini agent na tržištu koji ima analizu slika i videa, razume odgovore na stori, i vodi razgovor na tečnom srpskom — napravljen od nule, za srpsko tržište.\n\nPratim vaš Instagram — 10,672 pratilaca i 10 aktivnih oglasa. Svaki razgovor, svaki detalj na jednom mestu: ko je pisalo, šta traži, gde je stalo. Informacije koje trenutno jednostavno nemate.\n\nA kada bude spreman sadržaj koji zaista generiše te poruke — imate i sistem koji ih odmah prima i odgovara.\n\nRezultat? Više završenih kupovina. Manje napuštenih korpi. Klijenti koji se vraćaju.\n\nKada god imate 20 minuta slobodno, mogu da vam pokažem kako bi ovo izgledalo za Stop Auto Shop — besplatno, bez obaveza i bez pritiska.\n\nVeliki pozdrav,\n\nNikola Guteša\nSmartflow\nSmartflow.rs\n+381 64 118 2200"
+  }
+]

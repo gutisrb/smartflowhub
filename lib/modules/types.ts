@@ -2,7 +2,6 @@ import { LucideIcon } from "lucide-react"
 
 export type ModuleKey =
   | 'pipeline'
-  | 'leads'
   | 'business-crm'
   | 'email-outreach'
   | 'linkedin-agent'

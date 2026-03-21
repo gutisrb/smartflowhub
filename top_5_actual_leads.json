@@ -1,0 +1,405 @@
+[
+  {
+    "id": "70921d7c-37da-44b4-a8ac-0a0b9b2353f7",
+    "company_name": "Dexy Co",
+    "website": "https://www.dexy.co.rs",
+    "niche": "online_prodaja",
+    "status": "enriched",
+    "intake_data": {
+      "ad_cta": "Shop now",
+      "ad_title": "Dexy Co",
+      "ad_copies": [
+        "😍 Mesečna bebi akcija donosi sjajne popuste na odabrani asortiman opereme za bebe:\n\n30% POPUSTA na Urban auto-sedišta\n20% POPUSTA na Maxi-Cosi auto-sedišta\n20% POPUSTA na FreeOn prenosive krevece\n20% POPUSTA na Avent blendere\n50% POPUSTA na Twistshake asortiman\n\n🗓️ Akcija važi od 1. do 31. marta u Dexyco prodavnicama i onlajn na www.dexy.co.rs.\n\n📦 Besplatna dostava za sve porudžbine veće od 4.999 RSD.",
+        "🎉 Počela je Revell akcija! Uživaj u 𝟐𝟎% 𝐏𝐎𝐏𝐔𝐒𝐓𝐀 na celokupan asortiman!\n\n🚀 Otkrij makete, vozila i setove za modelare svih uzrasta – idealno za sve koji vole detalje, kreativnost i kvalitetnu zabavu.\n\n📅 Akcija traje do 31. marta i važi isključivo za onlajn kupovinu na www.dexy.co.rs.\n\n👉 Poruči odmah!",
+        "Pazi akcija! 🔥 Sve što klinci vole sada je na sniženju. Poruči odmah i uštedi! 🛒",
+        "💥 Vreme je za prve prolećne krugove uz 𝟐𝟎% 𝐏𝐎𝐏𝐔𝐒𝐓𝐀 na sve za vožnju! ✨ 🛴 Trotineti, balans-bicikli, guralice, tricikli, roleri, skejtovi... sada imaju niže cene!\n\n⏳ Akcija važi od 16. do 22. marta, samo onlajn na www.dexy.co.rs.\n\n🎁 Besplatna dostava za porudžbine iznad 4.999 RSD.\n\n🛒 Poruči odmah!",
+        "{{product.brand}}"
+      ],
+      "enrichment": {
+        "contact": {
+          "name": "Dunja Borojević",
+          "email": "dunja.borojevic@dexy.co.rs",
+          "title": "Director of Brand Management",
+          "linkedin": "https://www.linkedin.com/in/dunja-borojević-056bbb119",
+          "seniority": "executive"
+        },
+        "enriched_at": "2026-03-16T21:27:16.328Z",
+        "instagram_reels": [
+          {
+            "url": "https://www.instagram.com/reel/DVgxRBhjFqV/",
+            "likes": -1,
+            "views": 1783,
+            "caption": "🌷 Kreativnost cveta uz LEGO Botanicals lale!\n\n✨ Iskoristite -20% popusta na odabrane LEGO® Botanical setove i obradujte nekoga posebnim poklonom. \nId",
+            "comments": 0,
+            "timestamp": "2026-03-05T18:00:00.000Z"
+          },
+          {
+            "url": "https://www.instagram.com/reel/DV0Wq3WgMkU/",
+            "likes": -1,
+            "views": 2849,
+            "caption": "🐈‍⬛ Ko kaže da je petak 13. baksuzan?\n\n🍀 Danas pravila ne važe! Razbij maler i ugrabi 𝐃𝐔𝐏𝐋𝐈 𝐏𝐎𝐏𝐔𝐒𝐓: 𝟏𝟑% + 𝟏𝟑% na odabrane igračke i k",
+            "comments": 0,
+            "timestamp": "2026-03-13T08:33:02.000Z"
+          }
+        ],
+        "instagram_profile": {
+          "bio": "Za svako dete od glave do pete.",
+          "url": "https://www.instagram.com/dexycokids/",
+          "username": "dexycokids",
+          "followers": 150554,
+          "following": 0,
+          "is_verified": false,
+          "posts_count": 5131,
+          "external_url": "http://lnk.bio/dexycokids",
+          "business_email": null,
+          "business_category": "Content & Apps"
+        },
+        "recommendation_reason": "Lead gen funnel detected — email sequences will convert leads before they go cold",
+        "service_recommendation": "ai_sales_systems"
+      },
+      "scraped_at": "2026-03-16T19:21:44.166Z",
+      "scrape_query": "https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=RS&q=akcija&search_type=keyword_unordered",
+      "ad_start_date": "2026-03-02 08:00:00",
+      "ad_library_url": "https://www.facebook.com/ads/library/?id=1986944158844039",
+      "page_followers": 154551,
+      "page_categories": [
+        "Games/toys"
+      ],
+      "active_ads_count": 12,
+      "facebook_page_id": "194848353914186",
+      "facebook_page_url": "https://www.facebook.com/DexyCoSrbija/",
+      "publisher_platforms": [
+        "FACEBOOK",
+        "INSTAGRAM"
+      ]
+    },
+    "email_draft": "Subject: Ko u Dexy Co odgovara kupcima na poruke? Stvarno nema smisla.\n\nDobar dan,\n\nStvarno nema smisla da neko u Dexy Co troši ceo ili deo radnog dana na komunikaciju sa potencijalnim kupcima — a da vi pritom nemate nikakav uvid u to gde odustaju od kupovine.\n\nMislim da biste imali manje haosa, a bolju prodaju i odnos sa kupcima, uz AI sistem koji radi 168 sati nedeljno za manje nego što vas taj isti posao košta sada.\nSistem radi 168 sati nedeljno. Košta manje od tog istog radnika. I za razliku od njega — pamti svaki razgovor.\n\nAli ovo nije šablonski chatbot. Jedini agent na tržištu koji ima analizu slika i videa, razume odgovore na stori, i vodi razgovor na tečnom srpskom — napravljen od nule, za srpsko tržište.\n\nPratim vaš Instagram — 150,554 pratilaca i 12 aktivnih oglasa. Svaki razgovor, svaki detalj na jednom mestu: ko je pisalo, šta traži, gde je stalo. Informacije koje trenutno jednostavno nemate.\n\nA kada bude spreman sadržaj koji zaista generiše te poruke — imate i sistem koji ih odmah prima i odgovara.\n\nRezultat? Više završenih kupovina. Manje napuštenih korpi. Klijenti koji se vraćaju.\n\nKada god imate 20 minuta slobodno, mogu da vam pokažem kako bi ovo izgledalo za Dexy Co — besplatno, bez obaveza i bez pritiska.\n\nVeliki pozdrav,\n\nNikola Guteša\nSmartflow\nSmartflow.rs\n+381 64 118 2200"
+  },
+  {
+    "id": "70313ce1-6364-4cef-bf63-27e5bad76639",
+    "company_name": "Kompanija TRI O",
+    "website": "https://tri-o.rs",
+    "niche": "online_prodaja",
+    "status": "enriched",
+    "intake_data": {
+      "ad_cta": "Shop now",
+      "ad_title": "Kompanija TRI O",
+      "ad_copies": [
+        "Mali rituali koji svaki dan čine lepšim.\nIskoristi akcijske cene na VOX aparate za negu i pronađi sve za stilizovanje i negu na jednom mestu.\n✨ fenovi\n✨ prese i figara za kosu\n✨ epilatori\n\n🚨 Popusti do 23% na odabrane modele. \n\n🚚 Brza dostava na tvoju adresu\n💳 Odloženo plaćanje – kupi sada, plati kasnije!\n📅Akcija traje do 22.03.2026.\n\n📍 Poseti najbližu TRI O prodavnicu ili kupuj online\n\nTRI O – Jedno mesto za sve pametne kupovine!\nSrpski trgovinski lanac",
+        "Iskoristi specijalnu akciju na beauty aparate!\nFenovi, styleri, epilatori i aparati za negu – sve što treba za savršenu frizuru i negu kod kuće.\n✨ Revlon – 15% popusta na ceo asortiman\n✨ Braun – posebne cene na odabrane aparate\n\n🚚 Brza dostava na tvoju adresu\n💳 Odloženo plaćanje – kupi sada, plati kasnije!\n📅Akcija traje do 20.03.2026.\n\n📍 Poseti najbližu TRI O prodavnicu ili kupuj online\n\nTRI O – Jedno mesto za sve pametne kupovine!\nSrpski trgovinski lanac",
+        "TRI O i Beko poklanjaju Beko električni šporet našim vernim kupcima u Rumi! 🎁\n\nKupi bilo koje Beko aparate u vrednosti od minimum 25.000 dinara u TRI O prodavnici u Rumi i ostvaruješ pravo da učestvuješ u izvlačenju za poklon.\n\nUz to, trenutno traje i Beko akcija ceo mesec:\n🔹 10% popusta na velike kućne aparate\n🔹 15% popusta na male kućne aparate\n\n📅 Učešće traje do 18.03.\n🎥 19.03. izvlačimo dobitnika, a proglašenje objavljujemo na našim društvenim mrežama.\n\nDobitnik će biti kontaktiran i pozvan da preuzme poklon u TRI O prodavnici u Rumi.\n\nMožda baš ovaj šporet bude savršen poklon za nečije Mladence. Srećno svima koji učestvuju! 🍀\n\n📞 Za više informacija poseti našu prodavnicu u Rumi ili nas kontaktiraj telefonom: +381 66 82 28 848.\n\nTRI O – Jedno mesto za sve pametne kupovine!\nSrpski trgovinski lanac\n\n#beko #trio #kompanijatrio #poklon #giveaway",
+        "Zato smo za tebe pripremili posebnu akciju na Gorenje male kućne aparate – da zajednički dom opremiš pametno, po odličnim cenama.\n\nBlenderi, mikseri, aparati za kafu, tosteri i još mnogo toga – više od 30 modela čeka te u ponudi!\n\nJer kada tehnologija radi za tebe, ostaje ti više vremena za ono što je zaista važno – zajedničke trenutke.\n\n💳 Odloženo plaćanje – kupi sada, plati kasnije!\n🚚 Brza dostava na tvoju adresu\n🛒 Kupuj u TRI O prodavnicama ili online\n📅 Akcija traje do 31.03.2026.\n\nTRI O – Jedno mesto za sve pametne kupovine!\nSrpski trgovinski lanac",
+        "Niže cene, više razloga za kupovinu!\nKuća, dvorište ili kuhinja – izdvojili smo akciju za sve!\n\n📍 Poseti TRI O u Inđiji ili Rumi i završi sve na jednom mestu!\n📅Akcija traje do 30.03.2026.\n\nTRI O – Jedno mesto za sve pametne kupovine!\nSrpski trgovinski lanac"
+      ],
+      "enrichment": {
+        "contact": {
+          "name": "Stefan Colic",
+          "email": "stefan.colic@tri-o.rs",
+          "title": "Sales Director",
+          "linkedin": "https://www.linkedin.com/in/stefan-colic-45b473168",
+          "seniority": "executive"
+        },
+        "enriched_at": "2026-03-16T21:27:16.328Z",
+        "instagram_reels": [
+          {
+            "url": "https://www.instagram.com/reel/DVk8e6dDedD/",
+            "likes": -1,
+            "views": 6523,
+            "caption": "U TRI O te čekaju posebno niske cene na odabrani asortiman alata i još mnogo toga.\n\n🗓 Akcija traje do 14.03.2026.\n\nTRI O - Jedno mesto za sve pametne",
+            "comments": 8,
+            "timestamp": "2026-03-07T08:59:35.000Z"
+          },
+          {
+            "url": "https://www.instagram.com/reel/DMkKlHbNVAw/",
+            "likes": -1,
+            "views": 5413,
+            "caption": "Tražiš siguran posao?\nPridruži se TRI O timu!\n\n🔸️Na našem sajtu možeš da pogledaš sve otvorene pozicije i prijaviš se online!\n🔸️Ako ti je lakše, mož",
+            "comments": 0,
+            "timestamp": "2025-07-26T09:19:53.000Z"
+          },
+          {
+            "url": "https://www.instagram.com/reel/DVrIJMXDddt/",
+            "likes": -1,
+            "views": 6559,
+            "caption": "Odabrani Sencor aparati sada su na posebnoj akciji do 22. marta!\n\n🔸️SENCOR APARAT ZA ESSPRESO SES 7018BK - 26.990 rsd\n🔸️SENCOR FRITEZA SFR 1250BK - ",
+            "comments": 0,
+            "timestamp": "2026-03-09T19:07:32.000Z"
+          }
+        ],
+        "instagram_profile": {
+          "bio": "Jedno mesto za sve pametne kupovine!\n🛒 37 prodavnica",
+          "url": "https://www.instagram.com/kompanijatrio/",
+          "username": "kompanijatrio",
+          "followers": 35990,
+          "following": 0,
+          "is_verified": false,
+          "posts_count": 3805,
+          "external_url": "https://www.tri-o.rs/",
+          "business_email": null,
+          "business_category": "None,Shopping & retail"
+        },
+        "recommendation_reason": "Active e-commerce via social — too much DM volume to handle manually",
+        "service_recommendation": "social_media_system"
+      },
+      "scraped_at": "2026-03-16T19:21:44.165Z",
+      "scrape_query": "https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=RS&q=popust&search_type=keyword_unordered",
+      "ad_start_date": "2026-03-09 07:00:00",
+      "ad_library_url": "https://www.facebook.com/ads/library/?id=2234545780695597",
+      "page_followers": 32860,
+      "page_categories": [
+        "Electronics"
+      ],
+      "active_ads_count": 47,
+      "facebook_page_id": "384226071668117",
+      "facebook_page_url": "https://www.facebook.com/kompanijatrio/",
+      "publisher_platforms": [
+        "FACEBOOK",
+        "INSTAGRAM",
+        "AUDIENCE_NETWORK",
+        "MESSENGER",
+        "THREADS"
+      ]
+    },
+    "email_draft": "Subject: Ko u TRI O odgovara kupcima na poruke? Stvarno nema smisla.\n\nDobar dan,\n\nStvarno nema smisla da neko u TRI O troši ceo ili deo radnog dana na komunikaciju sa potencijalnim kupcima — a da vi pritom nemate nikakav uvid u to gde odustaju od kupovine.\n\nMislim da biste imali manje haosa, a bolju prodaju i odnos sa kupcima, uz AI sistem koji radi 168 sati nedeljno za manje nego što vas taj isti posao košta sada.\nSistem radi 168 sati nedeljno. Košta manje od tog istog radnika. I za razliku od njega — pamti svaki razgovor.\n\nAli ovo nije šablonski chatbot. Jedini agent na tržištu koji ima analizu slika i videa, razume odgovore na stori, i vodi razgovor na tečnom srpskom — napravljen od nule, za srpsko tržište.\n\nPratim vaš Instagram — 35,990 pratilaca i 47 aktivnih oglasa. Svaki razgovor, svaki detalj na jednom mestu: ko je pisalo, šta traži, gde je stalo. Informacije koje trenutno jednostavno nemate.\n\nA kada bude spreman sadržaj koji zaista generiše te poruke — imate i sistem koji ih odmah prima i odgovara.\n\nRezultat? Više završenih kupovina. Manje napuštenih korpi. Klijenti koji se vraćaju.\n\nKada god imate 20 minuta slobodno, mogu da vam pokažem kako bi ovo izgledalo za TRI O — besplatno, bez obaveza i bez pritiska.\n\nVeliki pozdrav,\n\nNikola Guteša\nSmartflow\nSmartflow.rs\n+381 64 118 2200"
+  },
+  {
+    "id": "ecaff6e0-9918-49ac-b36c-07c9ec4424fe",
+    "company_name": "Angel therapy",
+    "website": "https://angeltherapy.rs",
+    "niche": "ostalo",
+    "status": "enriched",
+    "intake_data": {
+      "ad_cta": "Shop now",
+      "ad_title": "{{product.name}}",
+      "ad_copies": [
+        "🔥 AKCIJA KOJU NE SMEŠ PROPUSTITI! 🔥\n\n→ Kupi 2 ista proizvoda i ostvari 20% popusta\n→ Kupi 3 ista proizvoda i ostvari 30% popusta\n\n• Popust se obračunava automatski u korpi\n• Važi za sve proizvode na sajtu\n\n Požuri — ponuda traje ograničeno!"
+      ],
+      "enrichment": {
+        "contact": {
+          "name": null,
+          "email": "office@angeltherapy.rs",
+          "title": null,
+          "linkedin": null,
+          "seniority": null
+        },
+        "enriched_at": "2026-03-16T21:27:16.328Z",
+        "instagram_reels": [
+          {
+            "url": "https://www.instagram.com/reel/DV6SAUljdDH/",
+            "likes": 32,
+            "views": 3577,
+            "caption": "✨ Kratke i retke trepavice? Probaj ovo prirodno ulje!\n\nRicinusovo ulje je poznato po tome što hrani koren dlake i jača trepavice i obrve. Bogato je vi",
+            "comments": 1,
+            "timestamp": "2026-03-15T15:49:35.000Z"
+          },
+          {
+            "url": "https://www.instagram.com/reel/DV1OE1nDbWw/",
+            "likes": 91,
+            "views": 12866,
+            "caption": "👉 Kosa ti se umasti već sledeći dan posle pranja?\n\nAktivni ugalj deluje kao magnet za masnoću i nečistoće – dubinski čisti teme glave, osvežava kosu ",
+            "comments": 4,
+            "timestamp": "2026-03-13T16:43:52.000Z"
+          },
+          {
+            "url": "https://www.instagram.com/reel/DV3xMahllap/",
+            "likes": 52,
+            "views": 11661,
+            "caption": "Fleke i pege na licu… kako ih vi prekrivate? 🤔\n\nPuder, korektor ili možda negom rešavate problem?\n\nDa li ste probale Vitamin C serum ili kremu u svoj",
+            "comments": 3,
+            "timestamp": "2026-03-14T16:26:52.000Z"
+          }
+        ],
+        "instagram_profile": {
+          "bio": "Prirodni proizvodi 🍀\nVrhunski kvalitet 💪\nVeliki broj zadovoljnih korisnika 👫\n100% biljna ulja 🌰\n+381692022599",
+          "url": "https://www.instagram.com/angeltherapynovisad/",
+          "username": "angeltherapynovisad",
+          "followers": 143049,
+          "following": 0,
+          "is_verified": false,
+          "posts_count": 6298,
+          "external_url": "https://angeltherapy.rs/",
+          "business_email": null,
+          "business_category": "Health/beauty"
+        },
+        "recommendation_reason": "Default — social DM management is the most broadly applicable entry point",
+        "service_recommendation": "social_media_system"
+      },
+      "scraped_at": "2026-03-16T19:21:44.166Z",
+      "scrape_query": "https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=RS&q=popust&search_type=keyword_unordered",
+      "ad_start_date": "2026-03-01 08:00:00",
+      "ad_library_url": "https://www.facebook.com/ads/library/?id=1708150897203496",
+      "page_followers": 90579,
+      "page_categories": [
+        "Health/beauty"
+      ],
+      "active_ads_count": 12,
+      "facebook_page_id": "946184335442883",
+      "facebook_page_url": "https://www.facebook.com/angel.therapy.mask/",
+      "publisher_platforms": [
+        "FACEBOOK",
+        "INSTAGRAM",
+        "AUDIENCE_NETWORK",
+        "MESSENGER",
+        "THREADS"
+      ]
+    },
+    "email_draft": "Subject: Ko u Angel therapy vodi poruke od klijentkinja? Stvarno nema smisla.\n\nDobar dan,\n\nStvarno nema smisla da neko u Angel therapy troši ceo ili deo radnog dana na komunikaciju sa potencijalnim klijentkinjama — a da vi pritom nemate nikakav uvid u to gde odustaju od zakazivanja.\n\nMislim da biste imali manje haosa, a bolju prodaju i odnos sa klijentkinjama, uz AI sistem koji radi 168 sati nedeljno za manje nego što vas taj isti posao košta sada.\nSistem radi 168 sati nedeljno. Košta manje od tog istog radnika. I za razliku od njega — pamti svaki razgovor.\n\nAli ovo nije šablonski chatbot. Jedini agent na tržištu koji ima analizu slika i videa, razume odgovore na stori, i vodi razgovor na tečnom srpskom — napravljen od nule, za srpsko tržište.\n\nPratim vaš Instagram — 143,049 pratilaca i 12 aktivnih oglasa. Svaki razgovor, svaki detalj na jednom mestu: ko je pisalo, šta traži, gde je stalo. Informacije koje trenutno jednostavno nemate.\n\nA kada bude spreman sadržaj koji zaista generiše te poruke — imate i sistem koji ih odmah prima i odgovara.\n\nRezultat? Više zakazanih tretmana. Zadovoljnije klijentkinje. Bolja reputacija.\n\nKada god imate 20 minuta slobodno, mogu da vam pokažem kako bi ovo izgledalo za Angel therapy — besplatno, bez obaveza i bez pritiska.\n\nVeliki pozdrav,\n\nNikola Guteša\nSmartflow\nSmartflow.rs\n+381 64 118 2200"
+  },
+  {
+    "id": "a9094e18-f8c9-446a-a034-11527dc90aad",
+    "company_name": "Vitorog promet - salon nameštaja",
+    "website": "https://vitorogpromet.rs",
+    "niche": "klinika_wellness",
+    "status": "enriched",
+    "intake_data": {
+      "ad_cta": "Shop now",
+      "ad_title": null,
+      "ad_copies": [
+        "FESTIVAL POPUSTA – od 20% do 40% 💥\n-\nOd 16. do 20. marta u Vitorogu vas očekuju popusti na pažljivo odabrane komade nameštaja.\n-\nUgaone garniture, kuhinje, spavaće sobe i još mnogo detalja za uređenje doma sada su dostupni po sjajnim cenama.\n-\nPopusti važe i za kupovinu putem webshopa.\n-\nDodatni popust se ne obračunava na promotivni asortiman, belu tehniku, lim i kupatilski nameštaj.\n-\nOčekujemo vas u Vitorogu!",
+        "FESTIVAL POPUSTA – od 20% do 40%💥\n-\nOd 16. do 20. marta u Vitorogu vas očekuju popusti na pažljivo odabrane komade nameštaja.\n-\nUgaone garniture, kuhinje, spavaće sobe i još mnogo detalja za uređenje doma sada su dostupni po sjajnim cenama.\n-\nPopusti važe i za kupovinu putem webshopa vitorogpromet.rs.\n-\nDodatni popust se ne obračunava na promotivni asortiman, belu tehniku, lim i kupatilski nameštaj.\n-\nOčekujemo vas u Vitorogu!",
+        "{{product.brand}}",
+        "4 DANA VELIKIH POPUSTA u Vitorogu! 💥\n-\nIskoristite priliku da svoj dom opremite kvalitetnim nameštajem po izuzetnim cenama.\n-\nU periodu od 11. do 14. marta očekuje vas pažljivo odabran asortiman nameštaja za dnevnu sobu, spavaću sobu i trpezariju, uz popuste do 57%.\n-\nPosetite Vitorog salone ili Webshop vitorogpromet.rs  i izaberite komade koji će vaš svakodnevni život učiniti udobnijim, lepšim i funkcionalnijim.\n-\nOčekujemo vas!"
+      ],
+      "enrichment": {
+        "contact": {
+          "name": null,
+          "email": "outlet.zemun@vitorogpromet.rs",
+          "title": null,
+          "linkedin": null,
+          "seniority": null
+        },
+        "enriched_at": "2026-03-16T21:27:16.328Z",
+        "instagram_reels": [
+          {
+            "url": "https://www.instagram.com/reel/DV8hGqpgvpf/",
+            "likes": 92,
+            "views": 1467,
+            "caption": "04. april rezervisan je za Invictus Challenge! 🔥\nTrčimo, takmičimo se i pomeramo granice na Petrovaradinskoj tvrđavi. 💪\n-\nVitorog i ove godine podrž",
+            "comments": 0,
+            "timestamp": "2026-03-16T12:44:34.000Z"
+          }
+        ],
+        "instagram_profile": {
+          "bio": "Negujte svoj dom, jer dom nas okuplja 🏡\nKvalitetan nameštaj proizveden u Srbiji i Evropi 🌍\n32 godine sa vama!\n👇 Aktuelni popusti: 👇",
+          "url": "https://www.instagram.com/vitorogpromet_official/",
+          "username": "vitorogpromet_official",
+          "followers": 155915,
+          "following": 0,
+          "is_verified": false,
+          "posts_count": 3968,
+          "external_url": "http://vitorogpromet.rs/na-popustu",
+          "business_email": null,
+          "business_category": "None,Furniture"
+        },
+        "recommendation_reason": "Active e-commerce via social — too much DM volume to handle manually",
+        "service_recommendation": "social_media_system"
+      },
+      "scraped_at": "2026-03-16T19:21:44.165Z",
+      "scrape_query": "https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=RS&q=popust&search_type=keyword_unordered",
+      "ad_start_date": "2026-03-16 07:00:00",
+      "ad_library_url": "https://www.facebook.com/ads/library/?id=1413885799961889",
+      "page_followers": 109030,
+      "page_categories": [
+        "Furniture"
+      ],
+      "active_ads_count": 29,
+      "facebook_page_id": "719452254818731",
+      "facebook_page_url": "https://www.facebook.com/vitorogpromet/",
+      "publisher_platforms": [
+        "INSTAGRAM"
+      ]
+    },
+    "email_draft": "Subject: Ko u Vitorog prima upite za projekte? Stvarno nema smisla.\n\nDobar dan,\n\nStvarno nema smisla da neko u Vitorog troši ceo ili deo radnog dana na komunikaciju sa potencijalnim klijentima — a da vi pritom nemate nikakav uvid u to gde odustaju od prvog kontakta.\n\nMislim da biste imali manje haosa, a bolju prodaju i odnos sa klijentima, uz AI sistem koji radi 168 sati nedeljno za manje nego što vas taj isti posao košta sada.\nSistem radi 168 sati nedeljno. Košta manje od tog istog radnika. I za razliku od njega — pamti svaki razgovor.\n\nAli ovo nije šablonski chatbot. Jedini agent na tržištu koji ima analizu slika i videa, razume odgovore na stori, i vodi razgovor na tečnom srpskom — napravljen od nule, za srpsko tržište.\n\nPratim vaš Instagram — 155,915 pratilaca i 29 aktivnih oglasa. Svaki razgovor, svaki detalj na jednom mestu: ko je pisalo, šta traži, gde je stalo. Informacije koje trenutno jednostavno nemate.\n\nA kada bude spreman sadržaj koji zaista generiše te poruke — imate i sistem koji ih odmah prima i odgovara.\n\nRezultat? Više dogovorenih projekata. Brži odgovori. Klijenti koji se ne gube.\n\nKada god imate 20 minuta slobodno, mogu da vam pokažem kako bi ovo izgledalo za Vitorog — besplatno, bez obaveza i bez pritiska.\n\nVeliki pozdrav,\n\nNikola Guteša\nSmartflow\nSmartflow.rs\n+381 64 118 2200"
+  },
+  {
+    "id": "b328564f-5f3b-45ae-95ee-c9232d146ffc",
+    "company_name": "Rasveta Led Light",
+    "website": "https://ledlight.rs",
+    "niche": "dizajn_enterijer",
+    "status": "enriched",
+    "intake_data": {
+      "ad_cta": "Shop now",
+      "ad_title": "{{product.name}}",
+      "ad_copies": [
+        "OVO JE TRENUTAK! Ekskluzivna akcija rasvete koja menja prostor i štednju – lusteri, visilice, plafonjere i LED svetiljke sada su dostupni po rekordno niskim cenama. Online porudžbine idu direktno do tvoje kuće, brzo i bez muke. Ne čekaj – modeli odlaze munjevitom brzinom, a akcijske cene važe samo dok traje zaliha. Iskoristi priliku, ulepšaj svoj enterijer i uštedi ozbiljno. Klikni i poruči odmah na strani https://www.ledlight.rs/product-category/ponuda-meseca/."
+      ],
+      "enrichment": {
+        "contact": {
+          "name": null,
+          "email": "office@ledlight.rs",
+          "title": null,
+          "source": "hunter",
+          "linkedin": null,
+          "seniority": null
+        },
+        "enriched_at": "2026-03-20T10:33:42.892Z",
+        "decision_maker": {
+          "name": null,
+          "email": "office@ledlight.rs",
+          "title": null,
+          "source": "hunter",
+          "linkedin": null,
+          "seniority": null
+        },
+        "instagram_reels": [
+          {
+            "url": "https://www.instagram.com/reel/DNnkoyqP1CU/",
+            "likes": 1,
+            "views": 673,
+            "caption": "💥 NOVO U PONUDI 💥\n\nModeli:\nStepenišna rasveta BRY-STEP BH07-00382 senzor CCT color\nStepenišna rasveta BRY-STEP BH07-00381 senzor CCT color\nStepenišn",
+            "comments": 0,
+            "timestamp": "2025-08-21T13:13:44.000Z"
+          },
+          {
+            "url": "https://www.instagram.com/reel/DM-979qs2C5/",
+            "likes": 1,
+            "views": 407,
+            "caption": "RAZIGRANE SENKE PRIRODE U VAŠEM DOMU\nNova Ratan kolekcija je više od rasvete — to je umetnički akcenat u prostoru koji stvara intimnu atmosferu i dono",
+            "comments": 0,
+            "timestamp": "2025-08-05T18:45:49.000Z"
+          },
+          {
+            "url": "https://www.instagram.com/reel/DM_AkNxhEuV/",
+            "likes": 8,
+            "views": 1514,
+            "caption": "✨ NOVO u ponudi – visilice koje plene pogled ✨\nZlatna boja, stakleni difuzori u amber i smoky varijantama, profinjen dizajn i oblik koji se ističe — k",
+            "comments": 0,
+            "timestamp": "2025-08-05T19:08:37.000Z"
+          }
+        ],
+        "instagram_profile": {
+          "bio": "💡 Mi osvetljavamo Vas dom\n🛒 Online prodaja: www.LEDLIGHT.rs \n📧 Porucivanje putem sajta ili DM-a 24/7\n🚚 Dostava robe kurirskom sluzbom",
+          "url": "https://www.instagram.com/rasveta_online/",
+          "username": "rasveta_online",
+          "followers": 31751,
+          "following": 0,
+          "is_verified": false,
+          "posts_count": 1234,
+          "external_url": "https://ledlight.rs/product-category/ponuda-meseca/",
+          "business_email": null,
+          "business_category": "None,Lighting Store"
+        },
+        "recommendation_reason": "Active e-commerce via social — too much DM volume to handle manually",
+        "service_recommendation": "social_media_system"
+      },
+      "scraped_at": "2026-03-16T16:58:27.033Z",
+      "scrape_query": "https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=RS&q=enterijer&search_type=keyword_unordered",
+      "ad_start_date": "2026-02-28 08:00:00",
+      "ad_library_url": "https://www.facebook.com/ads/library/?id=928481716704304",
+      "page_followers": 16874,
+      "page_categories": [
+        "Home & Garden"
+      ],
+      "active_ads_count": 2,
+      "facebook_page_id": "601693246697367",
+      "facebook_page_url": "https://www.facebook.com/www.LEDLIGHT.rs/",
+      "publisher_platforms": [
+        "FACEBOOK",
+        "INSTAGRAM",
+        "AUDIENCE_NETWORK",
+        "THREADS"
+      ]
+    },
+    "email_draft": "Subject: Ko u Rasveta Led Light vodi poruke od klijentkinja? Stvarno nema smisla.\n\nDobar dan,\n\nStvarno nema smisla da neko u Rasveta Led Light troši ceo ili deo radnog dana na poruke sa društvenih mreža — a da vi pritom nemate nikakav uvid u to šta vam klijentkinje zapravo traže, šta ih zanima, i gde odustaju od zakazivanja.\n\nMislim da biste imali manje haosa, a bolju prodaju i odnos sa klijentkinjama, uz AI sistem koji radi 24/7 na svim mrežama za manje nego što vas taj isti posao košta sada.\nSistem radi 168 sati nedeljno. Košta manje od tog istog radnika. I za razliku od njega — pamti svaki razgovor.\n\nVodi razgovor na tečnom srpskom, razume fotografije koje klijentkinje šalju — kao vaš najbolji konsultant, samo bez pauze, bolovanja i propuštenih poruka.\nAli ovo nije šablonski chatbot. Ovo je jedini agent na tržištu koji ima analizu slika i videa, i razume odgovore na stori — napravljen od nule.\n\nSvaki razgovor, svaki detalj je na jednom mestu: ko je pisalo, za koji tretman pita, šta je zanima, gde je stala.\nDobijate konkretne podatke pomoću kojih možete da prilagodite ponudu, procese, marketing — sve na osnovu onoga što vam klijentkinje zapravo govore. Informacije koje trenutno jednostavno nemate.\n\nPratim vaš Instagram — 31,726 pratilaca i aktivne kampanje sa pozivom da vam se piše direktno. Pitanje je samo koliko tih poruka ostaje bez odgovora dok ste zauzeti.\n\nRezultat? Više zakazanih tretmana. Zadovoljnije klijentkinje. Bolja reputacija.\n\nKada god imate 20 minuta slobodno, mogu da vam pokažem kako bi ovo izgledalo za Rasveta Led Light — besplatno, bez obaveza i bez smaranja.\n\nVeliki pozdrav,\n\nNikola Guteša\nSmartflow\nSmartflow.rs\n+381 64 118 2200"
+  }
+]

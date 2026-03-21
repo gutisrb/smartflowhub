@@ -288,6 +288,7 @@ export function PipelineModule({ clientId }: { clientId: string }) {
       .select("*")
       .eq("client_id", clientId)
       .eq("izvor", "meta_ads_scrape")
+      .neq("kategorija", "Disqualified")
       .order("prioritet_skor", { ascending: false })
 
     if (!error && data) setLeads(data as Lead[])

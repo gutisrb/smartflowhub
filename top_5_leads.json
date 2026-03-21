@@ -1,0 +1,187 @@
+[
+  {
+    "id": "fb5d5fb6-540c-4d7c-b5b8-7436936df15d",
+    "company_name": "Perfectil Srbija",
+    "website": "oliva.rs",
+    "niche": "klinika_wellness",
+    "intake_data": {
+      "ad_cta": "learn more",
+      "ad_copies": [],
+      "enrichment": {
+        "contact": {
+          "name": "Jovan Obradovic",
+          "email": "jovan.obradovic@oliva.rs",
+          "title": null,
+          "source": "hunter",
+          "linkedin": null,
+          "seniority": null
+        },
+        "instagram_reels": [
+          {
+            "likes": 0,
+            "views": 624,
+            "caption": "Svaki dan: jednom nedeljno: svaka 2-3 meseca"
+          },
+          {
+            "likes": 0,
+            "views": 82500,
+            "caption": "Namirnice koje treba izbegavati sa dr Nedom Grbović"
+          },
+          {
+            "likes": 0,
+            "views": 112000,
+            "caption": "Kolagen tečni vs kapsule sa dr Nedom Grbović"
+          }
+        ],
+        "instagram_profile": {
+          "username": "perfectil_rs",
+          "followers": 2886,
+          "posts_count": 143
+        }
+      },
+      "active_ads_count": 0
+    },
+    "email_draft": "Subject: Primetio sam nešto u digitalnom prisustvu Perfectil Srbija-a.\n\nDobar dan,\n\nPratio sam digitalno prisustvo Perfectil Srbija-a — vidim prostor koji vaša konkurencija već počinje da zauzima na Instagramu i TikToku.\n\nPravim profesionalni AI video sadržaj za srpsko tržište — video rezultata tretmana, atmosfera klinike i edukativni sadržaj koji gradi poverenje pre prvog dolaska. Agencije su često spore, skupe i forsiraju svoj stil. Moj sistem se u potpunosti prilagođava onome što Perfectil Srbija i vaše tržište zahtevaju — brže i uz mnogo veće kreativne mogućnosti. Srpski govornik koji zvuči kao pravi, cinematic vizuali, bez mesečnih ugovora sa agencijom.\n\nAko bi vam pomoglo da vidite kako bi to izgledalo za Perfectil Srbija — odgovorite sa jednom rečju \"Da\" i napravim vam besplatan sample video odmah.\n\nVeliki pozdrav,\n\nNikola Guteša\nSmartflow\nSmartflow.rs\n+381 64 118 2200"
+  },
+  {
+    "id": "b2a0086c-18b2-4f97-b79b-ac515918be70",
+    "company_name": "Vatanmed Serbia",
+    "website": "vatanmed.rs",
+    "niche": "klinika_wellness",
+    "intake_data": {
+      "ad_cta": "apply now",
+      "ad_copies": [
+        "Popuni formu na web sajtu www.vatanmed.rs i ostvari popust od 250€ na zahvat. Reši trajno problem ćelavosti."
+      ],
+      "enrichment": {
+        "contact": {
+          "name": null,
+          "email": "serbia@vatanmed.com",
+          "title": null,
+          "source": "website_scrape",
+          "linkedin": null,
+          "seniority": null
+        },
+        "instagram_reels": [],
+        "instagram_profile": {
+          "username": "vatanmedserbia",
+          "followers": 0,
+          "posts_count": 0
+        }
+      },
+      "active_ads_count": 8
+    },
+    "email_draft": "Subject: Primetio sam Vatanmed Serbia kampanje. Jedna stvar.\n\nDobar dan,\n\nPratim vaše kampanje — 8 aktivnih oglasa koji svaki dan privlače potencijalne klijente. Ono što vidim kod većine biznisa nije da nemaju sistem, već da taj sistem nije optimizovan — \"leaky bucket\" gde potencijalni pacijenti koji se raspitaju i ne dobiju odgovor odmah najčešće zakazuju kod konkurencije.\n\nTu na scenu stupa onaj pravi \"WOW\" faktor — integracija AI sistema u vaš postojeći prodajni proces. Sistem automatski komunicira, neguje lead-ove (nurturing), beleži nameru i prati svaki korak ka zatvaranju prodaje.\n\nOvo nije još samo jedan CRM iz kog ručno šaljete poruke. Ovo je automatizovana pametna infrastruktura koja super-optimizuje trud koji već ulažete — bez meseci implementacije i prekomplikovanih alata.\n\nRezultat? Vaš ad budžet se mnogo bolje iskoristi, zatvarate više lead-ova koji bi inače propali, i dobijate nivo automatizacije kakav trenutno ima jako mali broj biznisa na našem tržištu. A kada bude spreman sadržaj koji privlači bolje lead-ove — imate i sistem koji ih zatvara.\n\nKada god imate 20 minuta slobodno, mogu da vam pokažem kako bi ovo izgledalo za Vatanmed Serbia — besplatno, bez obaveza i bez pritiska.\n\nVeliki pozdrav,\n\nNikola Guteša\nSmartflow\nSmartflow.rs\n+381 64 118 2200"
+  },
+  {
+    "id": "6c4f24e5-bc1e-4eec-9187-9439cf40cac0",
+    "company_name": "Ajo Leather",
+    "website": "ajo.rs",
+    "niche": "ostalo",
+    "intake_data": {
+      "ad_cta": "",
+      "ad_copies": [],
+      "enrichment": {
+        "enriched_at": "2026-03-20T10:35:54.473Z",
+        "instagram_reels": [
+          {
+            "url": "https://www.instagram.com/reel/CiK14nhKOHn/",
+            "likes": 472,
+            "views": 31991,
+            "caption": "⚡️MOST WANTED⚡️",
+            "comments": 25,
+            "timestamp": "2022-09-06T14:57:05.000Z"
+          },
+          {
+            "url": "https://www.instagram.com/reel/DU5555giCV1/",
+            "likes": 60,
+            "views": 3620,
+            "caption": "• Hvala na poverenju koje pružate i verujete u kvalitet i posvećenost❤️\n• Posebno nam je drago na vašim feedbekovima o procesu porucivanja i strpljenj",
+            "comments": 0,
+            "timestamp": "2026-02-18T15:48:53.000Z"
+          },
+          {
+            "url": "https://www.instagram.com/reel/DUqcyxgiG9w/",
+            "likes": 161,
+            "views": 20928,
+            "caption": "KEŠ WALLET - OGRANIČENA KOLIČINA!\n⭐️ Ako želiš kul novčanik, ne traži dalje💰💶\n⭐️ NEOGRANIČENA GARANCIJA na ⭐️ ajo.rs ⭐️",
+            "comments": 11,
+            "timestamp": "2026-02-12T15:47:19.000Z"
+          }
+        ],
+        "instagram_profile": {
+          "bio": "Pravimo vam novčanik ili aksesoar koji će trajati koliko i vi, a to i GARANTUJEMO! \nRučna izrada, i \"prava\" koža što se kaže, i to italijanska👌🏼🇮🇹",
+          "url": "https://www.instagram.com/ajo_leather/",
+          "username": "ajo_leather",
+          "followers": 75251,
+          "following": 0,
+          "is_verified": false,
+          "posts_count": 651,
+          "external_url": "http://www.ajo.rs/",
+          "business_email": null,
+          "business_category": "None"
+        },
+        "recommendation_reason": "Default — social DM management is the most broadly applicable entry point",
+        "service_recommendation": "social_media_system"
+      },
+      "active_ads_count": 0
+    },
+    "email_draft": "Subject: Ko u Ajo Leather vodi komunikaciju sa klijentima? Stvarno nema smisla.\n\nDobar dan,\n\nStvarno nema smisla da neko u Ajo Leather troši ceo ili deo radnog dana na komunikaciju sa potencijalnim klijentima — a da vi pritom nemate nikakav uvid u to gde odustaju od prvog kontakta.\n\nMislim da biste imali manje haosa, a bolju prodaju i odnos sa klijentima, uz AI sistem koji radi 168 sati nedeljno za manje nego što vas taj isti posao košta sada.\nSistem radi 168 sati nedeljno. Košta manje od tog istog radnika. I za razliku od njega — pamti svaki razgovor.\n\nAli ovo nije šablonski chatbot. Jedini agent na tržištu koji ima analizu slika i videa, razume odgovore na stori, i vodi razgovor na tečnom srpskom — napravljen od nule, za srpsko tržište.\n\nPratim vaš Instagram — 75,200 pratilaca. Svaki razgovor, svaki detalj na jednom mestu: ko je pisalo, šta traži, gde je stalo. Informacije koje trenutno jednostavno nemate.\n\nA kada bude spreman sadržaj koji zaista generiše te poruke — imate i sistem koji ih odmah prima i odgovara.\n\nRezultat? Više zakazanih sastanaka. Manje haosa. Klijenti koji se ne gube u inboxu.\n\nKada god imate 20 minuta slobodno, mogu da vam pokažem kako bi ovo izgledalo za Ajo Leather — besplatno, bez obaveza i bez pritiska.\n\nVeliki pozdrav,\n\nNikola Guteša\nSmartflow\nSmartflow.rs\n+381 64 118 2200"
+  },
+  {
+    "id": "052295d8-82ea-4609-bb6b-30b21ecc6abb",
+    "company_name": "BAA Training",
+    "website": "baatraining.com",
+    "niche": "edukacija",
+    "intake_data": {
+      "ad_cta": "",
+      "ad_copies": [],
+      "enrichment": {
+        "contact": {
+          "name": "Ashima Sareen",
+          "email": "a.sareen@baatraining.com",
+          "title": "Director of Administration",
+          "source": "hunter",
+          "linkedin": "https://www.linkedin.com/in/ashima-sareen-16607b95",
+          "seniority": "executive"
+        },
+        "instagram_reels": [],
+        "instagram_profile": {
+          "username": "baatraining",
+          "followers": 39800,
+          "posts_count": 1166
+        }
+      },
+      "active_ads_count": 0
+    },
+    "email_draft": "Subject: Primetio sam nešto u BAA Training prodajnom procesu.\n\nDobar dan,\n\nVidim da BAA Training aktivno privlači klijente. Ono što vidim kod većine biznisa nije da nemaju sistem, već da taj sistem nije optimizovan — \"leaky bucket\" gde većina lead-ova koji ne konvertuju odmah nestane u roku od 48 sati bez ijednog follow-upa.\n\nTu na scenu stupa onaj pravi \"WOW\" faktor — integracija AI sistema u vaš postojeći prodajni proces. Sistem automatski komunicira, neguje lead-ove (nurturing), beleži nameru i prati svaki korak ka zatvaranju prodaje.\n\nOvo nije još samo jedan CRM iz kog ručno šaljete poruke. Ovo je automatizovana pametna infrastruktura koja super-optimizuje trud koji već ulažete — bez meseci implementacije i prekomplikovanih alata.\n\nRezultat? Vaš ad budžet se mnogo bolje iskoristi, zatvarate više lead-ova koji bi inače propali, i dobijate nivo automatizacije kakav trenutno ima jako mali broj biznisa na našem tržištu. A kada bude spreman sadržaj koji privlači bolje lead-ove — imate i sistem koji ih zatvara.\n\nKada god imate 20 minuta slobodno, mogu da vam pokažem kako bi ovo izgledalo za BAA Training — besplatno, bez obaveza i bez pritiska.\n\nVeliki pozdrav,\n\nNikola Guteša\nSmartflow\nSmartflow.rs\n+381 64 118 2200"
+  },
+  {
+    "id": "48864b83-25e5-4d1f-9df9-d3c08df3a106",
+    "company_name": "Hedera Vita",
+    "website": "hederavita.rs",
+    "niche": "klinika_wellness",
+    "intake_data": {
+      "ad_cta": "",
+      "ad_copies": [],
+      "enrichment": {
+        "contact": {
+          "name": "Olgica Samoilovic",
+          "email": "olgicasamoilovic@hederavita.rs",
+          "title": "CEO",
+          "source": "hunter",
+          "linkedin": "https://www.linkedin.com/in/olgica-samoilovic-38268854",
+          "seniority": "executive"
+        },
+        "instagram_reels": [],
+        "instagram_profile": {
+          "username": "hederavita",
+          "followers": 79200,
+          "posts_count": 2217
+        }
+      },
+      "active_ads_count": 0
+    },
+    "email_draft": "Subject: Ko u Hedera Vita vodi poruke od klijentkinja? Stvarno nema smisla.\n\nDobar dan,\n\nStvarno nema smisla da neko u Hedera Vita troši ceo ili deo radnog dana na komunikaciju sa potencijalnim klijentkinjama — a da vi pritom nemate nikakav uvid u to gde odustaju od zakazivanja.\n\nMislim da biste imali manje haosa, a bolju prodaju i odnos sa klijentkinjama, uz AI sistem koji radi 168 sati nedeljno za manje nego što vas taj isti posao košta sada.\nSistem radi 168 sati nedeljno. Košta manje od tog istog radnika. I za razliku od njega — pamti svaki razgovor.\n\nAli ovo nije šablonski chatbot. Jedini agent na tržištu koji ima analizu slika i videa, razume odgovore na stori, i vodi razgovor na tečnom srpskom — napravljen od nule, za srpsko tržište.\n\nPratim vaš Instagram — 79,200 pratilaca. Svaki razgovor, svaki detalj na jednom mestu: ko je pisalo, šta traži, gde je stalo. Informacije koje trenutno jednostavno nemate.\n\nA kada bude spreman sadržaj koji zaista generiše te poruke — imate i sistem koji ih odmah prima i odgovara.\n\nRezultat? Više zakazanih tretmana. Zadovoljnije klijentkinje. Bolja reputacija.\n\nKada god imate 20 minuta slobodno, mogu da vam pokažem kako bi ovo izgledalo za Hedera Vita — besplatno, bez obaveza i bez pritiska.\n\nVeliki pozdrav,\n\nNikola Guteša\nSmartflow\nSmartflow.rs\n+381 64 118 2200"
+  }
+]

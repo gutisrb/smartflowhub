@@ -12,7 +12,6 @@ import { cn } from "@/lib/utils"
 
 // Import module components
 import { PipelineModule } from "@/components/modules/pipeline-module"
-import { LeadsModule } from "@/components/modules/leads-module"
 import { GrowthEngineModule } from "@/components/modules/growth-engine-module"
 import { EmailOutreachModule } from "@/components/modules/email-outreach-module"
 import { LinkedInAgentModule } from "@/components/modules/linkedin-agent-module"
@@ -113,7 +112,7 @@ export default function DashboardPage() {
     const isRecruitment = clientName?.toLowerCase().includes('mjob')
     if (isRecruitment) {
       return availableModules.filter(m =>
-        ['pipeline', 'leads', 'business-crm', 'agent-database', 'agent-leads', 'social-chatbot', 'chatbot-analytics'].includes(m.key)
+        ['pipeline', 'business-crm', 'agent-database', 'agent-leads', 'social-chatbot', 'chatbot-analytics'].includes(m.key)
       )
     }
     return availableModules
@@ -139,8 +138,6 @@ export default function DashboardPage() {
     switch (activeModule) {
       case 'pipeline':
         return <PipelineModule clientId={clientId} />
-      case 'leads':
-        return <LeadsModule clientId={clientId} />
       case 'growth-engine':
       case 'business-crm':
         return <GrowthEngineModule
