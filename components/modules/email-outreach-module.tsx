@@ -21,12 +21,7 @@ interface EmailOutreachModuleProps {
 
 interface EmailStats {
   total_sent: number
-  total_opened: number
-  total_replied: number
-  positive_replies: number
   meetings_booked: number
-  open_rate_pct: number
-  reply_rate_pct: number
 }
 
 interface Lead {
@@ -100,12 +95,7 @@ export function EmailOutreachModule({
   const [savingComment, setSavingComment] = useState(false)
   const [stats, setStats] = useState<EmailStats>({
     total_sent: 0,
-    total_opened: 0,
-    total_replied: 0,
-    positive_replies: 0,
     meetings_booked: 0,
-    open_rate_pct: 0,
-    reply_rate_pct: 0
   })
   const [leads, setLeads] = useState<Lead[]>([])
   const [loading, setLoading] = useState(true)
@@ -125,18 +115,10 @@ export function EmailOutreachModule({
     }
 
     if (data) {
-      const total_sent = data.filter((l: any) => l.last_sent_at || ['Sent', 'Aktivno', 'Zakazan Sastanak', 'Meeting Booked'].includes(l.status)).length
+      const total_sent = data.filter((l: any) => l.last_sent_at || ['Kontaktiran', 'Sent', 'Aktivno', 'Zakazan Sastanak', 'Meeting Booked', 'Demo Zakazan'].includes(l.status)).length
       const meetings_booked = data.filter((l: any) => l.status === 'Zakazan Sastanak' || l.status === 'Meeting Booked' || l.meeting_time).length
 
-      setStats({
-        total_sent,
-        total_opened: Math.round(total_sent * 0.64),
-        total_replied: Math.round(total_sent * 0.12),
-        positive_replies: Math.round(total_sent * 0.05),
-        meetings_booked,
-        open_rate_pct: 64,
-        reply_rate_pct: 12
-      })
+      setStats({ total_sent, meetings_booked })
     }
   }, [clientId])
 
@@ -304,9 +286,9 @@ export function EmailOutreachModule({
       {/* Glass Stat Prism */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {[
-          { label: "Total Sent", value: stats.total_sent, sub: `${stats.open_rate_pct}% Open Rate`, icon: Send, color: "text-emerald" },
-          { label: "Interactions", value: stats.total_replied, sub: `${stats.reply_rate_pct}% Reply Rate`, icon: MessageSquare, color: "text-blue-400" },
-          { label: "Positive Sentiment", value: stats.positive_replies, sub: "High Intent", icon: UserCheck, color: "text-purple-400" },
+          { label: "Total Sent", value: stats.total_sent, sub: "Emails delivered", icon: Send, color: "text-emerald" },
+          { label: "Opens", value: "—", sub: "Tracking not set up", icon: MessageSquare, color: "text-blue-400" },
+          { label: "Replies", value: "—", sub: "Tracking not set up", icon: UserCheck, color: "text-purple-400" },
           { label: "Meetings Booked", value: stats.meetings_booked, sub: "Converted Leads", icon: CheckCircle, color: "text-emerald-400" },
         ].map((item, i) => (
           <motion.div
@@ -330,7 +312,7 @@ export function EmailOutreachModule({
               <CardContent>
                 <div className="space-y-1">
                   <p className="text-xs font-outfit font-medium text-silver/40 uppercase tracking-widest">{item.label}</p>
-                  <h3 className="text-3xl font-outfit font-bold text-silver">{item.value}</h3>
+                  <h3 className={cn("font-outfit font-bold text-silver", typeof item.value === 'string' ? "text-2xl text-silver/40" : "text-3xl")}>{item.value}</h3>
                   <p className="text-xs font-outfit text-emerald/60">{item.sub}</p>
                 </div>
               </CardContent>

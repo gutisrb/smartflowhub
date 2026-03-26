@@ -93,6 +93,7 @@ function B2BLeadIntelPanel({ lead }: { lead: any }) {
     const rec        = enrichment?.service_recommendation
     const recReason  = enrichment?.recommendation_reason
     const intake     = lead.intake_data || {}
+    const webIntel   = enrichment?.website_intel
 
     // Compute engagement rate from reels
     const followers   = igProfile?.followers || 0
@@ -270,6 +271,42 @@ function B2BLeadIntelPanel({ lead }: { lead: any }) {
                 </motion.div>
             )}
 
+            {/* Website Intel */}
+            {webIntel && (
+                <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 }} className="rounded-2xl border border-white/[0.06] bg-white/[0.03] overflow-hidden">
+                    <div className="px-5 py-3 border-b border-white/[0.05] flex items-center justify-between">
+                        <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Website Intel</span>
+                        {lead.website && (
+                            <a href={lead.website.startsWith('http') ? lead.website : `https://${lead.website}`} target="_blank" rel="noopener noreferrer"
+                                className="text-[10px] text-blue-400/70 hover:text-blue-400 flex items-center gap-1">
+                                <Globe className="w-2.5 h-2.5" /> Otvori sajt <ExternalLink className="w-2.5 h-2.5" />
+                            </a>
+                        )}
+                    </div>
+                    <div className="px-5 py-4 space-y-3">
+                        {webIntel.description && (
+                            <p className="text-xs text-zinc-300 leading-relaxed">
+                                {webIntel.description}
+                            </p>
+                        )}
+                        {webIntel.products?.length > 0 && (
+                            <div className="flex flex-wrap gap-1.5">
+                                {webIntel.products.map((p: string, i: number) => (
+                                    <span key={i} className="text-[10px] text-blue-300/80 bg-blue-500/10 border border-blue-500/20 px-2.5 py-0.5 rounded-full">
+                                        {p}
+                                    </span>
+                                ))}
+                            </div>
+                        )}
+                        {webIntel.is_female_brand && (
+                            <span className="text-[10px] text-pink-400/80 bg-pink-500/10 border border-pink-500/20 px-2.5 py-0.5 rounded-full inline-block">
+                                ♀ Female-first brand
+                            </span>
+                        )}
+                    </div>
+                </motion.div>
+            )}
+
             {/* Meta Ads Intel */}
             <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="rounded-2xl border border-white/[0.06] bg-white/[0.03] overflow-hidden">
                 <div className="px-5 py-3 border-b border-white/[0.05]">
@@ -300,6 +337,19 @@ function B2BLeadIntelPanel({ lead }: { lead: any }) {
                     )}
                 </div>
             </motion.div>
+
+            {/* AI Analysis */}
+            {enrichment?.ai_analysis && (
+                <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.18 }} className="rounded-2xl border border-violet-500/20 bg-violet-500/[0.04] overflow-hidden">
+                    <div className="px-5 py-3 border-b border-violet-500/15 flex items-center gap-2">
+                        <Zap className="w-3 h-3 text-violet-400" />
+                        <span className="text-[10px] font-bold text-violet-400 uppercase tracking-widest">AI Analiza Leada</span>
+                    </div>
+                    <div className="px-5 py-4">
+                        <p className="text-xs text-zinc-300 leading-relaxed whitespace-pre-line">{enrichment.ai_analysis}</p>
+                    </div>
+                </motion.div>
+            )}
 
             {/* Service Recommendation */}
             {rec && (
@@ -472,7 +522,7 @@ export function LeadIntelligenceViewer({ lead, isOpen, onClose }: LeadIntelligen
                         </span>
                     </div>
 
-                    <ScrollArea className="flex-1">
+                    <div className="flex-1 overflow-y-auto min-h-0">
                         {isB2BLead ? (
                             <B2BLeadIntelPanel lead={lead} />
                         ) : (
@@ -523,7 +573,7 @@ export function LeadIntelligenceViewer({ lead, isOpen, onClose }: LeadIntelligen
                                 </AnimatePresence>
                             </div>
                         )}
-                    </ScrollArea>
+                    </div>
                 </div>
             </DialogContent>
         </Dialog>
