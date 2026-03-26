@@ -16,7 +16,6 @@ interface EmailOutreachModuleProps {
   clientId: string
   tableName?: string
   useMockData?: boolean
-  sourceFilter?: string
 }
 
 interface EmailStats {
@@ -80,7 +79,6 @@ const cardVariants: Variants = {
 export function EmailOutreachModule({
   clientId,
   tableName = 'kontakti',
-  sourceFilter = 'meta_ads_scrape',
 }: EmailOutreachModuleProps) {
   const [draftLead, setDraftLead] = useState<Lead | null>(null)
   const [editingDraft, setEditingDraft] = useState<string | null>(null)
@@ -107,7 +105,6 @@ export function EmailOutreachModule({
       .from('kontakti')
       .select('status, last_sent_at, meeting_time')
       .eq('client_id', clientId)
-      .eq('izvor', sourceFilter)
 
     if (error) {
       console.error('Error fetching email stats:', error)
@@ -120,7 +117,7 @@ export function EmailOutreachModule({
 
       setStats({ total_sent, meetings_booked })
     }
-  }, [clientId])
+  }, [clientId])  // eslint-disable-line react-hooks/exhaustive-deps
 
   const fetchLeads = useCallback(async () => {
     setLoading(true)
@@ -130,7 +127,6 @@ export function EmailOutreachModule({
       .from(tableName)
       .select('*')
       .eq('client_id', clientId)
-      .eq('izvor', sourceFilter)
       .neq('kategorija', 'Disqualified')
       .order('prioritet_skor', { ascending: false })
       .limit(200)
