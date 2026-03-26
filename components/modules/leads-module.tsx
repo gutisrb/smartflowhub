@@ -408,7 +408,7 @@ export function LeadsModule({ clientId }: { clientId: string }) {
       {/* Controls Row */}
       <div className="flex items-center gap-3 flex-wrap">
         {/* Search */}
-        <div className="flex items-center gap-2 px-3.5 py-2 bg-white/5 rounded-full border border-white/[0.06] focus-within:border-emerald/30 transition-all w-64">
+        <div className="flex items-center gap-2 px-3.5 py-2 bg-white/5 rounded-full border border-white/[0.06] focus-within:border-emerald/30 transition-all w-full sm:w-64">
           <Search className="w-3.5 h-3.5 text-zinc-500 shrink-0" />
           <input
             type="text"
@@ -486,16 +486,16 @@ export function LeadsModule({ clientId }: { clientId: string }) {
               <TableHead className="sticky top-0 bg-obsidian/80 backdrop-blur-sm text-[10px] text-zinc-600 uppercase tracking-widest font-bold">
                 Kompanija
               </TableHead>
-              <TableHead className="sticky top-0 bg-obsidian/80 backdrop-blur-sm w-[120px] text-[10px] text-zinc-600 uppercase tracking-widest font-bold">
+              <TableHead className="sticky top-0 bg-obsidian/80 backdrop-blur-sm w-[120px] text-[10px] text-zinc-600 uppercase tracking-widest font-bold hidden sm:table-cell">
                 Instagram
               </TableHead>
-              <TableHead className="sticky top-0 bg-obsidian/80 backdrop-blur-sm w-[150px] text-[10px] text-zinc-600 uppercase tracking-widest font-bold">
+              <TableHead className="sticky top-0 bg-obsidian/80 backdrop-blur-sm w-[150px] text-[10px] text-zinc-600 uppercase tracking-widest font-bold hidden md:table-cell">
                 Usluga
               </TableHead>
               <TableHead className="sticky top-0 bg-obsidian/80 backdrop-blur-sm w-[100px] text-[10px] text-zinc-600 uppercase tracking-widest font-bold">
                 Status
               </TableHead>
-              <TableHead className="sticky top-0 bg-obsidian/80 backdrop-blur-sm w-[80px] text-[10px] text-zinc-600 uppercase tracking-widest font-bold text-right">
+              <TableHead className="sticky top-0 bg-obsidian/80 backdrop-blur-sm w-[80px] text-[10px] text-zinc-600 uppercase tracking-widest font-bold text-right hidden lg:table-cell">
                 Oglasi
               </TableHead>
               <TableHead className="sticky top-0 bg-obsidian/80 backdrop-blur-sm w-[60px] text-[10px] text-zinc-600 uppercase tracking-widest font-bold text-center">
@@ -564,7 +564,7 @@ export function LeadsModule({ clientId }: { clientId: string }) {
                       </TableCell>
 
                       {/* Instagram */}
-                      <TableCell className="w-[120px]">
+                      <TableCell className="w-[120px] hidden sm:table-cell">
                         {igHandle ? (
                           <div className="flex flex-col gap-0.5">
                             <div className="flex items-center gap-1">
@@ -583,7 +583,7 @@ export function LeadsModule({ clientId }: { clientId: string }) {
                       </TableCell>
 
                       {/* Usluga */}
-                      <TableCell className="w-[150px]" onClick={e => e.stopPropagation()}>
+                      <TableCell className="w-[150px] hidden md:table-cell" onClick={e => e.stopPropagation()}>
                         <ServiceCell lead={lead} onUpdate={handleServiceUpdate} />
                       </TableCell>
 
@@ -598,7 +598,7 @@ export function LeadsModule({ clientId }: { clientId: string }) {
                       </TableCell>
 
                       {/* Oglasi */}
-                      <TableCell className="w-[80px] text-right">
+                      <TableCell className="w-[80px] text-right hidden lg:table-cell">
                         <span className="text-sm text-zinc-400">
                           {activeAds != null ? activeAds : "—"}
                         </span>

@@ -7,7 +7,7 @@ import { Sidebar } from "@/components/dashboard/sidebar"
 import { useUnifiedModules } from "@/lib/modules/hooks"
 import { ModuleKey } from "@/lib/modules/types"
 import { Button } from "@/components/ui/button"
-import { LogOut, Bell, Search, Sparkles } from "lucide-react"
+import { LogOut, Bell, Search, Sparkles, Menu } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 // Import module components
@@ -28,6 +28,7 @@ export default function DashboardPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [clientName, setClientName] = useState("")
   const [userEmail, setUserEmail] = useState<string | null>(null)
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
 
   const supabase = createClient()
   const { modules: availableModules, loading: isLoading } = useUnifiedModules(clientId)
@@ -187,20 +188,29 @@ export default function DashboardPage() {
       {isAuthenticated && (
         <Sidebar
           currentView={activeModule}
-          onViewChange={setActiveModule}
+          onViewChange={(view) => { setActiveModule(view); setIsSidebarOpen(false) }}
           clientName={clientName}
           clientId={clientId}
           modules={filteredModules}
           loading={isLoading}
+          isOpen={isSidebarOpen}
+          onClose={() => setIsSidebarOpen(false)}
         />
       )}
 
-      <main className="flex-1 flex flex-col overflow-hidden relative z-10 p-4 pl-0">
+      <main className="flex-1 flex flex-col overflow-hidden relative z-10 p-2 md:p-4 md:pl-0">
         <div className="flex-1 flex flex-col glass-panel rounded-[2rem] overflow-hidden shadow-[0_0_50px_-12px_rgba(0,0,0,0.5)] border border-white/5">
-          <header className="h-20 flex items-center justify-between px-10 shrink-0 border-b border-white/5 bg-white/[0.02]">
-            <div className="flex items-center gap-6">
+          <header className="h-16 md:h-20 flex items-center justify-between px-4 md:px-10 shrink-0 border-b border-white/5 bg-white/[0.02]">
+            <div className="flex items-center gap-3 md:gap-6">
+              {/* Mobile hamburger */}
+              <button
+                onClick={() => setIsSidebarOpen(true)}
+                className="md:hidden p-2 rounded-xl text-zinc-500 hover:text-zinc-300 hover:bg-white/5 transition-all border border-white/[0.06]"
+              >
+                <Menu className="w-5 h-5" />
+              </button>
               <div className="flex flex-col">
-                <h1 className="text-2xl font-outfit font-light text-silver tracking-tight">
+                <h1 className="text-lg md:text-2xl font-outfit font-light text-silver tracking-tight">
                   {getModuleLabel()}
                 </h1>
               </div>
@@ -242,7 +252,7 @@ export default function DashboardPage() {
             </div>
           </header>
 
-          <div className="flex-1 overflow-y-auto p-10 scrollbar-none custom-scrollbar pb-32">
+          <div className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-10 scrollbar-none custom-scrollbar pb-20 lg:pb-32">
             <div className="max-w-[1600px] mx-auto">
               {isLoading ? (
                 <div className="flex h-[60vh] items-center justify-center">

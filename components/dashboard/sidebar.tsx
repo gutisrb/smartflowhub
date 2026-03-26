@@ -1,7 +1,7 @@
 "use client"
 
 import { cn } from "@/lib/utils"
-import { ChevronRight, UserCircle, Database, LayoutDashboard, Zap, BarChart3, Settings, ShieldCheck, Sparkles } from "lucide-react"
+import { ChevronRight, UserCircle, Database, LayoutDashboard, Zap, BarChart3, Settings, ShieldCheck, Sparkles, X } from "lucide-react"
 import { useState, useMemo } from "react"
 import { useUnifiedModules } from "@/lib/modules/hooks"
 import { EnabledModule, ModuleCategory, ModuleKey } from "@/lib/modules/types"
@@ -13,6 +13,8 @@ interface SidebarProps {
   clientId: string | null
   modules?: EnabledModule[]
   loading?: boolean
+  isOpen?: boolean
+  onClose?: () => void
 }
 
 interface CategoryConfig {
@@ -29,7 +31,7 @@ const CATEGORY_CONFIG: CategoryConfig[] = [
   { key: 'settings', label: 'Podešavanja', collapsible: false, icon: Settings },
 ]
 
-export function Sidebar({ currentView, onViewChange, clientName, clientId, modules: propModules, loading: propLoading }: SidebarProps) {
+export function Sidebar({ currentView, onViewChange, clientName, clientId, modules: propModules, loading: propLoading, isOpen, onClose }: SidebarProps) {
   const { modules: hookModules, loading: hookLoading } = useUnifiedModules(propModules ? null : clientId)
 
   const modules = propModules || hookModules
@@ -62,24 +64,47 @@ export function Sidebar({ currentView, onViewChange, clientName, clientId, modul
 
   if (loading) {
     return (
-      <div className="w-72 m-4 glass-panel rounded-3xl flex flex-col h-[calc(100vh-2rem)] overflow-hidden">
-        <div className="p-8 pb-4">
-          <div className="w-12 h-12 bg-emerald/10 rounded-2xl animate-pulse" />
+      <>
+        {isOpen && <div className="fixed inset-0 bg-black/60 z-30 md:hidden" onClick={onClose} />}
+        <div className={cn(
+          "glass-panel rounded-3xl flex flex-col overflow-hidden",
+          "fixed top-0 left-0 h-full w-72 z-40 transition-transform duration-300 ease-in-out rounded-r-3xl",
+          isOpen ? "translate-x-0" : "-translate-x-full",
+          "md:relative md:w-72 md:m-4 md:mr-0 md:h-[calc(100vh-2rem)] md:rounded-3xl md:translate-x-0 md:z-20"
+        )}>
+          <div className="p-8 pb-4">
+            <div className="w-12 h-12 bg-emerald/10 rounded-2xl animate-pulse" />
+          </div>
+          <div className="flex-1 px-6 space-y-4">
+            {[1, 2, 3, 4].map(i => (
+              <div key={i} className="h-10 bg-white/5 rounded-xl animate-pulse" style={{ animationDelay: `${i * 0.1}s` }} />
+            ))}
+          </div>
         </div>
-        <div className="flex-1 px-6 space-y-4">
-          {[1, 2, 3, 4].map(i => (
-            <div key={i} className="h-10 bg-white/5 rounded-xl animate-pulse" style={{ animationDelay: `${i * 0.1}s` }} />
-          ))}
-        </div>
-      </div>
+      </>
     )
   }
 
   return (
-    <div className="w-72 m-4 mr-0 glass-panel rounded-3xl flex flex-col h-[calc(100vh-2rem)] relative overflow-hidden group/sidebar animate-in slide-in-from-left-8 duration-700 ease-out z-20">
+    <>
+      {/* Mobile backdrop */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 bg-black/60 z-30 md:hidden"
+          onClick={onClose}
+        />
+      )}
+
+    <div className={cn(
+      "glass-panel flex flex-col overflow-hidden group/sidebar relative",
+      "fixed top-0 left-0 h-full w-72 z-40 transition-transform duration-300 ease-in-out rounded-r-3xl",
+      isOpen ? "translate-x-0" : "-translate-x-full",
+      "md:relative md:w-72 md:m-4 md:mr-0 md:h-[calc(100vh-2rem)] md:rounded-3xl md:translate-x-0 md:z-20"
+    )}>
       <div className="absolute inset-0 bg-gradient-to-b from-emerald/5 to-transparent pointer-events-none opacity-50" />
 
-      <div className="p-8 pb-6 relative z-10">
+      <div className="p-6 md:p-8 pb-6 relative z-10">
+        <div className="flex items-center justify-between">
         <div className="flex items-center gap-4 group cursor-pointer">
           <div className="relative">
             <div className="w-12 h-12 rounded-2xl bg-emerald flex items-center justify-center shadow-[0_0_20px_oklch(0.75_0.15_160_/_0.3)] group-hover:scale-110 transition-transform duration-500 overflow-hidden">
@@ -93,6 +118,14 @@ export function Sidebar({ currentView, onViewChange, clientName, clientId, modul
             <span className="text-xs font-bold text-emerald uppercase tracking-[0.2em] leading-none mb-1">Smartflow</span>
             <span className="text-xl font-outfit font-medium text-silver tracking-tight leading-none group-hover:text-white transition-colors">Dashboard</span>
           </div>
+        </div>
+        {/* Mobile close button */}
+        <button
+          onClick={onClose}
+          className="md:hidden p-2 rounded-xl text-zinc-500 hover:text-zinc-300 hover:bg-white/5 transition-all"
+        >
+          <X className="w-5 h-5" />
+        </button>
         </div>
       </div>
 
@@ -164,6 +197,7 @@ export function Sidebar({ currentView, onViewChange, clientName, clientId, modul
         </div>
       </div>
     </div>
+    </>
   )
 }
 
