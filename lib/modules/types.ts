@@ -12,7 +12,7 @@ export type ModuleKey =
   | 'chatbot-analytics'
   | 'growth-engine'
 
-export type ModuleCategory = 'social' | 'outreach' | 'analytics' | 'settings' | 'crm'
+export type ModuleCategory = 'acquisition' | 'fulfillment' | 'analytics' | 'settings'
 
 export interface DashboardModule {
   key: ModuleKey

@@ -42,6 +42,7 @@ interface Lead {
   comment?: string
   instagram_handle?: string
   starred?: boolean
+  email_framework?: string
   created_at?: string
   client_id?: string
   intake_data?: {
@@ -86,6 +87,7 @@ export function EmailOutreachModule({
   const [intelLead, setIntelLead] = useState<Lead | null>(null)
   const [confirmRemoveLead, setConfirmRemoveLead] = useState<Lead | null>(null)
   const [copied, setCopied] = useState(false)
+  const [selectedFramework, setSelectedFramework] = useState<'legacy' | '3-sentence'>('3-sentence')
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [bulkStatus, setBulkStatus] = useState<string>('')
@@ -231,16 +233,24 @@ export function EmailOutreachModule({
     if (!draftLead || editingDraft === null) return
     setIsSavingDraft(true)
     const supabase = createClient()
+    
+    // First, try to update with the new email_framework column
     const { error } = await supabase
       .from('contacts')
-      .update({ email_draft: editingDraft })
+      .update({ email_draft: editingDraft, email_framework: selectedFramework })
       .eq('id', draftLead.id)
     
-    if (!error) {
-      setLeads(prev => prev.map(l => l.id === draftLead.id ? { ...l, email_draft: editingDraft } : l))
-      setDraftLead(prev => prev ? { ...prev, email_draft: editingDraft } : null)
-      setEditingDraft(null)
+    // Fallback if column doesn't exist yet
+    if (error && error.message.includes('column "email_framework" of relation "contacts" does not exist')) {
+      await supabase
+        .from('contacts')
+        .update({ email_draft: editingDraft })
+        .eq('id', draftLead.id)
     }
+    
+    setLeads(prev => prev.map(l => l.id === draftLead.id ? { ...l, email_draft: editingDraft, email_framework: selectedFramework } : l))
+    setDraftLead(prev => prev ? { ...prev, email_draft: editingDraft, email_framework: selectedFramework } : null)
+    setEditingDraft(null)
     setIsSavingDraft(false)
   }
 
@@ -752,7 +762,14 @@ export function EmailOutreachModule({
                 <label className="text-[10px] font-outfit uppercase tracking-widest text-silver/30">Email Body</label>
                 {!editingDraft && (
                   <button 
-                    onClick={() => setEditingDraft(draftLead?.email_draft || '')}
+                    onClick={() => {
+                      setEditingDraft(draftLead?.email_draft || '')
+                      if (draftLead?.email_framework === 'legacy' || draftLead?.email_framework === '3-sentence') {
+                        setSelectedFramework(draftLead.email_framework as 'legacy' | '3-sentence')
+                      } else {
+                        setSelectedFramework('3-sentence')
+                      }
+                    }}
                     className="flex items-center gap-1.5 text-[10px] text-emerald/60 hover:text-emerald transition-colors uppercase tracking-widest font-bold"
                   >
                     <Pencil className="w-3 h-3" /> Edit Draft
@@ -762,6 +779,32 @@ export function EmailOutreachModule({
 
               {editingDraft !== null ? (
                 <div className="space-y-4">
+                  <div className="flex gap-4 mb-2">
+                    <button
+                      onClick={() => setSelectedFramework('3-sentence')}
+                      className={cn("text-xs px-4 py-2 rounded-xl transition-colors font-outfit font-medium border", selectedFramework === '3-sentence' ? "bg-emerald/20 border-emerald/50 text-emerald" : "bg-obsidian border-white/10 text-silver/60 hover:text-white")}
+                    >
+                      3-Sentence Framework (B-C-O)
+                    </button>
+                    <button
+                      onClick={() => setSelectedFramework('legacy')}
+                      className={cn("text-xs px-4 py-2 rounded-xl transition-colors font-outfit font-medium border", selectedFramework === 'legacy' ? "bg-emerald/20 border-emerald/50 text-emerald" : "bg-obsidian border-white/10 text-silver/60 hover:text-white")}
+                    >
+                      Legacy Framework
+                    </button>
+                  </div>
+                  
+                  {selectedFramework === '3-sentence' && (
+                    <div className="bg-emerald/5 border border-emerald/20 p-4 rounded-xl space-y-2 text-xs text-silver/80">
+                      <p className="font-bold text-emerald">3-Sentence B-C-O Framework Guide:</p>
+                      <ul className="list-disc pl-4 space-y-1">
+                        <li><span className="text-white">Sentence 1 (Buyer):</span> Call out their identity/niche/role implicitly. Focus on context, not general traits.</li>
+                        <li><span className="text-white">Sentence 2 (Constraint):</span> Define the exact structural problem creating the gap.</li>
+                        <li><span className="text-white">Sentence 3 (Outcome):</span> Explain how your system bypasses the constraint to make the outcome inevitable. Suggest a quick chat.</li>
+                      </ul>
+                    </div>
+                  )}
+                  
                   <textarea
                     autoFocus
                     value={editingDraft}

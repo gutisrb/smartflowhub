@@ -23,8 +23,8 @@ interface CategoryConfig {
 }
 
 const CATEGORY_CONFIG: CategoryConfig[] = [
-  { key: 'crm', label: 'Sistem Rasta', collapsible: false, icon: Zap },
-  { key: 'social', label: 'Kanali Akvizicije', collapsible: true, icon: Database },
+  { key: 'acquisition', label: 'Akvizicija', collapsible: false, icon: Zap },
+  { key: 'fulfillment', label: 'Fulfillment & Servisi', collapsible: true, icon: Database },
   { key: 'analytics', label: 'Market Intelligence', collapsible: false, icon: BarChart3 },
   { key: 'settings', label: 'Podešavanja', collapsible: false, icon: Settings },
 ]
@@ -36,7 +36,7 @@ export function Sidebar({ currentView, onViewChange, clientName, clientId, modul
   const loading = propLoading !== undefined ? propLoading : hookLoading
 
   const [expandedCategories, setExpandedCategories] = useState<Set<ModuleCategory>>(
-    new Set(['crm', 'social', 'analytics', 'settings'])
+    new Set(['acquisition', 'fulfillment', 'analytics', 'settings'])
   )
 
   const modulesByCategory = useMemo(() => {
