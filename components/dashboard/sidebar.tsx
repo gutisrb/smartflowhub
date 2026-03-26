@@ -65,12 +65,14 @@ export function Sidebar({ currentView, onViewChange, clientName, clientId, modul
   if (loading) {
     return (
       <>
-        {isOpen && <div className="fixed inset-0 bg-black/60 z-30 md:hidden" onClick={onClose} />}
+        {isOpen && <div className="fixed inset-0 bg-black/70 z-40 md:hidden" onClick={onClose} />}
         <div className={cn(
-          "glass-panel rounded-3xl flex flex-col overflow-hidden",
-          "fixed top-0 left-0 h-full w-72 z-40 transition-transform duration-300 ease-in-out rounded-r-3xl",
+          "glass-panel flex flex-col overflow-hidden",
+          "fixed top-0 left-0 bottom-0 w-[85vw] max-w-xs z-50",
+          "transition-transform duration-300 ease-in-out rounded-r-3xl",
           isOpen ? "translate-x-0" : "-translate-x-full",
-          "md:relative md:w-72 md:m-4 md:mr-0 md:h-[calc(100vh-2rem)] md:rounded-3xl md:translate-x-0 md:z-20"
+          "md:relative md:inset-auto md:w-72 md:m-4 md:mr-0 md:h-[calc(100vh-2rem)]",
+          "md:rounded-3xl md:translate-x-0 md:z-20"
         )}>
           <div className="p-8 pb-4">
             <div className="w-12 h-12 bg-emerald/10 rounded-2xl animate-pulse" />
@@ -90,16 +92,20 @@ export function Sidebar({ currentView, onViewChange, clientName, clientId, modul
       {/* Mobile backdrop */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black/60 z-30 md:hidden"
+          className="fixed inset-0 bg-black/70 z-40 md:hidden"
           onClick={onClose}
         />
       )}
 
     <div className={cn(
-      "glass-panel flex flex-col overflow-hidden group/sidebar relative",
-      "fixed top-0 left-0 h-full w-72 z-40 transition-transform duration-300 ease-in-out rounded-r-3xl",
+      "glass-panel flex flex-col overflow-hidden group/sidebar",
+      // Mobile: fixed overlay, no 'relative' here to avoid Tailwind ordering conflict
+      "fixed top-0 left-0 bottom-0 w-[85vw] max-w-xs z-50",
+      "transition-transform duration-300 ease-in-out rounded-r-3xl",
       isOpen ? "translate-x-0" : "-translate-x-full",
-      "md:relative md:w-72 md:m-4 md:mr-0 md:h-[calc(100vh-2rem)] md:rounded-3xl md:translate-x-0 md:z-20"
+      // Desktop: in-flow sidebar, overrides the fixed positioning
+      "md:relative md:inset-auto md:w-72 md:m-4 md:mr-0 md:h-[calc(100vh-2rem)]",
+      "md:rounded-3xl md:translate-x-0 md:z-20"
     )}>
       <div className="absolute inset-0 bg-gradient-to-b from-emerald/5 to-transparent pointer-events-none opacity-50" />
 
