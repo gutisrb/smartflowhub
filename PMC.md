@@ -3,9 +3,9 @@
 *Last updated: 2026-02-13*
 
 ## Product Overview
-**One-liner:** SmartFlow is Serbia's most advanced AI agency — providing AI-powered marketing, intelligent agents, and custom AI systems that help businesses grow faster.
+**One-liner:** SmartFlow fixes the structural gaps where Serbian businesses lose revenue — unanswered social media inquiries, leaking sales pipelines, slow content production, and siloed operations — by building custom AI systems from scratch that no one else in this market can deliver.
 
-**What it does:** SmartFlow integrates AI across every layer of a business — from generating marketing content (videos, images, ad creatives) to deploying intelligent agents that handle customer inquiries 24/7 across social platforms, to building complete AI-powered lead acquisition and growth systems. We don't just consult on AI — we build and deliver production-ready solutions.
+**What it does:** SmartFlow builds custom AI infrastructure that plugs directly into a business's existing operations: agents that handle every social media inquiry 24/7 with image/video understanding, research-backed content production at scale, AI-powered sales pipelines that recover lost deals, and automation that eliminates administrative overhead. We don't consult — we build and deploy production-ready systems with measurable ROI.
 
 **Product category:** AI Agency / AI Services Agency (how Serbian businesses would search: "AI agencija", "AI marketing", "AI integracija", "veštačka inteligencija za biznis")
 
@@ -20,9 +20,11 @@
 - Pricing is intentionally NOT on the website — every deal starts with a meeting
 
 ## Target Audience
-**Target companies:** Serbian businesses of any size — from established SMBs (50-200+ employees, €100K+ revenue) to growth-stage companies — who sell products or services directly to consumers or other businesses, especially through social media channels. Priority niches being tested: youth employment agencies (zadruge), product brands on Instagram/Facebook, service businesses seeking more leads.
-
-**Decision-makers:** Business owners, directors, founders, marketing managers — people with authority to invest in operational improvements. Often 35-55 years old, may not be deeply technical but are curious about AI and open to innovation.
+**Target buyers (by role, pressure, and moment):**
+- **Sales directors / owners** at SMBs running 50+ daily social media inquiries who are under pressure to increase conversion with the same headcount — and watching revenue leak through unanswered DMs every night and weekend
+- **Marketing managers / founders** spending €2K-€10K/month on agencies stuck in slow turnaround cycles with no performance feedback — under pressure to produce more content faster without increasing budget
+- **Directors / sales heads** investing in paid acquisition whose pipeline looks active but less than half of booked meetings progress to close — under pressure to justify ad spend with actual deals
+- **Operations directors / founders** at companies with 50-200+ employees where manual admin processes consume 15-30 hours/week — under pressure to scale without proportionally growing headcount
 
 **Primary use case:** "I know AI is the future and I want to use it in my business, but I don't know how — and I can't find anyone competent enough to actually do it for me."
 
@@ -47,25 +49,27 @@
 | **Tech-Curious Founder** (Early Adopter) | Being first, innovation, AI capabilities, sophistication | Wants to integrate AI but the "automation" market is full of amateurs using third-party drag-and-drop tools. Needs someone who actually builds custom solutions. | "We build agents and systems from scratch — not cookie-cutter automations. Image analysis, video understanding, custom workflows that nobody else in Serbia can build." |
 
 ## Problems & Pain Points
-**Core problem:** Serbian businesses that want to leverage AI hit a wall — there's a massive gap between the desire to integrate AI and the availability of competent, professional AI service providers in this market. Most "automation" agencies are amateurs using third-party tools like ManyChat, offering cookie-cutter solutions.
+**Core structural problems (not symptoms — the actual constraints):**
 
-**Why alternatives fall short:**
-- Local freelancers and "automation" agencies use pre-built third-party tools (ManyChat, Zapier) — they don't build custom solutions
-- They can't handle complex capabilities like image/video analysis in chatbots
-- They haven't gone through actual platform integrations (Meta App Review, API-level work)
-- Video content creators are expensive (human production) or low quality (basic AI tools without research/strategy)
-- No one in the Serbian market offers the full stack: creative + agents + growth systems
+1. **Inquiry-to-sale conversion is structurally capped** — teams cover 48 of 168 weekly hours. 71% of social media inquiries arrive when nobody's there. By morning, those leads are cold or at a competitor. No CRM tracks the loss.
 
-**What it costs them:**
-- Time: hours per day manually responding to inquiries, creating content, posting to social media
-- Money: expensive human production for marketing content, or lost sales from not having content at all
-- Opportunities: competitors who adopt AI first will capture the market advantage
-- Growth: can't scale customer acquisition without either hiring or automating
+2. **Creative pipelines are misaligned** — agencies deliver 4-6 assets on 3-week cycles with zero data feedback. Content is produced on gut feel, not market response. Too slow to test, too rigid to adapt, too expensive to iterate.
+
+3. **Sales pipelines leak at the handoff** — businesses invest in ads but have no system between lead capture and close. The 24-48 hour window between a lead clicking and someone responding is where most ad spend dies. No automated follow-up, no pre-appointment warming, no visibility into where deals stall.
+
+4. **Operations scale linearly with headcount** — information lives in 4-5 disconnected tools. Every handoff is manual. Teams spend more time on process than output. Growing the business means proportionally growing administrative overhead.
+
+**Why alternatives fail to fix these:**
+- Local agencies use pre-built tools (ManyChat, Zapier) — can't build custom solutions
+- Can't handle complex capabilities like image/video analysis in agents
+- Haven't gone through platform integrations (Meta App Review, API-level work)
+- Video creators are expensive (human production) or low quality (no research/strategy)
+- No one offers the full stack: creative + agents + growth systems
 
 **Emotional tension:**
 - Fear of being left behind as AI becomes mainstream
-- Frustration with the lack of professional options in Serbia
-- Skepticism born from being burned by amateurs who overpromised
+- Frustration with incompetent local providers who overpromised
+- Skepticism from being burned by amateurs
 - Anxiety about investing in something they can't measure ROI on
 
 ## Competitive Landscape

@@ -42,26 +42,27 @@ Output format:
 
 ## SmartFlow Context
 
-### Services Offered
+### Services — Buyer → Constraint → Outcome
+
 1. **AI Agent za društvene mreže**
-   - 24/7 ne propušta poruke
-   - Jedina analiza slike i videa na tržištu
-   - 95% manje vremena na društvenim mrežama za Vaš tim
+   - **Who:** Sales directors/owners at SMBs running 50+ daily social inquiries whose team can't cover nights/weekends
+   - **Constraint:** Inquiry-to-sale funnel capped at 28% of hours (48/168). 71% of inquiries arrive when no one's there — cold by morning
+   - **Outcome:** Recover 71% lost window in 14 days. 250% more coverage. Image/video understanding. Full CRM logging. Less than minimum wage cost.
 
 2. **AI Marketing**
-   - Visokobudžetni/Visokokvalitetni brendirani sadržaj
-   - 4k rezolucija, Holivudska produkcija
-   - Najrealniji video i audio na srpskom tržištu
+   - **Who:** Marketing managers spending €2K-€10K/month on agencies stuck in slow turnaround cycles with no performance feedback
+   - **Constraint:** Creative pipeline broken: 4-6 assets on 3-week cycles, zero data feedback, every piece is a guess
+   - **Outcome:** 9+ research-backed AI videos/month at 60-70% lower cost. 3x more creative variants. Studio-quality Serbian TTS.
 
 3. **AI Prodajni sistemi**
-   - Povećanje prodaje kroz efikasan sistem
-   - Evidencija i statistika
-   - Jasan ROI
+   - **Who:** Directors investing in marketing who book meetings but leak 40-60% of deals because follow-up is manual
+   - **Constraint:** 24-48 hour gap between lead clicking and someone responding kills most ad spend. No automated nurture, no visibility into stalls
+   - **Outcome:** Recover 30-50% lost pipeline in 60 days. Automated follow-up + qualification + booking — without increasing ad spend.
 
 4. **AI Integracija**
-   - Neizbežna budućnost
-   - Digitalizacija biznisa
-   - Prilagođena AI Integracija
+   - **Who:** Operations directors at growing companies (50-200+ employees) where manual admin eats 15-30 hours/week
+   - **Constraint:** Operations siloed across 4-5 tools, every handoff manual, headcount cost scales linearly with growth
+   - **Outcome:** Eliminate 60-80% of admin overhead in 30 days. Custom AI workflows as fractional IT department.
 
 ### Differentiation
 - **Custom-built solutions** - built from scratch using n8n and APIs (NOT ManyChat/Zapier)
