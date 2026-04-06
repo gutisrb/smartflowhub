@@ -26,14 +26,14 @@ interface Lead {
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const STAGES = ["Novi Lead", "Kontaktiran", "Demo Zakazan", "Meeting Booked"] as const
+const STAGES = ["Kontaktiran", "Odgovorio", "Zakazan Sastanak", "Meeting Booked"] as const
 type Stage = typeof STAGES[number]
 
 const STAGE_BADGE_STYLES: Record<Stage, string> = {
-  "Novi Lead":      "bg-zinc-800 text-zinc-400",
-  "Kontaktiran":    "bg-blue-500/20 text-blue-400",
-  "Demo Zakazan":   "bg-amber-500/20 text-amber-400",
-  "Meeting Booked": "bg-emerald-500/20 text-emerald-400",
+  "Kontaktiran":      "bg-blue-500/20 text-blue-400",
+  "Odgovorio":        "bg-purple-500/20 text-purple-400",
+  "Zakazan Sastanak": "bg-amber-500/20 text-amber-400",
+  "Meeting Booked":   "bg-emerald-500/20 text-emerald-400",
 }
 
 const SERVICE_BADGE_STYLES: Record<string, string> = {
@@ -287,8 +287,8 @@ export function PipelineModule({ clientId }: { clientId: string }) {
       .from("kontakti")
       .select("*")
       .eq("client_id", clientId)
-      .eq("izvor", "meta_ads_scrape")
       .neq("kategorija", "Disqualified")
+      .in("status", ["Kontaktiran", "Odgovorio", "Zakazan Sastanak", "Meeting Booked"])
       .order("prioritet_skor", { ascending: false })
 
     if (!error && data) setLeads(data as Lead[])
@@ -318,7 +318,7 @@ export function PipelineModule({ clientId }: { clientId: string }) {
   }, {} as Record<Stage, Lead[]>)
 
   for (const lead of leads) {
-    const stage = STAGES.includes(lead.status as Stage) ? (lead.status as Stage) : "Novi Lead"
+    const stage = STAGES.includes(lead.status as Stage) ? (lead.status as Stage) : "Kontaktiran"
     grouped[stage].push(lead)
   }
 

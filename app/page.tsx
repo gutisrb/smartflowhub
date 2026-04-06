@@ -143,7 +143,7 @@ export default function DashboardPage() {
         return <GrowthEngineModule
           clientId={clientId}
           tableName="kontakti"
-          statuses={settings.statuses || ['Novi Lead', 'Kontaktiran', 'Meeting Booked', 'Closed', 'Lost', 'enriched', 'Enriched', 'Sent']}
+          statuses={settings.statuses || ['Novi Lead', 'enriched', 'Kontaktiran', 'Meeting Booked', 'Closed', 'Lost', 'Sent']}
         />
       case 'email-outreach':
         return <EmailOutreachModule

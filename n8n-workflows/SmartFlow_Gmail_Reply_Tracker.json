@@ -1,0 +1,163 @@
+{
+  "name": "SmartFlow - Gmail Reply Tracker",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [{ "field": "hours", "hoursInterval": 1 }]
+        }
+      },
+      "id": "schedule-trigger",
+      "name": "Every Hour",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [-1200, 400]
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "contacts",
+        "returnAll": true,
+        "filterType": "string",
+        "filterString": "client_id=eq.69acf7e9-557e-4ca3-85bd-a785ef39e351&email_1_poslat=eq.true&replied_at=is.null&email=not.is.null&status=eq.Kontaktiran"
+      },
+      "id": "get-sent-contacts",
+      "name": "Get Sent Contacts",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [-1000, 400],
+      "credentials": {
+        "supabaseApi": {
+          "id": "x9GAXz1Nv6O8J4Vh",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nif (!items || items.length === 0) return [{ json: { emails: [], contactMap: {} } }];\n\nconst contacts = items.map(i => i.json);\nconst contactMap = {};\nconst emailList = [];\n\nfor (const c of contacts) {\n  if (c.email) {\n    const emailLower = c.email.toLowerCase().trim();\n    contactMap[emailLower] = { id: c.id, company_name: c.company_name };\n    emailList.push(emailLower);\n  }\n}\n\nif (emailList.length === 0) return [{ json: { emails: [], contactMap: {} } }];\n\n// Gmail search: replies from any of these senders in last 60 days\nconst fromQuery = emailList.map(e => `from:${e}`).join(' OR ');\nconst searchQuery = `(${fromQuery}) in:inbox newer_than:60d`;\n\nreturn [{ json: { searchQuery, contactMap, totalContacts: emailList.length } }];"
+      },
+      "id": "build-search-query",
+      "name": "Build Search Query",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-800, 400]
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "filters": {
+          "q": "={{ $json.searchQuery }}"
+        },
+        "returnAll": true,
+        "options": {
+          "fields": ["id", "threadId", "snippet", "payload"]
+        }
+      },
+      "id": "search-gmail",
+      "name": "Search Gmail for Replies",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [-600, 400],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "gmail-oauth-smartflow",
+          "name": "Gmail (SmartFlow)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": false, "leftValue": "", "typeValidation": "strict", "version": 3 },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "has-messages",
+              "leftValue": "={{ $input.all().length }}",
+              "operator": { "operation": "gt", "type": "number" },
+              "rightValue": 0
+            }
+          ]
+        }
+      },
+      "id": "has-replies",
+      "name": "Any Replies?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [-400, 400]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Match each Gmail message to a contact by sender email\nconst messages = $input.all();\nconst contactMap = $('Build Search Query').first().json.contactMap;\n\nconst matches = [];\n\nfor (const msg of messages) {\n  const headers = msg.json.payload?.headers || [];\n  const fromHeader = headers.find(h => h.name?.toLowerCase() === 'from');\n  if (!fromHeader) continue;\n\n  // Extract email from 'From: Name <email@domain.com>' or 'email@domain.com'\n  const fromRaw = fromHeader.value || '';\n  const emailMatch = fromRaw.match(/<([^>]+)>/) || fromRaw.match(/([\\w.+-]+@[\\w.-]+\\.[a-z]{2,})/i);\n  if (!emailMatch) continue;\n\n  const senderEmail = emailMatch[1].toLowerCase().trim();\n  const contact = contactMap[senderEmail];\n  if (!contact) continue;\n\n  // Get snippet (first 200 chars of reply content)\n  const snippet = (msg.json.snippet || '').substring(0, 200);\n\n  matches.push({\n    contact_id: contact.id,\n    company_name: contact.company_name,\n    sender_email: senderEmail,\n    reply_snippet: snippet,\n    gmail_thread_id: msg.json.threadId\n  });\n}\n\n// Deduplicate by contact_id (take first reply per contact)\nconst seen = new Set();\nconst unique = matches.filter(m => {\n  if (seen.has(m.contact_id)) return false;\n  seen.add(m.contact_id);\n  return true;\n});\n\nif (unique.length === 0) return [{ json: { matched: 0 } }];\nreturn unique.map(m => ({ json: m }));"
+      },
+      "id": "match-to-contacts",
+      "name": "Match Replies to Contacts",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-200, 300]
+    },
+    {
+      "parameters": {
+        "tableId": "contacts",
+        "fieldsUi": {
+          "fieldValues": [
+            { "fieldId": "replied_at", "fieldValue": "={{ $now.toISO() }}" },
+            { "fieldId": "reply_snippet", "fieldValue": "={{ $json.reply_snippet }}" },
+            { "fieldId": "gmail_thread_id", "fieldValue": "={{ $json.gmail_thread_id }}" },
+            { "fieldId": "status", "fieldValue": "Odgovorio" }
+          ]
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "={{ $json.contact_id }}"
+            }
+          ]
+        }
+      },
+      "id": "update-contact-replied",
+      "name": "Mark as Odgovorio",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [0, 300],
+      "credentials": {
+        "supabaseApi": {
+          "id": "x9GAXz1Nv6O8J4Vh",
+          "name": "Supabase account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Every Hour": {
+      "main": [[{ "node": "Get Sent Contacts", "type": "main", "index": 0 }]]
+    },
+    "Get Sent Contacts": {
+      "main": [[{ "node": "Build Search Query", "type": "main", "index": 0 }]]
+    },
+    "Build Search Query": {
+      "main": [[{ "node": "Search Gmail for Replies", "type": "main", "index": 0 }]]
+    },
+    "Search Gmail for Replies": {
+      "main": [[{ "node": "Any Replies?", "type": "main", "index": 0 }]]
+    },
+    "Any Replies?": {
+      "main": [
+        [{ "node": "Match Replies to Contacts", "type": "main", "index": 0 }],
+        []
+      ]
+    },
+    "Match Replies to Contacts": {
+      "main": [[{ "node": "Mark as Odgovorio", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "tags": [{ "name": "SmartFlow" }]
+}

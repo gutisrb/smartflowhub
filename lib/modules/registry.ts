@@ -54,6 +54,13 @@ export const MODULE_REGISTRY: Record<ModuleKey, DashboardModule> = {
     category: 'fulfillment',
     description: 'Praćenje prijava sa kanala vođenih agentima (društvene mreže, četbot)',
   },
+  'leads': {
+    key: 'leads',
+    label: 'Leads',
+    icon: Users,
+    category: 'acquisition',
+    description: 'B2B leads pipeline',
+  },
   'linkedin-agent': {
     key: 'linkedin-agent',
     label: 'LinkedIn Agent',

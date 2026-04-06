@@ -66,16 +66,6 @@ export function useUnifiedModules(clientId: string | null) {
           sort_order: 1,
           created_at: new Date().toISOString(),
           settings: null
-        },
-        {
-          id: "fb1b",
-          client_id: clientId as string,
-          module_key: "leads",
-          is_enabled: true,
-          display_name: "Leads",
-          sort_order: 2,
-          created_at: new Date().toISOString(),
-          settings: null
         }
       ]),
       {
@@ -130,16 +120,6 @@ export function useUnifiedModules(clientId: string | null) {
           is_enabled: true,
           display_name: "Website Chatbot",
           sort_order: 5,
-          created_at: new Date().toISOString(),
-          settings: null
-        },
-        {
-          id: "fb7",
-          client_id: clientId as string,
-          module_key: "linkedin-agent",
-          is_enabled: true,
-          display_name: "LinkedIn Agent",
-          sort_order: 6,
           created_at: new Date().toISOString(),
           settings: null
         }

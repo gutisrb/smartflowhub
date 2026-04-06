@@ -20,7 +20,9 @@ interface EmailOutreachModuleProps {
 
 interface EmailStats {
   total_sent: number
+  replied: number
   meetings_booked: number
+  no_response: number
 }
 
 interface Lead {
@@ -33,6 +35,9 @@ interface Lead {
   status: string
   last_sent_at?: string
   email_draft?: string
+  email_2_draft?: string
+  email_1_poslat?: boolean
+  email_2_poslat?: boolean
   meeting_time?: string
   meeting_link?: string
   izvor: string
@@ -45,6 +50,8 @@ interface Lead {
   email_framework?: string
   created_at?: string
   client_id?: string
+  replied_at?: string
+  reply_snippet?: string
   intake_data?: {
     active_ads_count?: number
     enrichment?: {
@@ -82,6 +89,7 @@ export function EmailOutreachModule({
   tableName = 'kontakti',
 }: EmailOutreachModuleProps) {
   const [draftLead, setDraftLead] = useState<Lead | null>(null)
+  const [draftVersion, setDraftVersion] = useState<'1' | '2'>('1')
   const [editingDraft, setEditingDraft] = useState<string | null>(null)
   const [isSavingDraft, setIsSavingDraft] = useState(false)
   const [intelLead, setIntelLead] = useState<Lead | null>(null)
@@ -95,7 +103,9 @@ export function EmailOutreachModule({
   const [savingComment, setSavingComment] = useState(false)
   const [stats, setStats] = useState<EmailStats>({
     total_sent: 0,
+    replied: 0,
     meetings_booked: 0,
+    no_response: 0,
   })
   const [leads, setLeads] = useState<Lead[]>([])
   const [loading, setLoading] = useState(true)
@@ -105,7 +115,7 @@ export function EmailOutreachModule({
     const supabase = createClient()
     const { data, error } = await supabase
       .from('kontakti')
-      .select('status, last_sent_at, meeting_time')
+      .select('status, last_sent_at, meeting_time, replied_at')
       .eq('client_id', clientId)
 
     if (error) {
@@ -114,10 +124,13 @@ export function EmailOutreachModule({
     }
 
     if (data) {
-      const total_sent = data.filter((l: any) => l.last_sent_at || ['Kontaktiran', 'Sent', 'Aktivno', 'Zakazan Sastanak', 'Meeting Booked', 'Demo Zakazan'].includes(l.status)).length
+      const sentStatuses = ['Kontaktiran', 'Odgovorio', 'Zakazan Sastanak', 'Meeting Booked', 'Demo Zakazan']
+      const total_sent = data.filter((l: any) => l.last_sent_at || sentStatuses.includes(l.status)).length
+      const replied = data.filter((l: any) => (l as any).replied_at || l.status === 'Odgovorio').length
       const meetings_booked = data.filter((l: any) => l.status === 'Zakazan Sastanak' || l.status === 'Meeting Booked' || l.meeting_time).length
+      const no_response = data.filter((l: any) => (l.last_sent_at || l.status === 'Kontaktiran') && !(l as any).replied_at && l.status !== 'Zakazan Sastanak' && l.status !== 'Meeting Booked').length
 
-      setStats({ total_sent, meetings_booked })
+      setStats({ total_sent, replied, meetings_booked, no_response })
     }
   }, [clientId])  // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -129,7 +142,7 @@ export function EmailOutreachModule({
       .from(tableName)
       .select('*')
       .eq('client_id', clientId)
-      .neq('kategorija', 'Disqualified')
+      .or('kategorija.neq.Disqualified,kategorija.is.null')
       .order('prioritet_skor', { ascending: false })
       .limit(200)
 
@@ -157,6 +170,9 @@ export function EmailOutreachModule({
   const filteredLeads = useMemo(() => {
     if (statusFilter === 'all') return leads
     if (statusFilter === 'starred') return leads.filter(l => l.starred)
+    if (statusFilter === 'replied') return leads.filter(l => l.replied_at || l.status === 'Odgovorio')
+    if (statusFilter === 'booked') return leads.filter(l => l.status === 'Zakazan Sastanak' || l.status === 'Meeting Booked')
+    if (statusFilter === 'no_response') return leads.filter(l => (l.last_sent_at || l.status === 'Kontaktiran') && !l.replied_at && l.status !== 'Zakazan Sastanak' && l.status !== 'Meeting Booked')
     return leads.filter(l => l.status === statusFilter)
   }, [leads, statusFilter])
 
@@ -233,31 +249,25 @@ export function EmailOutreachModule({
     if (!draftLead || editingDraft === null) return
     setIsSavingDraft(true)
     const supabase = createClient()
-    
-    // First, try to update with the new email_framework column
-    const { error } = await supabase
-      .from('contacts')
-      .update({ email_draft: editingDraft, email_framework: selectedFramework })
-      .eq('id', draftLead.id)
-    
-    // Fallback if column doesn't exist yet
-    if (error && error.message.includes('column "email_framework" of relation "contacts" does not exist')) {
-      await supabase
-        .from('contacts')
-        .update({ email_draft: editingDraft })
-        .eq('id', draftLead.id)
-    }
-    
-    setLeads(prev => prev.map(l => l.id === draftLead.id ? { ...l, email_draft: editingDraft, email_framework: selectedFramework } : l))
-    setDraftLead(prev => prev ? { ...prev, email_draft: editingDraft, email_framework: selectedFramework } : null)
+    const updatePayload = draftVersion === '2'
+      ? { email_2_draft: editingDraft }
+      : { email_draft: editingDraft, email_framework: selectedFramework }
+    await supabase.from('contacts').update(updatePayload).eq('id', draftLead.id)
+    setLeads(prev => prev.map(l => l.id === draftLead.id ? { ...l, ...updatePayload } : l))
+    setDraftLead(prev => prev ? { ...prev, ...updatePayload } : null)
     setEditingDraft(null)
     setIsSavingDraft(false)
   }
 
   const handleRemoveLead = async (lead: Lead) => {
-    const supabase = createClient()
+    const res = await fetch(`/api/leads/${lead.id}`, { method: 'DELETE' })
+    if (!res.ok) {
+      const { error } = await res.json().catch(() => ({ error: 'Unknown error' }))
+      console.error('Delete failed:', error)
+      alert(`Failed to delete lead: ${error}`)
+      return
+    }
     setLeads(prev => prev.filter(l => l.id !== lead.id))
-    await supabase.from('contacts').update({ kategorija: 'Disqualified' }).eq('id', lead.id)
   }
 
   return (
@@ -292,10 +302,10 @@ export function EmailOutreachModule({
       {/* Glass Stat Prism */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {[
-          { label: "Total Sent", value: stats.total_sent, sub: "Emails delivered", icon: Send, color: "text-emerald" },
-          { label: "Opens", value: "—", sub: "Tracking not set up", icon: MessageSquare, color: "text-blue-400" },
-          { label: "Replies", value: "—", sub: "Tracking not set up", icon: UserCheck, color: "text-purple-400" },
-          { label: "Meetings Booked", value: stats.meetings_booked, sub: "Converted Leads", icon: CheckCircle, color: "text-emerald-400" },
+          { label: "Poslato", value: stats.total_sent, sub: "Emails delivered", icon: Send, color: "text-emerald" },
+          { label: "Odgovorili", value: stats.replied, sub: stats.total_sent > 0 ? `${Math.round((stats.replied / stats.total_sent) * 100)}% reply rate` : "No sends yet", icon: MessageSquare, color: "text-purple-400" },
+          { label: "Zakazano", value: stats.meetings_booked, sub: "Meetings booked", icon: CheckCircle, color: "text-emerald-400" },
+          { label: "Bez odgovora", value: stats.no_response, sub: "Awaiting reply", icon: UserCheck, color: "text-blue-400" },
         ].map((item, i) => (
           <motion.div
             key={item.label}
@@ -357,6 +367,18 @@ export function EmailOutreachModule({
                   onClick={() => setStatusFilter('starred')}
                   className={cn("px-3 py-1 rounded-full text-xs font-outfit transition-all flex items-center gap-1", statusFilter === 'starred' ? 'bg-amber-400 text-obsidian font-bold' : 'bg-amber-400/10 text-amber-400/70 hover:bg-amber-400/20')}
                 ><Star className="w-3 h-3" /> starred ({leads.filter(l => l.starred).length})</button>
+                <button
+                  onClick={() => setStatusFilter('replied')}
+                  className={cn("px-3 py-1 rounded-full text-xs font-outfit transition-all flex items-center gap-1", statusFilter === 'replied' ? 'bg-purple-500 text-white font-bold' : 'bg-purple-500/10 text-purple-400/70 hover:bg-purple-500/20')}
+                >odgovorili ({leads.filter(l => l.replied_at || l.status === 'Odgovorio').length})</button>
+                <button
+                  onClick={() => setStatusFilter('booked')}
+                  className={cn("px-3 py-1 rounded-full text-xs font-outfit transition-all", statusFilter === 'booked' ? 'bg-amber-400 text-obsidian font-bold' : 'bg-amber-400/10 text-amber-400/70 hover:bg-amber-400/20')}
+                >zakazali ({leads.filter(l => l.status === 'Zakazan Sastanak' || l.status === 'Meeting Booked').length})</button>
+                <button
+                  onClick={() => setStatusFilter('no_response')}
+                  className={cn("px-3 py-1 rounded-full text-xs font-outfit transition-all", statusFilter === 'no_response' ? 'bg-silver/30 text-obsidian font-bold' : 'bg-silver/5 text-silver/40 hover:bg-silver/10')}
+                >bez odgovora ({leads.filter(l => (l.last_sent_at || l.status === 'Kontaktiran') && !l.replied_at && l.status !== 'Zakazan Sastanak' && l.status !== 'Meeting Booked').length})</button>
                 {uniqueStatuses.map(s => (
                   <button key={s}
                     onClick={() => setStatusFilter(s)}
@@ -446,6 +468,7 @@ export function EmailOutreachModule({
                       <TableHead className="font-outfit text-silver/40 uppercase text-[10px] tracking-widest min-w-[120px]">Instagram</TableHead>
                       <TableHead className="font-outfit text-silver/40 uppercase text-[10px] tracking-widest">Service</TableHead>
                       <TableHead className="font-outfit text-silver/40 uppercase text-[10px] tracking-widest">Status</TableHead>
+                      <TableHead className="font-outfit text-silver/40 uppercase text-[10px] tracking-widest min-w-[140px]">Odgovor</TableHead>
                       <TableHead className="font-outfit text-silver/40 uppercase text-[10px] tracking-widest">Intel</TableHead>
                       <TableHead className="font-outfit text-silver/40 uppercase text-[10px] tracking-widest pr-8 text-right">Draft</TableHead>
                     </TableRow>
@@ -550,7 +573,7 @@ export function EmailOutreachModule({
                               const igPr = lead.intake_data?.enrichment?.instagram_profile
                               const igReels = lead.intake_data?.enrichment?.instagram_reels || []
                               const followers = igPr?.followers || igPr?.follower_count || 0
-                              const handle = igPr?.username || lead.instagram_handle || null
+                              const handle = igPr?.username || (lead as any).instagram_handle || (lead.intake_data as any)?.instagram_handle || null
                               if (!followers && !handle) return <span className="text-silver/20 text-xs font-outfit">—</span>
                               return (
                                 <div className="flex flex-col gap-0.5">
@@ -613,16 +636,72 @@ export function EmailOutreachModule({
                             })()}
                           </TableCell>
                           <TableCell>
-                            <div className="flex items-center gap-2">
-                              <div className={cn(
-                                "w-2 h-2 rounded-full",
-                                lead.status === 'enriched' || lead.status === 'Enriched' ? 'bg-emerald shadow-[0_0_8px_rgba(16,185,129,0.5)]' :
-                                lead.status === 'Sent' ? 'bg-blue-400' :
-                                lead.status === 'Meeting Booked' || lead.status === 'Zakazan Sastanak' ? 'bg-amber-400' :
-                                'bg-silver/20'
-                              )} />
-                              <span className="font-outfit text-xs text-silver/70">{lead.status}</span>
+                            <div className="flex flex-col gap-1.5">
+                              <div className="flex items-center gap-2">
+                                <div className={cn(
+                                  "w-2 h-2 rounded-full",
+                                  lead.status === 'enriched' || lead.status === 'Enriched' ? 'bg-emerald shadow-[0_0_8px_rgba(16,185,129,0.5)]' :
+                                  lead.status === 'Kontaktiran' ? 'bg-blue-400 shadow-[0_0_6px_rgba(96,165,250,0.4)]' :
+                                  lead.status === 'Odgovorio' ? 'bg-purple-400 shadow-[0_0_6px_rgba(192,132,252,0.4)]' :
+                                  lead.status === 'Meeting Booked' || lead.status === 'Zakazan Sastanak' ? 'bg-amber-400 shadow-[0_0_6px_rgba(251,191,36,0.4)]' :
+                                  'bg-silver/20'
+                                )} />
+                                <span className="font-outfit text-xs text-silver/70">{lead.status}</span>
+                              </div>
+                              {/* Email sequence progress — only visible for contacted leads */}
+                              {(lead.email_1_poslat || lead.email_draft) && (
+                                <div className="flex items-center gap-0.5 pl-0.5" title={
+                                  `E1: ${lead.email_1_poslat ? 'sent' : 'draft'} · E2: ${lead.email_2_poslat ? 'sent' : lead.email_2_draft ? 'ready' : '—'}`
+                                }>
+                                  {/* E1 */}
+                                  <div className={cn(
+                                    "h-1 w-5 rounded-full transition-all",
+                                    lead.email_1_poslat ? "bg-sky-400 shadow-[0_0_4px_rgba(56,189,248,0.6)]" : "bg-white/10"
+                                  )} />
+                                  {/* E2 */}
+                                  <div className={cn(
+                                    "h-1 w-5 rounded-full transition-all",
+                                    lead.email_2_poslat ? "bg-amber-400 shadow-[0_0_4px_rgba(251,191,36,0.6)]" :
+                                    lead.email_2_draft  ? "bg-amber-400/35 border border-amber-400/40" :
+                                    "bg-white/10"
+                                  )} />
+                                  {/* E3 placeholder */}
+                                  <div className="h-1 w-5 rounded-full bg-white/[0.05]" />
+                                  {lead.email_2_draft && !lead.email_2_poslat && (
+                                    <span className="text-[8px] font-outfit text-amber-400/50 ml-0.5 leading-none">ready</span>
+                                  )}
+                                </div>
+                              )}
                             </div>
+                          </TableCell>
+                          <TableCell>
+                            {lead.replied_at ? (
+                              <div className="flex flex-col gap-0.5">
+                                <div className="flex items-center gap-1.5">
+                                  <div className="w-1.5 h-1.5 rounded-full bg-purple-400 shadow-[0_0_6px_rgba(192,132,252,0.5)]" />
+                                  <span className="text-[10px] font-outfit text-purple-400/80">
+                                    {(() => {
+                                      const diff = Date.now() - new Date(lead.replied_at).getTime()
+                                      const h = Math.floor(diff / 3600000)
+                                      const d = Math.floor(diff / 86400000)
+                                      if (d >= 1) return `pre ${d}d`
+                                      if (h >= 1) return `pre ${h}h`
+                                      return 'malopre'
+                                    })()}
+                                  </span>
+                                </div>
+                                {lead.reply_snippet && (
+                                  <span
+                                    className="text-[10px] font-outfit text-silver/40 italic truncate max-w-[130px]"
+                                    title={lead.reply_snippet}
+                                  >
+                                    {lead.reply_snippet.substring(0, 60)}{lead.reply_snippet.length > 60 ? '…' : ''}
+                                  </span>
+                                )}
+                              </div>
+                            ) : (
+                              <span className="text-silver/20 text-xs font-outfit">—</span>
+                            )}
                           </TableCell>
                           <TableCell>
                             <button
@@ -640,10 +719,29 @@ export function EmailOutreachModule({
                           </TableCell>
                           <TableCell className="pr-8 text-right">
                             <div className="flex items-center justify-end gap-2">
-                              {lead.email_draft ? (
+                              {lead.email_1_poslat && !lead.email_2_poslat && lead.email_2_draft ? (
+                                /* Follow-up ready state */
+                                <div className="flex items-center gap-1">
+                                  <Button
+                                    variant="ghost" size="sm"
+                                    onClick={() => { setDraftVersion('2'); setDraftLead(lead) }}
+                                    className="text-amber-400 hover:bg-amber-400/10 border border-amber-400/20 bg-amber-400/5 rounded-xl text-xs font-outfit gap-1.5"
+                                  >
+                                    <Mail className="w-3.5 h-3.5" />
+                                    Follow-up
+                                  </Button>
+                                  <button
+                                    onClick={() => { setDraftVersion('1'); setDraftLead(lead) }}
+                                    className="text-[9px] font-outfit text-silver/25 hover:text-silver/50 px-1.5 py-1 rounded-lg hover:bg-white/5 transition-all"
+                                    title="View original Email 1"
+                                  >
+                                    E1
+                                  </button>
+                                </div>
+                              ) : lead.email_draft ? (
                                 <Button
                                   variant="ghost" size="sm"
-                                  onClick={() => setDraftLead(lead)}
+                                  onClick={() => { setDraftVersion('1'); setDraftLead(lead) }}
                                   className="text-emerald hover:bg-emerald/10 rounded-xl text-xs font-outfit gap-1.5"
                                 >
                                   <Mail className="w-3.5 h-3.5" />
@@ -683,7 +781,7 @@ export function EmailOutreachModule({
             </DialogTitle>
           </DialogHeader>
           <p className="font-outfit text-silver/60 text-sm mt-1">
-            <span className="text-silver font-semibold">{confirmRemoveLead?.company_name}</span> will be marked as Disqualified and removed from this list.
+            <span className="text-silver font-semibold">{confirmRemoveLead?.company_name}</span> will be permanently deleted from the database.
           </p>
           <div className="flex gap-3 mt-4">
             <Button
@@ -698,7 +796,7 @@ export function EmailOutreachModule({
               onClick={() => { handleRemoveLead(confirmRemoveLead!); setConfirmRemoveLead(null) }}
             >
               <Trash2 className="w-3.5 h-3.5 mr-2" />
-              Disqualify
+              Delete
             </Button>
           </div>
         </DialogContent>
@@ -719,8 +817,11 @@ export function EmailOutreachModule({
             <div className="flex justify-between items-start gap-4">
               <div className="space-y-1">
                 <DialogTitle className="font-outfit text-silver text-2xl font-bold flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-emerald/10 flex items-center justify-center">
-                    <Mail className="w-5 h-5 text-emerald" />
+                  <div className={cn(
+                    "w-10 h-10 rounded-xl flex items-center justify-center",
+                    draftVersion === '2' ? "bg-amber-400/10" : "bg-emerald/10"
+                  )}>
+                    <Mail className={cn("w-5 h-5", draftVersion === '2' ? "text-amber-400" : "text-emerald")} />
                   </div>
                   {draftLead?.company_name || draftLead?.ime}
                 </DialogTitle>
@@ -733,124 +834,183 @@ export function EmailOutreachModule({
                   )}
                 </div>
               </div>
-              <div className="flex gap-2">
-                {draftLead?.service?.split(',').map(s => s.trim()).filter(Boolean).map(svc => (
-                  <Badge key={svc} variant="outline" className={cn(
-                    "font-outfit text-[10px] uppercase tracking-widest border-emerald/20 bg-emerald/5 text-emerald/70",
-                    svc === 'ai_sales_systems' && "border-orange-500/20 bg-orange-500/5 text-orange-400/80",
-                    svc === 'ai_organic_content' && "border-green-500/20 bg-green-500/5 text-green-400/80"
-                  )}>
-                    {svc === 'ai_sales_systems' ? 'AIS' : svc === 'ai_organic_content' ? 'AIO' : 'SMS'}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          <div className="flex-1 overflow-y-auto p-8 space-y-6">
-            {/* Subject Line Display */}
-            <div className="space-y-2">
-              <label className="text-[10px] font-outfit uppercase tracking-widest text-silver/30 pl-1">Subject Line</label>
-              <div className="p-4 bg-obsidian/60 border border-white/5 rounded-2xl font-outfit text-silver/80 text-sm italic">
-                {draftLead?.email_draft?.match(/^Subject:\s*(.*)$/m)?.[1] || "No subject detected"}
-              </div>
-            </div>
-
-            {/* Content Area */}
-            <div className="space-y-2 group">
-              <div className="flex justify-between items-center pl-1">
-                <label className="text-[10px] font-outfit uppercase tracking-widest text-silver/30">Email Body</label>
-                {!editingDraft && (
-                  <button 
-                    onClick={() => {
-                      setEditingDraft(draftLead?.email_draft || '')
-                      if (draftLead?.email_framework === 'legacy' || draftLead?.email_framework === '3-sentence') {
-                        setSelectedFramework(draftLead.email_framework as 'legacy' | '3-sentence')
-                      } else {
-                        setSelectedFramework('3-sentence')
-                      }
-                    }}
-                    className="flex items-center gap-1.5 text-[10px] text-emerald/60 hover:text-emerald transition-colors uppercase tracking-widest font-bold"
-                  >
-                    <Pencil className="w-3 h-3" /> Edit Draft
-                  </button>
+              <div className="flex flex-col items-end gap-3">
+                <div className="flex gap-2">
+                  {draftLead?.service?.split(',').map(s => s.trim()).filter(Boolean).map(svc => (
+                    <Badge key={svc} variant="outline" className={cn(
+                      "font-outfit text-[10px] uppercase tracking-widest border-emerald/20 bg-emerald/5 text-emerald/70",
+                      svc === 'ai_sales_systems' && "border-orange-500/20 bg-orange-500/5 text-orange-400/80",
+                      svc === 'ai_organic_content' && "border-green-500/20 bg-green-500/5 text-green-400/80"
+                    )}>
+                      {svc === 'ai_sales_systems' ? 'AIS' : svc === 'ai_organic_content' ? 'AIO' : 'SMS'}
+                    </Badge>
+                  ))}
+                </div>
+                {/* Version tabs — only shown when a follow-up draft exists */}
+                {draftLead?.email_2_draft && (
+                  <div className="flex gap-1 p-1 bg-white/5 rounded-xl">
+                    <button
+                      onClick={() => { setEditingDraft(null); setDraftVersion('1') }}
+                      className={cn(
+                        "text-[10px] font-outfit font-semibold px-3 py-1 rounded-lg transition-all",
+                        draftVersion === '1'
+                          ? "bg-sky-400/15 text-sky-400 border border-sky-400/30"
+                          : "text-silver/30 hover:text-silver/60"
+                      )}
+                    >
+                      Email 1
+                    </button>
+                    <button
+                      onClick={() => { setEditingDraft(null); setDraftVersion('2') }}
+                      className={cn(
+                        "text-[10px] font-outfit font-semibold px-3 py-1 rounded-lg transition-all flex items-center gap-1",
+                        draftVersion === '2'
+                          ? "bg-amber-400/15 text-amber-400 border border-amber-400/30"
+                          : "text-silver/30 hover:text-silver/60"
+                      )}
+                    >
+                      Follow-up
+                      {!draftLead?.email_2_poslat && (
+                        <span className="w-1.5 h-1.5 rounded-full bg-amber-400 shadow-[0_0_4px_rgba(251,191,36,0.8)]" />
+                      )}
+                    </button>
+                  </div>
                 )}
               </div>
-
-              {editingDraft !== null ? (
-                <div className="space-y-4">
-                  <div className="flex gap-4 mb-2">
-                    <button
-                      onClick={() => setSelectedFramework('3-sentence')}
-                      className={cn("text-xs px-4 py-2 rounded-xl transition-colors font-outfit font-medium border", selectedFramework === '3-sentence' ? "bg-emerald/20 border-emerald/50 text-emerald" : "bg-obsidian border-white/10 text-silver/60 hover:text-white")}
-                    >
-                      3-Sentence Framework (B-C-O)
-                    </button>
-                    <button
-                      onClick={() => setSelectedFramework('legacy')}
-                      className={cn("text-xs px-4 py-2 rounded-xl transition-colors font-outfit font-medium border", selectedFramework === 'legacy' ? "bg-emerald/20 border-emerald/50 text-emerald" : "bg-obsidian border-white/10 text-silver/60 hover:text-white")}
-                    >
-                      Legacy Framework
-                    </button>
-                  </div>
-                  
-                  {selectedFramework === '3-sentence' && (
-                    <div className="bg-emerald/5 border border-emerald/20 p-4 rounded-xl space-y-2 text-xs text-silver/80">
-                      <p className="font-bold text-emerald">3-Sentence B-C-O Framework Guide:</p>
-                      <ul className="list-disc pl-4 space-y-1">
-                        <li><span className="text-white">Sentence 1 (Buyer):</span> Call out their identity/niche/role implicitly. Focus on context, not general traits.</li>
-                        <li><span className="text-white">Sentence 2 (Constraint):</span> Define the exact structural problem creating the gap.</li>
-                        <li><span className="text-white">Sentence 3 (Outcome):</span> Explain how your system bypasses the constraint to make the outcome inevitable. Suggest a quick chat.</li>
-                      </ul>
-                    </div>
-                  )}
-                  
-                  <textarea
-                    autoFocus
-                    value={editingDraft}
-                    onChange={(e) => setEditingDraft(e.target.value)}
-                    className="w-full h-[400px] bg-obsidian/60 border border-emerald/20 rounded-2xl p-6 font-mono text-xs text-silver/90 outline-none focus:border-emerald/50 resize-none leading-relaxed"
-                  />
-                  <div className="flex justify-end gap-2">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setEditingDraft(null)}
-                      className="text-silver/40 hover:text-silver/60 rounded-xl"
-                    >
-                      Cancel
-                    </Button>
-                    <Button
-                      size="sm"
-                      onClick={handleSaveDraft}
-                      disabled={isSavingDraft}
-                      className="bg-emerald text-obsidian font-bold rounded-xl px-6"
-                    >
-                      {isSavingDraft ? <RefreshCw className="w-3.5 h-3.5 animate-spin mr-2" /> : <Check className="w-3.5 h-3.5 mr-2" />}
-                      Save Changes
-                    </Button>
-                  </div>
-                </div>
-              ) : (
-                <div className="relative group/content">
-                  <pre className="whitespace-pre-wrap font-mono text-xs text-silver/70 bg-obsidian/60 border border-white/5 rounded-2xl p-6 leading-relaxed min-h-[300px]">
-                    {draftLead?.email_draft?.replace(/^Subject:.*$/m, '').trim() || 'No body content available.'}
-                  </pre>
-                  <div className="absolute top-4 right-4 opacity-0 group-hover/content:opacity-100 transition-opacity flex gap-2">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => handleCopyDraft(draftLead?.email_draft || '')}
-                      className="bg-obsidian/80 border-emerald/20 hover:border-emerald/40 text-emerald rounded-xl"
-                    >
-                      {copied ? <Check className="w-3.5 h-3.5 mr-2" /> : <Copy className="w-3.5 h-3.5 mr-2" />}
-                      {copied ? 'Copied' : 'Copy Full Text'}
-                    </Button>
-                  </div>
-                </div>
-              )}
             </div>
           </div>
+
+          {(() => {
+            const activeDraft = draftVersion === '2' ? draftLead?.email_2_draft : draftLead?.email_draft
+            return (
+              <div className="flex-1 overflow-y-auto p-8 space-y-6">
+                {/* Subject Line Display */}
+                <div className="space-y-2">
+                  <label className="text-[10px] font-outfit uppercase tracking-widest text-silver/30 pl-1">Subject Line</label>
+                  <div className={cn(
+                    "p-4 border rounded-2xl font-outfit text-silver/80 text-sm italic",
+                    draftVersion === '2' ? "bg-amber-400/5 border-amber-400/10" : "bg-obsidian/60 border-white/5"
+                  )}>
+                    {activeDraft?.match(/^Subject:\s*(.*)$/m)?.[1] || "No subject detected"}
+                  </div>
+                </div>
+
+                {/* Content Area */}
+                <div className="space-y-2 group">
+                  <div className="flex justify-between items-center pl-1">
+                    <label className="text-[10px] font-outfit uppercase tracking-widest text-silver/30">Email Body</label>
+                    {!editingDraft && (
+                      <button
+                        onClick={() => {
+                          setEditingDraft(activeDraft || '')
+                          if (draftVersion === '1') {
+                            const fw = draftLead?.email_framework
+                            setSelectedFramework(fw === 'legacy' || fw === '3-sentence' ? fw : '3-sentence')
+                          }
+                        }}
+                        className={cn(
+                          "flex items-center gap-1.5 text-[10px] transition-colors uppercase tracking-widest font-bold",
+                          draftVersion === '2'
+                            ? "text-amber-400/60 hover:text-amber-400"
+                            : "text-emerald/60 hover:text-emerald"
+                        )}
+                      >
+                        <Pencil className="w-3 h-3" /> Edit Draft
+                      </button>
+                    )}
+                  </div>
+
+                  {editingDraft !== null ? (
+                    <div className="space-y-4">
+                      {draftVersion === '1' && (
+                        <div className="flex gap-4 mb-2">
+                          <button
+                            onClick={() => setSelectedFramework('3-sentence')}
+                            className={cn("text-xs px-4 py-2 rounded-xl transition-colors font-outfit font-medium border", selectedFramework === '3-sentence' ? "bg-emerald/20 border-emerald/50 text-emerald" : "bg-obsidian border-white/10 text-silver/60 hover:text-white")}
+                          >
+                            3-Sentence Framework (B-C-O)
+                          </button>
+                          <button
+                            onClick={() => setSelectedFramework('legacy')}
+                            className={cn("text-xs px-4 py-2 rounded-xl transition-colors font-outfit font-medium border", selectedFramework === 'legacy' ? "bg-emerald/20 border-emerald/50 text-emerald" : "bg-obsidian border-white/10 text-silver/60 hover:text-white")}
+                          >
+                            Legacy Framework
+                          </button>
+                        </div>
+                      )}
+
+                      {draftVersion === '1' && selectedFramework === '3-sentence' && (
+                        <div className="bg-emerald/5 border border-emerald/20 p-4 rounded-xl space-y-2 text-xs text-silver/80">
+                          <p className="font-bold text-emerald">3-Sentence B-C-O Framework Guide:</p>
+                          <ul className="list-disc pl-4 space-y-1">
+                            <li><span className="text-white">Sentence 1 (Buyer):</span> Call out their identity/niche/role implicitly. Focus on context, not general traits.</li>
+                            <li><span className="text-white">Sentence 2 (Constraint):</span> Define the exact structural problem creating the gap.</li>
+                            <li><span className="text-white">Sentence 3 (Outcome):</span> Explain how your system bypasses the constraint to make the outcome inevitable. Suggest a quick chat.</li>
+                          </ul>
+                        </div>
+                      )}
+
+                      <textarea
+                        autoFocus
+                        value={editingDraft}
+                        onChange={(e) => setEditingDraft(e.target.value)}
+                        className={cn(
+                          "w-full h-[400px] rounded-2xl p-6 font-mono text-xs text-silver/90 outline-none resize-none leading-relaxed bg-obsidian/60 border",
+                          draftVersion === '2'
+                            ? "border-amber-400/20 focus:border-amber-400/50"
+                            : "border-emerald/20 focus:border-emerald/50"
+                        )}
+                      />
+                      <div className="flex justify-end gap-2">
+                        <Button variant="ghost" size="sm" onClick={() => setEditingDraft(null)} className="text-silver/40 hover:text-silver/60 rounded-xl">
+                          Cancel
+                        </Button>
+                        <Button
+                          size="sm"
+                          onClick={handleSaveDraft}
+                          disabled={isSavingDraft}
+                          className={cn(
+                            "font-bold rounded-xl px-6",
+                            draftVersion === '2'
+                              ? "bg-amber-400 text-obsidian hover:bg-amber-300"
+                              : "bg-emerald text-obsidian"
+                          )}
+                        >
+                          {isSavingDraft ? <RefreshCw className="w-3.5 h-3.5 animate-spin mr-2" /> : <Check className="w-3.5 h-3.5 mr-2" />}
+                          Save Changes
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="relative group/content">
+                      <pre className={cn(
+                        "whitespace-pre-wrap font-mono text-xs text-silver/70 border rounded-2xl p-6 leading-relaxed min-h-[300px]",
+                        draftVersion === '2' ? "bg-amber-400/[0.03] border-amber-400/10" : "bg-obsidian/60 border-white/5"
+                      )}>
+                        {activeDraft?.replace(/^Subject:.*$/m, '').trim() || 'No body content available.'}
+                      </pre>
+                      <div className="absolute top-4 right-4 opacity-0 group-hover/content:opacity-100 transition-opacity flex gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleCopyDraft(activeDraft || '')}
+                          className={cn(
+                            "bg-obsidian/80 rounded-xl",
+                            draftVersion === '2'
+                              ? "border-amber-400/20 hover:border-amber-400/40 text-amber-400"
+                              : "border-emerald/20 hover:border-emerald/40 text-emerald"
+                          )}
+                        >
+                          {copied ? <Check className="w-3.5 h-3.5 mr-2" /> : <Copy className="w-3.5 h-3.5 mr-2" />}
+                          {copied ? 'Copied' : 'Copy Full Text'}
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )
+          })()}
 
           {/* Footer Actions */}
           <div className="p-8 border-t border-white/5 bg-obsidian/80 shrink-0 flex justify-between items-center">

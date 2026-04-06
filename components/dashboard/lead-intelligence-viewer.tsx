@@ -86,13 +86,21 @@ function formatNum(n: number): string {
 function B2BLeadIntelPanel({ lead }: { lead: any }) {
     const enrichment = lead.intake_data?.enrichment
     const dm         = enrichment?.decision_maker
-    // Only show IG profile if we have real follower data (followers > 0 means confirmed real profile)
+    const intake     = lead.intake_data || {}
     const igProfileRaw = enrichment?.instagram_profile
-    const igProfile  = igProfileRaw?.followers > 0 ? igProfileRaw : null
-    const igReels    = igProfile ? (enrichment?.instagram_reels || []) : []
+    // Normalize IG profile — handle both old format (username/url/posts_count) and
+    // new format from enrich-leads.mjs (no username, bio_links array, category field)
+    const igHandle = igProfileRaw?.username || intake.instagram_handle || null
+    const igNorm = igProfileRaw && (igProfileRaw.followers > 0 || igHandle) ? {
+        ...igProfileRaw,
+        username: igHandle,
+        url: igProfileRaw.url || (igHandle ? `https://www.instagram.com/${igHandle}/` : null),
+        business_category: igProfileRaw.business_category || igProfileRaw.category || null,
+    } : null
+    const igProfile  = igNorm
+    const igReels    = enrichment?.instagram_reels || []
     const rec        = enrichment?.service_recommendation
     const recReason  = enrichment?.recommendation_reason
-    const intake     = lead.intake_data || {}
     const webIntel   = enrichment?.website_intel
 
     // Compute engagement rate from reels
@@ -189,7 +197,7 @@ function B2BLeadIntelPanel({ lead }: { lead: any }) {
                         {/* Stats row */}
                         <div className="grid grid-cols-3 gap-3 mb-4">
                             <div className="bg-white/[0.03] rounded-xl p-3 text-center">
-                                <div className="text-base font-bold text-silver">{formatNum(igProfile.followers)}</div>
+                                <div className="text-base font-bold text-silver">{igProfile.followers > 0 ? formatNum(igProfile.followers) : '—'}</div>
                                 <div className="text-[10px] text-zinc-500 mt-0.5">Pratioci</div>
                             </div>
                             <div className="bg-white/[0.03] rounded-xl p-3 text-center">
@@ -239,34 +247,46 @@ function B2BLeadIntelPanel({ lead }: { lead: any }) {
                         <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Poslednji Reelsi</span>
                     </div>
                     <div className="divide-y divide-white/[0.04]">
-                        {igReels.map((reel: any, i: number) => (
+                        {igReels.map((reel: any, i: number) => {
+                            const reelUrl = reel.url || (reel.shortcode ? `https://www.instagram.com/reel/${reel.shortcode}/` : null)
+                            return (
                             <div key={i} className="px-5 py-3.5">
                                 {reel.caption && (
                                     <p className="text-xs text-zinc-300 leading-relaxed mb-2 line-clamp-2">
                                         {reel.caption}
                                     </p>
                                 )}
+                                {reel.transcript && (
+                                    <div className="text-[11px] text-zinc-400 leading-relaxed mb-2 bg-white/[0.02] rounded-lg px-3 py-2 border border-white/[0.04] italic">
+                                        🎙 "{reel.transcript.substring(0, 200)}{reel.transcript.length > 200 ? '…' : ''}"
+                                    </div>
+                                )}
                                 <div className="flex items-center gap-4">
-                                    <span className="flex items-center gap-1 text-[11px] text-zinc-500">
-                                        <Heart className="w-3 h-3 text-pink-500/70" /> {formatNum(reel.likes || 0)}
-                                    </span>
-                                    <span className="flex items-center gap-1 text-[11px] text-zinc-500">
-                                        <MessageCircle className="w-3 h-3 text-blue-400/70" /> {formatNum(reel.comments || 0)}
-                                    </span>
+                                    {reel.likes != null && (
+                                        <span className="flex items-center gap-1 text-[11px] text-zinc-500">
+                                            <Heart className="w-3 h-3 text-pink-500/70" /> {formatNum(reel.likes || 0)}
+                                        </span>
+                                    )}
+                                    {reel.comments != null && (
+                                        <span className="flex items-center gap-1 text-[11px] text-zinc-500">
+                                            <MessageCircle className="w-3 h-3 text-blue-400/70" /> {formatNum(reel.comments || 0)}
+                                        </span>
+                                    )}
                                     {reel.views > 0 && (
                                         <span className="flex items-center gap-1 text-[11px] text-zinc-500">
                                             <Eye className="w-3 h-3 text-zinc-500/70" /> {formatNum(reel.views)}
                                         </span>
                                     )}
-                                    {reel.url && (
-                                        <a href={reel.url} target="_blank" rel="noopener noreferrer"
+                                    {reelUrl && (
+                                        <a href={reelUrl} target="_blank" rel="noopener noreferrer"
                                             className="ml-auto text-[10px] text-zinc-600 hover:text-zinc-400 flex items-center gap-0.5">
                                             <Film className="w-3 h-3" /> Otvori
                                         </a>
                                     )}
                                 </div>
                             </div>
-                        ))}
+                            )
+                        })}
                     </div>
                 </motion.div>
             )}
@@ -376,8 +396,8 @@ export function LeadIntelligenceViewer({ lead, isOpen, onClose }: LeadIntelligen
     const [loading, setLoading] = useState(false)
     const supabase = createClient()
 
-    // Detect B2B lead (SmartFlow meta_ads_scrape) vs recruitment lead
-    const isB2BLead = lead?.izvor === 'meta_ads_scrape' || !!lead?.intake_data?.enrichment
+    // Detect B2B lead (SmartFlow outreach) vs recruitment lead
+    const isB2BLead = lead?.izvor === 'meta_ads_scrape' || lead?.izvor === 'Chatbot Outreach' || !!lead?.intake_data?.enrichment || !!lead?.email_draft
 
     useEffect(() => {
         if (lead && isOpen && !isB2BLead) {

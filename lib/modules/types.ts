@@ -7,6 +7,7 @@ export type ModuleKey =
   | 'linkedin-agent'
   | 'agent-database'
   | 'agent-leads'
+  | 'leads'
   | 'social-chatbot'
   | 'website-chatbot'
   | 'chatbot-analytics'
