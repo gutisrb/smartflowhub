@@ -55,7 +55,9 @@ const modeIdx     = process.argv.indexOf('--mode');
 const MODE        = modeIdx !== -1 ? process.argv[modeIdx + 1] : 'initial'; // 'initial' | 'followup'
 const companyIdx  = process.argv.indexOf('--company');
 const COMPANY     = companyIdx !== -1 ? process.argv[companyIdx + 1] : null;
-const DELAY_MS    = 75_000; // 75s between sends
+const DELAY_MIN_MS = 90_000;  // min 90s between sends
+const DELAY_MAX_MS = 180_000; // max 180s — randomized to look human
+function randomDelay() { return DELAY_MIN_MS + Math.floor(Math.random() * (DELAY_MAX_MS - DELAY_MIN_MS)); }
 
 // ── Ordering ───────────────────────────────────────────────────────────────────
 const KAT_ORDER  = { 'Vreo': 0, 'Topao': 1, 'Hladan': 2 };
@@ -234,8 +236,9 @@ async function main() {
     }
 
     if (i < queue.length - 1 && !isDryRun) {
-      console.log(`  ⏳ ${DELAY_MS / 1000}s before next send…\n`);
-      await sleep(DELAY_MS);
+      const delay = randomDelay();
+      console.log(`  ⏳ ${Math.round(delay / 1000)}s before next send…\n`);
+      await sleep(delay);
     }
   }
 

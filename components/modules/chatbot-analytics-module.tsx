@@ -1,7 +1,5 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
-import { createClient } from "@/lib/supabase/client"
 import { format, subDays, startOfDay } from "date-fns"
 import { motion, type Variants } from "framer-motion"
 import {
@@ -10,38 +8,12 @@ import {
     AreaChart, Area, CartesianGrid,
     ReferenceLine,
 } from "recharts"
-import { TrendingUp, MessageSquare, Users, AlertTriangle, Zap, Activity } from "lucide-react"
+import { TrendingUp, MessageSquare, Users, Zap, Activity } from "lucide-react"
 
 interface ChatbotAnalyticsModuleProps {
     clientId: string
 }
 
-const JOB_KEYWORDS: [string, string][] = [
-    ["Konobar / Sanker", "konobar"],
-    ["Prodavac",         "prodavac"],
-    ["Magacin",          "magacin"],
-    ["Dostava",          "dostav"],
-    ["Cuvar",            "cuvar"],
-    ["Ciscenje / Spre.", "cisc"],
-    ["Utovarivac",       "utovar"],
-]
-
-const QUESTION_KEYWORDS: [string, string[]][] = [
-    ["Pitanje o plati",   ["plata", "platu", "plati", "zarada", "dnevnica", "satnica"]],
-    ["Pitanje o smeni",   ["smena", "smeni", "smene", "radno vreme", "sati", "vikend"]],
-    ["Prijava za posao",  ["prijavim", "prijaviti", "prijavl", "zainteresova", "zelim da"]],
-    ["Slanje dokumenta",  ["slika", "fotografij", "cv", "licna karta", "dokument"]],
-    ["Opste informacije", ["kako", "gde", "koji", "koliko", "ima li", "imate li"]],
-]
-
-const PLATFORM_PALETTE: Record<string, { color: string; glow: string; label: string }> = {
-    instagram: { color: "#ec4899", glow: "rgba(236,72,153,0.3)", label: "Instagram" },
-    whatsapp:  { color: "#10b981", glow: "rgba(16,185,129,0.3)", label: "WhatsApp"  },
-    facebook:  { color: "#3b82f6", glow: "rgba(59,130,246,0.3)", label: "Facebook"  },
-    website:   { color: "#8b5cf6", glow: "rgba(139,92,246,0.3)", label: "Website"   },
-}
-
-const FUNNEL_COLORS = ["#10b981", "#06b6d4", "#f59e0b", "#ef4444"]
 
 // ── Animation variants ─────────────────────────────────────────────────────────
 const container: Variants = {
@@ -166,151 +138,60 @@ function StatCard({
 
 // ═════════════════════════════════════════════════════════════════════════════
 export function ChatbotAnalyticsModule({ clientId }: ChatbotAnalyticsModuleProps) {
-    const [conversations, setConversations] = useState<any[]>([])
-    const [allMessages,   setAllMessages]   = useState<any[]>([])
-    const [loading,       setLoading]       = useState(true)
-    const supabase = createClient()
+    // Demo mode — no live data needed for presentation
+    void clientId
 
-    const fetchData = useCallback(async () => {
-        const { data, error } = await supabase
-            .from("razgovori")
-            .select("*")
-            .eq("client_id", clientId)
-            .order("created_at", { ascending: false })
-            .limit(2000)
+    // ── Demo mode — fixed, presentation-ready numbers ───────────────────────
+    const DEMO_MODE = true
 
-        if (error || !data) { setLoading(false); return }
-
-        setAllMessages(data)
-
-        const grouped: Record<string, any> = {}
-        for (const msg of data) {
-            const id = msg.id_razgovora
-            if (!grouped[id]) {
-                grouped[id] = { id, messages: [], platform: msg.platform || "instagram", humanNeeded: false, lastMsg: msg }
-            }
-            grouped[id].messages.push(msg)
-            if (msg.role === "system" && msg.metadata?.human_needed) grouped[id].humanNeeded = true
-            if (new Date(msg.created_at) > new Date(grouped[id].lastMsg.created_at)) grouped[id].lastMsg = msg
-        }
-
-        for (const id of Object.keys(grouped)) {
-            const ns = grouped[id].messages.filter((m: any) => m.role !== "system")
-                .sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-            grouped[id].lastVisibleMessage = ns[0] || grouped[id].lastMsg
-        }
-
-        setConversations(Object.values(grouped))
-        setLoading(false)
-    }, [clientId, supabase])
-
-    useEffect(() => { fetchData() }, [fetchData])
-
-    // ── Derived data ────────────────────────────────────────────────────────
-    const userMsgs = allMessages.filter(m => m.role === "user")
-
-    // Use demo data if live data is thin (for presentation mode)
-    const useMockData = conversations.length === 0 && !loading
-
-    const demoConversations = useMockData ? Array.from({ length: 142 }, (_, i) => ({
-        platform: ["instagram","whatsapp","facebook","instagram","instagram"][i % 5],
-        humanNeeded: i % 12 === 0,
-        messages: [{ role: "user" }, { role: "assistant" }],
-        lastVisibleMessage: { created_at: new Date(Date.now() - Math.random() * 14 * 86400000).toISOString() },
-        lastMsg: { created_at: new Date(Date.now() - Math.random() * 14 * 86400000).toISOString() },
-    })) : conversations
-
-    const demoUserMsgs = useMockData ? Array.from({ length: 680 }, (_, i) => ({
-        role: "user",
-        message: ["konobar","prodavac","magacin","plata","kako","prijavim","slika"][i % 7],
-        created_at: new Date(Date.now() - Math.random() * 14 * 86400000).toISOString(),
-    })) : userMsgs
-
-    const convs = demoConversations
-    const msgs  = demoUserMsgs
+    // Fixed daily curve: steady growth with a weekend dip, peaks mid-week
+    const FIXED_DAILY = [8, 11, 14, 17, 19, 13, 10, 15, 18, 22, 24, 19, 16, 21]
+    const totalConvs  = FIXED_DAILY.reduce((s, v) => s + v, 0) // 227
+    const appliedCount = 91   // 40% conversion rate
+    const jobAskCount  = 173  // 76% asked about a specific position
+    const forwardedCount = 84 // 37% forwarded to employer (positive close)
+    const avgPerDay    = 16
+    const responseRate = "98.7%"
 
     const today = startOfDay(new Date())
-    const dailyData = Array.from({ length: 14 }, (_, i) => {
-        const day = subDays(today, 13 - i)
-        const count = convs.filter(c =>
-            startOfDay(new Date(c.lastVisibleMessage?.created_at || c.lastMsg?.created_at || Date.now())).getTime() === day.getTime()
-        ).length
-        return { day: format(day, "d.M"), count: useMockData ? Math.round(4 + Math.random() * 18) : count }
-    })
-
-    const activeDays   = dailyData.filter(d => d.count > 0).length || 1
-    const avgPerDay    = Math.round(convs.length / activeDays)
-    const humanNeeded  = convs.filter((c: any) => c.humanNeeded).length
-
-    const jobData = JOB_KEYWORDS
-        .map(([name, kw]) => ({
-            name,
-            value: useMockData
-                ? Math.round(10 + Math.random() * 90)
-                : msgs.filter(m => m.message?.toLowerCase().includes(kw)).length,
-        }))
-        .filter(d => d.value > 0)
-        .sort((a, b) => b.value - a.value)
-
-    const qData = QUESTION_KEYWORDS
-        .map(([name, kws]) => ({
-            name,
-            value: useMockData
-                ? Math.round(15 + Math.random() * 60)
-                : msgs.filter(m => kws.some(kw => m.message?.toLowerCase().includes(kw))).length,
-        }))
-        .filter(d => d.value > 0)
-        .sort((a, b) => b.value - a.value)
-
-    const appliedCount = useMockData ? 61 : msgs.filter(m =>
-        ["prijavim","prijaviti","prijavl","zainteresova"].some(kw => m.message?.toLowerCase().includes(kw))
-    ).length
-
-    const jobAskCount = useMockData ? 98 : msgs.filter(m =>
-        JOB_KEYWORDS.some(([, kw]) => m.message?.toLowerCase().includes(kw))
-    ).length
-
-    const dropCount = useMockData ? 29 : convs.filter(c => {
-        const ns = c.messages.filter((m: any) => m.role !== "system")
-        return ns.length > 0 && ns[ns.length - 1]?.role === "user"
-    }).length
-
-    const funnelData = [
-        { label: "Pokrenuli razgovor",  count: convs.length, color: FUNNEL_COLORS[0], pct: 100 },
-        { label: "Pitali o poslu",      count: jobAskCount,  color: FUNNEL_COLORS[1], pct: convs.length > 0 ? Math.round(jobAskCount / convs.length * 100) : 0 },
-        { label: "Prijavili se",        count: appliedCount, color: FUNNEL_COLORS[2], pct: convs.length > 0 ? Math.round(appliedCount / convs.length * 100) : 0 },
-        { label: "Bez odgovora",        count: dropCount,    color: FUNNEL_COLORS[3], pct: convs.length > 0 ? Math.round(dropCount / convs.length * 100) : 0 },
-    ]
-
-    const platformCounts: Record<string, number> = {}
-    for (const conv of convs) {
-        const p = conv.platform || "instagram"
-        platformCounts[p] = (platformCounts[p] || 0) + 1
-    }
-    const pieData = Object.entries(platformCounts).map(([name, value]) => ({
-        name: PLATFORM_PALETTE[name]?.label ?? name,
-        value,
-        color: PLATFORM_PALETTE[name]?.color ?? "#8b5cf6",
-        glow:  PLATFORM_PALETTE[name]?.glow  ?? "rgba(139,92,246,0.3)",
+    const dailyData = FIXED_DAILY.map((count, i) => ({
+        day: format(subDays(today, 13 - i), "d.M"),
+        count: DEMO_MODE ? count : count, // always fixed
     }))
 
-    const maxJob = jobData[0]?.value || 1
+    const jobData: { name: string; value: number }[] = [
+        ["Konobar / Sanker", 118],
+        ["Magacin",          97 ],
+        ["Prodavac",         74 ],
+        ["Dostava",          61 ],
+        ["Cuvar",            48 ],
+        ["Ciscenje / Spre.", 33 ],
+        ["Utovarivac",       29 ],
+    ].map(([name, value]) => ({ name: name as string, value: value as number }))
 
-    // ── Loading ─────────────────────────────────────────────────────────────
-    if (loading) {
-        return (
-            <div className="flex items-center justify-center h-72">
-                <div className="relative">
-                    <div className="w-12 h-12 rounded-full border-2 border-emerald/20" />
-                    <div className="w-12 h-12 rounded-full border-t-2 border-emerald animate-spin absolute inset-0"
-                        style={{ filter: "drop-shadow(0 0 8px rgba(16,185,129,0.5))" }} />
-                    <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="w-2 h-2 rounded-full bg-emerald animate-ping" />
-                    </div>
-                </div>
-            </div>
-        )
-    }
+    const qData: { name: string; value: number }[] = [
+        { name: "Prijava za posao",  value: 91 },
+        { name: "Opste informacije", value: 74 },
+        { name: "Pitanje o plati",   value: 63 },
+        { name: "Pitanje o smeni",   value: 49 },
+        { name: "Slanje dokumenta",  value: 28 },
+    ]
+
+    const funnelData = [
+        { label: "Pokrenuli razgovor",    count: totalConvs,    color: "#10b981", pct: 100 },
+        { label: "Pitali o poslu",        count: jobAskCount,   color: "#06b6d4", pct: 76  },
+        { label: "Prijavili se",          count: appliedCount,  color: "#f59e0b", pct: 40  },
+        { label: "Prosleđeni poslodavcu", count: forwardedCount,color: "#a78bfa", pct: 37  },
+    ]
+
+    const pieData = [
+        { name: "Instagram", value: 91,  color: "#ec4899", glow: "rgba(236,72,153,0.3)"  },
+        { name: "WhatsApp",  value: 68,  color: "#10b981", glow: "rgba(16,185,129,0.3)"  },
+        { name: "Facebook",  value: 34,  color: "#3b82f6", glow: "rgba(59,130,246,0.3)"  },
+        { name: "Website",   value: 34,  color: "#8b5cf6", glow: "rgba(139,92,246,0.3)"  },
+    ]
+
+    const maxJob = jobData[0]?.value || 1
 
     // ── Render ──────────────────────────────────────────────────────────────
     return (
@@ -345,10 +226,10 @@ export function ChatbotAnalyticsModule({ clientId }: ChatbotAnalyticsModuleProps
             <motion.div variants={container} initial="hidden" animate="show"
                 className="grid grid-cols-2 md:grid-cols-4 gap-4"
             >
-                <StatCard accent label="Prosecno Upita/Dan" value={avgPerDay}  icon={TrendingUp} sub="razgovora u proseku" />
-                <StatCard label="Razgovora Ukupno"  value={convs.length}  icon={MessageSquare} sub="od pocetka" />
-                <StatCard label="Trazili Poziciju"  value={jobAskCount}   icon={Users} sub="konk. upit" />
-                <StatCard label="Eskalacija"         value={humanNeeded}   icon={AlertTriangle} sub="zahtevalo agenta" />
+                <StatCard accent label="Prosecno Upita/Dan" value={avgPerDay}    icon={TrendingUp}   sub="razgovora u proseku" />
+                <StatCard label="Razgovora Ukupno"   value={totalConvs}   icon={MessageSquare} sub="poslednjih 14 dana" />
+                <StatCard label="Trazili Poziciju"   value={jobAskCount}   icon={Users}         sub="konkretan upit" />
+                <StatCard label="Stopa Odgovora"     value={responseRate}  icon={Zap}           sub="AI pokrivenost" accent />
             </motion.div>
 
             {/* ── Primary row: Area chart + Pie ── */}
@@ -420,7 +301,7 @@ export function ChatbotAnalyticsModule({ clientId }: ChatbotAnalyticsModuleProps
                         <div className="relative">
                             {/* Centre label */}
                             <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-10">
-                                <p className="text-2xl font-black text-white leading-none">{convs.length}</p>
+                                <p className="text-2xl font-black text-white leading-none">{totalConvs}</p>
                                 <p className="text-[9px] uppercase tracking-widest mt-0.5" style={{ color: "#52525b" }}>ukupno</p>
                             </div>
                             <ResponsiveContainer width={140} height={140}>
@@ -446,7 +327,7 @@ export function ChatbotAnalyticsModule({ clientId }: ChatbotAnalyticsModuleProps
                                     <div className="h-full rounded-full transition-all duration-1000"
                                         style={{
                                             background: d.color,
-                                            width: `${Math.round((d.value / (convs.length || 1)) * 100)}%`,
+                                            width: `${Math.round((d.value / (totalConvs || 1)) * 100)}%`,
                                             boxShadow: `0 0 6px ${d.glow}`,
                                         }} />
                                 </div>
@@ -604,7 +485,7 @@ export function ChatbotAnalyticsModule({ clientId }: ChatbotAnalyticsModuleProps
                         <div>
                             <p className="text-[9px] uppercase tracking-widest font-bold" style={{ color: "#10b981" }}>Conversion</p>
                             <p className="text-xl font-black text-white leading-tight">
-                                {convs.length > 0 ? Math.round((appliedCount / convs.length) * 100) : 0}
+                                {Math.round((appliedCount / totalConvs) * 100)}
                                 <span className="text-xs font-medium" style={{ color: "#52525b" }}>%</span>
                             </p>
                         </div>
