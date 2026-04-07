@@ -1,7 +1,7 @@
 "use client"
 
 import { cn } from "@/lib/utils"
-import { ChevronRight, UserCircle, Database, LayoutDashboard, Zap, BarChart3, Settings, ShieldCheck, Sparkles } from "lucide-react"
+import { ChevronRight, UserCircle, Database, LayoutDashboard, Zap, BarChart3, Settings, ShieldCheck, Sparkles, X } from "lucide-react"
 import { useState, useMemo } from "react"
 import { useUnifiedModules } from "@/lib/modules/hooks"
 import { EnabledModule, ModuleCategory, ModuleKey } from "@/lib/modules/types"
@@ -13,6 +13,8 @@ interface SidebarProps {
   clientId: string | null
   modules?: EnabledModule[]
   loading?: boolean
+  isOpen?: boolean
+  onClose?: () => void
 }
 
 interface CategoryConfig {
@@ -29,7 +31,7 @@ const CATEGORY_CONFIG: CategoryConfig[] = [
   { key: 'settings', label: 'Podešavanja', collapsible: false, icon: Settings },
 ]
 
-export function Sidebar({ currentView, onViewChange, clientName, clientId, modules: propModules, loading: propLoading }: SidebarProps) {
+export function Sidebar({ currentView, onViewChange, clientName, clientId, modules: propModules, loading: propLoading, isOpen, onClose }: SidebarProps) {
   const { modules: hookModules, loading: hookLoading } = useUnifiedModules(propModules ? null : clientId)
 
   const modules = propModules || hookModules
@@ -60,9 +62,21 @@ export function Sidebar({ currentView, onViewChange, clientName, clientId, modul
     })
   }
 
+  // Shared wrapper classes — desktop: in-flow; mobile: fixed drawer
+  const wrapperClass = cn(
+    // Mobile: fixed drawer that slides in/out
+    "fixed inset-y-0 left-0 z-50 flex flex-col glass-panel overflow-hidden transition-transform duration-300 ease-in-out",
+    "w-[280px] md:w-72",
+    // Mobile slide
+    isOpen ? "translate-x-0" : "-translate-x-full",
+    // Desktop: reset to in-flow positioning
+    "md:relative md:translate-x-0 md:inset-auto md:z-20 md:m-4 md:mr-0 md:rounded-3xl md:h-[calc(100vh-2rem)]",
+    "group/sidebar animate-in slide-in-from-left-8 duration-700 ease-out"
+  )
+
   if (loading) {
     return (
-      <div className="w-72 m-4 glass-panel rounded-3xl flex flex-col h-[calc(100vh-2rem)] overflow-hidden">
+      <div className={wrapperClass}>
         <div className="p-8 pb-4">
           <div className="w-12 h-12 bg-emerald/10 rounded-2xl animate-pulse" />
         </div>
@@ -76,23 +90,34 @@ export function Sidebar({ currentView, onViewChange, clientName, clientId, modul
   }
 
   return (
-    <div className="w-72 m-4 mr-0 glass-panel rounded-3xl flex flex-col h-[calc(100vh-2rem)] relative overflow-hidden group/sidebar animate-in slide-in-from-left-8 duration-700 ease-out z-20">
+    <div className={wrapperClass}>
       <div className="absolute inset-0 bg-gradient-to-b from-emerald/5 to-transparent pointer-events-none opacity-50" />
 
-      <div className="p-8 pb-6 relative z-10">
-        <div className="flex items-center gap-4 group cursor-pointer">
-          <div className="relative">
-            <div className="w-12 h-12 rounded-2xl bg-emerald flex items-center justify-center shadow-[0_0_20px_oklch(0.75_0.15_160_/_0.3)] group-hover:scale-110 transition-transform duration-500 overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-tr from-black/20 to-transparent" />
-              <ShieldCheck className="w-6 h-6 text-obsidian relative z-10" />
-              <div className="absolute inset-x-0 bottom-0 h-1/2 bg-white/10 blur-md translate-y-full group-hover:translate-y-0 transition-transform duration-700" />
+      <div className="p-6 md:p-8 pb-6 relative z-10">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4 group cursor-pointer">
+            <div className="relative">
+              <div className="w-10 h-10 md:w-12 md:h-12 rounded-2xl bg-emerald flex items-center justify-center shadow-[0_0_20px_oklch(0.75_0.15_160_/_0.3)] group-hover:scale-110 transition-transform duration-500 overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-tr from-black/20 to-transparent" />
+                <ShieldCheck className="w-5 h-5 md:w-6 md:h-6 text-obsidian relative z-10" />
+                <div className="absolute inset-x-0 bottom-0 h-1/2 bg-white/10 blur-md translate-y-full group-hover:translate-y-0 transition-transform duration-700" />
+              </div>
+              <div className="absolute -top-1 -right-1 w-3 h-3 bg-emerald border-2 border-obsidian rounded-full animate-pulse" />
             </div>
-            <div className="absolute -top-1 -right-1 w-3 h-3 bg-emerald border-2 border-obsidian rounded-full animate-pulse" />
+            <div className="flex flex-col">
+              <span className="text-xs font-bold text-emerald uppercase tracking-[0.2em] leading-none mb-1">Smartflow</span>
+              <span className="text-lg md:text-xl font-outfit font-medium text-silver tracking-tight leading-none group-hover:text-white transition-colors">Dashboard</span>
+            </div>
           </div>
-          <div className="flex flex-col">
-            <span className="text-xs font-bold text-emerald uppercase tracking-[0.2em] leading-none mb-1">Smartflow</span>
-            <span className="text-xl font-outfit font-medium text-silver tracking-tight leading-none group-hover:text-white transition-colors">Dashboard</span>
-          </div>
+          {/* Close button — mobile only */}
+          {onClose && (
+            <button
+              onClick={onClose}
+              className="md:hidden p-2 rounded-xl text-zinc-500 hover:text-white hover:bg-white/10 transition-all duration-200"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          )}
         </div>
       </div>
 

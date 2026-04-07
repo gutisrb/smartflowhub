@@ -7,14 +7,13 @@ import { Sidebar } from "@/components/dashboard/sidebar"
 import { useUnifiedModules } from "@/lib/modules/hooks"
 import { ModuleKey } from "@/lib/modules/types"
 import { Button } from "@/components/ui/button"
-import { LogOut, Bell, Search, Sparkles } from "lucide-react"
+import { LogOut, Bell, Search, Sparkles, Menu } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 // Import module components
 import { PipelineModule } from "@/components/modules/pipeline-module"
 import { GrowthEngineModule } from "@/components/modules/growth-engine-module"
 import { EmailOutreachModule } from "@/components/modules/email-outreach-module"
-import { LinkedInAgentModule } from "@/components/modules/linkedin-agent-module"
 import { SocialChatbotModule } from "@/components/modules/social-chatbot-module"
 import { WebsiteChatbotModule } from "@/components/modules/website-chatbot-module"
 import { AgentDatabaseModule } from "@/components/modules/agent-database-module"
@@ -27,6 +26,7 @@ export default function DashboardPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [clientName, setClientName] = useState("")
   const [userEmail, setUserEmail] = useState<string | null>(null)
+  const [sidebarOpen, setSidebarOpen] = useState(false)
 
   const supabase = createClient()
   const { modules: availableModules, loading: isLoading } = useUnifiedModules(clientId)
@@ -150,8 +150,6 @@ export default function DashboardPage() {
           clientId={clientId}
           tableName="kontakti"
         />
-      case 'linkedin-agent':
-        return <LinkedInAgentModule clientId={clientId} />
       case 'agent-database':
         return <AgentDatabaseModule clientId={clientId} terminology={terminology} />
       case 'agent-leads':
@@ -181,29 +179,45 @@ export default function DashboardPage() {
     <div className="flex h-screen bg-mesh overflow-hidden font-sans">
       <div className="absolute inset-0 bg-obsidian/40 backdrop-blur-[2px] pointer-events-none" />
 
+      {/* Mobile overlay backdrop */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm md:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
       {isAuthenticated && (
         <Sidebar
           currentView={activeModule}
-          onViewChange={setActiveModule}
+          onViewChange={(view) => { setActiveModule(view); setSidebarOpen(false) }}
           clientName={clientName}
           clientId={clientId}
           modules={filteredModules}
           loading={isLoading}
+          isOpen={sidebarOpen}
+          onClose={() => setSidebarOpen(false)}
         />
       )}
 
-      <main className="flex-1 flex flex-col overflow-hidden relative z-10 p-4 pl-0">
-        <div className="flex-1 flex flex-col glass-panel rounded-[2rem] overflow-hidden shadow-[0_0_50px_-12px_rgba(0,0,0,0.5)] border border-white/5">
-          <header className="h-20 flex items-center justify-between px-10 shrink-0 border-b border-white/5 bg-white/[0.02]">
-            <div className="flex items-center gap-6">
-              <div className="flex flex-col">
-                <h1 className="text-2xl font-outfit font-light text-silver tracking-tight">
-                  {getModuleLabel()}
-                </h1>
-              </div>
+      <main className="flex-1 flex flex-col overflow-hidden relative z-10 p-2 md:p-4 md:pl-0">
+        <div className="flex-1 flex flex-col glass-panel rounded-2xl md:rounded-[2rem] overflow-hidden shadow-[0_0_50px_-12px_rgba(0,0,0,0.5)] border border-white/5">
+          {/* Header */}
+          <header className="h-14 md:h-20 flex items-center justify-between px-4 md:px-10 shrink-0 border-b border-white/5 bg-white/[0.02] gap-3">
+            <div className="flex items-center gap-3">
+              {/* Hamburger — mobile only */}
+              <button
+                className="md:hidden p-2 rounded-xl bg-white/5 border border-white/10 text-zinc-400 hover:text-emerald hover:border-emerald/30 transition-all duration-200 shrink-0"
+                onClick={() => setSidebarOpen(true)}
+              >
+                <Menu className="w-5 h-5" />
+              </button>
+              <h1 className="text-base md:text-2xl font-outfit font-light text-silver tracking-tight truncate">
+                {getModuleLabel()}
+              </h1>
             </div>
 
-            <div className="flex items-center gap-6">
+            <div className="flex items-center gap-2 md:gap-6">
               <div className="hidden lg:flex items-center gap-2 px-4 py-2 bg-white/5 rounded-full border border-white/5 focus-within:border-emerald/30 transition-all duration-300">
                 <Search className="w-4 h-4 text-zinc-500" />
                 <input
@@ -213,16 +227,16 @@ export default function DashboardPage() {
                 />
               </div>
 
-              <div className="flex items-center gap-4">
-                <button className="p-2.5 rounded-xl bg-white/5 border border-white/10 text-zinc-400 hover:text-emerald hover:border-emerald/30 transition-all duration-300 relative group">
-                  <Bell className="w-5 h-5" />
-                  <span className="absolute top-2.5 right-2.5 w-1.5 h-1.5 bg-emerald rounded-full shadow-[0_0_10px_oklch(0.75_0.15_160)]" />
+              <div className="flex items-center gap-2 md:gap-4">
+                <button className="p-2 md:p-2.5 rounded-xl bg-white/5 border border-white/10 text-zinc-400 hover:text-emerald hover:border-emerald/30 transition-all duration-300 relative group">
+                  <Bell className="w-4 h-4 md:w-5 md:h-5" />
+                  <span className="absolute top-2 right-2 w-1.5 h-1.5 bg-emerald rounded-full shadow-[0_0_10px_oklch(0.75_0.15_160)]" />
                 </button>
 
                 <div className="h-8 w-px bg-white/10 hidden sm:block" />
 
-                <div className="flex items-center gap-4 group cursor-pointer">
-                  <div className="flex flex-col items-end hidden sm:flex">
+                <div className="flex items-center gap-2 md:gap-4 group cursor-pointer">
+                  <div className="hidden md:flex flex-col items-end">
                     <span className="text-sm font-medium text-silver group-hover:text-emerald transition-colors">{clientName}</span>
                     <span className="text-[10px] text-zinc-500 uppercase tracking-widest font-bold">Node Primary</span>
                   </div>
@@ -230,16 +244,17 @@ export default function DashboardPage() {
                     variant="ghost"
                     size="icon"
                     onClick={handleLogout}
-                    className="rounded-xl hover:bg-rose-500/10 hover:text-rose-400 border border-transparent hover:border-rose-500/20 transition-all duration-300"
+                    className="rounded-xl hover:bg-rose-500/10 hover:text-rose-400 border border-transparent hover:border-rose-500/20 transition-all duration-300 w-8 h-8 md:w-10 md:h-10"
                   >
-                    <LogOut className="w-5 h-5" />
+                    <LogOut className="w-4 h-4 md:w-5 md:h-5" />
                   </Button>
                 </div>
               </div>
             </div>
           </header>
 
-          <div className="flex-1 overflow-y-auto p-10 scrollbar-none custom-scrollbar pb-32">
+          {/* Content */}
+          <div className="flex-1 overflow-y-auto p-3 md:p-10 scrollbar-none custom-scrollbar pb-24 md:pb-32">
             <div className="max-w-[1600px] mx-auto">
               {isLoading ? (
                 <div className="flex h-[60vh] items-center justify-center">
@@ -262,12 +277,41 @@ export default function DashboardPage() {
                   {renderModule()}
                 </div>
               ) : (
-                <div className="flex h-full items-center justify-center glass-card p-12 rounded-3xl">
-                  <p className="text-zinc-500 italic font-light tracking-wide">Awaiting secure handshake with client node...</p>
+                <div className="flex h-full items-center justify-center glass-card p-8 rounded-3xl">
+                  <p className="text-zinc-500 italic font-light tracking-wide text-sm text-center">Awaiting secure handshake with client node...</p>
                 </div>
               )}
             </div>
           </div>
+
+          {/* Mobile bottom nav */}
+          {isAuthenticated && filteredModules.length > 0 && (
+            <div className="md:hidden shrink-0 border-t border-white/5 bg-obsidian/80 backdrop-blur-xl">
+              <div className="flex overflow-x-auto scrollbar-none px-2 py-2 gap-1">
+                {filteredModules.map(mod => {
+                  const Icon = mod.icon
+                  const isActive = activeModule === mod.key
+                  return (
+                    <button
+                      key={mod.key}
+                      onClick={() => { setActiveModule(mod.key); setSidebarOpen(false) }}
+                      className={cn(
+                        "flex flex-col items-center gap-1 px-3 py-2 rounded-xl shrink-0 transition-all duration-200 min-w-[60px]",
+                        isActive
+                          ? "bg-emerald text-obsidian"
+                          : "text-zinc-500 hover:text-white hover:bg-white/5"
+                      )}
+                    >
+                      <Icon className="w-4 h-4" />
+                      <span className="text-[9px] font-bold uppercase tracking-wide leading-none whitespace-nowrap">
+                        {mod.displayName.split(' ')[0]}
+                      </span>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+          )}
         </div>
       </main>
 

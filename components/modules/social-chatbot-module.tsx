@@ -7,10 +7,164 @@ import { format, subDays } from "date-fns"
 import {
     MessageCircle, Instagram, Facebook, Bot, AlertTriangle, CheckCircle2,
     Inbox, TrendingUp, UserCheck, Globe, Phone, Hash, ExternalLink,
-    Shield, Wifi, Clock, ChevronRight
+    Wifi, Clock
 } from "lucide-react"
 import { motion } from "framer-motion"
 import { cn } from "@/lib/utils"
+
+// ── Demo mode ────────────────────────────────────────────────────────────────
+const DEMO_MODE = true
+
+function td(hoursBack: number, minutesBack = 0) {
+    const d = new Date()
+    d.setHours(d.getHours() - hoursBack, d.getMinutes() - minutesBack, 0, 0)
+    return d.toISOString()
+}
+function yd(hour: number, min = 0) {
+    const d = new Date(); d.setDate(d.getDate() - 1); d.setHours(hour, min, 0, 0); return d.toISOString()
+}
+
+function generateMockData() {
+    const CID = "demo"
+    const msg = (id: string, role: string, text: string, ts: string, platform: string, name: string, pic: string, extra?: any) => ({
+        id: `${id}-${role}-${ts}`, id_razgovora: id, role, message: text,
+        metadata: { name, profile_pic: pic, ...extra }, platform, client_id: CID, created_at: ts,
+    })
+
+    const convDefs = [
+        // Instagram (6 = 40%)
+        { id: "ig_marko", platform: "instagram", name: "Marko Petrović", pic: "https://randomuser.me/api/portraits/men/32.jpg", humanNeeded: false, phone: "065/123-456", msgs: [
+            msg("ig_marko","user","Zdravo! Tražim posao u magacinu, da li imate nešto u Novom Sadu?",td(6,10),"instagram","Marko Petrović","https://randomuser.me/api/portraits/men/32.jpg"),
+            msg("ig_marko","assistant","Zdravo Marko! Imamo otvorenu poziciju magacionera u Novom Sadu, plata 72.000 din, rad u smenama. Koji shift vam odgovara?",td(6,8),"instagram","Marko Petrović","https://randomuser.me/api/portraits/men/32.jpg"),
+            msg("ig_marko","user","Zanima me noćna smena, 20-04h",td(6,5),"instagram","Marko Petrović","https://randomuser.me/api/portraits/men/32.jpg"),
+            msg("ig_marko","assistant","Noćna smena je slobodna. Koliko imate godina i da li imate iskustvo u magacinskom poslovanju?",td(6,3),"instagram","Marko Petrović","https://randomuser.me/api/portraits/men/32.jpg"),
+            msg("ig_marko","user","24 godine, radio sam godinu dana u DHL-u",td(5,55),"instagram","Marko Petrović","https://randomuser.me/api/portraits/men/32.jpg"),
+            msg("ig_marko","assistant","Odlično iskustvo! Da li biste se prijavili? Trebam vaš broj telefona da povežemo sa poslodavcem.",td(5,53),"instagram","Marko Petrović","https://randomuser.me/api/portraits/men/32.jpg"),
+            msg("ig_marko","user","Da, prijavim se! 065/123-456",td(5,50),"instagram","Marko Petrović","https://randomuser.me/api/portraits/men/32.jpg"),
+            msg("ig_marko","assistant","Hvala Marko! Vaš kontakt je evidentiran. Koordinator će vas pozvati u roku od 24h. 🎯",td(5,48),"instagram","Marko Petrović","https://randomuser.me/api/portraits/men/32.jpg"),
+        ]},
+        { id: "ig_stefan", platform: "instagram", name: "Stefan Nikolić", pic: "https://randomuser.me/api/portraits/men/67.jpg", humanNeeded: true, phone: null, msgs: [
+            msg("ig_stefan","user","Zdravo, imam pitanje o isplati za prethodni period, mislim da mi nešto nedostaje",td(5,30),"instagram","Stefan Nikolić","https://randomuser.me/api/portraits/men/67.jpg"),
+            msg("ig_stefan","assistant","Zdravo Stefan! Razumem situaciju. Ovo zahteva uvid u vaš dosije — prosleđujem vas koordinatoru koji će vas kontaktirati danas.",td(5,28),"instagram","Stefan Nikolić","https://randomuser.me/api/portraits/men/67.jpg"),
+            msg("ig_stefan","user","Hvala, čekam poziv onda",td(5,25),"instagram","Stefan Nikolić","https://randomuser.me/api/portraits/men/67.jpg"),
+        ]},
+        { id: "ig_jelena", platform: "instagram", name: "Jelena Popović", pic: "https://randomuser.me/api/portraits/women/35.jpg", humanNeeded: false, phone: null, msgs: [
+            msg("ig_jelena","user","Dobar dan, imam iskustvo kuvara 5 godina, da li tražite nekoga?",td(4,45),"instagram","Jelena Popović","https://randomuser.me/api/portraits/women/35.jpg"),
+            msg("ig_jelena","assistant","Dobar dan Jelena! Odlično iskustvo. Imamo otvorenu poziciju kuvara u restoranu u centru Beograda. Koja je vaša specijalnost?",td(4,43),"instagram","Jelena Popović","https://randomuser.me/api/portraits/women/35.jpg"),
+            msg("ig_jelena","user","Mediteranska i italijanska kuhinja uglavnom",td(4,40),"instagram","Jelena Popović","https://randomuser.me/api/portraits/women/35.jpg"),
+            msg("ig_jelena","assistant","Savršeno! Restoran traži upravo to. Plata 90.000 din + bonusi. Da li vas zanima formalni razgovor?",td(4,38),"instagram","Jelena Popović","https://randomuser.me/api/portraits/women/35.jpg"),
+            msg("ig_jelena","user","Da apsolutno! Kada i gde?",td(4,35),"instagram","Jelena Popović","https://randomuser.me/api/portraits/women/35.jpg"),
+        ]},
+        { id: "ig_maja", platform: "instagram", name: "Maja Stanković", pic: "https://randomuser.me/api/portraits/women/42.jpg", humanNeeded: false, phone: null, msgs: [
+            msg("ig_maja","user","Zdravo, završila sam turizam, tražim posao u hotelu",td(3,15),"instagram","Maja Stanković","https://randomuser.me/api/portraits/women/42.jpg"),
+            msg("ig_maja","assistant","Zdravo Maja! Imamo otvorene pozicije u hotelima u Beogradu i na Zlatiboru. Šta preferirate?",td(3,13),"instagram","Maja Stanković","https://randomuser.me/api/portraits/women/42.jpg"),
+            msg("ig_maja","user","Zlatibor bi bio super, obožavam planinu 🏔️",td(3,10),"instagram","Maja Stanković","https://randomuser.me/api/portraits/women/42.jpg"),
+            msg("ig_maja","assistant","Divno! Imamo poziciju na recepciji hotela 4* na Zlatiboru, plata 65.000 + smeštaj uključen. Zanima vas?",td(3,8),"instagram","Maja Stanković","https://randomuser.me/api/portraits/women/42.jpg"),
+            msg("ig_maja","user","Da, apsolutno! Kada može razgovor?",td(3,5),"instagram","Maja Stanković","https://randomuser.me/api/portraits/women/42.jpg"),
+        ]},
+        { id: "ig_filip", platform: "instagram", name: "Filip Radović", pic: "https://randomuser.me/api/portraits/men/9.jpg", humanNeeded: false, phone: null, msgs: [
+            msg("ig_filip","user","Ima li posla promotera vikendum, student sam",yd(14,20),"instagram","Filip Radović","https://randomuser.me/api/portraits/men/9.jpg"),
+            msg("ig_filip","assistant","Zdravo Filip! Da, vikend promoteri su nam uvek potrebni. Plata 3.500 din po danu. Imaš li iskustvo?",yd(14,18),"instagram","Filip Radović","https://randomuser.me/api/portraits/men/9.jpg"),
+            msg("ig_filip","user","Imam, radio sam prošle godine na sličnom, super mi je bilo",yd(14,15),"instagram","Filip Radović","https://randomuser.me/api/portraits/men/9.jpg"),
+            msg("ig_filip","assistant","Super! Upisujem te u bazu. Kada možeš da počneš?",yd(14,13),"instagram","Filip Radović","https://randomuser.me/api/portraits/men/9.jpg"),
+        ]},
+        { id: "ig_ivan", platform: "instagram", name: "Ivan Marković", pic: "https://randomuser.me/api/portraits/men/24.jpg", humanNeeded: false, phone: null, msgs: [
+            msg("ig_ivan","user","Tražim posao obezbeđenja, imam licencu",yd(18,30),"instagram","Ivan Marković","https://randomuser.me/api/portraits/men/24.jpg"),
+            msg("ig_ivan","assistant","Zdravo Ivan! Sa licencom imate prednost. Imamo pozicije u tržnim centrima i bankama. Da li preferirate stacionarno ili mobilno obezbeđenje?",yd(18,28),"instagram","Ivan Marković","https://randomuser.me/api/portraits/men/24.jpg"),
+            msg("ig_ivan","user","Stacionarno, TC ili slično",yd(18,25),"instagram","Ivan Marković","https://randomuser.me/api/portraits/men/24.jpg"),
+            msg("ig_ivan","assistant","Razumem. Imamo poziciju u Delta City-ju, 12h smene, plata 78.000. Interesuje vas?",yd(18,23),"instagram","Ivan Marković","https://randomuser.me/api/portraits/men/24.jpg"),
+        ]},
+        // WhatsApp (5 = 33%)
+        { id: "wa_ana", platform: "whatsapp", name: "Ana Đorđević", pic: "https://randomuser.me/api/portraits/women/44.jpg", humanNeeded: false, phone: "064/987-654", msgs: [
+            msg("wa_ana","user","Pozdrav, tražim posao konobarice, ima li nešto u Beogradu?",td(5,0),"whatsapp","Ana Đorđević","https://randomuser.me/api/portraits/women/44.jpg"),
+            msg("wa_ana","assistant","Zdravo Ana! Da, imamo više otvorenih pozicija. Da li preferirate dnevnu ili noćnu smenu?",td(4,58),"whatsapp","Ana Đorđević","https://randomuser.me/api/portraits/women/44.jpg"),
+            msg("wa_ana","user","Dnevnu, od 8 do 16 ili 12 do 20",td(4,55),"whatsapp","Ana Đorđević","https://randomuser.me/api/portraits/women/44.jpg"),
+            msg("wa_ana","assistant","Imamo poziciju u kafiću na Vračaru, plata 58.000 + napojnice. Zainteresovana?",td(4,53),"whatsapp","Ana Đorđević","https://randomuser.me/api/portraits/women/44.jpg"),
+            msg("wa_ana","user","Da, veoma zainteresovana! Kako da se prijavim?",td(4,50),"whatsapp","Ana Đorđević","https://randomuser.me/api/portraits/women/44.jpg"),
+            msg("wa_ana","assistant","Pošalji mi broj telefona i kada možeš na razgovor — koordinator će te kontaktirati. 👍",td(4,48),"whatsapp","Ana Đorđević","https://randomuser.me/api/portraits/women/44.jpg"),
+        ]},
+        { id: "wa_nikola", platform: "whatsapp", name: "Nikola Stojanović", pic: "https://randomuser.me/api/portraits/men/12.jpg", humanNeeded: false, phone: null, msgs: [
+            msg("wa_nikola","user","Imam 20 god i studiram, da li postoji nešto pola radnog vremena?",td(4,30),"whatsapp","Nikola Stojanović","https://randomuser.me/api/portraits/men/12.jpg"),
+            msg("wa_nikola","assistant","Zdravo Nikola! Za studente imamo odlične opcije — promoter, magacioner ili konobar, sve sa fleksibilnim rasporedom. Šta te zanima?",td(4,28),"whatsapp","Nikola Stojanović","https://randomuser.me/api/portraits/men/12.jpg"),
+            msg("wa_nikola","user","Magacioner mi zvuči dobro, kolika je plata?",td(4,25),"whatsapp","Nikola Stojanović","https://randomuser.me/api/portraits/men/12.jpg"),
+            msg("wa_nikola","assistant","Za pola radnog vremena oko 40.000 din. Smene po dogovoru. Zainteresovan si?",td(4,23),"whatsapp","Nikola Stojanović","https://randomuser.me/api/portraits/men/12.jpg"),
+            msg("wa_nikola","user","Da, zainteresovan sam! Kako da počnem?",td(4,20),"whatsapp","Nikola Stojanović","https://randomuser.me/api/portraits/men/12.jpg"),
+            msg("wa_nikola","assistant","Odlično! Pošalji mi kontakt i slobodne termine — sve je brzo i jednostavno. 🎓",td(4,18),"whatsapp","Nikola Stojanović","https://randomuser.me/api/portraits/men/12.jpg"),
+        ]},
+        { id: "wa_tamara", platform: "whatsapp", name: "Tamara Milošević", pic: "https://randomuser.me/api/portraits/women/61.jpg", humanNeeded: false, phone: "061/555-789", msgs: [
+            msg("wa_tamara","user","Zdravo, tražim posao recepcionerke, imam iskustvo u hotelu 2 godine",td(3,45),"whatsapp","Tamara Milošević","https://randomuser.me/api/portraits/women/61.jpg"),
+            msg("wa_tamara","assistant","Zdravo Tamara! Odlično! Imamo poziciju recepcionerke u centru Beograda. Govorite li engleski?",td(3,43),"whatsapp","Tamara Milošević","https://randomuser.me/api/portraits/women/61.jpg"),
+            msg("wa_tamara","user","Da, engleski i nemački",td(3,40),"whatsapp","Tamara Milošević","https://randomuser.me/api/portraits/women/61.jpg"),
+            msg("wa_tamara","assistant","Sjajno! Sa nemačkim imate veliku prednost. Pozicija je u 4★ hotelu, plata 68.000. Prijavila bih vas?",td(3,38),"whatsapp","Tamara Milošević","https://randomuser.me/api/portraits/women/61.jpg"),
+            msg("wa_tamara","user","Da molim! Prijavila bih se odmah!",td(3,35),"whatsapp","Tamara Milošević","https://randomuser.me/api/portraits/women/61.jpg"),
+            msg("wa_tamara","assistant","Odlično Tamara! Vaš profil je zabeležen. Očekujte poziv koordinatora danas poslepodne. ✅",td(3,33),"whatsapp","Tamara Milošević","https://randomuser.me/api/portraits/women/61.jpg"),
+        ]},
+        { id: "wa_luka", platform: "whatsapp", name: "Luka Đurić", pic: "https://randomuser.me/api/portraits/men/77.jpg", humanNeeded: false, phone: null, msgs: [
+            msg("wa_luka","user","Pozdrav, tražim posao barmena, Beograd",td(2,30),"whatsapp","Luka Đurić","https://randomuser.me/api/portraits/men/77.jpg"),
+            msg("wa_luka","assistant","Zdravo Luka! Imamo više otvorenih pozicija za barmena u Beogradu. Imate li iskustvo?",td(2,28),"whatsapp","Luka Đurić","https://randomuser.me/api/portraits/men/77.jpg"),
+            msg("wa_luka","user","Da, 3 godine u nekoliko kafića. Mogu li se prijavim odmah?",td(2,25),"whatsapp","Luka Đurić","https://randomuser.me/api/portraits/men/77.jpg"),
+            msg("wa_luka","assistant","Naravno! Pošalji mi kontakt podatke i slobodne termine za razgovor.",td(2,23),"whatsapp","Luka Đurić","https://randomuser.me/api/portraits/men/77.jpg"),
+        ]},
+        { id: "wa_nina", platform: "whatsapp", name: "Nina Vasić", pic: "https://randomuser.me/api/portraits/women/5.jpg", humanNeeded: false, phone: null, msgs: [
+            msg("wa_nina","user","Zdravo, tražim posao u prodaji",td(1,45),"whatsapp","Nina Vasić","https://randomuser.me/api/portraits/women/5.jpg"),
+            msg("wa_nina","assistant","Zdravo Nina! Imamo pozicije u maloprodaji i B2B prodaji. Imate li iskustvo?",td(1,43),"whatsapp","Nina Vasić","https://randomuser.me/api/portraits/women/5.jpg"),
+            msg("wa_nina","user","Da, 2 godine u prodavnici obuće",td(1,40),"whatsapp","Nina Vasić","https://randomuser.me/api/portraits/women/5.jpg"),
+            msg("wa_nina","assistant","Odlično! Imamo poziciju prodajnog asistenta u Zara (TC Ušće), plata 65.000 + provizija. Zanima?",td(1,38),"whatsapp","Nina Vasić","https://randomuser.me/api/portraits/women/5.jpg"),
+            msg("wa_nina","user","Da zanima! Ima li brza procedura?",td(1,35),"whatsapp","Nina Vasić","https://randomuser.me/api/portraits/women/5.jpg"),
+        ]},
+        // Facebook (2 = 13%)
+        { id: "fb_milica", platform: "facebook", name: "Milica Jovanović", pic: "https://randomuser.me/api/portraits/women/23.jpg", humanNeeded: false, phone: null, msgs: [
+            msg("fb_milica","user","Ima li posla za kasirku, Zemun?",td(4,10),"facebook","Milica Jovanović","https://randomuser.me/api/portraits/women/23.jpg"),
+            msg("fb_milica","assistant","Zdravo Milica! Da, imamo otvorenu poziciju kasirke u Zemunu, plata 62.000 din, puno radno vreme. Da li vas zanima?",td(4,8),"facebook","Milica Jovanović","https://randomuser.me/api/portraits/women/23.jpg"),
+            msg("fb_milica","user","Zanima, šta je potrebno od dokumenata?",td(4,5),"facebook","Milica Jovanović","https://randomuser.me/api/portraits/women/23.jpg"),
+            msg("fb_milica","assistant","Potrebna je lična karta, zdravstvena knjižica i diploma srednje škole. Da li ih posedujete?",td(4,3),"facebook","Milica Jovanović","https://randomuser.me/api/portraits/women/23.jpg"),
+            msg("fb_milica","user","Sve imam, kad mogu da dođem na razgovor?",td(4,0),"facebook","Milica Jovanović","https://randomuser.me/api/portraits/women/23.jpg"),
+        ]},
+        { id: "fb_sara", platform: "facebook", name: "Sara Simić", pic: "https://randomuser.me/api/portraits/women/18.jpg", humanNeeded: false, phone: null, msgs: [
+            msg("fb_sara","user","Potreban mi je kancelarijski posao, šta imate?",yd(16,5),"facebook","Sara Simić","https://randomuser.me/api/portraits/women/18.jpg"),
+            msg("fb_sara","assistant","Zdravo Sara! Imamo administrativne pozicije u više firmi. Koliko imate iskustva i koje programe koristite?",yd(16,3),"facebook","Sara Simić","https://randomuser.me/api/portraits/women/18.jpg"),
+            msg("fb_sara","user","1 godina, Word, Excel i Outlook",yd(16,0),"facebook","Sara Simić","https://randomuser.me/api/portraits/women/18.jpg"),
+            msg("fb_sara","assistant","Odlično! Pozicija administratora u Novom Beogradu, plata 58.000. Zanima?",yd(15,57),"facebook","Sara Simić","https://randomuser.me/api/portraits/women/18.jpg"),
+        ]},
+        // Website (2 = 13%)
+        { id: "web_aleksandar", platform: "website", name: "Aleksandar Lukić", pic: "https://randomuser.me/api/portraits/men/55.jpg", humanNeeded: false, phone: null, msgs: [
+            msg("web_aleksandar","user","Interesuje me posao u logistici, vozač ili koordinator",td(2,0),"website","Aleksandar Lukić","https://randomuser.me/api/portraits/men/55.jpg"),
+            msg("web_aleksandar","assistant","Zdravo Aleksandar! Imamo obe pozicije. Vozač — 75.000 din, koordinator — 85.000 din. Imate li vozačku dozvolu B ili C kategorije?",td(1,58),"website","Aleksandar Lukić","https://randomuser.me/api/portraits/men/55.jpg"),
+            msg("web_aleksandar","user","Da, B i C kategorija, 8 godina iskustva",td(1,55),"website","Aleksandar Lukić","https://randomuser.me/api/portraits/men/55.jpg"),
+            msg("web_aleksandar","assistant","Odlično! C kategorija otvara mnoge opcije. Da li preferirate lokalni ili međunarodni prevoz?",td(1,53),"website","Aleksandar Lukić","https://randomuser.me/api/portraits/men/55.jpg"),
+            msg("web_aleksandar","user","Lokalni, imam porodicu",td(1,50),"website","Aleksandar Lukić","https://randomuser.me/api/portraits/men/55.jpg"),
+            msg("web_aleksandar","assistant","Razumem! Imam savršenu poziciju za vas — lokalni vozač, Beograd zona, kući svaki dan. Šaljemo vam detalje. 🚚",td(1,48),"website","Aleksandar Lukić","https://randomuser.me/api/portraits/men/55.jpg"),
+        ]},
+        { id: "web_danilo", platform: "website", name: "Danilo Bogdanović", pic: "https://randomuser.me/api/portraits/men/88.jpg", humanNeeded: false, phone: null, msgs: [
+            msg("web_danilo","user","Tražim posao dostavljača, imam sopstveni auto",td(1,15),"website","Danilo Bogdanović","https://randomuser.me/api/portraits/men/88.jpg"),
+            msg("web_danilo","assistant","Zdravo Danilo! Odlično! Sa sopstvenim vozilom imate više opcija — dostava hrane, paketa ili medicinski materijal. Šta vas zanima?",td(1,13),"website","Danilo Bogdanović","https://randomuser.me/api/portraits/men/88.jpg"),
+            msg("web_danilo","user","Hrana ili paketi, šta bolje plaća?",td(1,10),"website","Danilo Bogdanović","https://randomuser.me/api/portraits/men/88.jpg"),
+            msg("web_danilo","assistant","Paketi generalno 72.000 mesečno fiksno, dostava hrane 55.000 + % od narudžbina. Šta preferirate?",td(1,8),"website","Danilo Bogdanović","https://randomuser.me/api/portraits/men/88.jpg"),
+            msg("web_danilo","user","Paketi, fiksno je bolje za planiranje",td(1,5),"website","Danilo Bogdanović","https://randomuser.me/api/portraits/men/88.jpg"),
+            msg("web_danilo","assistant","Odlična odluka! Imam poziciju kod DHL-a u Beogradu. Da li imate vozačku dozvolu B kategorije?",td(1,3),"website","Danilo Bogdanović","https://randomuser.me/api/portraits/men/88.jpg"),
+        ]},
+    ]
+
+    const allMessages: any[] = []
+    const conversations: any[] = []
+
+    for (const def of convDefs) {
+        const sorted = [...def.msgs].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+        const visible = sorted.filter(m => m.role !== "system")
+        const conv = {
+            id: def.id, leadId: null, messages: def.msgs, platform: def.platform,
+            candidateName: def.name, humanNeeded: def.humanNeeded, phone: def.phone,
+            profilePic: def.pic, lastMessage: sorted[0], lastVisibleMessage: visible[0] || sorted[0],
+        }
+        conversations.push(conv)
+        allMessages.push(...def.msgs)
+    }
+
+    conversations.sort((a, b) => new Date(b.lastVisibleMessage.created_at).getTime() - new Date(a.lastVisibleMessage.created_at).getTime())
+
+    return { conversations, allMessages }
+}
+// ─────────────────────────────────────────────────────────────────────────────
 
 // Handles both proper JSONB objects and legacy string-encoded metadata
 function parseMeta(m: any): Record<string, any> {
@@ -43,6 +197,7 @@ export function SocialChatbotModule({ clientId }: SocialChatbotModuleProps) {
     const [nameMap, setNameMap] = useState<Record<string, string>>({})
     const [togglingFlag, setTogglingFlag] = useState(false)
     const [msgPeriod, setMsgPeriod] = useState<Period>("danas")
+    const [mobilePanel, setMobilePanel] = useState<"list" | "chat" | "profile">("list")
     const messagesEndRef = useRef<HTMLDivElement>(null)
     const supabase = createClient()
 
@@ -64,7 +219,7 @@ export function SocialChatbotModule({ clientId }: SocialChatbotModuleProps) {
                 grouped[id] = {
                     id, leadId: msg.lead_id, lastMessage: msg,
                     messages: [], platform: msg.platform || "instagram",
-                    candidateName: null, humanNeeded: false, phone: null
+                    candidateName: null, humanNeeded: false, phone: null, profilePic: null
                 }
             }
             grouped[id].messages.push(msg)
@@ -74,6 +229,8 @@ export function SocialChatbotModule({ clientId }: SocialChatbotModuleProps) {
             if (meta.name && !grouped[id].candidateName) grouped[id].candidateName = meta.name
             if ((meta.phone || meta.number) && !grouped[id].phone)
                 grouped[id].phone = meta.phone || meta.number
+            if (meta.profile_pic && !grouped[id].profilePic)
+                grouped[id].profilePic = meta.profile_pic
         }
 
         for (const id of Object.keys(grouped)) {
@@ -104,6 +261,12 @@ export function SocialChatbotModule({ clientId }: SocialChatbotModuleProps) {
     }, [clientId, supabase])
 
     useEffect(() => {
+        if (DEMO_MODE) {
+            const { conversations: mockConvs, allMessages: mockMsgs } = generateMockData()
+            setConversations(mockConvs)
+            setAllMessages(mockMsgs)
+            return
+        }
         fetchConversations()
         const channel = supabase
             .channel(`razgovori-rt-${clientId}`)
@@ -111,7 +274,7 @@ export function SocialChatbotModule({ clientId }: SocialChatbotModuleProps) {
                 () => fetchConversations())
             .subscribe()
         return () => { supabase.removeChannel(channel) }
-    }, [fetchConversations, clientId, supabase])
+    }, [clientId]) // eslint-disable-line react-hooks/exhaustive-deps
 
     useEffect(() => {
         if (conversations.length > 0 && !selectedId) setSelectedId(conversations[0].id)
@@ -161,6 +324,13 @@ export function SocialChatbotModule({ clientId }: SocialChatbotModuleProps) {
     const toggleHumanNeeded = async () => {
         if (!selected || togglingFlag) return
         setTogglingFlag(true)
+        if (DEMO_MODE) {
+            setConversations(prev => prev.map(c =>
+                c.id === selected.id ? { ...c, humanNeeded: !c.humanNeeded } : c
+            ))
+            setTogglingFlag(false)
+            return
+        }
         if (!selected.humanNeeded) {
             await supabase.from("razgovori").insert({
                 client_id: clientId,
@@ -188,22 +358,22 @@ export function SocialChatbotModule({ clientId }: SocialChatbotModuleProps) {
     ]
 
     return (
-        <div className="h-[calc(100vh-140px)] flex flex-col gap-4 animate-in fade-in slide-in-from-bottom-4 duration-700">
+        <div className="h-[calc(100vh-120px)] md:h-[calc(100vh-140px)] flex flex-col gap-3 md:gap-4 animate-in fade-in slide-in-from-bottom-4 duration-700">
 
             {/* ── Header ─────────────────────────────────────────────────────── */}
-            <div className="flex items-center justify-between shrink-0">
+            <div className="flex items-center justify-between shrink-0 flex-wrap gap-2">
                 <div>
-                    <h2 className="text-3xl font-outfit font-bold tracking-tight text-white">
+                    <h2 className="text-xl md:text-3xl font-outfit font-bold tracking-tight text-white">
                         Social{" "}
                         <span style={{ background: "linear-gradient(120deg, #f472b6, #c084fc, #818cf8)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
                             Inbox
                         </span>
                     </h2>
                     <p className="text-[11px] font-mono text-zinc-500 mt-0.5 tracking-wider">
-                        Mjob Recruitment Agent · fh2UjbwqxCaCNh9I
+                        SmartFlow AI Agent · Multi-channel
                     </p>
                 </div>
-                <div className="flex items-center gap-2.5">
+                <div className="hidden sm:flex items-center gap-2.5">
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/[0.07]">
                         <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                         <Wifi className="w-3 h-3 text-emerald-400" />
@@ -211,17 +381,17 @@ export function SocialChatbotModule({ clientId }: SocialChatbotModuleProps) {
                     </div>
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-pink-500/20 bg-pink-500/[0.07]">
                         <Instagram className="w-3 h-3 text-pink-400" />
-                        <span className="text-[10px] font-mono font-bold text-pink-400 tracking-wide">@ozavala.rs</span>
+                        <span className="text-[10px] font-mono font-bold text-pink-400 tracking-wide">@smartflow.rs</span>
                     </div>
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/[0.07] bg-white/[0.03]">
                         <Globe className="w-3 h-3 text-zinc-400" />
-                        <span className="text-[10px] font-mono text-zinc-400 tracking-wide">ozavala.co.rs</span>
+                        <span className="text-[10px] font-mono text-zinc-400 tracking-wide">smartflow.rs</span>
                     </div>
                 </div>
             </div>
 
             {/* ── Stats ──────────────────────────────────────────────────────── */}
-            <div className="grid grid-cols-4 gap-3 shrink-0">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3 shrink-0">
                 <StatCard icon={<MessageCircle className="w-4 h-4" />} label="Upiti Danas" value={upitiDanas} variant="pink" />
                 <StatCard icon={<UserCheck className="w-4 h-4" />} label="Prijave Danas" value={prijaveDanas} variant="emerald" />
                 <StatCard
@@ -258,11 +428,37 @@ export function SocialChatbotModule({ clientId }: SocialChatbotModuleProps) {
                 </div>
             </div>
 
+            {/* ── Mobile panel tabs ──────────────────────────────────────────── */}
+            {selected && (
+                <div className="md:hidden flex shrink-0 rounded-xl border border-white/[0.07] bg-white/[0.02] p-1 gap-1">
+                    {[
+                        { key: "list" as const, label: "Inbox" },
+                        { key: "chat" as const, label: "Chat" },
+                        { key: "profile" as const, label: "Profil" },
+                    ].map(tab => (
+                        <button
+                            key={tab.key}
+                            onClick={() => setMobilePanel(tab.key)}
+                            className={cn(
+                                "flex-1 py-1.5 rounded-lg text-[11px] font-mono font-bold uppercase tracking-wider transition-all",
+                                mobilePanel === tab.key ? "bg-pink-500/20 text-pink-400" : "text-zinc-600 hover:text-zinc-400"
+                            )}
+                        >
+                            {tab.label}
+                        </button>
+                    ))}
+                </div>
+            )}
+
             {/* ── Main Panel ─────────────────────────────────────────────────── */}
-            <div className="flex-1 grid grid-cols-12 gap-3 min-h-0">
+            <div className="flex-1 grid grid-cols-1 md:grid-cols-12 gap-3 min-h-0">
 
                 {/* Conversation list */}
-                <div className="col-span-4 flex flex-col rounded-2xl border border-white/[0.07] bg-white/[0.02] overflow-hidden backdrop-blur-xl">
+                <div className={cn(
+                    "md:col-span-4 flex flex-col rounded-2xl border border-white/[0.07] bg-white/[0.02] overflow-hidden backdrop-blur-xl",
+                    // Mobile: show only when mobilePanel === "list" (or no selection yet)
+                    selected ? (mobilePanel === "list" ? "flex" : "hidden md:flex") : "flex"
+                )}>
                     <div className="px-4 py-3 border-b border-white/[0.05] flex items-center justify-between shrink-0">
                         <div className="flex items-center gap-2">
                             <Inbox className="w-3.5 h-3.5 text-zinc-500" />
@@ -281,7 +477,7 @@ export function SocialChatbotModule({ clientId }: SocialChatbotModuleProps) {
                                     initial={{ opacity: 0, x: -8 }}
                                     animate={{ opacity: 1, x: 0 }}
                                     transition={{ delay: Math.min(idx * 0.03, 0.5) }}
-                                    onClick={() => setSelectedId(conv.id)}
+                                    onClick={() => { setSelectedId(conv.id); setMobilePanel("chat") }}
                                     className={cn(
                                         "w-full text-left px-4 py-3.5 transition-all duration-200 relative border-l-2",
                                         isSelected
@@ -292,12 +488,7 @@ export function SocialChatbotModule({ clientId }: SocialChatbotModuleProps) {
                                     <div className="flex items-start gap-3">
                                         {/* Avatar */}
                                         <div className="relative shrink-0">
-                                            <div
-                                                className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white ring-2 ring-black/40"
-                                                style={{ background: `linear-gradient(135deg, ${pm.gradFrom}, ${pm.gradTo})` }}
-                                            >
-                                                {name[0]?.toUpperCase()}
-                                            </div>
+                                            <Avatar conv={conv} size="md" />
                                             {conv.humanNeeded && (
                                                 <div className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-amber-400 border-2 border-[#0d0d14] flex items-center justify-center">
                                                     <span className="text-[7px] font-black text-black leading-none">!</span>
@@ -334,7 +525,10 @@ export function SocialChatbotModule({ clientId }: SocialChatbotModuleProps) {
                 </div>
 
                 {/* Chat view */}
-                <div className="col-span-5 flex flex-col rounded-2xl border border-white/[0.07] bg-white/[0.02] overflow-hidden backdrop-blur-xl">
+                <div className={cn(
+                    "md:col-span-5 flex flex-col rounded-2xl border border-white/[0.07] bg-white/[0.02] overflow-hidden backdrop-blur-xl",
+                    mobilePanel === "chat" ? "flex" : "hidden md:flex"
+                )}>
                     {selected ? (
                         <>
                             {/* Chat header */}
@@ -342,17 +536,7 @@ export function SocialChatbotModule({ clientId }: SocialChatbotModuleProps) {
                                 "px-5 py-3.5 border-b flex items-center gap-3 shrink-0 transition-colors",
                                 selected.humanNeeded ? "border-amber-500/25 bg-amber-500/[0.04]" : "border-white/[0.05]"
                             )}>
-                                {(() => {
-                                    const pm = getPlatformMeta(selected.platform)
-                                    return (
-                                        <div
-                                            className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white ring-2 ring-black/30 shrink-0"
-                                            style={{ background: `linear-gradient(135deg, ${pm.gradFrom}, ${pm.gradTo})` }}
-                                        >
-                                            {getDisplayName(selected)[0]}
-                                        </div>
-                                    )
-                                })()}
+                                <Avatar conv={selected} size="sm" className="shrink-0" />
                                 <div className="flex-1 min-w-0">
                                     <p className="text-sm font-semibold text-white font-outfit leading-none mb-0.5 truncate">
                                         {getFullName(selected) || getDisplayName(selected)}
@@ -395,11 +579,8 @@ export function SocialChatbotModule({ clientId }: SocialChatbotModuleProps) {
                                             className={cn("flex gap-2.5", isUser ? "justify-start" : "justify-end")}
                                         >
                                             {isUser && (
-                                                <div
-                                                    className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold text-white shrink-0 mt-1 ring-1 ring-black/30"
-                                                    style={{ background: `linear-gradient(135deg, ${getPlatformMeta(selected.platform).gradFrom}, ${getPlatformMeta(selected.platform).gradTo})` }}
-                                                >
-                                                    {getDisplayName(selected)[0]}
+                                                <div className="shrink-0 mt-1">
+                                                    <Avatar conv={selected} size="sm" />
                                                 </div>
                                             )}
                                             <div
@@ -466,7 +647,10 @@ export function SocialChatbotModule({ clientId }: SocialChatbotModuleProps) {
                 </div>
 
                 {/* Profile sidebar */}
-                <div className="col-span-3 flex flex-col gap-3 overflow-y-auto scrollbar-none">
+                <div className={cn(
+                    "md:col-span-3 flex flex-col gap-3 overflow-y-auto scrollbar-none",
+                    mobilePanel === "profile" ? "flex" : "hidden md:flex"
+                )}>
                     {selected ? (
                         <>
                             {/* Profile card */}
@@ -484,12 +668,7 @@ export function SocialChatbotModule({ clientId }: SocialChatbotModuleProps) {
                                 <div className="px-4 pb-4">
                                     {/* Avatar overlapping cover */}
                                     <div className="-mt-5 mb-2.5">
-                                        <div
-                                            className="w-12 h-12 rounded-full flex items-center justify-center text-base font-bold text-white border-2 border-[#111118] ring-2 ring-black/30"
-                                            style={{ background: `linear-gradient(135deg, ${getPlatformMeta(selected.platform).gradFrom}, ${getPlatformMeta(selected.platform).gradTo})` }}
-                                        >
-                                            {getDisplayName(selected)[0]}
-                                        </div>
+                                        <Avatar conv={selected} size="lg" className="border-2 border-[#111118]" />
                                     </div>
                                     <p className="font-semibold text-white text-sm font-outfit leading-tight">
                                         {getFullName(selected) || getDisplayName(selected)}
@@ -528,8 +707,8 @@ export function SocialChatbotModule({ clientId }: SocialChatbotModuleProps) {
                                     <InfoRow
                                         icon={<Globe />}
                                         label="Website"
-                                        value="ozavala.co.rs"
-                                        link="https://ozavala.co.rs"
+                                        value="smartflow.rs"
+                                        link="https://smartflow.rs"
                                     />
                                 </div>
                             </div>
@@ -572,7 +751,7 @@ export function SocialChatbotModule({ clientId }: SocialChatbotModuleProps) {
                                     <span className="text-[10px] font-mono font-bold text-emerald-400 uppercase tracking-widest">AI Agent Aktivan</span>
                                 </div>
                                 <p className="text-[11px] font-mono text-zinc-500 leading-relaxed">
-                                    Mjob Agent obradjuje poruke 24/7 i automatski odgovara kandidatima na Instagram DM.
+                                    SmartFlow AI Agent obradjuje poruke 24/7 i automatski odgovara kandidatima na svim kanalima.
                                 </p>
                             </div>
                         </>
@@ -642,6 +821,40 @@ function InfoRow({ icon, label, value, mono, link }: {
                     <p className={cn("text-xs text-zinc-300 truncate", mono && "font-mono")}>{value}</p>
                 )}
             </div>
+        </div>
+    )
+}
+
+function Avatar({ conv, size = "md", className }: { conv: any; size?: "sm" | "md" | "lg"; className?: string }) {
+    const pm = getPlatformMeta(conv.platform)
+    const initial = (conv.candidateName || conv.id || "?")[0]?.toUpperCase()
+    const sizeMap = { sm: "w-6 h-6 text-[10px]", md: "w-10 h-10 text-sm", lg: "w-12 h-12 text-base" }
+    const sizeClass = sizeMap[size]
+
+    if (conv.profilePic) {
+        return (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+                src={conv.profilePic}
+                alt={initial}
+                className={cn(sizeClass, "rounded-full object-cover ring-2 ring-black/30", className)}
+                onError={e => {
+                    // On error fall back to gradient initial
+                    const el = e.currentTarget
+                    el.style.display = "none"
+                    const sibling = el.nextElementSibling as HTMLElement | null
+                    if (sibling) sibling.style.display = "flex"
+                }}
+            />
+        )
+    }
+
+    return (
+        <div
+            className={cn(sizeClass, "rounded-full flex items-center justify-center font-bold text-white ring-2 ring-black/30", className)}
+            style={{ background: `linear-gradient(135deg, ${pm.gradFrom}, ${pm.gradTo})` }}
+        >
+            {initial}
         </div>
     )
 }

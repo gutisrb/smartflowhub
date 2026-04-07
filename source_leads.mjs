@@ -50,8 +50,13 @@ const SERVICE_KEY    = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmF
 const SMARTFLOW_ID   = '69acf7e9-557e-4ca3-85bd-a785ef39e351';
 const HUNTER_KEY     = 'b18a1b18f913bb7907bff359ec0b8065f58eecfa';
 
-// Single no-query URL — video ads in RS, all advertisers
-const ADS_LIBRARY_URL = 'https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=RS&media_type=video';
+// Multiple broad Serbian queries — each hits a different slice of the ad pool
+const ADS_LIBRARY_URLS = [
+  'https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=RS&media_type=video&q=dostava',
+  'https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=RS&media_type=video&q=naruci',
+  'https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=RS&media_type=video&q=akcija',
+  'https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=RS&media_type=video&q=popust',
+];
 
 const isLocal  = process.argv.includes('--local');   // read from local JSON files, skip Apify Stage 1
 const isTest   = process.argv.includes('--test');    // no DB writes
@@ -59,15 +64,15 @@ const isYes    = process.argv.includes('--yes');     // live Apify run
 const limitIdx = process.argv.indexOf('--limit');
 const LIMIT    = limitIdx !== -1 ? parseInt(process.argv[limitIdx + 1]) : 100;
 
-// Raw ads to fetch when calling Apify: 100 in test, 2000 in live
-const RAW_LIMIT = isTest ? 100 : 2000;
+// Raw ads to fetch when calling Apify: 100 in test, 4000 in live
+const RAW_LIMIT = isTest ? 100 : 4000;
 
 // Local dataset files (used when --local flag is set)
 const LOCAL_DATASETS_DIR = resolve(__dirname, '..');  // photonic-lunar/
-const LOCAL_DATASET_GLOB = 'dataset_facebook-ads-library-scraper_2026-03-30_';
+const LOCAL_DATASET_GLOB = 'dataset_facebook-ads-library-scraper_';
 
 // Minimum IG followers to qualify a lead
-const MIN_FOLLOWERS = 10000;
+const MIN_FOLLOWERS = 20000;
 
 // ── D2C retail exclusion ──────────────────────────────────────────────────────
 const EXCLUDE_CATS = new Set([
@@ -375,10 +380,10 @@ async function main() {
     console.log('─── Stage 1: FB Ads Library via Apify ──────────────────');
     rawItems = await runApify(
       FB_ADS_ACTOR,
-      { urls: [{ url: ADS_LIBRARY_URL }] },
+      { urls: ADS_LIBRARY_URLS.map(url => ({ url })) },
       'FB Ads Library',
       RAW_LIMIT,
-      isTest ? 0.15 : 2.00,
+      isTest ? 0.15 : 4.00,
     );
     console.log(`  Raw records: ${rawItems.length}\n`);
   }

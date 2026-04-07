@@ -4,7 +4,6 @@ import {
   LayoutDashboard,
   Briefcase,
   Users,
-  Linkedin,
   MessageCircle,
   BarChart2,
   Kanban,
@@ -53,20 +52,6 @@ export const MODULE_REGISTRY: Record<ModuleKey, DashboardModule> = {
     icon: Users,
     category: 'fulfillment',
     description: 'Praćenje prijava sa kanala vođenih agentima (društvene mreže, četbot)',
-  },
-  'leads': {
-    key: 'leads',
-    label: 'Leads',
-    icon: Users,
-    category: 'acquisition',
-    description: 'B2B leads pipeline',
-  },
-  'linkedin-agent': {
-    key: 'linkedin-agent',
-    label: 'LinkedIn Agent',
-    icon: Linkedin,
-    category: 'acquisition',
-    description: 'Automatizovana LinkedIn selekcija i generisanje kontakata',
   },
   'website-chatbot': {
     key: 'website-chatbot',
