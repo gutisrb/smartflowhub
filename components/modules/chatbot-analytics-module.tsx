@@ -537,7 +537,7 @@ export function ChatbotAnalyticsModule({ clientId }: ChatbotAnalyticsModuleProps
                             {jobData.map((d, i) => {
                                 const pct = Math.round((d.value / maxJob) * 100)
                                 const hue = 160 - i * 8
-                                const color = `oklch(0.72 0.15 ${hue})`
+                                const color = `hsl(${hue}, 80%, 45%)`
                                 return (
                                     <div key={d.name} className="flex items-center gap-3">
                                         <span className="text-[10px] font-bold w-3 text-right shrink-0" style={{ color: "#3f3f46" }}>{i + 1}</span>
@@ -549,8 +549,8 @@ export function ChatbotAnalyticsModule({ clientId }: ChatbotAnalyticsModuleProps
                                                 transition={{ duration: 1, delay: 0.3 + i * 0.07, ease: "easeOut" }}
                                                 className="h-full rounded-full"
                                                 style={{
-                                                    background: `linear-gradient(90deg, ${color}, oklch(0.65 0.12 200))`,
-                                                    boxShadow: `0 0 8px oklch(0.72 0.15 ${hue} / 0.4)`,
+                                                    background: `linear-gradient(90deg, ${color}, hsl(200, 80%, 40%))`,
+                                                    boxShadow: `0 0 8px hsla(${hue}, 80%, 45%, 0.4)`,
                                                 }}
                                             />
                                         </div>

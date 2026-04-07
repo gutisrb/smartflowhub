@@ -30,7 +30,7 @@ export function PremiumFilters() {
                 {/* ── Soft emerald glow ── */}
                 <filter id="soft-glow" x="-30%" y="-30%" width="160%" height="160%">
                     <feGaussianBlur in="SourceAlpha" stdDeviation="8" result="blur" />
-                    <feFlood floodColor="oklch(0.75 0.15 160)" floodOpacity="0.5" result="color" />
+                    <feFlood floodColor="#10b981" floodOpacity="0.5" result="color" />
                     <feComposite in="color" in2="blur" operator="in" result="glow" />
                     <feMerge>
                         <feMergeNode in="glow" />

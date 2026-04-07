@@ -97,7 +97,7 @@ export function Sidebar({ currentView, onViewChange, clientName, clientId, modul
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4 group cursor-pointer">
             <div className="relative">
-              <div className="w-10 h-10 md:w-12 md:h-12 rounded-2xl bg-emerald flex items-center justify-center shadow-[0_0_20px_oklch(0.75_0.15_160_/_0.3)] group-hover:scale-110 transition-transform duration-500 overflow-hidden">
+              <div className="w-10 h-10 md:w-12 md:h-12 rounded-2xl bg-emerald flex items-center justify-center shadow-[0_0_20px_rgba(16,185,129,0.3)] group-hover:scale-110 transition-transform duration-500 overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-tr from-black/20 to-transparent" />
                 <ShieldCheck className="w-5 h-5 md:w-6 md:h-6 text-obsidian relative z-10" />
                 <div className="absolute inset-x-0 bottom-0 h-1/2 bg-white/10 blur-md translate-y-full group-hover:translate-y-0 transition-transform duration-700" />
@@ -206,7 +206,7 @@ function NavItem({ icon: Icon, label, active, onClick, delay }: {
       className={cn(
         "w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-300 group relative overflow-hidden animate-in fade-in slide-in-from-left-4 fill-mode-both",
         active
-          ? "bg-emerald text-obsidian shadow-[0_0_20px_oklch(0.75_0.15_160_/_0.2)]"
+          ? "bg-emerald text-obsidian shadow-[0_0_20px_rgba(16,185,129,0.2)]"
           : "text-zinc-500 hover:text-white hover:bg-white/5"
       )}
     >
