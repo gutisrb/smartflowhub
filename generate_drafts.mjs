@@ -68,18 +68,60 @@ function subjectVariant(companyName) {
   return h % 3;
 }
 
-/** Classify email as decision_maker or general */
+/** Classify email as decision_maker or general.
+ *  decision_maker = personal name pattern (firstname@, firstname.lastname@)
+ *  general        = everything else (department, brand, catch-all, location)
+ */
 function classifyEmail(email) {
   if (!email) return 'general';
   const prefix = email.split('@')[0].toLowerCase();
-  const catchAll = ['info', 'kontakt', 'contact', 'office', 'prodaja', 'hello', 'hi',
+
+  // Explicit catch-all keywords (exact match or prefix)
+  const catchAll = [
+    'info', 'kontakt', 'contact', 'office', 'prodaja', 'hello', 'hi',
     'podrska', 'support', 'mail', 'email', 'admin', 'team', 'marketing', 'hr',
-    'uprava', 'firma', 'company', 'post', 'posta', 'servis', 'service', 'zakazi',
-    'booking', 'rezervacije', 'recepcija', 'reception', 'oglasi', 'jobs'];
-  if (catchAll.some(c => prefix === c || prefix.startsWith(c + '.'))) return 'general';
-  // Names with digits mixed in are likely catch-all too
+    'uprava', 'firma', 'company', 'post', 'posta', 'servis', 'service',
+    'zakazi', 'booking', 'rezervacije', 'recepcija', 'reception', 'oglasi',
+    'jobs', 'store', 'online', 'korisnicki', 'porudzbine', 'potrosaci',
+    'nabavka', 'sales', 'shop', 'web', 'dm', 'pr', 'media', 'press',
+    'hello', 'hey', 'clinic', 'apoteka', 'ordinacija', 'beograd', 'novi',
+    'zagreb', 'sarajevo', 'notice', 'noreply', 'no-reply', 'newsletter',
+  ];
+  if (catchAll.some(c => prefix === c || prefix.startsWith(c + '.') || prefix.startsWith(c + '_'))) return 'general';
+
+  // Digits (3+) indicate a catch-all or auto-generated address
   if (/\d{3,}/.test(prefix)) return 'general';
-  return 'decision_maker';
+
+  // Brand-pattern: contains the @ domain brand name fragment, or is all lowercase with no separators → brand alias
+  // e.g. naturamedy@, medameggy@, prettyeverydayofficial@, onlinemototrening@
+  // Heuristic: if prefix is long (>14 chars) with no dot/underscore/dash → brand name, not a person
+  if (prefix.length > 14 && !/[._-]/.test(prefix)) return 'general';
+
+  // Location codes: single word that is a place name fragment (e.g. banovobrdo, usce, zemun)
+  // Heuristic: no separator AND looks like a compound word (camelCase-adjacent) AND no known first-name pattern
+  // Skip — hard to detect reliably; handle via name pattern detection below instead
+
+  // Personal name patterns — must positively match to be DM:
+  // 1. firstname.lastname@ (e.g. vukasin.plavsic, marijana.ivanovic)
+  //    Both parts must be name-like: 2-12 chars, no brand/catch-all terms
+  const brandTerms = new Set(['store','shop','online','mistore','usce','beograd','team','web','dm','media']);
+  const dotMatch = prefix.match(/^([a-zčćšžđ]{2,12})[._]([a-zčćšžđ]{2,15})$/);
+  if (dotMatch && !brandTerms.has(dotMatch[1]) && !brandTerms.has(dotMatch[2])) return 'decision_maker';
+
+  // 2. Common Serbian/regional first names standing alone
+  const firstNames = new Set([
+    'nikola','marko','stefan','milan','aleksandar','ivan','petar','jovan','filip','luka',
+    'nemanja','vladimir','bogdan','milan','dejan','milos','miloš','igor','dragan','nenad',
+    'ana','marija','milica','jovana','nina','ivana','jelena','katarina','aleksandra','maja',
+    'tijana','danijela','dragana','vesna','snezana','sanja','marina','tatjana','natasa','bojana',
+    'anita','gordana','radmila','slavica','sonja','andrea','jasmina','jasna','svetlana',
+    'vukasin','vukašin','bojan','srdjan','srđan','goran','zoran','dalibor','miroslav',
+    'slobodan','predrag','darko','saša','sasa','dušan','dusan','aleksandar','branko',
+  ]);
+  if (firstNames.has(prefix)) return 'decision_maker';
+
+  // Everything else: treat as general to avoid false personalization
+  return 'general';
 }
 
 
@@ -103,8 +145,23 @@ function inferBusinessTypeFromContext(niche, bio, companyName) {
     'shop', 'prodavnica', 'prodaja', 'dostava', 'porudžb', 'porudzb',
     'webshop', 'web shop', 'online', 'kupovina', 'narudžb', 'narudzb',
     'veleprodaja', 'maloprodaja', 'proizvod', 'brend', 'kolekcij',
+    'šaljemo', 'saljemo', 'šalje', 'dostavlja', 'porudžba', 'porudzba',
+    'kupi', 'kupite', 'cena', 'cijena', 'popust', 'akcija', 'naruči',
+    'naruci', 'web', 'sajt', 'store', 'fashion', 'odjeća', 'odjeca',
+    'odeća', 'odeca', 'kolekcija', 'suplementi', 'kozmetika', 'prirodni',
+    'organski', 'biljna', 'ulje', 'serum', 'krem', 'parfem', 'nakit',
+    'satovi', 'nameštaj', 'namestaj', 'oprema', 'uređaj', 'uredaj',
   ];
   if (productKeywords.some(k => text.includes(k))) return 'product';
+
+  // Explicit service signals override fallthrough
+  const serviceKeywords = [
+    'zakazivanje', 'termin', 'konsultacij', 'trening', 'kurs', 'edukacij',
+    'seminar', 'coaching', 'savetovanj', 'terapij', 'klinik', 'ordinacij',
+    'agencij', 'nekretnin', 'iznajmlj', 'renovacij', 'gradjevina',
+  ];
+  if (serviceKeywords.some(k => text.includes(k))) return 'service';
+
   return 'service';
 }
 
@@ -134,9 +191,15 @@ function buildLeadIntel(lead, emailType) {
     email_classification: classification,
     email_type: emailType,
     company_name: companyName,
-    contact_name: classification === 'decision_maker'
-      ? (contact.name || lead.ime || '')
-      : null,
+    contact_name: (() => {
+      if (classification !== 'decision_maker') return null;
+      if (contact.name) return contact.name;
+      // Extract first name from email prefix (e.g. anita@, vukasin.plavsic@ → "Vukasin")
+      const pfx = email.split('@')[0].toLowerCase();
+      const part = pfx.split(/[._-]/)[0];
+      if (part && part.length >= 2) return part.charAt(0).toUpperCase() + part.slice(1);
+      return null;
+    })(),
     contact_role: contact.title || null,
     niche: lead.niche || 'other',
     business_type: businessType,
@@ -202,13 +265,27 @@ async function generateDraft(leadIntel, systemPrompt) {
   const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
 
   // Strip any accidental markdown code fences
-  const cleaned = text.trim().replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```$/, '');
+  let cleaned = text.trim().replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```$/, '');
+
+  // Extract just the JSON object (first { to last })
+  const firstBrace = cleaned.indexOf('{');
+  const lastBrace = cleaned.lastIndexOf('}');
+  if (firstBrace !== -1 && lastBrace !== -1) cleaned = cleaned.slice(firstBrace, lastBrace + 1);
 
   let parsed;
   try {
     parsed = JSON.parse(cleaned);
   } catch {
-    throw new Error(`Gemini returned non-JSON: ${cleaned.slice(0, 300)}`);
+    // Fallback: repair literal newlines inside string values
+    try {
+      const repaired = cleaned.replace(/"(body|subject)":\s*"([\s\S]*?)(?<!\\)"/g, (_, k, v) => {
+        const escaped = v.replace(/\n/g, '\\n').replace(/\r/g, '');
+        return `"${k}": "${escaped}"`;
+      });
+      parsed = JSON.parse(repaired);
+    } catch {
+      throw new Error(`Gemini returned non-JSON: ${cleaned.slice(0, 300)}`);
+    }
   }
 
   if (!parsed.subject || !parsed.body) {

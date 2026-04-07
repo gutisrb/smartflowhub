@@ -89,8 +89,17 @@ This is ONE sentence. Not two. Not a list. One sentence with an em dash.
 - "završava prodaju" for product businesses, "zakazuje" for service businesses
 - The pressure after "koji" must be specific to this lead's situation — not generic
 
-**Decision-maker email:** Start with `Zdravo [name in vocative],\n\n` then the sentence.
-**General inbox email:** Start with `Dobar dan,\n\n` then the sentence (replace "možete" with "Vaš tim može").
+**Decision-maker email (`email_classification: decision_maker`):**
+- MUST start with `Zdravo [contact_name in vocative],\n\n`
+- MUST use "možete" / "Vaš" (addressing the person directly)
+- If `contact_name` is null or empty, fall back to general inbox format instead
+
+**General inbox email (`email_classification: general`):**
+- MUST start with `Dobar dan,\n\n`
+- MUST replace every "možete" with "Vaš tim može"
+- MUST replace every "možete ući" with "Vaš tim može ući"
+- NEVER use "Zdravo" — not even in P4
+- The person reading this is NOT the decision-maker — frame the system as taking work off their team, not replacing them personally
 
 **Grammar for vocative:**
 - Names ending in -a: Nikola → Nikola, Luka → Luka, Marija → Marija

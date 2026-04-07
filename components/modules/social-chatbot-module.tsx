@@ -196,7 +196,7 @@ export function SocialChatbotModule({ clientId }: SocialChatbotModuleProps) {
     const [selectedId, setSelectedId] = useState<string | null>(null)
     const [nameMap, setNameMap] = useState<Record<string, string>>({})
     const [togglingFlag, setTogglingFlag] = useState(false)
-    const [msgPeriod, setMsgPeriod] = useState<Period>("danas")
+    const [msgPeriod, setMsgPeriod] = useState<Period>("sedmica")
     const [mobilePanel, setMobilePanel] = useState<"list" | "chat" | "profile">("list")
     const messagesEndRef = useRef<HTMLDivElement>(null)
     const supabase = createClient()
@@ -313,13 +313,14 @@ export function SocialChatbotModule({ clientId }: SocialChatbotModuleProps) {
         return d >= monthAgo
     }
 
-    const upitiDanas = conversations.filter(c => new Date(c.lastVisibleMessage.created_at).toDateString() === todayStr).length
-    const prijaveDanas = allMessages.filter(m =>
-        m.role === "user" && new Date(m.created_at).toDateString() === todayStr &&
+    const upitiPeriod = conversations.filter(c => inDateRange(c.lastVisibleMessage.created_at)).length
+    const prijavePeriod = allMessages.filter(m =>
+        m.role === "user" && inDateRange(m.created_at) &&
         ["prijavim", "prijaviti", "prijavl", "zainteresova"].some(kw => m.message?.toLowerCase().includes(kw))
     ).length
     const intervencije = conversations.filter((c: any) => c.humanNeeded).length
     const msgCount = allMessages.filter(m => m.role !== "system" && inDateRange(m.created_at)).length
+    const periodLabel = msgPeriod === "danas" ? "Danas" : msgPeriod === "sedmica" ? "7 dana" : "30 dana"
 
     const toggleHumanNeeded = async () => {
         if (!selected || togglingFlag) return
@@ -392,8 +393,8 @@ export function SocialChatbotModule({ clientId }: SocialChatbotModuleProps) {
 
             {/* ── Stats ──────────────────────────────────────────────────────── */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3 shrink-0">
-                <StatCard icon={<MessageCircle className="w-4 h-4" />} label="Upiti Danas" value={upitiDanas} variant="pink" />
-                <StatCard icon={<UserCheck className="w-4 h-4" />} label="Prijave Danas" value={prijaveDanas} variant="emerald" />
+                <StatCard icon={<MessageCircle className="w-4 h-4" />} label={`Upiti · ${periodLabel}`} value={upitiPeriod} variant="pink" />
+                <StatCard icon={<UserCheck className="w-4 h-4" />} label={`Prijave · ${periodLabel}`} value={prijavePeriod} variant="emerald" />
                 <StatCard
                     icon={<AlertTriangle className="w-4 h-4" />}
                     label="Intervencije"
@@ -401,7 +402,7 @@ export function SocialChatbotModule({ clientId }: SocialChatbotModuleProps) {
                     variant={intervencije > 0 ? "amber" : "zinc"}
                     glow={intervencije > 0}
                 />
-                <div className="rounded-2xl border border-white/[0.07] bg-white/[0.03] p-4 flex items-center justify-between backdrop-blur-xl">
+                <div className="rounded-2xl border border-white/[0.07] bg-white/[0.03] p-3 md:p-4 flex items-center justify-between" style={{ backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)" }}>
                     <div className="flex items-center gap-3">
                         <div className="w-9 h-9 rounded-xl border border-cyan-500/20 bg-cyan-500/10 flex items-center justify-center text-cyan-400">
                             <TrendingUp className="w-4 h-4" />
@@ -784,13 +785,14 @@ function StatCard({ icon, label, value, variant, glow }: {
     }
     const s = styles[variant]
     return (
-        <div className={cn("rounded-2xl border p-4 flex items-center gap-3 backdrop-blur-xl", s.bg, s.border, glow && "ring-1 ring-amber-500/20")}>
-            <div className={cn("w-9 h-9 rounded-xl flex items-center justify-center border shrink-0", s.iconClass)}>
+        <div className={cn("rounded-2xl border p-3 md:p-4 flex items-center gap-2 md:gap-3 backdrop-blur-xl", s.bg, s.border, glow && "ring-1 ring-amber-500/20")}
+             style={{ WebkitBackdropFilter: "blur(20px)" }}>
+            <div className={cn("w-8 h-8 md:w-9 md:h-9 rounded-xl flex items-center justify-center border shrink-0", s.iconClass)}>
                 {icon}
             </div>
             <div>
-                <p className="text-[9px] font-mono font-bold text-zinc-500 uppercase tracking-widest">{label}</p>
-                <p className={cn("text-2xl font-bold font-outfit leading-none mt-0.5", s.num)}>{value}</p>
+                <p className="text-[8px] md:text-[9px] font-mono font-bold text-zinc-500 uppercase tracking-widest">{label}</p>
+                <p className={cn("text-xl md:text-2xl font-bold font-outfit leading-none mt-0.5", s.num)}>{value}</p>
             </div>
         </div>
     )

@@ -68,6 +68,7 @@ function PremiumTooltip({ active, payload, label, unit = "" }: any) {
                 borderRadius: 12,
                 padding: "10px 16px",
                 backdropFilter: "blur(20px)",
+                WebkitBackdropFilter: "blur(20px)",
                 boxShadow: "0 20px 40px -10px rgba(0,0,0,0.6), 0 0 20px -5px rgba(16,185,129,0.15)",
             }}
         >
@@ -135,7 +136,8 @@ function StatCard({
                     ? "0 0 40px -10px rgba(16,185,129,0.2), 0 20px 40px -10px rgba(0,0,0,0.4)"
                     : "0 20px 40px -10px rgba(0,0,0,0.3)",
                 backdropFilter: "blur(20px)",
-                padding: "22px 24px",
+                WebkitBackdropFilter: "blur(20px)",
+                padding: "20px",
             }}
         >
             {accent && <Scanline />}
@@ -152,7 +154,7 @@ function StatCard({
                 </div>
             </div>
             <p
-                className={`text-[2.6rem] font-black leading-none tracking-tighter ${accent ? "glow-emerald text-gradient-emerald animate-count-up" : "text-white"}`}
+                className={`text-3xl md:text-[2.6rem] font-black leading-none tracking-tighter ${accent ? "glow-emerald text-gradient-emerald animate-count-up" : "text-white"}`}
                 style={{ fontFamily: "'Space Grotesk', sans-serif" }}
             >
                 {value}
@@ -322,11 +324,11 @@ export function ChatbotAnalyticsModule({ clientId }: ChatbotAnalyticsModuleProps
                     <p className="text-[10px] font-bold uppercase tracking-[0.2em] mb-2" style={{ color: "#10b981" }}>
                         AI Growth Intelligence
                     </p>
-                    <h2 className="text-5xl font-black tracking-tight leading-none text-white">
+                    <h2 className="text-3xl md:text-5xl font-black tracking-tight leading-none text-white">
                         Agent{" "}
                         <span className="text-gradient-emerald glow-emerald">Analitika</span>
                     </h2>
-                    <p className="mt-2 text-sm font-light" style={{ color: "#52525b" }}>
+                    <p className="mt-2 text-xs md:text-sm font-light" style={{ color: "#52525b" }}>
                         Real-time insights from your AI recruitment agent
                     </p>
                 </div>
@@ -357,8 +359,9 @@ export function ChatbotAnalyticsModule({ clientId }: ChatbotAnalyticsModuleProps
                         background: "linear-gradient(135deg,rgba(255,255,255,0.05),rgba(255,255,255,0.015))",
                         border: "1px solid rgba(255,255,255,0.07)",
                         backdropFilter: "blur(20px)",
+                        WebkitBackdropFilter: "blur(20px)",
                         boxShadow: "0 20px 40px -10px rgba(0,0,0,0.5)",
-                        padding: "28px",
+                        padding: "20px",
                     }}
                 >
                     <Scanline />
@@ -406,8 +409,9 @@ export function ChatbotAnalyticsModule({ clientId }: ChatbotAnalyticsModuleProps
                         background: "linear-gradient(135deg,rgba(255,255,255,0.05),rgba(255,255,255,0.015))",
                         border: "1px solid rgba(255,255,255,0.07)",
                         backdropFilter: "blur(20px)",
+                        WebkitBackdropFilter: "blur(20px)",
                         boxShadow: "0 20px 40px -10px rgba(0,0,0,0.5)",
-                        padding: "28px",
+                        padding: "20px",
                     }}
                 >
                     <p className="text-[10px] font-bold uppercase tracking-[0.18em] mb-1" style={{ color: "#52525b" }}>Kanali</p>
@@ -459,13 +463,14 @@ export function ChatbotAnalyticsModule({ clientId }: ChatbotAnalyticsModuleProps
                     background: "linear-gradient(135deg,rgba(255,255,255,0.05),rgba(255,255,255,0.015))",
                     border: "1px solid rgba(255,255,255,0.07)",
                     backdropFilter: "blur(20px)",
+                    WebkitBackdropFilter: "blur(20px)",
                     boxShadow: "0 20px 40px -10px rgba(0,0,0,0.5)",
-                    padding: "28px",
+                    padding: "20px",
                 }}
             >
                 <p className="text-[10px] font-bold uppercase tracking-[0.18em] mb-1" style={{ color: "#52525b" }}>Konverzija</p>
                 <p className="text-base font-semibold text-white mb-8">Gde staje razgovor</p>
-                <div className="grid grid-cols-4 gap-5">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-5">
                     {funnelData.map((s, i) => (
                         <div key={i} className="relative flex flex-col gap-3">
                             {/* Funnel bar */}
@@ -510,8 +515,9 @@ export function ChatbotAnalyticsModule({ clientId }: ChatbotAnalyticsModuleProps
                         background: "linear-gradient(135deg,rgba(255,255,255,0.05),rgba(255,255,255,0.015))",
                         border: "1px solid rgba(255,255,255,0.07)",
                         backdropFilter: "blur(20px)",
+                        WebkitBackdropFilter: "blur(20px)",
                         boxShadow: "0 20px 40px -10px rgba(0,0,0,0.5)",
-                        padding: "28px",
+                        padding: "20px",
                     }}
                 >
                     <div className="flex items-center gap-3 mb-6">
@@ -562,8 +568,9 @@ export function ChatbotAnalyticsModule({ clientId }: ChatbotAnalyticsModuleProps
                         background: "linear-gradient(135deg,rgba(255,255,255,0.05),rgba(255,255,255,0.015))",
                         border: "1px solid rgba(255,255,255,0.07)",
                         backdropFilter: "blur(20px)",
+                        WebkitBackdropFilter: "blur(20px)",
                         boxShadow: "0 20px 40px -10px rgba(0,0,0,0.5)",
-                        padding: "28px",
+                        padding: "20px",
                     }}
                 >
                     <p className="text-[10px] font-bold uppercase tracking-[0.18em] mb-1" style={{ color: "#52525b" }}>Intent</p>

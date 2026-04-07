@@ -61,7 +61,14 @@ const DELAY_MS    = 75_000; // 75s between sends
 const KAT_ORDER  = { 'Vreo': 0, 'Topao': 1, 'Hladan': 2 };
 const SKIP_NAMES = new Set(['Temu Asia', 'Orion Telekom', 'CGSHOPPP', 'PATIKE HUB', 'Zen House Sarajevo']);
 // Domains that are clearly not real business emails
-const BOGUS_DOMAINS = new Set(['instagram.com', 'airbnb.com', 'facebook.com', 'tiktok.com']);
+const BOGUS_DOMAINS = new Set(['instagram.com', 'airbnb.com', 'facebook.com', 'tiktok.com', 'pubgmobile.com']);
+// Emails that are clearly image filenames scraped by mistake
+function isBogusEmail(email) {
+  if (!email) return true;
+  if (/\.(webp|png|jpg|jpeg|gif|svg)(@|$)/i.test(email)) return true;
+  if (/@.*\.(webp|png|jpg|jpeg|gif|svg)$/i.test(email)) return true;
+  return false;
+}
 
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
@@ -153,12 +160,18 @@ async function main() {
 
   const draftField = isFollowUp ? 'email_2_draft' : 'email_draft';
 
+  const seenEmails = new Set();
   const sendable = leads
     .filter(l => {
       if (SKIP_NAMES.has(l.company_name)) return false;
       if (!l[draftField]) return false;
+      if (isBogusEmail(l.email)) return false;
       const domain = l.email?.split('@')[1]?.toLowerCase();
       if (domain && BOGUS_DOMAINS.has(domain)) return false;
+      // Deduplicate: skip if we already have this recipient address
+      const addr = l.email?.toLowerCase();
+      if (addr && seenEmails.has(addr)) return false;
+      if (addr) seenEmails.add(addr);
       return true;
     })
     .sort((a, b) => {

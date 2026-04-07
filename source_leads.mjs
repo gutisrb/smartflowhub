@@ -48,7 +48,7 @@ const IG_PROFILE_ACTOR = 'dSCLg0C3YEZ83HzYX';
 const SUPABASE_URL   = 'https://ndazbdkytcksmhoabtgs.supabase.co';
 const SERVICE_KEY    = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5kYXpiZGt5dGNrc21ob2FidGdzIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MDQ5NzQ4MSwiZXhwIjoyMDg2MDczNDgxfQ.6PsYNOzdZeqpWXW3Pej_oLK5fV2MLDi34-SGkHHje2k';
 const SMARTFLOW_ID   = '69acf7e9-557e-4ca3-85bd-a785ef39e351';
-const HUNTER_KEY     = 'b18a1b18f913bb7907bff359ec0b8065f58eecfa';
+const HUNTER_KEY     = '2814e367457bf09b2e06e154352f8c822932bb6b';
 
 // Multiple broad Serbian queries — each hits a different slice of the ad pool
 const ADS_LIBRARY_URLS = [
