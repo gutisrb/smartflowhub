@@ -213,7 +213,7 @@ export default function DashboardPage() {
                 <Menu className="w-5 h-5" />
               </button>
               <h1 className="text-base md:text-2xl font-outfit font-light text-silver tracking-tight truncate">
-                {getModuleLabel()}
+                {getModuleLabel()} <span className="text-[10px] opacity-20">V2</span>
               </h1>
             </div>
 
@@ -230,7 +230,7 @@ export default function DashboardPage() {
               <div className="flex items-center gap-2 md:gap-4">
                 <button className="p-2 md:p-2.5 rounded-xl bg-white/5 border border-white/10 text-zinc-400 hover:text-emerald hover:border-emerald/30 transition-all duration-300 relative group">
                   <Bell className="w-4 h-4 md:w-5 md:h-5" />
-                  <span className="absolute top-2 right-2 w-1.5 h-1.5 bg-emerald rounded-full shadow-[0_0_10px_oklch(0.75_0.15_160)]" />
+                  <span className="absolute top-2 right-2 w-1.5 h-1.5 bg-emerald rounded-full shadow-[0_0_10px_rgba(16,185,129,0.8)]" />
                 </button>
 
                 <div className="h-8 w-px bg-white/10 hidden sm:block" />

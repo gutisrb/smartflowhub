@@ -785,8 +785,11 @@ function StatCard({ icon, label, value, variant, glow }: {
     }
     const s = styles[variant]
     return (
-        <div className={cn("rounded-2xl border p-3 md:p-4 flex items-center gap-2 md:gap-3 backdrop-blur-xl", s.bg, s.border, glow && "ring-1 ring-amber-500/20")}
-             style={{ WebkitBackdropFilter: "blur(20px)" }}>
+        <div className={cn("rounded-2xl border p-3 md:p-4 flex items-center gap-2 md:gap-3", s.bg, s.border, glow && "ring-1 ring-amber-500/20")}
+             style={{ 
+                backdropFilter: "blur(20px)",
+                WebkitBackdropFilter: "blur(20px)" 
+             }}>
             <div className={cn("w-8 h-8 md:w-9 md:h-9 rounded-xl flex items-center justify-center border shrink-0", s.iconClass)}>
                 {icon}
             </div>
