@@ -1,3 +1,16 @@
+
+const path = require('path');
+function loadEnv() {
+  try {
+    const raw = require('fs').readFileSync(path.resolve(__dirname, '.env.local'), 'utf8');
+    for (const line of raw.split('\n')) {
+      const m = line.match(/^([^#=]+)=(.*)$/);
+      if (m) process.env[m[1].trim()] = m[2].trim();
+    }
+  } catch {}
+}
+loadEnv();
+
 /**
  * SmartFlow Follow-up Generator
  *
@@ -13,8 +26,8 @@
 
 const { createClient } = require('@supabase/supabase-js');
 
-const SUPABASE_URL = 'https://ndazbdkytcksmhoabtgs.supabase.co';
-const SERVICE_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5kYXpiZGt5dGNrc21ob2FidGdzIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MDQ5NzQ4MSwiZXhwIjoyMDg2MDczNDgxfQ.6PsYNOzdZeqpWXW3Pej_oLK5fV2MLDi34-SGkHHje2k';
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const SERVICE_KEY  = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const SMARTFLOW_ID = '69acf7e9-557e-4ca3-85bd-a785ef39e351';
 const isDryRun = process.argv.includes('--dry-run');
 

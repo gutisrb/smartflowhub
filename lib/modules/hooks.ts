@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { getClientModules } from "@/lib/supabase/queries"
 import { MODULE_REGISTRY } from "./registry"
 import { ClientModule, EnabledModule, ModuleKey } from "./types"
+import { BOOK_STORE_CLIENTS } from "@/lib/bookstore-clients"
 
 // Fetch enabled modules from DB for a specific client
 export function useClientModules(clientId: string | null) {
@@ -41,6 +42,55 @@ export function useUnifiedModules(clientId: string | null) {
   const PRIMARY_CLIENT_ID = "69acf7e9-557e-4ca3-85bd-a785ef39e351"
   const MJOB_CLIENT_ID = "fa252187-3229-4d0b-8a11-0f66ea97be71"
   const OZ_AVALA_FB_ID = "7ac02189-d0ec-4532-baa6-d7d4dc84b87c"
+
+  // FALLBACK: Bookstore clients (Harmonija, Publik, Stela) — always show the 4 book-store modules
+  const isBookStoreClient = clientId !== null && clientId in BOOK_STORE_CLIENTS
+  const bookStoreConfig = isBookStoreClient && clientId ? BOOK_STORE_CLIENTS[clientId] : null
+
+  if (!loading && (!dbModules || dbModules.length === 0) && isBookStoreClient && bookStoreConfig) {
+    finalDbModules = [
+      {
+        id: "bs1",
+        client_id: clientId as string,
+        module_key: "social-chatbot",
+        is_enabled: true,
+        display_name: "AI Agent",
+        sort_order: 1,
+        created_at: new Date().toISOString(),
+        settings: null,
+      },
+      {
+        id: "bs2",
+        client_id: clientId as string,
+        module_key: "agent-leads",
+        is_enabled: true,
+        display_name: bookStoreConfig.crmLabel,
+        sort_order: 2,
+        created_at: new Date().toISOString(),
+        settings: null,
+      },
+      {
+        id: "bs3",
+        client_id: clientId as string,
+        module_key: "agent-database",
+        is_enabled: true,
+        display_name: bookStoreConfig.catalogLabel,
+        sort_order: 3,
+        created_at: new Date().toISOString(),
+        settings: null,
+      },
+      {
+        id: "bs4",
+        client_id: clientId as string,
+        module_key: "chatbot-analytics",
+        is_enabled: true,
+        display_name: "Analitika",
+        sort_order: 4,
+        created_at: new Date().toISOString(),
+        settings: null,
+      },
+    ] as ClientModule[]
+  }
 
   if (!loading && (!dbModules || dbModules.length === 0) && (clientId === PRIMARY_CLIENT_ID || clientId === MJOB_CLIENT_ID || clientId === OZ_AVALA_FB_ID)) {
     const isMjobRecruitment = clientId === MJOB_CLIENT_ID || clientId === OZ_AVALA_FB_ID

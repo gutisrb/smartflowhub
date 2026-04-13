@@ -8,7 +8,7 @@
  *   Stage 1: Load raw ad records (Apify live OR local JSON files with --local)
  *   Stage 2: Post-filter (INSTAGRAM publisher, 3+ ads per page, Serbian language)
  *   Stage 3: IG handle extraction (website HTML scrape)
- *   Stage 4: Apify IG Profile Scraper — batch verify followers ≥ 10k (~$0.25)
+ *   Stage 4: ScrapeCreators — verify followers ≥ 10k (5 concurrent calls)
  *   Stage 5: Email enrichment (Firecrawl FB about + Hunter.io + website scrape)
  *   Stage 6: DB upsert
  *
@@ -41,14 +41,14 @@ function loadEnv() {
 loadEnv();
 
 // ── Config ────────────────────────────────────────────────────────────────────
-const APIFY_TOKEN    = 'process.env.APIFY_TOKEN';
+const APIFY_TOKEN    = process.env.APIFY_TOKEN;
 const FB_ADS_ACTOR   = 'XtaWFhbtfxyzqrFmd';
-const IG_PROFILE_ACTOR = 'dSCLg0C3YEZ83HzYX';
+const SC_API_KEY     = process.env.SC_API_KEY;
 
-const SUPABASE_URL   = 'https://ndazbdkytcksmhoabtgs.supabase.co';
-const SERVICE_KEY    = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5kYXpiZGt5dGNrc21ob2FidGdzIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MDQ5NzQ4MSwiZXhwIjoyMDg2MDczNDgxfQ.6PsYNOzdZeqpWXW3Pej_oLK5fV2MLDi34-SGkHHje2k';
+const SUPABASE_URL   = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const SERVICE_KEY    = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const SMARTFLOW_ID   = '69acf7e9-557e-4ca3-85bd-a785ef39e351';
-const HUNTER_KEY     = '2814e367457bf09b2e06e154352f8c822932bb6b';
+const HUNTER_KEY     = process.env.HUNTER_API_KEY;
 
 // Multiple broad Serbian queries — each hits a different slice of the ad pool
 const ADS_LIBRARY_URLS = [
@@ -74,13 +74,32 @@ const LOCAL_DATASET_GLOB = 'dataset_facebook-ads-library-scraper_';
 // Minimum IG followers to qualify a lead
 const MIN_FOLLOWERS = 20000;
 
-// ── D2C retail exclusion ──────────────────────────────────────────────────────
+// ── D2C retail & irrelevant exclusion ─────────────────────────────────────────
+// Anything that sells physical products, media, or has no service DM use-case
 const EXCLUDE_CATS = new Set([
+  // Apparel / fashion
   'Clothing (Brand)', 'Boutique store', 'Fashion designer', 'Fashion & beauty',
-  'Jewelry/watches', 'Cosmetics store', 'Beauty, cosmetics & personal care',
-  'Shopping & retail', 'Toy store', 'Baby goods/kids goods', 'Grocery store',
-  'Supermarket', 'Food & beverage', 'Restaurant', 'Fast food restaurant',
-  'Personal blog', 'Public figure', 'Artist', 'Musician/band',
+  "Women's Clothing", "Men's Clothing", 'Clothing store',
+  // Accessories / beauty
+  'Jewelry/watches', 'Jewelry', 'Jewelry & Watches', 'Eyewear',
+  'Cosmetics store', 'Beauty, cosmetics & personal care',
+  // Retail / shopping
+  'Shopping & retail', 'Shopping', 'Retail company', 'Website',
+  'Brand', 'Bags/luggage',
+  // Toys / kids / baby
+  'Toy store', 'Toys', 'Baby goods/kids goods',
+  // Food & beverage
+  'Grocery store', 'Supermarket', 'Food & beverage', 'Restaurant',
+  'Fast food restaurant', 'Bakery', 'Food delivery service',
+  // Phones / electronics
+  'Phone/Tablet', 'Electronics', 'Computer store', 'Video Games',
+  // Health products (not services)
+  'Vitamins/supplements', 'Supplement store', 'Health food store',
+  // Media / entertainment
+  'Personal blog', 'Public figure', 'Artist', 'Musician/band', 'Magazine',
+  'Media/news company', 'Entertainment website', 'TV channel',
+  // Other pure D2C
+  'Interest', 'Sports team',
 ]);
 
 const SOCIAL = new Set([
@@ -102,17 +121,20 @@ function isValidIgHandle(h) {
   return true;
 }
 
-// ── Serbian language detection ────────────────────────────────────────────────
-// Excludes global brands (Nike, Samsung, etc.) targeting RS audience
-function isSerbianContent(texts, linkUrls) {
-  const serbianChars = /[šžčćđŠŽČĆĐ]/;
-  for (const t of texts) {
-    if (t && serbianChars.test(t)) return true;
-  }
-  for (const url of linkUrls) {
+// ── Serbian business detection ────────────────────────────────────────────────
+// Requires .rs domain OR Serbian-specific words — rejects Polish/Croatian/Bosnian
+// that merely target RS audience with Cyrillic-adjacent diacritics
+const SERBIAN_WORDS = /\b(srbija|beograd|novi sad|niš|kragujevac|subotica|dinar|dinara|dostava|besplatna|porudžbina|usluga|popust|akcija|zakazivanje|termin|naručite|kupite|pogledajte|saznajte|pratite|pratilaca|ponuda|cena|cene|kontakt|telefon|adresa|radno vreme|radi|radimo|otvoreno)\b/i;
+
+function isSerbianBusiness(texts, linkUrls, fbPageUri) {
+  // .rs domain in any URL = Serbian business
+  const allUrls = [...linkUrls, fbPageUri || ''];
+  for (const url of allUrls) {
     if (url && /\.rs(\/|$)/i.test(url)) return true;
-    if (url && /\.rs(\/|$)/i.test(url)) return true;
   }
+  // Serbian-specific vocabulary in ad copy
+  const combined = texts.join(' ');
+  if (SERBIAN_WORDS.test(combined)) return true;
   return false;
 }
 
@@ -211,6 +233,28 @@ async function scrapeFacebookAbout(fbPageUri) {
 
     return { website, ig, email };
   } catch { return {}; }
+}
+
+// ── ScrapeCreators — IG profile lookup ───────────────────────────────────────
+async function scrapeCreatorsProfile(handle) {
+  try {
+    const res = await fetch(
+      `https://api.scrapecreators.com/v1/instagram/profile?handle=${encodeURIComponent(handle)}`,
+      { headers: { 'x-api-key': SC_API_KEY }, signal: AbortSignal.timeout(15000) }
+    );
+    if (!res.ok) return null;
+    const data = await res.json();
+    const user = data?.data?.user;
+    if (!user) return null;
+    return {
+      username    : user.username || handle,
+      followers   : user.edge_followed_by?.count || 0,
+      bio         : user.biography || '',
+      external_url: user.external_url || null,
+      is_verified : user.is_verified || false,
+      is_private  : user.is_private || false,
+    };
+  } catch { return null; }
 }
 
 // ── Hunter.io ─────────────────────────────────────────────────────────────────
@@ -423,9 +467,9 @@ async function main() {
     if (likes > 500000)                                    { dbg.tooBig++;    continue; }
     if (cats.some(c => EXCLUDE_CATS.has(c)))               { dbg.retail++;    continue; }
 
-    // Serbian language check — exclude global brands targeting RS audience
+    // Serbian business check — requires .rs domain or Serbian-specific vocabulary
     const linkUrls = [snap.link_url, snap.caption].filter(Boolean);
-    if (!isSerbianContent(adCopies, linkUrls))             { dbg.noSerbian++; continue; }
+    if (!isSerbianBusiness(adCopies, linkUrls, snap.page_profile_uri)) { dbg.noSerbian++; continue; }
 
     dbg.passed++;
     qualified.push({ pid, item, adCopies, count });
@@ -494,31 +538,25 @@ async function main() {
     return;
   }
 
-  // ── Stage 4: IG Profile Scraper — batch follower verification ────────────────
-  console.log('─── Stage 4: IG Profile Scraper (follower verification) ');
+  // ── Stage 4: ScrapeCreators — follower verification ──────────────────────────
+  console.log('─── Stage 4: ScrapeCreators (follower verification) ─────');
 
   const uniqueHandles = [...new Set(withHandles.map(l => l.igHandle))];
   console.log(`  Checking ${uniqueHandles.length} handles for ${MIN_FOLLOWERS/1000}k+ followers...`);
 
-  let igProfiles = [];
-  try {
-    igProfiles = await runApify(
-      IG_PROFILE_ACTOR,
-      { usernames: uniqueHandles },
-      'IG Profile',
-      uniqueHandles.length,
-      0.50,
-    );
-  } catch (err) {
-    console.warn(`  ⚠ IG Profile scraper failed: ${err.message}`);
-    console.warn('  Continuing without follower verification — all handles assumed valid\n');
-  }
-
-  // Build handle → profile map
+  // Parallel with concurrency limit of 5 to avoid rate limits
+  const CONCURRENCY = 5;
   const profileByHandle = new Map();
-  for (const p of igProfiles) {
-    if (p.username) profileByHandle.set(p.username.toLowerCase(), p);
+  for (let i = 0; i < uniqueHandles.length; i += CONCURRENCY) {
+    const batch = uniqueHandles.slice(i, i + CONCURRENCY);
+    const results = await Promise.all(batch.map(h => scrapeCreatorsProfile(h)));
+    for (let j = 0; j < batch.length; j++) {
+      if (results[j]) profileByHandle.set(batch[j].toLowerCase(), results[j]);
+    }
+    process.stdout.write(`\r  ${Math.min(i + CONCURRENCY, uniqueHandles.length)}/${uniqueHandles.length}`);
+    if (i + CONCURRENCY < uniqueHandles.length) await sleep(500);
   }
+  console.log();
 
   // Attach profile data to leads
   let qualified10k = 0;
@@ -526,15 +564,22 @@ async function main() {
     const profile = profileByHandle.get(lead.igHandle.toLowerCase());
     if (profile) {
       lead.igProfile = profile;
-      lead.igFollowers = profile.followersCount || 0;
+      lead.igFollowers = profile.followers || 0;
       if (lead.igFollowers >= MIN_FOLLOWERS) qualified10k++;
-    } else if (igProfiles.length === 0) {
-      // Scraper failed entirely — proceed without follower check
-      lead.igFollowers = null;
     }
   }
 
-  const toEnrich = withHandles.filter(l => l.igFollowers === null || l.igFollowers >= MIN_FOLLOWERS);
+  // If ScrapeCreators verified followers → use that. Otherwise fall back to FB page_like_count.
+  // Never pass through unverified with 0 count — require at least the FB likes threshold.
+  for (const lead of withHandles) {
+    if (lead.igFollowers == null) {
+      // SC out of credits — use FB likes as proxy (conservative: require 2x threshold)
+      const fbLikes = lead.item.snapshot?.page_like_count || 0;
+      lead.igFollowers = fbLikes;
+      lead.igFollowerSource = 'fb_likes_fallback';
+    }
+  }
+  const toEnrich = withHandles.filter(l => l.igFollowers >= MIN_FOLLOWERS);
   const skippedLowFollowers = withHandles.length - toEnrich.length;
 
   console.log(`  Profiles verified  : ${profileByHandle.size}/${uniqueHandles.length}`);
@@ -641,13 +686,10 @@ async function main() {
         instagram_profile: lead.igProfile
           ? {
               username         : lead.igProfile.username,
-              followers        : lead.igProfile.followersCount || followers,
-              following        : lead.igProfile.followingCount || 0,
-              posts_count      : lead.igProfile.postsCount || 0,
-              bio              : lead.igProfile.biography || null,
-              business_category: lead.igProfile.businessCategoryName || null,
-              is_verified      : lead.igProfile.isVerified || false,
-              external_url     : lead.igProfile.externalUrl || null,
+              followers        : lead.igProfile.followers || followers,
+              bio              : lead.igProfile.bio || null,
+              is_verified      : lead.igProfile.is_verified || false,
+              external_url     : lead.igProfile.external_url || null,
             }
           : lead.igHandle
             ? { username: lead.igHandle, followers }

@@ -22,9 +22,12 @@ import {
     Clock,
     CalendarDays,
     Pencil,
-    Trash
+    Trash,
+    ExternalLink,
+    BookOpen
 } from "lucide-react"
-import { getJobsByClientId, createJob, updateJob, deleteJob } from "@/lib/supabase/queries"
+import { getJobsByClientId, createJob, updateJob, deleteJob, getKnjigeByClientId } from "@/lib/supabase/queries"
+import { getBookStoreConfig, BOOK_STORE_CLIENTS } from "@/lib/bookstore-clients"
 import {
     Dialog,
     DialogContent,
@@ -43,6 +46,7 @@ import { toast } from "sonner"
 
 interface AgentDatabaseModuleProps {
     clientId: string
+    selectedBrandIds?: string[]   // Multi-brand: show combined catalog from all selected brands
     terminology?: {
         title: string
         highlight: string
@@ -58,6 +62,7 @@ interface AgentDatabaseModuleProps {
 
 export function AgentDatabaseModule({
     clientId,
+    selectedBrandIds,
     terminology = {
         title: "Growth",
         highlight: "Engine",
@@ -75,6 +80,7 @@ export function AgentDatabaseModule({
     const [isDialogOpen, setIsDialogOpen] = useState(false)
     const [searchQuery, setSearchQuery] = useState("")
     const [editId, setEditId] = useState<string | null>(null)
+    const [bookTab, setBookTab] = useState<'all' | 'dostupno' | 'nedostupno'>('all')
 
     const [formData, setFormData] = useState({
         posao: "",
@@ -95,18 +101,35 @@ export function AgentDatabaseModule({
         show_template: "off"
     })
 
+    const bookStoreConfig = getBookStoreConfig(clientId)
+    const isHarmonija = bookStoreConfig !== null
+    const bsColor = bookStoreConfig?.color || '#10b981'
+
     const loadData = useCallback(async () => {
         if (!clientId) return
         setLoading(true)
         try {
-            const data = await getJobsByClientId(clientId)
-            setItems(data || [])
+            if (isHarmonija && selectedBrandIds && selectedBrandIds.length > 1) {
+                // Multi-brand: fetch katalog for each selected brand and merge
+                const results = await Promise.all(
+                    selectedBrandIds.map(async (bid) => {
+                        const rows = await getKnjigeByClientId(bid)
+                        return (rows || []).map((r: any) => ({ ...r, brandId: bid }))
+                    })
+                )
+                setItems(results.flat())
+            } else {
+                const data = isHarmonija
+                    ? await getKnjigeByClientId(clientId)
+                    : await getJobsByClientId(clientId)
+                setItems(data || [])
+            }
         } catch (error) {
             console.error("Failed to load data", error)
             toast.error("Greška u konekciji sa bazom")
         }
         setLoading(false)
-    }, [clientId])
+    }, [clientId, isHarmonija, selectedBrandIds])
 
     useEffect(() => {
         loadData()
@@ -214,11 +237,18 @@ export function AgentDatabaseModule({
     }
 
     const filteredItems = useMemo(() => {
-        return items.filter(item =>
-            item.posao?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            item.firma?.toLowerCase().includes(searchQuery.toLowerCase())
-        )
-    }, [items, searchQuery])
+        return items.filter(item => {
+            const matchesSearch = isHarmonija
+                ? item.naslov?.toLowerCase().includes(searchQuery.toLowerCase()) || item.autor?.toLowerCase().includes(searchQuery.toLowerCase())
+                : item.posao?.toLowerCase().includes(searchQuery.toLowerCase()) || item.firma?.toLowerCase().includes(searchQuery.toLowerCase())
+            if (!matchesSearch) return false
+            if (isHarmonija) {
+                if (bookTab === 'dostupno') return item.status === 'Aktivan'
+                if (bookTab === 'nedostupno') return item.status !== 'Aktivan'
+            }
+            return true
+        })
+    }, [items, searchQuery, isHarmonija, bookTab])
 
     const config = useMemo(() => {
         return {
@@ -239,14 +269,19 @@ export function AgentDatabaseModule({
                             <config.icon className={cn("w-6 h-6", config.color)} />
                         </div>
                         <h2 className="text-4xl font-outfit font-bold text-silver tracking-tight">
-                            {terminology.title === "Recruitment" ? "Baza" : "Databaza"} <span className={config.color}>{terminology.title === "Recruitment" ? "Pozicija" : "Agenta"}</span>
+                            {isHarmonija ? "Katalog" : terminology.title === "Recruitment" ? "Baza" : "Databaza"}{" "}
+                            <span className={config.color}>{isHarmonija ? "Knjiga" : terminology.title === "Recruitment" ? "Pozicija" : "Agenta"}</span>
                         </h2>
-                        <Badge className="bg-white/5 text-silver/40 border-white/10 font-outfit text-[10px] uppercase tracking-widest">{config.label}</Badge>
+                        <Badge className="bg-white/5 text-silver/40 border-white/10 font-outfit text-[10px] uppercase tracking-widest">
+                            {isHarmonija ? `${items.length} naslova` : config.label}
+                        </Badge>
                     </div>
                     <p className="text-silver/60 font-outfit text-lg max-w-xl">
-                        {terminology.title === "Regrutacija" || terminology.title === "Recruitment"
-                            ? "Upravljanje oglasima i kriterijumima za AI selekciju kandidata."
-                            : `Autonomno upravljanje znanjem za ${config.item} čvorove.`}
+                        {isHarmonija
+                            ? "Naslovi koje agent preporučuje kupcima. Zaliha i cene biće sinhronizovane sa brainit.rs."
+                            : terminology.title === "Regrutacija" || terminology.title === "Recruitment"
+                                ? "Upravljanje oglasima i kriterijumima za AI selekciju kandidata."
+                                : `Autonomno upravljanje znanjem za ${config.item} čvorove.`}
                     </p>
                 </div>
 
@@ -263,6 +298,7 @@ export function AgentDatabaseModule({
                         Osveži Bazu
                     </Button>
 
+                    {!isHarmonija && (
                     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                         <DialogTrigger asChild>
                             <Button onClick={resetForm} className="h-12 px-8 bg-emerald hover:bg-emerald-600 text-obsidian font-bold rounded-2xl shadow-[0_0_20px_rgba(16,185,129,0.2)] border-none transition-all hover:scale-[1.02]">
@@ -450,6 +486,7 @@ export function AgentDatabaseModule({
                             </div>
                         </DialogContent>
                     </Dialog>
+                    )}
                 </div>
             </div>
 
@@ -458,18 +495,35 @@ export function AgentDatabaseModule({
                 <div className="relative w-full sm:w-80 group">
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500 group-focus-within:text-emerald transition-colors" />
                     <Input
-                        placeholder="Pretraži bazu pozicija..."
+                        placeholder={isHarmonija ? "Pretraži katalog knjiga..." : "Pretraži bazu pozicija..."}
                         className="pl-11 h-12 bg-white/5 border-white/5 rounded-2xl font-outfit focus:border-emerald/30 transition-all"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                     />
                 </div>
 
-                <div className="flex items-center gap-2 p-1.5 bg-white/5 border border-white/5 rounded-2xl">
-                    <Button variant="ghost" size="sm" className="h-9 px-5 rounded-xl text-[10px] font-bold uppercase tracking-widest text-emerald bg-emerald/10 shadow-lg shadow-emerald/5">Sve Pozicije</Button>
-                    <Button variant="ghost" size="sm" className="h-9 px-5 rounded-xl text-[10px] font-bold uppercase tracking-widest text-zinc-500 hover:text-silver">Aktivne</Button>
-                    <Button variant="ghost" size="sm" className="h-9 px-5 rounded-xl text-[10px] font-bold uppercase tracking-widest text-zinc-500 hover:text-silver">Arhivirane</Button>
-                </div>
+                {isHarmonija ? (
+                    <div className="flex items-center gap-2 p-1.5 bg-white/5 border border-white/5 rounded-2xl">
+                        {([['all', 'Sve knjige'], ['dostupno', 'Dostupno'], ['nedostupno', 'Nema na stanju']] as const).map(([key, label]) => (
+                            <Button key={key} variant="ghost" size="sm"
+                                onClick={() => setBookTab(key)}
+                                className={cn(
+                                    "h-9 px-5 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all",
+                                    bookTab === key
+                                        ? "text-emerald bg-emerald/10 shadow-lg shadow-emerald/5"
+                                        : "text-zinc-500 hover:text-silver"
+                                )}>
+                                {label}
+                            </Button>
+                        ))}
+                    </div>
+                ) : (
+                    <div className="flex items-center gap-2 p-1.5 bg-white/5 border border-white/5 rounded-2xl">
+                        <Button variant="ghost" size="sm" className="h-9 px-5 rounded-xl text-[10px] font-bold uppercase tracking-widest text-emerald bg-emerald/10 shadow-lg shadow-emerald/5">Sve Pozicije</Button>
+                        <Button variant="ghost" size="sm" className="h-9 px-5 rounded-xl text-[10px] font-bold uppercase tracking-widest text-zinc-500 hover:text-silver">Aktivne</Button>
+                        <Button variant="ghost" size="sm" className="h-9 px-5 rounded-xl text-[10px] font-bold uppercase tracking-widest text-zinc-500 hover:text-silver">Arhivirane</Button>
+                    </div>
+                )}
             </div>
 
             {/* Main Data Table */}
@@ -477,14 +531,25 @@ export function AgentDatabaseModule({
                 <Table>
                     <TableHeader className="bg-white/[0.02] border-b border-white/5">
                         <TableRow className="border-none hover:bg-transparent">
-                            <TableHead className="w-[100px] text-zinc-500 font-bold uppercase tracking-widest text-[10px] py-8 pl-8 font-outfit">Kod</TableHead>
-                            <TableHead className="text-zinc-500 font-bold uppercase tracking-widest text-[10px] py-8 font-outfit">Pozicija</TableHead>
-                            <TableHead className="text-zinc-500 font-bold uppercase tracking-widest text-[10px] py-8 font-outfit">Poslodavac</TableHead>
-                            <TableHead className="text-zinc-500 font-bold uppercase tracking-widest text-[10px] py-8 font-outfit">Smene & Vreme</TableHead>
-                            <TableHead className="text-zinc-500 font-bold uppercase tracking-widest text-[10px] py-8 font-outfit">Plata</TableHead>
-                            <TableHead className="text-zinc-500 font-bold uppercase tracking-widest text-[10px] py-8 font-outfit">Početak</TableHead>
-                            <TableHead className="text-zinc-500 font-bold uppercase tracking-widest text-[10px] py-8 font-outfit text-center">Status</TableHead>
-                            <TableHead className="text-right pr-8 py-8 font-outfit">Akcije</TableHead>
+                            {isHarmonija ? (<>
+                                <TableHead className="w-16 py-8 pl-8" />
+                                <TableHead className="text-zinc-500 font-bold uppercase tracking-widest text-[10px] py-8 font-outfit">Naslov</TableHead>
+                                <TableHead className="text-zinc-500 font-bold uppercase tracking-widest text-[10px] py-8 font-outfit">Kategorije</TableHead>
+                                <TableHead className="text-zinc-500 font-bold uppercase tracking-widest text-[10px] py-8 font-outfit text-center">
+                                    <span title="Biće sinhronizovano sa brainit.rs">Zaliha / Cena</span>
+                                </TableHead>
+                                <TableHead className="text-zinc-500 font-bold uppercase tracking-widest text-[10px] py-8 font-outfit text-center">Dostupnost</TableHead>
+                                <TableHead className="text-right pr-8 py-8 font-outfit">Link</TableHead>
+                            </>) : (<>
+                                <TableHead className="w-[100px] text-zinc-500 font-bold uppercase tracking-widest text-[10px] py-8 pl-8 font-outfit">Kod</TableHead>
+                                <TableHead className="text-zinc-500 font-bold uppercase tracking-widest text-[10px] py-8 font-outfit">Pozicija</TableHead>
+                                <TableHead className="text-zinc-500 font-bold uppercase tracking-widest text-[10px] py-8 font-outfit">Poslodavac</TableHead>
+                                <TableHead className="text-zinc-500 font-bold uppercase tracking-widest text-[10px] py-8 font-outfit">Smene & Vreme</TableHead>
+                                <TableHead className="text-zinc-500 font-bold uppercase tracking-widest text-[10px] py-8 font-outfit">Plata</TableHead>
+                                <TableHead className="text-zinc-500 font-bold uppercase tracking-widest text-[10px] py-8 font-outfit">Početak</TableHead>
+                                <TableHead className="text-zinc-500 font-bold uppercase tracking-widest text-[10px] py-8 font-outfit text-center">Status</TableHead>
+                                <TableHead className="text-right pr-8 py-8 font-outfit">Akcije</TableHead>
+                            </>)}
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -501,7 +566,7 @@ export function AgentDatabaseModule({
                             ) : filteredItems.length === 0 ? (
                                 <TableRow className="border-none">
                                     <TableCell colSpan={8} className="h-80 text-center">
-                                        <p className="text-sm font-outfit text-zinc-500 italic opacity-30 tracking-widest uppercase">Nema pronađenih pozicija u bazi</p>
+                                        <p className="text-sm font-outfit text-zinc-500 italic opacity-30 tracking-widest uppercase">{isHarmonija ? "Nema knjiga u katalogu" : "Nema pronađenih pozicija u bazi"}</p>
                                     </TableCell>
                                 </TableRow>
                             ) : (
@@ -511,99 +576,200 @@ export function AgentDatabaseModule({
                                         initial={{ opacity: 0, scale: 0.98, y: 10 }}
                                         animate={{ opacity: 1, scale: 1, y: 0 }}
                                         transition={{ delay: idx * 0.03, duration: 0.4 }}
-                                        className="group border-white/[0.03] hover:bg-emerald/[0.02] transition-all duration-300"
+                                        className="group border-white/[0.03] transition-all duration-300"
+                                        style={isHarmonija ? {} : undefined}
+                                        onMouseEnter={isHarmonija ? e => (e.currentTarget.style.backgroundColor = `${bsColor}08`) : undefined}
+                                        onMouseLeave={isHarmonija ? e => (e.currentTarget.style.backgroundColor = '') : undefined}
                                     >
-                                        <TableCell className="py-7 pl-8 font-mono text-[10px] text-zinc-500 font-bold">
-                                            <div className="bg-white/5 border border-white/5 px-2.5 py-1 rounded-lg w-fit group-hover:border-emerald/30 group-hover:text-emerald transition-all">
-                                                {item.job_id || 'O-991'}
-                                            </div>
-                                        </TableCell>
-                                        <TableCell>
-                                            <div className="flex flex-col">
-                                                <span className="text-silver font-bold font-outfit text-base group-hover:text-emerald transition-colors leading-tight">{item.posao}</span>
-                                                <span className="text-[10px] text-zinc-500 mt-1.5 uppercase tracking-widest font-medium opacity-60">{item.tip_posla}</span>
-                                            </div>
-                                        </TableCell>
-                                        <TableCell>
-                                            <div className="flex flex-col gap-1.5">
-                                                <span className="text-zinc-300 text-sm font-outfit font-bold">{item.firma}</span>
-                                                {item.employer_address && (
-                                                    <div className="flex items-center gap-1.5 text-zinc-500 text-xs font-outfit">
-                                                        <MapPin className="w-3 h-3 opacity-50 text-emerald shrink-0" />
-                                                        {item.employer_address}
+                                        {isHarmonija ? (
+                                            <>
+                                                {/* Book cover swatch */}
+                                                <TableCell className="py-5 pl-8 w-16">
+                                                    <div className="relative w-9">
+                                                        <div
+                                                            className="w-9 h-12 rounded-sm flex items-center justify-center shrink-0 shadow-md"
+                                                            style={{
+                                                                background: `linear-gradient(145deg, ${item.brandId ? (BOOK_STORE_CLIENTS[item.brandId]?.color || bsColor) : bsColor}28, ${item.brandId ? (BOOK_STORE_CLIENTS[item.brandId]?.color || bsColor) : bsColor}0a)`,
+                                                                borderLeft: `3px solid ${item.brandId ? (BOOK_STORE_CLIENTS[item.brandId]?.color || bsColor) : bsColor}55`,
+                                                            }}
+                                                        >
+                                                            <span className="text-sm font-black font-outfit" style={{ color: `${item.brandId ? (BOOK_STORE_CLIENTS[item.brandId]?.color || bsColor) : bsColor}aa` }}>
+                                                                {(item.naslov || '?').charAt(0)}
+                                                            </span>
+                                                        </div>
+                                                        {/* Brand dot in multi-brand mode */}
+                                                        {item.brandId && BOOK_STORE_CLIENTS[item.brandId] && (
+                                                            <span
+                                                                className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-black"
+                                                                style={{ backgroundColor: BOOK_STORE_CLIENTS[item.brandId].color }}
+                                                                title={BOOK_STORE_CLIENTS[item.brandId].brandName}
+                                                            />
+                                                        )}
                                                     </div>
-                                                )}
-                                                {!item.employer_address && item.lokacija && (
-                                                    <div className="flex items-center gap-1.5 text-zinc-500 text-xs font-outfit">
-                                                        <MapPin className="w-3 h-3 opacity-50 text-emerald shrink-0" />
-                                                        {item.lokacija}
+                                                </TableCell>
+                                                {/* Naslov + Autor */}
+                                                <TableCell className="py-5">
+                                                    <div>
+                                                        <span className="text-silver font-bold font-outfit text-sm group-hover:text-white transition-colors leading-snug block">{item.naslov}</span>
+                                                        <span className="text-zinc-500 text-xs font-outfit mt-0.5 block italic">{item.autor || '—'}</span>
                                                     </div>
-                                                )}
-                                                {item.employer_contact && (
-                                                    <a href={`tel:${item.employer_contact}`} className="flex items-center gap-1.5 text-cyan-400/70 text-xs font-outfit hover:text-cyan-400 transition-colors">
-                                                        <Phone className="w-3 h-3 shrink-0" />
-                                                        {item.employer_contact}
-                                                    </a>
-                                                )}
-                                            </div>
-                                        </TableCell>
-                                        <TableCell>
-                                            <div className="flex flex-col gap-1">
-                                                {item.smene ? (
-                                                    <div className="flex items-center gap-1.5 text-zinc-300 text-xs font-outfit font-medium">
-                                                        <Clock className="w-3 h-3 text-emerald opacity-70 shrink-0" />
-                                                        {item.smene}
+                                                </TableCell>
+                                                {/* Kategorije */}
+                                                <TableCell>
+                                                    <div className="flex flex-wrap gap-1">
+                                                        {(item.kategorije || []).slice(0, 2).map((k: string) => (
+                                                            <span key={k} className="text-[10px] px-2.5 py-0.5 rounded-full font-outfit"
+                                                                style={{
+                                                                    background: `${bsColor}12`,
+                                                                    border: `1px solid ${bsColor}25`,
+                                                                    color: `${bsColor}cc`,
+                                                                }}>
+                                                                {k}
+                                                            </span>
+                                                        ))}
                                                     </div>
-                                                ) : null}
-                                                {item.radno_vreme ? (
-                                                    <div className="text-zinc-500 text-xs font-outfit">{item.radno_vreme}</div>
-                                                ) : (
-                                                    !item.smene && <span className="text-zinc-600 text-xs italic">—</span>
-                                                )}
-                                            </div>
-                                        </TableCell>
-                                        <TableCell>
-                                            <div className="flex flex-col">
-                                                <div className="flex items-center gap-2 text-emerald font-bold font-outfit text-base tracking-tight">
-                                                    {item.plata}
-                                                </div>
-                                                <span className="text-[10px] text-zinc-500 mt-0.5 uppercase tracking-widest opacity-60 font-medium">{item.tip_plate}</span>
-                                            </div>
-                                        </TableCell>
-                                        <TableCell>
-                                            {item.start_datum ? (
-                                                <div className="flex items-center gap-1.5 text-zinc-300 text-xs font-outfit">
-                                                    <CalendarDays className="w-3 h-3 text-emerald opacity-70 shrink-0" />
-                                                    {item.start_datum}
-                                                </div>
-                                            ) : (
-                                                <span className="text-zinc-600 text-xs italic">—</span>
-                                            )}
-                                        </TableCell>
-                                        <TableCell className="text-center">
-                                            <Badge
-                                                className={cn(
-                                                    "px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest border-none transition-all",
-                                                    item.status === "Aktivan"
-                                                        ? "bg-emerald/10 text-emerald shadow-[0_0_15px_rgba(16,185,129,0.1)]"
-                                                        : item.status === "Pauziran"
-                                                            ? "bg-orange-500/10 text-orange-400"
-                                                            : "bg-zinc-800 text-zinc-500"
-                                                )}
-                                            >
-                                                {item.status}
-                                            </Badge>
-                                        </TableCell>
-                                        <TableCell className="text-right pr-8">
-                                            <div className="flex items-center justify-end gap-2.5 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-4 group-hover:translate-x-0">
-                                                <Button variant="ghost" size="icon" onClick={() => openEditDialog(item)} className="w-10 h-10 rounded-xl bg-white/5 hover:bg-emerald/10 hover:text-emerald transition-all">
-                                                    <Pencil className="w-4 h-4" />
-                                                </Button>
-                                                <Button variant="ghost" size="icon" onClick={() => handleDelete(item.id)} className="w-10 h-10 rounded-xl bg-white/5 text-zinc-500 hover:bg-red-500/10 hover:text-red-500 transition-all">
-                                                    <Trash className="w-4 h-4" />
-                                                </Button>
-                                            </div>
-                                        </TableCell>
+                                                </TableCell>
+                                                {/* Zaliha / Cena — synced from brainit.rs once connected */}
+                                                <TableCell className="text-center">
+                                                    {(item.zaliha != null || item.cena != null) ? (
+                                                        <div className="flex flex-col items-center gap-0.5">
+                                                            <span className="text-white font-bold font-mono text-sm">{item.zaliha ?? '—'} <span className="text-zinc-600 text-[10px] font-normal">kom</span></span>
+                                                            <span className="text-zinc-500 text-[10px]">{item.cena ?? '—'}</span>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="flex flex-col items-center gap-1.5" title="Biće sinhronizovano sa brainit.rs">
+                                                            <div className="flex gap-1">
+                                                                {[0,1,2].map(i => (
+                                                                    <span key={i} className="inline-block w-1 h-1 rounded-full bg-zinc-700 animate-pulse"
+                                                                        style={{ animationDelay: `${i * 150}ms` }} />
+                                                                ))}
+                                                            </div>
+                                                            <span className="text-[9px] font-mono uppercase tracking-wider text-zinc-700">brainit.rs</span>
+                                                        </div>
+                                                    )}
+                                                </TableCell>
+                                                {/* Dostupnost */}
+                                                <TableCell className="text-center">
+                                                    {(() => {
+                                                        if (item.zaliha === 0) return <Badge className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest bg-red-500/10 text-red-400 border border-red-500/15">Nema na stanju</Badge>
+                                                        if (item.status === "Aktivan") return <Badge className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border" style={{ background: `${bsColor}12`, color: bsColor, borderColor: `${bsColor}25` }}>Dostupno</Badge>
+                                                        if (item.status === "Pauziran") return <Badge className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest bg-amber-500/10 text-amber-400 border border-amber-500/15">Privremeno</Badge>
+                                                        return <Badge className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest bg-white/5 text-zinc-500 border border-white/5">Arhiviran</Badge>
+                                                    })()}
+                                                </TableCell>
+                                                {/* Link */}
+                                                <TableCell className="text-right pr-8">
+                                                    {item.url && (
+                                                        <a
+                                                            href={item.url}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="inline-flex items-center gap-1.5 text-xs text-zinc-500 transition-colors font-outfit opacity-0 group-hover:opacity-100"
+                                                            style={{ ['--tw-text-opacity' as string]: '1' }}
+                                                            onMouseEnter={e => (e.currentTarget.style.color = bsColor)}
+                                                            onMouseLeave={e => (e.currentTarget.style.color = '')}
+                                                        >
+                                                            <ExternalLink className="w-3.5 h-3.5" />
+                                                            Otvori
+                                                        </a>
+                                                    )}
+                                                </TableCell>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <TableCell className="py-7 pl-8 font-mono text-[10px] text-zinc-500 font-bold">
+                                                    <div className="bg-white/5 border border-white/5 px-2.5 py-1 rounded-lg w-fit group-hover:border-emerald/30 group-hover:text-emerald transition-all">
+                                                        {item.job_id || 'O-991'}
+                                                    </div>
+                                                </TableCell>
+                                                <TableCell>
+                                                    <div className="flex flex-col">
+                                                        <span className="text-silver font-bold font-outfit text-base group-hover:text-emerald transition-colors leading-tight">{item.posao}</span>
+                                                        <span className="text-[10px] text-zinc-500 mt-1.5 uppercase tracking-widest font-medium opacity-60">{item.tip_posla}</span>
+                                                    </div>
+                                                </TableCell>
+                                                <TableCell>
+                                                    <div className="flex flex-col gap-1.5">
+                                                        <span className="text-zinc-300 text-sm font-outfit font-bold">{item.firma}</span>
+                                                        {item.employer_address && (
+                                                            <div className="flex items-center gap-1.5 text-zinc-500 text-xs font-outfit">
+                                                                <MapPin className="w-3 h-3 opacity-50 text-emerald shrink-0" />
+                                                                {item.employer_address}
+                                                            </div>
+                                                        )}
+                                                        {!item.employer_address && item.lokacija && (
+                                                            <div className="flex items-center gap-1.5 text-zinc-500 text-xs font-outfit">
+                                                                <MapPin className="w-3 h-3 opacity-50 text-emerald shrink-0" />
+                                                                {item.lokacija}
+                                                            </div>
+                                                        )}
+                                                        {item.employer_contact && (
+                                                            <a href={`tel:${item.employer_contact}`} className="flex items-center gap-1.5 text-cyan-400/70 text-xs font-outfit hover:text-cyan-400 transition-colors">
+                                                                <Phone className="w-3 h-3 shrink-0" />
+                                                                {item.employer_contact}
+                                                            </a>
+                                                        )}
+                                                    </div>
+                                                </TableCell>
+                                                <TableCell>
+                                                    <div className="flex flex-col gap-1">
+                                                        {item.smene ? (
+                                                            <div className="flex items-center gap-1.5 text-zinc-300 text-xs font-outfit font-medium">
+                                                                <Clock className="w-3 h-3 text-emerald opacity-70 shrink-0" />
+                                                                {item.smene}
+                                                            </div>
+                                                        ) : null}
+                                                        {item.radno_vreme ? (
+                                                            <div className="text-zinc-500 text-xs font-outfit">{item.radno_vreme}</div>
+                                                        ) : (
+                                                            !item.smene && <span className="text-zinc-600 text-xs italic">—</span>
+                                                        )}
+                                                    </div>
+                                                </TableCell>
+                                                <TableCell>
+                                                    <div className="flex flex-col">
+                                                        <div className="flex items-center gap-2 text-emerald font-bold font-outfit text-base tracking-tight">
+                                                            {item.plata}
+                                                        </div>
+                                                        <span className="text-[10px] text-zinc-500 mt-0.5 uppercase tracking-widest opacity-60 font-medium">{item.tip_plate}</span>
+                                                    </div>
+                                                </TableCell>
+                                                <TableCell>
+                                                    {item.start_datum ? (
+                                                        <div className="flex items-center gap-1.5 text-zinc-300 text-xs font-outfit">
+                                                            <CalendarDays className="w-3 h-3 text-emerald opacity-70 shrink-0" />
+                                                            {item.start_datum}
+                                                        </div>
+                                                    ) : (
+                                                        <span className="text-zinc-600 text-xs italic">—</span>
+                                                    )}
+                                                </TableCell>
+                                                <TableCell className="text-center">
+                                                    <Badge
+                                                        className={cn(
+                                                            "px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest border-none transition-all",
+                                                            item.status === "Aktivan"
+                                                                ? "bg-emerald/10 text-emerald shadow-[0_0_15px_rgba(16,185,129,0.1)]"
+                                                                : item.status === "Pauziran"
+                                                                    ? "bg-orange-500/10 text-orange-400"
+                                                                    : "bg-zinc-800 text-zinc-500"
+                                                        )}
+                                                    >
+                                                        {item.status}
+                                                    </Badge>
+                                                </TableCell>
+                                                <TableCell className="text-right pr-8">
+                                                    <div className="flex items-center justify-end gap-2.5 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-4 group-hover:translate-x-0">
+                                                        <Button variant="ghost" size="icon" onClick={() => openEditDialog(item)} className="w-10 h-10 rounded-xl bg-white/5 hover:bg-emerald/10 hover:text-emerald transition-all">
+                                                            <Pencil className="w-4 h-4" />
+                                                        </Button>
+                                                        <Button variant="ghost" size="icon" onClick={() => handleDelete(item.id)} className="w-10 h-10 rounded-xl bg-white/5 text-zinc-500 hover:bg-red-500/10 hover:text-red-500 transition-all">
+                                                            <Trash className="w-4 h-4" />
+                                                        </Button>
+                                                    </div>
+                                                </TableCell>
+                                            </>
+                                        )}
                                     </motion.tr>
                                 ))
                             )}

@@ -5,6 +5,13 @@ import { ChevronRight, UserCircle, Database, LayoutDashboard, Zap, BarChart3, Se
 import { useState, useMemo } from "react"
 import { useUnifiedModules } from "@/lib/modules/hooks"
 import { EnabledModule, ModuleCategory, ModuleKey } from "@/lib/modules/types"
+import { BookStoreConfig } from "@/lib/bookstore-clients"
+import { BrandSwitcherSidebar } from "@/components/dashboard/brand-switcher"
+
+interface BrandEntry {
+  id: string
+  config: BookStoreConfig
+}
 
 interface SidebarProps {
   currentView: ModuleKey
@@ -15,6 +22,12 @@ interface SidebarProps {
   loading?: boolean
   isOpen?: boolean
   onClose?: () => void
+  // Group / bookstore brand switcher
+  isGroup?: boolean
+  groupBrands?: BrandEntry[]
+  selectedBrandIds?: string[]
+  onBrandSelectionChange?: (ids: string[]) => void
+  hideCategories?: boolean
 }
 
 interface CategoryConfig {
@@ -31,7 +44,13 @@ const CATEGORY_CONFIG: CategoryConfig[] = [
   { key: 'settings', label: 'Podešavanja', collapsible: false, icon: Settings },
 ]
 
-export function Sidebar({ currentView, onViewChange, clientName, clientId, modules: propModules, loading: propLoading, isOpen, onClose }: SidebarProps) {
+export function Sidebar({
+  currentView, onViewChange, clientName, clientId,
+  modules: propModules, loading: propLoading,
+  isOpen, onClose,
+  isGroup, groupBrands, selectedBrandIds, onBrandSelectionChange,
+  hideCategories,
+}: SidebarProps) {
   const { modules: hookModules, loading: hookLoading } = useUnifiedModules(propModules ? null : clientId)
 
   const modules = propModules || hookModules
@@ -64,12 +83,9 @@ export function Sidebar({ currentView, onViewChange, clientName, clientId, modul
 
   // Shared wrapper classes — desktop: in-flow; mobile: fixed drawer
   const wrapperClass = cn(
-    // Mobile: fixed drawer that slides in/out
     "fixed inset-y-0 left-0 z-50 flex flex-col glass-panel overflow-hidden transition-transform duration-300 ease-in-out",
     "w-[280px] md:w-72",
-    // Mobile slide
     isOpen ? "translate-x-0" : "-translate-x-full",
-    // Desktop: reset to in-flow positioning
     "md:relative md:translate-x-0 md:inset-auto md:z-20 md:m-4 md:mr-0 md:rounded-3xl md:h-[calc(100vh-2rem)]",
     "group/sidebar animate-in slide-in-from-left-8 duration-700 ease-out"
   )
@@ -93,80 +109,124 @@ export function Sidebar({ currentView, onViewChange, clientName, clientId, modul
     <div className={wrapperClass}>
       <div className="absolute inset-0 bg-gradient-to-b from-emerald/5 to-transparent pointer-events-none opacity-50" />
 
-      <div className="p-6 md:p-8 pb-6 relative z-10">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4 group cursor-pointer">
-            <div className="relative">
-              <div className="w-10 h-10 md:w-12 md:h-12 rounded-2xl bg-emerald flex items-center justify-center shadow-[0_0_20px_rgba(16,185,129,0.3)] group-hover:scale-110 transition-transform duration-500 overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-tr from-black/20 to-transparent" />
-                <ShieldCheck className="w-5 h-5 md:w-6 md:h-6 text-obsidian relative z-10" />
-                <div className="absolute inset-x-0 bottom-0 h-1/2 bg-white/10 blur-md translate-y-full group-hover:translate-y-0 transition-transform duration-700" />
-              </div>
-              <div className="absolute -top-1 -right-1 w-3 h-3 bg-emerald border-2 border-obsidian rounded-full animate-pulse" />
-            </div>
-            <div className="flex flex-col">
-              <span className="text-xs font-bold text-emerald uppercase tracking-[0.2em] leading-none mb-1">Smartflow</span>
-              <span className="text-lg md:text-xl font-outfit font-medium text-silver tracking-tight leading-none group-hover:text-white transition-colors">Dashboard</span>
-            </div>
-          </div>
-          {/* Close button — mobile only */}
+      {/* ── Header: brand switcher (group) OR Smartflow logo ─────────────── */}
+      {isGroup && groupBrands && groupBrands.length > 0 && selectedBrandIds && onBrandSelectionChange ? (
+        <div className="relative z-10">
+          {/* Mobile close button */}
           {onClose && (
-            <button
-              onClick={onClose}
-              className="md:hidden p-2 rounded-xl text-zinc-500 hover:text-white hover:bg-white/10 transition-all duration-200"
-            >
-              <X className="w-5 h-5" />
-            </button>
+            <div className="flex justify-end px-4 pt-4">
+              <button
+                onClick={onClose}
+                className="md:hidden p-2 rounded-xl text-zinc-500 hover:text-white hover:bg-white/10 transition-all duration-200"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
           )}
+          <BrandSwitcherSidebar
+            brands={groupBrands}
+            selectedIds={selectedBrandIds}
+            onSelectionChange={onBrandSelectionChange}
+          />
+          {/* Divider */}
+          <div className="mx-4 mb-2 h-px bg-white/5" />
         </div>
-      </div>
-
-      <nav className="flex-1 overflow-y-auto px-4 py-4 space-y-8 scrollbar-none relative z-10">
-        {CATEGORY_CONFIG.map(categoryConfig => {
-          const categoryModules = modulesByCategory.get(categoryConfig.key) || []
-          if (categoryModules.length === 0) return null
-
-          const isExpanded = expandedCategories.has(categoryConfig.key)
-
-          return (
-            <div key={categoryConfig.key} className="space-y-3">
-              <div className="flex items-center gap-2 px-4 mb-2">
-                <categoryConfig.icon className="w-3.5 h-3.5 text-zinc-600" />
-                {categoryConfig.collapsible ? (
-                  <button
-                    onClick={() => toggleCategory(categoryConfig.key)}
-                    className="flex-1 flex items-center justify-between text-[10px] font-bold text-zinc-500 hover:text-emerald uppercase tracking-[0.15em] transition-colors group/cat"
-                  >
-                    <span>{categoryConfig.label}</span>
-                    <ChevronRight className={cn("w-3 h-3 transition-transform text-zinc-600 group-hover/cat:text-emerald", isExpanded && "rotate-90")} />
-                  </button>
-                ) : (
-                  <div className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.15em]">
-                    {categoryConfig.label}
-                  </div>
-                )}
+      ) : (
+        <div className="p-6 md:p-8 pb-6 relative z-10">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4 group cursor-pointer">
+              <div className="relative">
+                <div className="w-10 h-10 md:w-12 md:h-12 rounded-2xl bg-emerald flex items-center justify-center shadow-[0_0_20px_rgba(16,185,129,0.3)] group-hover:scale-110 transition-transform duration-500 overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-tr from-black/20 to-transparent" />
+                  <ShieldCheck className="w-5 h-5 md:w-6 md:h-6 text-obsidian relative z-10" />
+                  <div className="absolute inset-x-0 bottom-0 h-1/2 bg-white/10 blur-md translate-y-full group-hover:translate-y-0 transition-transform duration-700" />
+                </div>
+                <div className="absolute -top-1 -right-1 w-3 h-3 bg-emerald border-2 border-obsidian rounded-full animate-pulse" />
               </div>
-
-              <div className={cn(
-                "space-y-1 overflow-hidden transition-all duration-500 ease-in-out",
-                !isExpanded ? "max-h-0 opacity-0" : "max-h-[500px] opacity-100"
-              )}>
-                {categoryModules.map((module, idx) => (
-                  <NavItem
-                    key={module.key}
-                    icon={module.icon}
-                    label={module.displayName}
-                    active={currentView === module.key}
-                    onClick={() => onViewChange(module.key)}
-                    delay={idx * 0.05}
-                  />
-                ))}
+              <div className="flex flex-col">
+                <span className="text-xs font-bold text-emerald uppercase tracking-[0.2em] leading-none mb-1">Smartflow</span>
+                <span className="text-lg md:text-xl font-outfit font-medium text-silver tracking-tight leading-none group-hover:text-white transition-colors">Dashboard</span>
               </div>
             </div>
-          )
-        })}
+            {onClose && (
+              <button
+                onClick={onClose}
+                className="md:hidden p-2 rounded-xl text-zinc-500 hover:text-white hover:bg-white/10 transition-all duration-200"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ── Nav ────────────────────────────────────────────────────────────── */}
+      <nav className="flex-1 overflow-y-auto px-4 py-2 scrollbar-none relative z-10">
+        {hideCategories ? (
+          // Flat nav — no category headers (bookstore clients)
+          <div className="space-y-1">
+            {modules.map((module, idx) => (
+              <NavItem
+                key={module.key}
+                icon={module.icon}
+                label={module.displayName}
+                active={currentView === module.key}
+                onClick={() => onViewChange(module.key)}
+                delay={idx * 0.05}
+              />
+            ))}
+          </div>
+        ) : (
+          // Categorised nav (SmartFlow / agency clients)
+          <div className="space-y-8 py-2">
+            {CATEGORY_CONFIG.map(categoryConfig => {
+              const categoryModules = modulesByCategory.get(categoryConfig.key) || []
+              if (categoryModules.length === 0) return null
+
+              const isExpanded = expandedCategories.has(categoryConfig.key)
+
+              return (
+                <div key={categoryConfig.key} className="space-y-3">
+                  <div className="flex items-center gap-2 px-4 mb-2">
+                    <categoryConfig.icon className="w-3.5 h-3.5 text-zinc-600" />
+                    {categoryConfig.collapsible ? (
+                      <button
+                        onClick={() => toggleCategory(categoryConfig.key)}
+                        className="flex-1 flex items-center justify-between text-[10px] font-bold text-zinc-500 hover:text-emerald uppercase tracking-[0.15em] transition-colors group/cat"
+                      >
+                        <span>{categoryConfig.label}</span>
+                        <ChevronRight className={cn("w-3 h-3 transition-transform text-zinc-600 group-hover/cat:text-emerald", isExpanded && "rotate-90")} />
+                      </button>
+                    ) : (
+                      <div className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.15em]">
+                        {categoryConfig.label}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className={cn(
+                    "space-y-1 overflow-hidden transition-all duration-500 ease-in-out",
+                    !isExpanded ? "max-h-0 opacity-0" : "max-h-[500px] opacity-100"
+                  )}>
+                    {categoryModules.map((module, idx) => (
+                      <NavItem
+                        key={module.key}
+                        icon={module.icon}
+                        label={module.displayName}
+                        active={currentView === module.key}
+                        onClick={() => onViewChange(module.key)}
+                        delay={idx * 0.05}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        )}
       </nav>
 
+      {/* ── Profile footer ─────────────────────────────────────────────────── */}
       <div className="p-6 relative z-10">
         <div className="glass-card rounded-2xl p-3 border-emerald/5 hover:border-emerald/20 group/profile cursor-pointer">
           <div className="flex items-center gap-3">

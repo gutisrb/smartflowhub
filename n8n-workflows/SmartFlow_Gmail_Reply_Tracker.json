@@ -19,7 +19,7 @@
         "tableId": "contacts",
         "returnAll": true,
         "filterType": "string",
-        "filterString": "client_id=eq.69acf7e9-557e-4ca3-85bd-a785ef39e351&email_1_poslat=eq.true&replied_at=is.null&email=not.is.null&status=eq.Kontaktiran"
+        "filterString": "client_id=eq.69acf7e9-557e-4ca3-85bd-a785ef39e351&email_1_poslat=eq.true&replied_at=is.null&email=not.is.null"
       },
       "id": "get-sent-contacts",
       "name": "Get Sent Contacts",
@@ -35,7 +35,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const items = $input.all();\nif (!items || items.length === 0) return [{ json: { emails: [], contactMap: {} } }];\n\nconst contacts = items.map(i => i.json);\nconst contactMap = {};\nconst emailList = [];\n\nfor (const c of contacts) {\n  if (c.email) {\n    const emailLower = c.email.toLowerCase().trim();\n    contactMap[emailLower] = { id: c.id, company_name: c.company_name };\n    emailList.push(emailLower);\n  }\n}\n\nif (emailList.length === 0) return [{ json: { emails: [], contactMap: {} } }];\n\n// Gmail search: replies from any of these senders in last 60 days\nconst fromQuery = emailList.map(e => `from:${e}`).join(' OR ');\nconst searchQuery = `(${fromQuery}) in:inbox newer_than:60d`;\n\nreturn [{ json: { searchQuery, contactMap, totalContacts: emailList.length } }];"
+        "jsCode": "const items = $input.all();\nif (!items || items.length === 0) return [{ json: { emails: [], contactMap: {} } }];\n\nconst contacts = items.map(i => i.json);\nconst contactMap = {};\nconst emailList = [];\n\nfor (const c of contacts) {\n  if (c.email) {\n    const emailLower = c.email.toLowerCase().trim();\n    contactMap[emailLower] = { id: c.id, company_name: c.company_name };\n    emailList.push(emailLower);\n  }\n}\n\nif (emailList.length === 0) return [{ json: { emails: [], contactMap: {} } }];\n\n// Group into chunks of 30 emails to avoid Gmail query length limits\nconst chunkSize = 30;\nconst results = [];\n\nfor (let i = 0; i < emailList.length; i += chunkSize) {\n  const chunk = emailList.slice(i, i + chunkSize);\n  const fromQuery = chunk.map(e => `from:${e}`).join(' OR ');\n  const searchQuery = `(${fromQuery}) in:inbox newer_than:60d`;\n  \n  results.push({\n    json: {\n      searchQuery,\n      contactMap,\n      totalContacts: chunk.length\n    }\n  });\n}\n\nreturn results;"
       },
       "id": "build-search-query",
       "name": "Build Search Query",

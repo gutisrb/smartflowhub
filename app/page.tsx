@@ -9,6 +9,7 @@ import { ModuleKey } from "@/lib/modules/types"
 import { Button } from "@/components/ui/button"
 import { LogOut, Bell, Search, Sparkles, Menu } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { isGroupClient, GROUP_CLIENTS, BOOK_STORE_CLIENTS, getBookStoreConfig } from "@/lib/bookstore-clients"
 
 // Import module components
 import { PipelineModule } from "@/components/modules/pipeline-module"
@@ -27,9 +28,20 @@ export default function DashboardPage() {
   const [clientName, setClientName] = useState("")
   const [userEmail, setUserEmail] = useState<string | null>(null)
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  // For group clients: selected brand IDs (multi-select). Default = first brand only.
+  const [selectedBrandIds, setSelectedBrandIds] = useState<string[]>([])
+
+  // Primary effective clientId — first selected brand (used by AI Agent, module loading, etc.)
+  const effectiveClientId = useMemo(() => {
+    if (clientId && isGroupClient(clientId)) {
+      const ids = selectedBrandIds.length > 0 ? selectedBrandIds : GROUP_CLIENTS[clientId] ?? []
+      return ids[0] ?? null
+    }
+    return clientId
+  }, [clientId, selectedBrandIds])
 
   const supabase = createClient()
-  const { modules: availableModules, loading: isLoading } = useUnifiedModules(clientId)
+  const { modules: availableModules, loading: isLoading } = useUnifiedModules(effectiveClientId)
 
   const checkSession = useCallback(async () => {
     const { data: { session } } = await supabase.auth.getSession()
@@ -74,8 +86,8 @@ export default function DashboardPage() {
 
   const terminology = useMemo(() => {
     const isRecruitment =
-      clientId === '7ac02189-d0ec-4532-baa6-d7d4dc84b87c' || // mjob (formerly Avala)
-      clientId === 'OZ Avala' ||
+      effectiveClientId === '7ac02189-d0ec-4532-baa6-d7d4dc84b87c' ||
+      effectiveClientId === 'OZ Avala' ||
       clientName?.toLowerCase().includes('mjob')
 
     if (isRecruitment) {
@@ -105,7 +117,9 @@ export default function DashboardPage() {
       searchPlaceholder: "Search trajectories, names...",
       tableHeaders: ["Identity Profile", "Comms Node", "Vector Status", "Activity"]
     }
-  }, [clientId, clientName])
+  }, [effectiveClientId, clientName])
+
+  const isBookStoreClient = getBookStoreConfig(effectiveClientId) !== null
 
   // Filter modules for recruitment demo
   const filteredModules = useMemo(() => {
@@ -125,7 +139,7 @@ export default function DashboardPage() {
   }
 
   const renderModule = () => {
-    if (!clientId) return (
+    if (!effectiveClientId) return (
       <div className="flex flex-col items-center justify-center p-20 glass-card rounded-3xl animate-in zoom-in duration-700">
         <Sparkles className="w-12 h-12 text-emerald mb-4 animate-pulse" />
         <h2 className="text-xl font-outfit text-silver uppercase tracking-widest">Initialising Growth Engine</h2>
@@ -137,29 +151,29 @@ export default function DashboardPage() {
 
     switch (activeModule) {
       case 'pipeline':
-        return <PipelineModule clientId={clientId} />
+        return <PipelineModule clientId={effectiveClientId} />
       case 'growth-engine':
       case 'business-crm':
         return <GrowthEngineModule
-          clientId={clientId}
+          clientId={effectiveClientId}
           tableName="kontakti"
           statuses={settings.statuses || ['Novi Lead', 'enriched', 'Kontaktiran', 'Meeting Booked', 'Closed', 'Lost', 'Sent']}
         />
       case 'email-outreach':
         return <EmailOutreachModule
-          clientId={clientId}
+          clientId={effectiveClientId}
           tableName="kontakti"
         />
       case 'agent-database':
-        return <AgentDatabaseModule clientId={clientId} terminology={terminology} />
+        return <AgentDatabaseModule clientId={effectiveClientId} terminology={terminology} selectedBrandIds={isBookStoreClient && selectedBrandIds.length > 1 ? selectedBrandIds : undefined} />
       case 'agent-leads':
-        return <AgentLeadsModule clientId={clientId} terminology={terminology} />
+        return <AgentLeadsModule clientId={effectiveClientId} terminology={terminology} selectedBrandIds={isBookStoreClient && selectedBrandIds.length > 1 ? selectedBrandIds : undefined} />
       case 'social-chatbot':
-        return <SocialChatbotModule clientId={clientId} />
+        return <SocialChatbotModule clientId={effectiveClientId} />
       case 'website-chatbot':
-        return <WebsiteChatbotModule clientId={clientId} />
+        return <WebsiteChatbotModule clientId={effectiveClientId} />
       case 'chatbot-analytics':
-        return <ChatbotAnalyticsModule clientId={clientId} />
+        return <ChatbotAnalyticsModule clientId={effectiveClientId} selectedBrandIds={isBookStoreClient && selectedBrandIds.length > 1 ? selectedBrandIds : undefined} />
       default:
         return <div className="p-8 text-center glass-card rounded-2xl">Module node offline or restricted</div>
     }
@@ -192,11 +206,18 @@ export default function DashboardPage() {
           currentView={activeModule}
           onViewChange={(view) => { setActiveModule(view); setSidebarOpen(false) }}
           clientName={clientName}
-          clientId={clientId}
+          clientId={effectiveClientId}
           modules={filteredModules}
           loading={isLoading}
           isOpen={sidebarOpen}
           onClose={() => setSidebarOpen(false)}
+          isGroup={clientId ? isGroupClient(clientId) : false}
+          groupBrands={clientId && isGroupClient(clientId)
+            ? (GROUP_CLIENTS[clientId] ?? []).map(id => ({ id, config: BOOK_STORE_CLIENTS[id] })).filter(b => b.config)
+            : undefined}
+          selectedBrandIds={selectedBrandIds.length > 0 ? selectedBrandIds : (clientId && isGroupClient(clientId) ? [GROUP_CLIENTS[clientId]?.[0] ?? ''] : undefined)}
+          onBrandSelectionChange={(ids) => setSelectedBrandIds(ids)}
+          hideCategories={isBookStoreClient}
         />
       )}
 
@@ -238,7 +259,6 @@ export default function DashboardPage() {
                 <div className="flex items-center gap-2 md:gap-4 group cursor-pointer">
                   <div className="hidden md:flex flex-col items-end">
                     <span className="text-sm font-medium text-silver group-hover:text-emerald transition-colors">{clientName}</span>
-                    <span className="text-[10px] text-zinc-500 uppercase tracking-widest font-bold">Node Primary</span>
                   </div>
                   <Button
                     variant="ghost"
@@ -272,7 +292,7 @@ export default function DashboardPage() {
                     </div>
                   </div>
                 </div>
-              ) : clientId ? (
+              ) : effectiveClientId ? (
                 <div className="animate-in fade-in slide-in-from-bottom-6 duration-1000 ease-out fill-mode-forwards">
                   {renderModule()}
                 </div>

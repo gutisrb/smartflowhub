@@ -166,6 +166,62 @@ export async function deleteKandidat(id: string) {
     return true
 }
 
+// Harmonija Knjige — CRM (interested buyers from DMs)
+export async function getCrmHarmonijaByClientId(clientId: string) {
+    const supabase = createClient()
+    const { data, error } = await supabase
+        .from('crm_harmonija')
+        .select('*')
+        .eq('client_id', clientId)
+        .order('created_at', { ascending: false })
+
+    if (error) {
+        console.error('Error fetching crm_harmonija:', error)
+        return []
+    }
+    return data
+}
+
+// Harmonija Knjige — book catalog
+export async function getKnjigeByClientId(clientId: string) {
+    const supabase = createClient()
+    const { data, error } = await supabase
+        .from('knjige')
+        .select('*')
+        .eq('client_id', clientId)
+        .order('naslov', { ascending: true })
+
+    if (error) {
+        console.error('Error fetching knjige:', error)
+        return []
+    }
+    return data
+}
+
+// Publik Praktikum — CRM
+export async function getCrmPublikByClientId(clientId: string) {
+    const supabase = createClient()
+    const { data, error } = await supabase
+        .from('crm_publik')
+        .select('*')
+        .eq('client_id', clientId)
+        .order('created_at', { ascending: false })
+    if (error) { console.error('Error fetching crm_publik:', error); return [] }
+    return data
+}
+
+// Stela Knjige — CRM
+export async function getCrmStelaByClientId(clientId: string) {
+    const supabase = createClient()
+    const { data, error } = await supabase
+        .from('crm_stela')
+        .select('*')
+        .eq('client_id', clientId)
+        .order('created_at', { ascending: false })
+    if (error) { console.error('Error fetching crm_stela:', error); return [] }
+    return data
+}
+
 // Module Management
 export async function getClientModules(clientId: string) {
     const supabase = createClient()

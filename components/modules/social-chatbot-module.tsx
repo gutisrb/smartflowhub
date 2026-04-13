@@ -11,9 +11,10 @@ import {
 } from "lucide-react"
 import { motion } from "framer-motion"
 import { cn } from "@/lib/utils"
+import { getBookStoreConfig } from "@/lib/bookstore-clients"
 
 // ── Demo mode ────────────────────────────────────────────────────────────────
-const DEMO_MODE = true
+const DEMO_MODE = false
 
 function td(hoursBack: number, minutesBack = 0) {
     const d = new Date()
@@ -191,6 +192,8 @@ function getPlatformMeta(platform: string) {
 type Period = "danas" | "sedmica" | "mesec"
 
 export function SocialChatbotModule({ clientId }: SocialChatbotModuleProps) {
+    const bookStoreConfig = getBookStoreConfig(clientId)
+
     const [conversations, setConversations] = useState<any[]>([])
     const [allMessages, setAllMessages] = useState<any[]>([])
     const [selectedId, setSelectedId] = useState<string | null>(null)
@@ -377,7 +380,7 @@ export function SocialChatbotModule({ clientId }: SocialChatbotModuleProps) {
                         </span>
                     </h2>
                     <p className="text-[11px] font-mono text-zinc-500 mt-0.5 tracking-wider">
-                        SmartFlow AI Agent · Multi-channel
+                        {bookStoreConfig ? `${bookStoreConfig.brandName} AI Agent · Multi-channel` : "SmartFlow AI Agent · Multi-channel"}
                     </p>
                 </div>
                 <div className="hidden sm:flex items-center gap-2.5">
@@ -388,11 +391,11 @@ export function SocialChatbotModule({ clientId }: SocialChatbotModuleProps) {
                     </div>
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-pink-500/20 bg-pink-500/[0.07]">
                         <Instagram className="w-3 h-3 text-pink-400" />
-                        <span className="text-[10px] font-mono font-bold text-pink-400 tracking-wide">@smartflow.rs</span>
+                        <span className="text-[10px] font-mono font-bold text-pink-400 tracking-wide">{bookStoreConfig ? bookStoreConfig.instagramHandle : "@smartflow.rs"}</span>
                     </div>
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/[0.07] bg-white/[0.03]">
                         <Globe className="w-3 h-3 text-zinc-400" />
-                        <span className="text-[10px] font-mono text-zinc-400 tracking-wide">smartflow.rs</span>
+                        <span className="text-[10px] font-mono text-zinc-400 tracking-wide">{bookStoreConfig ? bookStoreConfig.websiteUrl : "smartflow.rs"}</span>
                     </div>
                 </div>
             </div>
@@ -627,20 +630,58 @@ export function SocialChatbotModule({ clientId }: SocialChatbotModuleProps) {
 
                             {/* Chat footer status */}
                             <div className={cn(
-                                "px-5 py-3 border-t flex items-center gap-3 shrink-0 transition-colors",
+                                "px-4 py-2 border-t flex flex-col shrink-0 transition-colors",
                                 selected.humanNeeded ? "border-amber-500/20 bg-amber-500/[0.04]" : "border-white/[0.05] bg-black/15"
                             )}>
-                                {selected.humanNeeded ? (
-                                    <>
-                                        <AlertTriangle className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-                                        <p className="text-xs text-amber-400/80 font-mono">Čeka manuelnu intervenciju — sekretar treba da odgovori direktno.</p>
-                                    </>
-                                ) : (
-                                    <>
-                                        <Bot className="w-3.5 h-3.5 text-emerald-400 opacity-50 shrink-0" />
-                                        <p className="text-xs text-zinc-600 font-mono italic">AI agent automatski obradjuje sve dolazne poruke.</p>
-                                    </>
-                                )}
+                                <div className="flex items-center justify-between mb-2 px-1">
+                                    {selected.humanNeeded ? (
+                                        <div className="flex items-center gap-2">
+                                            <AlertTriangle className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                                            <p className="text-xs text-amber-400/80 font-mono">Čeka manuelnu intervenciju</p>
+                                        </div>
+                                    ) : (
+                                        <div className="flex items-center gap-2">
+                                            <Bot className="w-3.5 h-3.5 text-emerald-400 opacity-50 shrink-0" />
+                                            <p className="text-xs text-zinc-600 font-mono italic">AI automatski obrađuje poruke</p>
+                                        </div>
+                                    )}
+                                </div>
+                                <form 
+                                    className="flex items-center gap-2"
+                                    onSubmit={async (e) => {
+                                        e.preventDefault();
+                                        const form = e.target as HTMLFormElement;
+                                        const input = form.elements.namedItem('message') as HTMLInputElement;
+                                        const text = input.value.trim();
+                                        if(!text) return;
+
+                                        // Store to DB via Supabase
+                                        await supabase.from("razgovori").insert({
+                                            client_id: clientId,
+                                            id_razgovora: selected.id,
+                                            role: "assistant",
+                                            message: text,
+                                            platform: selected.platform,
+                                            metadata: { type: "dashboard_reply", profile_pic: null },
+                                        });
+
+                                        input.value = "";
+                                        await fetchConversations();
+                                    }}
+                                >
+                                    <input 
+                                        name="message"
+                                        type="text" 
+                                        placeholder="Upišite poruku..." 
+                                        className="flex-1 bg-white/[0.05] border border-white/[0.1] rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-pink-500/50"
+                                    />
+                                    <button 
+                                        type="submit"
+                                        className="bg-pink-500/90 hover:bg-pink-500 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors disabled:opacity-50"
+                                    >
+                                        Pošalji
+                                    </button>
+                                </form>
                             </div>
                         </>
                     ) : (
@@ -714,8 +755,8 @@ export function SocialChatbotModule({ clientId }: SocialChatbotModuleProps) {
                                     <InfoRow
                                         icon={<Globe />}
                                         label="Website"
-                                        value="smartflow.rs"
-                                        link="https://smartflow.rs"
+                                        value={bookStoreConfig ? bookStoreConfig.websiteUrl : "smartflow.rs"}
+                                        link={bookStoreConfig ? `https://${bookStoreConfig.websiteUrl}` : "https://smartflow.rs"}
                                     />
                                 </div>
                             </div>
@@ -758,7 +799,7 @@ export function SocialChatbotModule({ clientId }: SocialChatbotModuleProps) {
                                     <span className="text-[10px] font-mono font-bold text-emerald-400 uppercase tracking-widest">AI Agent Aktivan</span>
                                 </div>
                                 <p className="text-[11px] font-mono text-zinc-500 leading-relaxed">
-                                    SmartFlow AI Agent obradjuje poruke 24/7 i automatski odgovara kandidatima na svim kanalima.
+                                    {bookStoreConfig ? `${bookStoreConfig.brandName} AI Agent obradjuje poruke 24/7 i automatski odgovara kupcima na svim kanalima.` : "SmartFlow AI Agent obradjuje poruke 24/7 i automatski odgovara kandidatima na svim kanalima."}
                                 </p>
                             </div>
                         </>
