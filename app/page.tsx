@@ -7,7 +7,8 @@ import { Sidebar } from "@/components/dashboard/sidebar"
 import { useUnifiedModules } from "@/lib/modules/hooks"
 import { ModuleKey } from "@/lib/modules/types"
 import { Button } from "@/components/ui/button"
-import { LogOut, Bell, Search, Sparkles, Menu } from "lucide-react"
+import { LogOut, Bell, Search, Sparkles, Menu, Activity, X as XIcon } from "lucide-react"
+import { motion, AnimatePresence } from "framer-motion"
 import { cn } from "@/lib/utils"
 import { isGroupClient, GROUP_CLIENTS, BOOK_STORE_CLIENTS, getBookStoreConfig } from "@/lib/bookstore-clients"
 
@@ -30,6 +31,9 @@ export default function DashboardPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   // For group clients: selected brand IDs (multi-select). Default = first brand only.
   const [selectedBrandIds, setSelectedBrandIds] = useState<string[]>([])
+  // Intervencija notifications
+  const [intervencijaToasts, setIntervencijaToasts] = useState<{ id: string; brandName: string; color: string }[]>([])
+  const [unreadBellCount, setUnreadBellCount] = useState(0)
 
   // Primary effective clientId — first selected brand (used by AI Agent, module loading, etc.)
   const effectiveClientId = useMemo(() => {
@@ -75,6 +79,49 @@ export default function DashboardPage() {
       }
     }
   }, [availableModules, isLoading, activeModule])
+
+  // ── Intervencija realtime notifications ──────────────────────────────────
+  useEffect(() => {
+    if (!clientId || !isAuthenticated) return
+    const brandIds = isGroupClient(clientId)
+      ? (selectedBrandIds.length > 0 ? selectedBrandIds : (GROUP_CLIENTS[clientId] ?? []))
+      : [clientId]
+
+    // Request browser notification permission once
+    if (typeof Notification !== 'undefined' && Notification.permission === 'default') {
+      Notification.requestPermission()
+    }
+
+    const channels = brandIds.map(brandId => {
+      const config = BOOK_STORE_CLIENTS[brandId]
+      if (!config) return null
+      return supabase
+        .channel(`intervencija_${config.crmTable}_${brandId}`)
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: config.crmTable, filter: 'status=eq.Intervencija' },
+          () => {
+            if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+              new Notification(`Intervencija — ${config.brandName}`, {
+                body: 'Kupac čeka vaš odgovor. Otvorite AI Agent.',
+                icon: '/favicon.ico',
+              })
+            }
+            setIntervencijaToasts(prev => [
+              { id: `${brandId}-${Date.now()}`, brandName: config.brandName, color: config.color ?? '#10b981' },
+              ...prev.slice(0, 2),
+            ])
+            setUnreadBellCount(c => c + 1)
+          }
+        )
+        .subscribe()
+    })
+
+    return () => {
+      channels.forEach(ch => { if (ch) supabase.removeChannel(ch) })
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [clientId, isAuthenticated, selectedBrandIds.join(',')])
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
@@ -233,6 +280,28 @@ export default function DashboardPage() {
               >
                 <Menu className="w-5 h-5" />
               </button>
+
+              {/* Active brand indicator — mobile only, group clients */}
+              {clientId && isGroupClient(clientId) && effectiveClientId && BOOK_STORE_CLIENTS[effectiveClientId] && (
+                <button
+                  onClick={() => setSidebarOpen(true)}
+                  className="md:hidden flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border shrink-0 transition-all duration-200 active:scale-95"
+                  style={{
+                    backgroundColor: `${BOOK_STORE_CLIENTS[effectiveClientId].color}12`,
+                    borderColor: `${BOOK_STORE_CLIENTS[effectiveClientId].color}30`,
+                  }}
+                >
+                  <span className="w-2 h-2 rounded-full shrink-0"
+                    style={{ backgroundColor: BOOK_STORE_CLIENTS[effectiveClientId].color, boxShadow: `0 0 6px ${BOOK_STORE_CLIENTS[effectiveClientId].color}80` }} />
+                  <span className="text-[10px] font-semibold max-w-[76px] truncate"
+                    style={{ color: BOOK_STORE_CLIENTS[effectiveClientId].color }}>
+                    {selectedBrandIds.length > 1
+                      ? `${selectedBrandIds.length} brenda`
+                      : BOOK_STORE_CLIENTS[effectiveClientId].brandName}
+                  </span>
+                </button>
+              )}
+
               <h1 className="text-base md:text-2xl font-outfit font-light text-silver tracking-tight truncate">
                 {getModuleLabel()} <span className="text-[10px] opacity-20">V2</span>
               </h1>
@@ -249,9 +318,18 @@ export default function DashboardPage() {
               </div>
 
               <div className="flex items-center gap-2 md:gap-4">
-                <button className="p-2 md:p-2.5 rounded-xl bg-white/5 border border-white/10 text-zinc-400 hover:text-emerald hover:border-emerald/30 transition-all duration-300 relative group">
+                <button
+                  className="p-2 md:p-2.5 rounded-xl bg-white/5 border border-white/10 text-zinc-400 hover:text-emerald hover:border-emerald/30 transition-all duration-300 relative group"
+                  onClick={() => setUnreadBellCount(0)}
+                >
                   <Bell className="w-4 h-4 md:w-5 md:h-5" />
-                  <span className="absolute top-2 right-2 w-1.5 h-1.5 bg-emerald rounded-full shadow-[0_0_10px_rgba(16,185,129,0.8)]" />
+                  {unreadBellCount > 0 ? (
+                    <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] bg-red-500 rounded-full text-[9px] font-black flex items-center justify-center text-white px-1 shadow-[0_0_8px_rgba(239,68,68,0.5)]">
+                      {unreadBellCount > 9 ? '9+' : unreadBellCount}
+                    </span>
+                  ) : (
+                    <span className="absolute top-2 right-2 w-1.5 h-1.5 bg-emerald rounded-full shadow-[0_0_10px_rgba(16,185,129,0.8)]" />
+                  )}
                 </button>
 
                 <div className="h-8 w-px bg-white/10 hidden sm:block" />
@@ -338,6 +416,43 @@ export default function DashboardPage() {
       {/* Decorative Blur Orbs */}
       <div className="fixed -top-24 -left-24 w-96 h-96 bg-emerald/10 rounded-full blur-[120px] pointer-events-none animate-glow" />
       <div className="fixed -bottom-24 -right-24 w-96 h-96 bg-emerald/5 rounded-full blur-[100px] pointer-events-none" style={{ animationDelay: '1s' }} />
+
+      {/* ── Intervencija toast stack ──────────────────────────────────────── */}
+      <div className="fixed bottom-6 right-4 md:right-6 z-[200] flex flex-col gap-2 pointer-events-none">
+        <AnimatePresence>
+          {intervencijaToasts.map(toast => (
+            <motion.div
+              key={toast.id}
+              initial={{ opacity: 0, x: 40, scale: 0.95 }}
+              animate={{ opacity: 1, x: 0, scale: 1 }}
+              exit={{ opacity: 0, x: 40, scale: 0.95 }}
+              transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+              className="pointer-events-auto flex items-start gap-3 rounded-2xl border border-white/10 bg-[#0e1116]/95 backdrop-blur-xl shadow-2xl px-4 py-3 min-w-[260px] max-w-[320px] cursor-pointer"
+              style={{ borderLeft: `3px solid ${toast.color}` }}
+              onClick={() => {
+                setActiveModule('social-chatbot')
+                setIntervencijaToasts(p => p.filter(t => t.id !== toast.id))
+              }}
+            >
+              <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 mt-0.5"
+                style={{ background: `${toast.color}15`, border: `1px solid ${toast.color}25` }}>
+                <Activity className="w-4 h-4" style={{ color: toast.color }} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: toast.color }}>Intervencija</p>
+                <p className="text-sm font-semibold text-white mt-0.5">{toast.brandName}</p>
+                <p className="text-[11px] text-zinc-500 mt-0.5">Kupac čeka vaš odgovor · tapnite da otvorite</p>
+              </div>
+              <button
+                className="text-zinc-600 hover:text-zinc-300 shrink-0 mt-0.5 p-0.5"
+                onClick={e => { e.stopPropagation(); setIntervencijaToasts(p => p.filter(t => t.id !== toast.id)) }}
+              >
+                <XIcon className="w-3.5 h-3.5" />
+              </button>
+            </motion.div>
+          ))}
+        </AnimatePresence>
+      </div>
     </div>
   )
 }

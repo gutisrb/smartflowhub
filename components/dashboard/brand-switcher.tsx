@@ -35,13 +35,17 @@ export function BrandSwitcherSidebar({ brands, selectedIds, onSelectionChange }:
     const allSelected = brands.every(b => selectedIds.includes(b.id))
 
     const toggleBrand = (id: string) => {
+        let next: string[]
         if (selectedIds.includes(id)) {
-            // Don't deselect if it's the last one
             if (selectedIds.length === 1) return
-            onSelectionChange(selectedIds.filter(i => i !== id))
+            next = selectedIds.filter(i => i !== id)
         } else {
-            onSelectionChange([...selectedIds, id])
+            next = [...selectedIds, id]
         }
+        // Always keep the order matching the GROUP_CLIENTS / brands-prop order
+        // so effectiveClientId (selectedIds[0]) is always the highest-priority selected brand
+        const order = brands.map(b => b.id)
+        onSelectionChange(next.sort((a, b) => order.indexOf(a) - order.indexOf(b)))
     }
 
     const toggleAll = () => {
@@ -65,7 +69,7 @@ export function BrandSwitcherSidebar({ brands, selectedIds, onSelectionChange }:
             <button
                 onClick={toggleAll}
                 className={cn(
-                    "w-full flex items-center justify-between px-3 py-2 rounded-xl mb-2 text-left transition-all duration-200 border",
+                    "w-full flex items-center justify-between px-3 py-3 rounded-xl mb-2 text-left transition-all duration-200 border min-h-[44px]",
                     allSelected
                         ? "bg-white/[0.05] border-white/10"
                         : "border-transparent hover:bg-white/[0.02] hover:border-white/5"
@@ -99,7 +103,7 @@ export function BrandSwitcherSidebar({ brands, selectedIds, onSelectionChange }:
                             key={id}
                             onClick={() => toggleBrand(id)}
                             className={cn(
-                                "w-full flex items-center gap-3 rounded-2xl px-3 py-2.5 text-left transition-all duration-200 relative overflow-hidden group",
+                                "w-full flex items-center gap-3 rounded-2xl px-3 py-3.5 text-left transition-all duration-200 relative overflow-hidden group min-h-[52px]",
                                 isSelected
                                     ? "bg-white/[0.06] border border-white/10"
                                     : "hover:bg-white/[0.03] border border-transparent hover:border-white/5"

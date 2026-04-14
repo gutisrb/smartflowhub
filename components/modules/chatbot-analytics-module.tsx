@@ -254,13 +254,13 @@ function deriveBookstoreMetrics(rows: any[]) {
         .slice(0, 5)
         .map(([name, count]) => ({ name, count }))
 
-    // Drop-off: topics where conversations ended without ordering (status = Novi)
-    // Reveals what people want but aren't buying — stock gap or agent failure
-    const temaDropoff: Record<string, number> = {}
-    rows.filter(r => r.status?.toLowerCase() === 'novi' && r.tema).forEach(r => {
-        temaDropoff[r.tema] = (temaDropoff[r.tema] || 0) + 1
+    // Conversation conclusions — why the conversation ended without ordering
+    // razlog field: "Nema na stanju", "Pitao za cenu", "Nije odgovorio", etc.
+    const razlogCount: Record<string, number> = {}
+    rows.filter(r => r.razlog).forEach(r => {
+        razlogCount[r.razlog] = (razlogCount[r.razlog] || 0) + 1
     })
-    const topDropoff = Object.entries(temaDropoff)
+    const topDropoff = Object.entries(razlogCount)
         .sort(([, a], [, b]) => b - a)
         .slice(0, 5)
         .map(([name, count]) => ({ name, count }))
@@ -516,11 +516,11 @@ function BookstoreAnalytics({ clientId, config, selectedBrandIds }: { clientId: 
                             </div>
                             <div>
                                 <p className="text-[10px] font-bold uppercase tracking-[0.18em]" style={{ color: "#52525b" }}>Gde razgovor staje</p>
-                                <p className="text-sm font-semibold text-white">Traže, ali ne naručuju</p>
+                                <p className="text-sm font-semibold text-white">Kako razgovor završava</p>
                             </div>
                         </div>
                         <p className="text-[10px] mb-4 leading-snug" style={{ color: "#52525b" }}>
-                            Kategorije s najviše razgovora koji nisu završili narudžbinom.<br/>Signal: nema na stanju, previše visoka cena, ili agent nije znao odgovor.
+                            Zašto kupci ne završe narudžbinu — gde agent ili zalihe zakazuju.
                         </p>
                         <div className="space-y-2.5">
                             {m.topDropoff.length === 0 ? (

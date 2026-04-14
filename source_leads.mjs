@@ -8,7 +8,7 @@
  *   Stage 1: Load raw ad records (Apify live OR local JSON files with --local)
  *   Stage 2: Post-filter (INSTAGRAM publisher, 3+ ads per page, Serbian language)
  *   Stage 3: IG handle extraction (website HTML scrape)
- *   Stage 4: ScrapeCreators — verify followers ≥ 10k (5 concurrent calls)
+ *   Stage 4: Apify IG Profile Scraper — verify followers ≥ 10k (batch)
  *   Stage 5: Email enrichment (Firecrawl FB about + Hunter.io + website scrape)
  *   Stage 6: DB upsert
  *
@@ -41,31 +41,33 @@ function loadEnv() {
 loadEnv();
 
 // ── Config ────────────────────────────────────────────────────────────────────
-const APIFY_TOKEN    = process.env.APIFY_TOKEN;
-const FB_ADS_ACTOR   = 'XtaWFhbtfxyzqrFmd';
-const SC_API_KEY     = process.env.SC_API_KEY;
+const APIFY_TOKEN      = process.env.APIFY_TOKEN;
+const FB_ADS_ACTOR     = 'XtaWFhbtfxyzqrFmd';
+const IG_PROFILE_ACTOR = 'dSCLg0C3YEZ83HzYX';
 
 const SUPABASE_URL   = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SERVICE_KEY    = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const SMARTFLOW_ID   = '69acf7e9-557e-4ca3-85bd-a785ef39e351';
 const HUNTER_KEY     = process.env.HUNTER_API_KEY;
 
-// Multiple broad Serbian queries — each hits a different slice of the ad pool
-const ADS_LIBRARY_URLS = [
-  'https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=RS&media_type=video&q=dostava',
-  'https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=RS&media_type=video&q=naruci',
-  'https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=RS&media_type=video&q=akcija',
-  'https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=RS&media_type=video&q=popust',
-];
+// q=na: "na" is the most common Serbian preposition (appears in virtually all business ads).
+// This is as broad as possible — approximates the no-query run that produced the April 7 batch.
+const ADS_LIBRARY_URL = 'https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=RS&media_type=video&q=';
 
-const isLocal  = process.argv.includes('--local');   // read from local JSON files, skip Apify Stage 1
-const isTest   = process.argv.includes('--test');    // no DB writes
-const isYes    = process.argv.includes('--yes');     // live Apify run
-const limitIdx = process.argv.indexOf('--limit');
-const LIMIT    = limitIdx !== -1 ? parseInt(process.argv[limitIdx + 1]) : 100;
+const isLocal   = process.argv.includes('--local');   // read from local JSON files, skip Apify Stage 1
+const isTest    = process.argv.includes('--test');    // no DB writes
+const isYes     = process.argv.includes('--yes');     // live Apify run
+const limitIdx  = process.argv.indexOf('--limit');
+const budgetIdx = process.argv.indexOf('--budget');
+const LIMIT     = limitIdx  !== -1 ? parseInt(process.argv[limitIdx  + 1]) : Infinity;
 
-// Raw ads to fetch when calling Apify: 100 in test, 4000 in live
-const RAW_LIMIT = isTest ? 100 : 4000;
+// --budget X: cost cap in USD for the FB ads scraper (e.g. --budget 0.45 → ~600 records)
+const BUDGET_USD = budgetIdx !== -1 ? parseFloat(process.argv[budgetIdx + 1]) : null;
+const COST_PER_RECORD = 0.00075;
+
+// Raw ads to fetch: test=100, --budget drives live count, default live=2000
+const RAW_LIMIT = isTest ? 100 : (BUDGET_USD ? Math.floor(BUDGET_USD / COST_PER_RECORD) : 2000);
+const MAX_CHARGE = isTest ? 0.15 : (BUDGET_USD ? BUDGET_USD + 0.05 : 2.00); // +$0.05 headroom
 
 // Local dataset files (used when --local flag is set)
 const LOCAL_DATASETS_DIR = resolve(__dirname, '..');  // photonic-lunar/
@@ -149,6 +151,19 @@ function mapNiche(pageName = '', adBody = '', cats = []) {
   if (/fashion|moda|odeć|odeca|butik|clothing|garderob/.test(t)) return 'fashion';
   if (/online shop|e-commerce|prodavnic|webshop|shopping/.test(t)) return 'online_prodaja';
   return 'other';
+}
+
+// ── Extract domain from ad copy text (e.g. "Posetite nas na startours.rs") ──
+function domainFromAdCopies(adCopies = []) {
+  const LOCAL_TLDS = /\.(rs|ba|hr|si|me|com|net|org|eu|shop|store)(\/|$|\s)/i;
+  for (const copy of adCopies) {
+    const matches = [...(copy || '').matchAll(/(?:https?:\/\/)?(?:www\.)?([a-zA-Z0-9][a-zA-Z0-9\-]{1,60}\.[a-z]{2,10})(?:\/[^\s]*)?/g)];
+    for (const m of matches) {
+      const host = m[1].toLowerCase();
+      if (LOCAL_TLDS.test(host + '/') && !SOCIAL.has(host)) return host;
+    }
+  }
+  return null;
 }
 
 // ── Extract domain from ad snapshot ──────────────────────────────────────────
@@ -235,27 +250,6 @@ async function scrapeFacebookAbout(fbPageUri) {
   } catch { return {}; }
 }
 
-// ── ScrapeCreators — IG profile lookup ───────────────────────────────────────
-async function scrapeCreatorsProfile(handle) {
-  try {
-    const res = await fetch(
-      `https://api.scrapecreators.com/v1/instagram/profile?handle=${encodeURIComponent(handle)}`,
-      { headers: { 'x-api-key': SC_API_KEY }, signal: AbortSignal.timeout(15000) }
-    );
-    if (!res.ok) return null;
-    const data = await res.json();
-    const user = data?.data?.user;
-    if (!user) return null;
-    return {
-      username    : user.username || handle,
-      followers   : user.edge_followed_by?.count || 0,
-      bio         : user.biography || '',
-      external_url: user.external_url || null,
-      is_verified : user.is_verified || false,
-      is_private  : user.is_private || false,
-    };
-  } catch { return null; }
-}
 
 // ── Hunter.io ─────────────────────────────────────────────────────────────────
 const SENIORITY = ['c_suite', 'vp', 'director', 'manager', 'senior', 'entry'];
@@ -286,7 +280,7 @@ async function findEmailOnWebsite(domain) {
     `https://${domain}/o-nama`,
     `https://${domain}`,
   ];
-  const SKIP = /noreply|no-reply|example|sentry|wix|schema|privacy|jquery/;
+  const SKIP = /noreply|no-reply|example|sentry|wix|schema|privacy|jquery|\.(png|jpg|jpeg|gif|svg|webp|pdf|css|js)(@|$)/i;
   for (const url of urls) {
     try {
       const res = await fetch(url, {
@@ -424,10 +418,10 @@ async function main() {
     console.log('─── Stage 1: FB Ads Library via Apify ──────────────────');
     rawItems = await runApify(
       FB_ADS_ACTOR,
-      { urls: ADS_LIBRARY_URLS.map(url => ({ url })) },
+      { urls: [{ url: ADS_LIBRARY_URL }] },
       'FB Ads Library',
       RAW_LIMIT,
-      isTest ? 0.15 : 4.00,
+      MAX_CHARGE,
     );
     console.log(`  Raw records: ${rawItems.length}\n`);
   }
@@ -476,7 +470,6 @@ async function main() {
   }
 
   qualified.sort((a, b) => (b.item.snapshot?.page_like_count || 0) - (a.item.snapshot?.page_like_count || 0));
-  const toProcess = qualified.slice(0, LIMIT);
 
   console.log(`  Already in DB    : ${dbg.db}`);
   console.log(`  No Instagram     : ${dbg.noIG}`);
@@ -485,32 +478,42 @@ async function main() {
   console.log(`  Likes out range  : ${dbg.tooSmall + dbg.tooBig}`);
   console.log(`  Person profile   : ${dbg.person}`);
   console.log(`  D2C retail       : ${dbg.retail}`);
-  console.log(`  Qualified        : ${dbg.passed} → processing top ${toProcess.length}\n`);
+  console.log(`  Qualified        : ${dbg.passed} → processing all ${qualified.length} (DB limit: ${LIMIT})\n`);
 
-  if (!toProcess.length) { console.log('No qualified leads found.'); return; }
+  if (!qualified.length) { console.log('No qualified leads found.'); return; }
 
-  // ── Stage 3: IG handle extraction ────────────────────────────────────────────
-  console.log('─── Stage 3: IG handle extraction (website HTML) ───────');
+  // ── Stage 3: IG handle extraction (multi-source) ─────────────────────────────
+  console.log('─── Stage 3: IG handle extraction (multi-source) ───────');
+  console.log(`  Sources: snapshot URL → ad copy domain → website HTML → Firecrawl FB /about → slug\n`);
 
-  for (const lead of toProcess) {
+  for (let i = 0; i < qualified.length; i++) {
+    const lead = qualified[i];
     const snap   = lead.item.snapshot || {};
     const fbUri  = snap.page_profile_uri || '';
 
-    // Check if page_profile_uri is itself an instagram.com URL
+    // 3a. page_profile_uri is directly an instagram.com URL (rare but happens)
     if (fbUri.includes('instagram.com')) {
       try {
         const path = new URL(fbUri).pathname.replace(/^\//, '').replace(/\/$/, '').split('/').pop();
-        if (isValidIgHandle(path)) { lead.igHandle = path; continue; }
+        if (isValidIgHandle(path)) { lead.igHandle = path; process.stdout.write('.'); continue; }
       } catch {}
     }
 
-    // Extract domain and scrape website HTML for IG link
+    // 3b. Extract domain from snapshot (link_url, caption)
     lead.domain = extractDomain(snap);
-    if (lead.domain) {
+
+    // 3c. Extract domain from ad copy text (e.g. "Posetite nas na startours.rs")
+    if (!lead.domain) {
+      lead.domain = domainFromAdCopies(lead.adCopies);
+    }
+
+    // 3d. If domain found: raw HTML scrape for IG link
+    if (lead.domain && !lead.igHandle) {
       lead.igHandle = await findIgOnWebsite(lead.domain);
     }
 
-    // Fallback: use FB page slug as IG candidate (same handle on both platforms is common in RS)
+    // 3e. FB page slug as IG handle candidate — Serbian businesses use same handle on both platforms.
+    // Even if this is a guess, Stage 4 (Apify) confirms it and returns the real website via externalUrl.
     if (!lead.igHandle && fbUri) {
       const slug = fbUri.replace(/\/$/, '').split('/').filter(s =>
         s && s !== 'www.facebook.com' && s !== 'facebook.com' && s !== 'https:' && s !== 'http:'
@@ -521,75 +524,80 @@ async function main() {
       }
     }
 
-    if (lead.igHandle) {
-      process.stdout.write('.');
-    } else {
-      process.stdout.write('x');
-    }
-    await sleep(200);
-  }
-  console.log();
-
-  const withHandles = toProcess.filter(l => l.igHandle);
-  console.log(`  Found handles: ${withHandles.length}/${toProcess.length}\n`);
-
-  if (!withHandles.length) {
-    console.log('No IG handles found — cannot verify followers. Check Stage 3 logic.');
-    return;
+    await sleep(100);
   }
 
-  // ── Stage 4: ScrapeCreators — follower verification ──────────────────────────
-  console.log('─── Stage 4: ScrapeCreators (follower verification) ─────');
+  const withHandles = qualified.filter(l => l.igHandle);
+  const noHandleLeads = qualified.filter(l => !l.igHandle);
+  console.log(`  Handle candidates: ${withHandles.length}/${qualified.length} (${noHandleLeads.length} have numeric FB IDs — no slug available)\n`);
+
+  // ── Stage 4: Apify IG Profile Scraper — confirm handles + get externalUrl ────
+  // Key insight: the IG profile's externalUrl IS the business website (same as April 7 batch).
+  // We confirm which slug guesses are real AND get the domain for free.
+  console.log('─── Stage 4: Apify IG Profile Scraper (confirm + website) ─');
 
   const uniqueHandles = [...new Set(withHandles.map(l => l.igHandle))];
-  console.log(`  Checking ${uniqueHandles.length} handles for ${MIN_FOLLOWERS/1000}k+ followers...`);
+  console.log(`  Submitting ${uniqueHandles.length} handle candidates to Apify...`);
 
-  // Parallel with concurrency limit of 5 to avoid rate limits
-  const CONCURRENCY = 5;
-  const profileByHandle = new Map();
-  for (let i = 0; i < uniqueHandles.length; i += CONCURRENCY) {
-    const batch = uniqueHandles.slice(i, i + CONCURRENCY);
-    const results = await Promise.all(batch.map(h => scrapeCreatorsProfile(h)));
-    for (let j = 0; j < batch.length; j++) {
-      if (results[j]) profileByHandle.set(batch[j].toLowerCase(), results[j]);
-    }
-    process.stdout.write(`\r  ${Math.min(i + CONCURRENCY, uniqueHandles.length)}/${uniqueHandles.length}`);
-    if (i + CONCURRENCY < uniqueHandles.length) await sleep(500);
+  let igProfiles = [];
+  try {
+    igProfiles = await runApify(
+      IG_PROFILE_ACTOR,
+      { usernames: uniqueHandles },
+      'IG Profile Scraper',
+      uniqueHandles.length,
+      0.50,
+    );
+  } catch (err) {
+    console.warn(`  ⚠ IG Profile Scraper failed: ${err.message}`);
   }
-  console.log();
 
-  // Attach profile data to leads
-  let qualified10k = 0;
+  const profileByHandle = new Map();
+  for (const p of igProfiles) {
+    if (p.username) profileByHandle.set(p.username.toLowerCase(), p);
+  }
+
+  // Attach confirmed profile data to leads; unconfirmed slug guesses = mark invalid
+  let confirmed = 0, above20k = 0;
   for (const lead of withHandles) {
     const profile = profileByHandle.get(lead.igHandle.toLowerCase());
     if (profile) {
       lead.igProfile = profile;
-      lead.igFollowers = profile.followers || 0;
-      if (lead.igFollowers >= MIN_FOLLOWERS) qualified10k++;
-    }
-  }
-
-  // If ScrapeCreators verified followers → use that. Otherwise fall back to FB page_like_count.
-  // Never pass through unverified with 0 count — require at least the FB likes threshold.
-  for (const lead of withHandles) {
-    if (lead.igFollowers == null) {
-      // SC out of credits — use FB likes as proxy (conservative: require 2x threshold)
-      const fbLikes = lead.item.snapshot?.page_like_count || 0;
-      lead.igFollowers = fbLikes;
+      lead.igFollowers = profile.followersCount || 0;
+      confirmed++;
+      if (lead.igFollowers >= MIN_FOLLOWERS) above20k++;
+      // KEY: use IG bio's external_url as the website if we don't have one yet
+      const extUrl = profile.externalUrl;
+      if (extUrl && !lead.domain) {
+        try {
+          lead.domain = new URL(extUrl).hostname.replace(/^www\./, '');
+        } catch {}
+      }
+    } else if (lead.igHandleIsGuess) {
+      // Slug guess rejected by Apify — clear it so we don't insert a wrong handle
+      lead.igHandle = null;
+      lead.igHandleIsGuess = false;
+    } else {
+      // Handle was found via website scrape but Apify couldn't verify — keep it
+      lead.igFollowers = lead.item.snapshot?.page_like_count || 0;
       lead.igFollowerSource = 'fb_likes_fallback';
     }
   }
-  const toEnrich = withHandles.filter(l => l.igFollowers >= MIN_FOLLOWERS);
-  const skippedLowFollowers = withHandles.length - toEnrich.length;
 
-  console.log(`  Profiles verified  : ${profileByHandle.size}/${uniqueHandles.length}`);
-  console.log(`  ≥ ${MIN_FOLLOWERS/1000}k followers     : ${qualified10k}`);
-  console.log(`  Skipped (< ${MIN_FOLLOWERS/1000}k)    : ${skippedLowFollowers}\n`);
+  // Gate: keep only leads with confirmed ≥ 20k IG followers OR (no handle + FB likes ≥ 20k proxy)
+  const toEnrich = qualified.filter(lead => {
+    if (lead.igFollowers != null) return lead.igFollowers >= MIN_FOLLOWERS;
+    // No IG handle — use FB page likes as proxy
+    const likes = lead.item.snapshot?.page_like_count || 0;
+    return likes >= MIN_FOLLOWERS;
+  });
+  const skippedLowFollowers = qualified.length - toEnrich.length;
 
-  if (!toEnrich.length) {
-    console.log('No leads passed the follower threshold. Adjust MIN_FOLLOWERS or re-run with more raw ads.');
-    return;
-  }
+  console.log(`  Confirmed handles  : ${confirmed}/${uniqueHandles.length}`);
+  console.log(`  ≥ ${MIN_FOLLOWERS/1000}k followers     : ${above20k}`);
+  console.log(`  Skipped (< ${MIN_FOLLOWERS/1000}k)    : ${skippedLowFollowers}`);
+  console.log(`  Domain from externalUrl: ${qualified.filter(l => l.domain && l.igProfile?.externalUrl).length}`);
+  console.log(`  Proceeding with ${toEnrich.length} leads (${MIN_FOLLOWERS/1000}k+ filter applied)\n`);
 
   // ── Stage 5: Email enrichment ─────────────────────────────────────────────────
   console.log(`─── Stage 5: Email enrichment (${toEnrich.length} leads) ──────────`);
@@ -602,18 +610,18 @@ async function main() {
     const pageName = lead.item.page_name || snap.page_name || '';
     const followers = lead.igFollowers != null ? `${(lead.igFollowers/1000).toFixed(1)}k followers` : 'followers unknown';
 
-    console.log(`[${i+1}/${toEnrich.length}] ${pageName} (@${lead.igHandle}, ${followers})`);
+    console.log(`[${i+1}/${toEnrich.length}] ${pageName}${lead.igHandle ? ` (@${lead.igHandle})` : ' (no IG handle)'} ${followers}`);
 
     let domain  = lead.domain;
     let contact = null;
     let fbEmail = null;
 
-    if (!domain) {
-      // Domain not yet found — try Firecrawl FB about page
-      process.stdout.write(`  FB about scrape... `);
+    if (!domain && snap.page_profile_uri) {
+      // Last resort: Firecrawl FB /about for website + IG + email
+      process.stdout.write(`  FC about... `);
       const fb = await scrapeFacebookAbout(snap.page_profile_uri);
       domain  = fb.website || null;
-      lead.igHandle = lead.igHandle || fb.ig;
+      if (!lead.igHandle && fb.ig) lead.igHandle = fb.ig;
       fbEmail = fb.email;
       console.log(`website: ${domain || '—'} | email: ${fb.email || '—'}`);
       if (domain) lead.domain = domain;
@@ -650,17 +658,19 @@ async function main() {
   if (isTest) {
     console.log('═══════════════════════════════════════════════════════');
     console.log('  [TEST MODE] — results above, no DB writes');
-    console.log(`  Leads that would be inserted: ${toEnrich.length}`);
+    const wouldInsert = Number.isFinite(LIMIT) ? Math.min(toEnrich.length, LIMIT) : toEnrich.length;
+    console.log(`  Leads that would be inserted: ${wouldInsert} (of ${toEnrich.length} qualified)`);
     console.log(`    With email  : ${emailFound}`);
     console.log(`    With IG     : ${toEnrich.filter(l => l.igHandle).length}`);
     console.log(`  Run with --yes to insert into DB.`);
     return;
   }
 
-  console.log(`─── Stage 6: DB upsert (${toEnrich.length} leads) ──────────────`);
+  const toInsert = Number.isFinite(LIMIT) ? toEnrich.slice(0, LIMIT) : toEnrich;
+  console.log(`─── Stage 6: DB upsert (${toInsert.length}/${toEnrich.length} leads, limit: ${LIMIT}) ────`);
   let inserted = 0, failed = 0;
 
-  for (const lead of toEnrich) {
+  for (const lead of toInsert) {
     const snap     = lead.item.snapshot || {};
     const pageName = lead.item.page_name || snap.page_name || '';
     const domain   = lead.domainFinal;
@@ -686,10 +696,13 @@ async function main() {
         instagram_profile: lead.igProfile
           ? {
               username         : lead.igProfile.username,
-              followers        : lead.igProfile.followers || followers,
-              bio              : lead.igProfile.bio || null,
-              is_verified      : lead.igProfile.is_verified || false,
-              external_url     : lead.igProfile.external_url || null,
+              followers        : lead.igProfile.followersCount || followers,
+              following        : lead.igProfile.followingCount || 0,
+              posts_count      : lead.igProfile.postsCount || 0,
+              bio              : lead.igProfile.biography || null,
+              business_category: lead.igProfile.businessCategoryName || null,
+              is_verified      : lead.igProfile.isVerified || false,
+              external_url     : lead.igProfile.externalUrl || null,
             }
           : lead.igHandle
             ? { username: lead.igHandle, followers }
