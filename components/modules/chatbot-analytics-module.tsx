@@ -10,7 +10,7 @@ import {
 } from "recharts"
 import { TrendingUp, MessageSquare, Users, Zap, Activity, BookOpen, Tag, ShoppingBag, } from "lucide-react"
 import { getBookStoreConfig, BookStoreConfig, BOOK_STORE_CLIENTS } from "@/lib/bookstore-clients"
-import { getCrmHarmonijaByClientId, getCrmPublikByClientId, getCrmStelaByClientId } from "@/lib/supabase/queries"
+import { getCrmHarmonijaByClientId, getCrmPublikByClientId, getCrmStelaByClientId, getCrmAleksandarMNByClientId } from "@/lib/supabase/queries"
 
 interface ChatbotAnalyticsModuleProps {
     clientId: string
@@ -199,14 +199,49 @@ const MOCK_CRM_DATA_BY_CLIENT: Record<string, any[]> = {
         { tema: "Kriminalistički",   knjiga: null,                     autor: null,                   status: "Zainteresovan", razlog: "Nije odgovorio", izvor: "Instagram", created_at: d(13) },
         { tema: "Romantika",         knjiga: "November 9",             autor: "Colleen Hoover",       status: "Poručio",       razlog: null,             izvor: "Instagram", created_at: d(13) },
     ],
+    // ── Aleksandar MN (zdravstveni_cilj → tema, proizvod → knjiga) ────────────
+    "3255f279-801c-474b-9c16-a75edc336296": [
+        { tema: "Imunitet",          knjiga: "iMMUNITA + D3 vitamin 2000",         status: "Poručio",       razlog: null,                          izvor: "Instagram", created_at: d(0)  },
+        { tema: "Zglobovi",          knjiga: "Joint MD Revolution, 30 tab",        status: "Zainteresovan", razlog: "Pitao za cenu",                izvor: "Instagram", created_at: d(0)  },
+        { tema: "Kolagen / koža",    knjiga: "Super Collagen Beauty, 60 tab",      status: "Poručio",       razlog: null,                          izvor: "Facebook",  created_at: d(1)  },
+        { tema: "Spavanje / stres",  knjiga: null,                                 status: "Novi",          razlog: null,                          izvor: "Instagram", created_at: d(1)  },
+        { tema: "Zglobovi",          knjiga: "Joint MD Extra Strength, 50 tab",    status: "Poručio",       razlog: null,                          izvor: "Instagram", created_at: d(1)  },
+        { tema: "Imunitet",          knjiga: "Marnys Liposomalni VIT-C 1000",      status: "Zainteresovan", razlog: "Nema na stanju",               izvor: "Instagram", created_at: d(2)  },
+        { tema: "Kolagen / koža",    knjiga: "CERAMIDE Restorative Serum 30ml",    status: "Poručio",       razlog: null,                          izvor: "Facebook",  created_at: d(2)  },
+        { tema: "Imunitet",          knjiga: null,                                 status: "Novi",          razlog: null,                          izvor: "Website",   created_at: d(2)  },
+        { tema: "Mozak / fokus",     knjiga: "Cognitiva Super nutrijent za mozak", status: "Zainteresovan", razlog: "Pitao za cenu",                izvor: "Instagram", created_at: d(3)  },
+        { tema: "Zglobovi",          knjiga: "Joint MD Revolution, 30 tab",        status: "Poručio",       razlog: null,                          izvor: "Instagram", created_at: d(3)  },
+        { tema: "Imunitet",          knjiga: "iMMUNITA + D3 vitamin 2000",         status: "Zainteresovan", razlog: "Nije odgovorio",               izvor: "Facebook",  created_at: d(4)  },
+        { tema: "Spavanje / stres",  knjiga: "Marnys Liposomalni Magnezijum 375", status: "Poručio",       razlog: null,                          izvor: "Instagram", created_at: d(4)  },
+        { tema: "Medicinski upit",   knjiga: "Cimsulin + D3 vitamin",              status: "Intervencija",  razlog: "Medicinski upit – eskalacija", izvor: "Facebook",  created_at: d(4)  },
+        { tema: "Kolagen / koža",    knjiga: "Super Collagen + C, 60 tab",         status: "Zainteresovan", razlog: "Čeka isporuku",                izvor: "Instagram", created_at: d(5)  },
+        { tema: "Fitnes / sport",    knjiga: null,                                 status: "Novi",          razlog: null,                          izvor: "Instagram", created_at: d(5)  },
+        { tema: "Zglobovi",          knjiga: "Serrap MD Forte 120000 SPU",         status: "Zainteresovan", razlog: "Pitao za cenu",                izvor: "Instagram", created_at: d(6)  },
+        { tema: "Imunitet",          knjiga: "iMMUNITA + D3 vitamin 2000",         status: "Poručio",       razlog: null,                          izvor: "Website",   created_at: d(6)  },
+        { tema: "Spavanje / stres",  knjiga: "Cognitiva Super nutrijent za mozak", status: "Zainteresovan", razlog: "Premislio se",                 izvor: "Instagram", created_at: d(7)  },
+        { tema: "Kolagen / koža",    knjiga: "Super Collagen Beauty, 60 tab",      status: "Poručio",       razlog: null,                          izvor: "Instagram", created_at: d(7)  },
+        { tema: "Imunitet",          knjiga: null,                                 status: "Novi",          razlog: null,                          izvor: "Facebook",  created_at: d(8)  },
+        { tema: "Zglobovi",          knjiga: "Joint MD Extra Strength, 50 tab",    status: "Zainteresovan", razlog: "Nema na stanju",               izvor: "Instagram", created_at: d(8)  },
+        { tema: "Fitnes / sport",    knjiga: "MVS set za ravna stopala",           status: "Poručio",       razlog: null,                          izvor: "Instagram", created_at: d(9)  },
+        { tema: "Kolagen / koža",    knjiga: null,                                 status: "Novi",          razlog: null,                          izvor: "Website",   created_at: d(9)  },
+        { tema: "Imunitet",          knjiga: "Marnys Liposomalni VIT-C 1000",      status: "Poručio",       razlog: null,                          izvor: "Instagram", created_at: d(10) },
+        { tema: "Zglobovi",          knjiga: "Joint MD Revolution, 30 tab",        status: "Zainteresovan", razlog: "Nije odgovorio",               izvor: "Facebook",  created_at: d(10) },
+        { tema: "Medicinski upit",   knjiga: null,                                 status: "Intervencija",  razlog: "Medicinski upit – eskalacija", izvor: "Instagram", created_at: d(11) },
+        { tema: "Spavanje / stres",  knjiga: "Marnys Liposomalni Magnezijum 375", status: "Poručio",       razlog: null,                          izvor: "Instagram", created_at: d(11) },
+        { tema: "Imunitet",          knjiga: "iMMUNITA + D3 vitamin 2000",         status: "Poručio",       razlog: null,                          izvor: "Instagram", created_at: d(12) },
+        { tema: "Kolagen / koža",    knjiga: "CERAMIDE Restorative Serum 30ml",    status: "Zainteresovan", razlog: "Pitao za cenu",                izvor: "Facebook",  created_at: d(12) },
+        { tema: "Fitnes / sport",    knjiga: null,                                 status: "Novi",          razlog: null,                          izvor: "Instagram", created_at: d(13) },
+        { tema: "Zglobovi",          knjiga: "Serrap MD Forte 120000 SPU",         status: "Poručio",       razlog: null,                          izvor: "Instagram", created_at: d(13) },
+        { tema: "Imunitet",          knjiga: "iMMUNITA + D3 vitamin 2000",         status: "Zainteresovan", razlog: "Čeka isporuku",                izvor: "Website",   created_at: d(13) },
+    ],
 }
 
-function deriveBookstoreMetrics(rows: any[]) {
+function deriveBookstoreMetrics(rows: any[], days = 14) {
     const today = startOfDay(new Date())
 
-    // 14-day daily trend
+    // N-day daily trend
     const dailyMap: Record<string, number> = {}
-    for (let i = 13; i >= 0; i--) {
+    for (let i = days - 1; i >= 0; i--) {
         dailyMap[format(subDays(today, i), "d.M")] = 0
     }
     rows.forEach(r => {
@@ -292,9 +327,17 @@ function deriveBookstoreMetrics(rows: any[]) {
 const MEDALS = ["🥇", "🥈", "🥉"]
 const TEMA_COLORS = ["#f59e0b", "#10b981", "#06b6d4", "#8b5cf6", "#ec4899", "#f97316"]
 
+type AnalyticsPeriod = 'today' | '7d' | '30d'
+const ANALYTICS_PERIODS: { key: AnalyticsPeriod; label: string; days: number }[] = [
+    { key: 'today', label: 'Danas',  days: 1  },
+    { key: '7d',    label: '7 dana', days: 7  },
+    { key: '30d',   label: 'Mesec',  days: 30 },
+]
+
 function BookstoreAnalytics({ clientId, config, selectedBrandIds }: { clientId: string; config: BookStoreConfig; selectedBrandIds?: string[] }) {
     const [rows, setRows] = useState<any[]>([])
     const [loading, setLoading] = useState(true)
+    const [period, setPeriod] = useState<AnalyticsPeriod>('30d')
 
     const load = useCallback(async () => {
         setLoading(true)
@@ -308,6 +351,11 @@ function BookstoreAnalytics({ clientId, config, selectedBrandIds }: { clientId: 
                 if (cfg.crmTable === 'crm_harmonija') data = await getCrmHarmonijaByClientId(bid) as any[]
                 else if (cfg.crmTable === 'crm_publik') data = await getCrmPublikByClientId(bid) as any[]
                 else if (cfg.crmTable === 'crm_stela') data = await getCrmStelaByClientId(bid) as any[]
+                else if (cfg.crmTable === 'crm_aleksandarmn') data = await getCrmAleksandarMNByClientId(bid) as any[]
+                // Normalize AMN field names to match deriveBookstoreMetrics expectations
+                if (cfg.crmTable === 'crm_aleksandarmn') {
+                    data = data.map(r => ({ ...r, tema: r.zdravstveni_cilj, knjiga: r.proizvod }))
+                }
                 if (data && data.length > 0) {
                     allRows.push(...data.map(r => ({ ...r, brandId: bid })))
                 } else {
@@ -324,7 +372,13 @@ function BookstoreAnalytics({ clientId, config, selectedBrandIds }: { clientId: 
 
     useEffect(() => { load() }, [load])
 
-    const m = deriveBookstoreMetrics(rows)
+    const activePeriod = ANALYTICS_PERIODS.find(p => p.key === period)!
+    const periodCutoff = period === 'today'
+        ? startOfDay(new Date())
+        : subDays(new Date(), activePeriod.days)
+    const filteredRows = rows.filter(r => new Date(r.created_at) >= periodCutoff)
+
+    const m = deriveBookstoreMetrics(filteredRows, activePeriod.days)
     const totalChannels = m.channels.reduce((s, c) => s + c.value, 0)
     const maxKnjiga = m.topKnjige[0]?.count || 1
     const maxAutor  = m.topAutori[0]?.count || 1
@@ -362,10 +416,27 @@ function BookstoreAnalytics({ clientId, config, selectedBrandIds }: { clientId: 
                         <span className="text-[10px] font-mono" style={{ color: "#3f3f46" }}>{config.instagramHandle}</span>
                     </div>
                 </div>
-                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full"
-                    style={{ background: `${config.color}0d`, border: `1px solid ${config.color}30` }}>
-                    <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: config.color }} />
-                    <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: config.color }}>Live</span>
+                <div className="flex flex-col items-end gap-2">
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full"
+                        style={{ background: `${config.color}0d`, border: `1px solid ${config.color}30` }}>
+                        <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: config.color }} />
+                        <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: config.color }}>Live</span>
+                    </div>
+                    {/* Period toggle */}
+                    <div className="flex items-center gap-1 p-0.5 rounded-xl" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}>
+                        {ANALYTICS_PERIODS.map(p => (
+                            <button
+                                key={p.key}
+                                onClick={() => setPeriod(p.key)}
+                                className="px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all duration-200"
+                                style={period === p.key
+                                    ? { background: `${config.color}20`, color: config.color, border: `1px solid ${config.color}30` }
+                                    : { color: "#52525b", border: "1px solid transparent" }}
+                            >
+                                {p.label}
+                            </button>
+                        ))}
+                    </div>
                 </div>
             </motion.div>
 
@@ -398,7 +469,7 @@ function BookstoreAnalytics({ clientId, config, selectedBrandIds }: { clientId: 
                         <div className="flex items-center justify-between mb-5">
                             <div>
                                 <p className="text-[10px] font-bold uppercase tracking-[0.18em] mb-1" style={{ color: "#52525b" }}>Aktivnost</p>
-                                <p className="text-base font-semibold text-white">Razgovori po danu — posled. 14 dana</p>
+                                <p className="text-base font-semibold text-white">Razgovori po danu — {activePeriod.label.toLowerCase()}</p>
                             </div>
                         </div>
                         <ResponsiveContainer width="100%" height={150}>
@@ -558,7 +629,7 @@ function BookstoreAnalytics({ clientId, config, selectedBrandIds }: { clientId: 
                             </div>
                             <div>
                                 <p className="text-[10px] font-bold uppercase tracking-[0.18em]" style={{ color: "#52525b" }}>Kategorije</p>
-                                <p className="text-sm font-semibold text-white">Najpopularnije teme</p>
+                                <p className="text-sm font-semibold text-white">{config.tableType === 'proizvodi' ? "Zdravstveni ciljevi kupaca" : "Najpopularnije teme"}</p>
                             </div>
                         </div>
                         <div className="grid grid-cols-2 gap-2.5">
@@ -586,7 +657,9 @@ function BookstoreAnalytics({ clientId, config, selectedBrandIds }: { clientId: 
                             })}
                         </div>
                         <p className="text-[10px] mt-4 leading-snug" style={{ color: "#3f3f46" }}>
-                            Korisno za planiranje zaliha i odabir naslova za promotivne kampanje.
+                            {config.tableType === 'proizvodi'
+                                ? "Korisno za planiranje promotivnih kampanja i fokus na najtraženije kategorije."
+                                : "Korisno za planiranje zaliha i odabir naslova za promotivne kampanje."}
                         </p>
                     </Panel>
                 </motion.div>
@@ -601,7 +674,7 @@ function BookstoreAnalytics({ clientId, config, selectedBrandIds }: { clientId: 
                             </div>
                             <div>
                                 <p className="text-[10px] font-bold uppercase tracking-[0.18em]" style={{ color: "#52525b" }}>Potražnja</p>
-                                <p className="text-sm font-semibold text-white">Najpopularniji autori</p>
+                                <p className="text-sm font-semibold text-white">{config.tableType === 'proizvodi' ? "Top brendovi / kategorije" : "Najpopularniji autori"}</p>
                             </div>
                         </div>
                         {m.topAutori.length === 0 ? (
@@ -637,7 +710,9 @@ function BookstoreAnalytics({ clientId, config, selectedBrandIds }: { clientId: 
                             </div>
                         )}
                         <p className="text-[10px] mt-5 leading-snug" style={{ color: "#3f3f46" }}>
-                            Autori čija dela kupci najčešće traže — koristi za nabavku novih naslova istih autora.
+                            {config.tableType === 'proizvodi'
+                                ? "Brendovi i linije koje kupci najčešće traže — koristi za prioritizaciju zaliha."
+                                : "Autori čija dela kupci najčešće traže — koristi za nabavku novih naslova istih autora."}
                         </p>
                     </Panel>
                 </motion.div>
@@ -653,7 +728,7 @@ function BookstoreAnalytics({ clientId, config, selectedBrandIds }: { clientId: 
                         </div>
                         <div>
                             <p className="text-[10px] font-bold uppercase tracking-[0.18em]" style={{ color: "#52525b" }}>Direktan signal potražnje</p>
-                            <p className="text-sm font-semibold text-white">Najtraženije knjige</p>
+                            <p className="text-sm font-semibold text-white">{config.tableType === 'proizvodi' ? "Najtraženiji proizvodi" : "Najtraženije knjige"}</p>
                         </div>
                     </div>
                     {m.topKnjige.length === 0 ? (
@@ -692,7 +767,9 @@ function BookstoreAnalytics({ clientId, config, selectedBrandIds }: { clientId: 
                         </div>
                     )}
                     <p className="text-[10px] mt-4 leading-snug" style={{ color: "#3f3f46" }}>
-                        Koliko puta je svaka knjiga pomenuta u DM razgovorima. Kombinuj sa kolonom Zaliha u Katalogu za potpunu sliku.
+                        {config.tableType === 'proizvodi'
+                            ? "Koliko puta je svaki proizvod pomenut u DM razgovorima — kombiniraj sa statusom dostupnosti u katalogu."
+                            : "Koliko puta je svaka knjiga pomenuta u DM razgovorima. Kombinuj sa kolonom Zaliha u Katalogu za potpunu sliku."}
                     </p>
                 </Panel>
             </motion.div>

@@ -165,6 +165,79 @@ function generateMockData() {
 
     return { conversations, allMessages }
 }
+
+// ── Bookstore demo conversations ───────────────────────────────────────────────
+// Used as fallback when a bookstore client has no real conversations yet
+function generateBookstoreDemoData(): ReturnType<typeof generateMockData> {
+    const CID = "demo_bookstore"
+    const ms = (id: string, role: string, text: string, ts: string, platform: string, name: string, pic: string, extra?: any) => ({
+        id: `${id}-${role}-${ts}`, id_razgovora: id, role, message: text,
+        metadata: { name, profile_pic: pic, ...extra }, platform, client_id: CID, created_at: ts,
+    })
+    const t = (hoursBack: number, minutesBack = 0) => {
+        const d = new Date()
+        d.setHours(d.getHours() - hoursBack, d.getMinutes() - minutesBack, 0, 0)
+        return d.toISOString()
+    }
+    const convDefs = [
+        // Instagram — delivery inquiry, warm lead
+        { id: "bs_ig_ana", platform: "instagram", name: "Ana Živković", pic: "https://randomuser.me/api/portraits/women/29.jpg", humanNeeded: false, phone: null, msgs: [
+            ms("bs_ig_ana","user","Zdravo 😊 Da li imate 'Moć sadašnjeg trenutka' od Ekharta Tolija na stanju?",t(2,20),"instagram","Ana Živković","https://randomuser.me/api/portraits/women/29.jpg"),
+            ms("bs_ig_ana","assistant","Zdravo Ana! Da, Moć sadašnjeg trenutka je na stanju — cena 1.490 din. Slobodna poštarina za narudžbine iznad 2.500 din. Preporučujem i 'Nova Zemlja' od istog autora kao sjajnu pratnju 🙏",t(2,18),"instagram","Ana Živković","https://randomuser.me/api/portraits/women/29.jpg"),
+            ms("bs_ig_ana","user","Super! Koliko košta dostava do Novog Sada?",t(2,5),"instagram","Ana Živković","https://randomuser.me/api/portraits/women/29.jpg"),
+            ms("bs_ig_ana","assistant","Dostava do Novog Sada je 350 din (BEX Express, 2-3 dana). Uz dve knjige prelazite limit za besplatnu dostavu 📦 Naručite na harmonijaknjige.rs ili ostavite email za direktan link.",t(2,3),"instagram","Ana Živković","https://randomuser.me/api/portraits/women/29.jpg"),
+        ]},
+        // Instagram — Intervencija (lost shipment, needs human)
+        { id: "bs_ig_milos", platform: "instagram", name: "Miloš Jevtić", pic: "https://randomuser.me/api/portraits/men/41.jpg", humanNeeded: true, phone: null, msgs: [
+            ms("bs_ig_milos","user","Narucio sam knjigu pre 10 dana i jos nisam dobio nista. Placen post ekspres!",t(4,10),"instagram","Miloš Jevtić","https://randomuser.me/api/portraits/men/41.jpg"),
+            ms("bs_ig_milos","assistant","Miloše, razumem frustraciju — 10 dana jeste predugo. Prosleđujem vaš slučaj timu odmah. Možete li mi dati email ili broj narudžbine?",t(4,8),"instagram","Miloš Jevtić","https://randomuser.me/api/portraits/men/41.jpg"),
+            ms("bs_ig_milos","user","milos.jevtic87@gmail.com, narudžbina od 4. aprila",t(4,5),"instagram","Miloš Jevtić","https://randomuser.me/api/portraits/men/41.jpg"),
+            ms("bs_ig_milos","system","[HUMAN_NEEDED]",t(4,4),"instagram","Miloš Jevtić","https://randomuser.me/api/portraits/men/41.jpg",{ human_needed: true }),
+        ]},
+        // Facebook — gift recommendation flow
+        { id: "bs_fb_zorana", platform: "facebook", name: "Zorana Blagojević", pic: "https://randomuser.me/api/portraits/women/52.jpg", humanNeeded: false, phone: null, msgs: [
+            ms("bs_fb_zorana","user","Dobar dan, tražim poklon za prijatelju koja voli psihologiju i razvoj ličnosti",t(6,15),"facebook","Zorana Blagojević","https://randomuser.me/api/portraits/women/52.jpg"),
+            ms("bs_fb_zorana","assistant","Dobar dan! Odlično 🎁 Za ljubitelje psihologije, top 3 preporuke: Atomske navike (navike i produktivnost), Moć sadašnjeg trenutka (mindfulness), Mit o normalnom (trauma i telo). Koliko godina ima prijateli?",t(6,13),"facebook","Zorana Blagojević","https://randomuser.me/api/portraits/women/52.jpg"),
+            ms("bs_fb_zorana","user","35, bavi se meditacijom — hvala, uzimam Moć sadašnjeg trenutka!",t(6,5),"facebook","Zorana Blagojević","https://randomuser.me/api/portraits/women/52.jpg"),
+            ms("bs_fb_zorana","assistant","Savršen izbor za nju 🙏 Naručite na harmonijaknjige.rs ili mi ostavite email za direktan link ka knjizi.",t(6,3),"facebook","Zorana Blagojević","https://randomuser.me/api/portraits/women/52.jpg"),
+        ]},
+        // WhatsApp — bulk corporate order
+        { id: "bs_wa_svetlana", platform: "whatsapp", name: "Svetlana Jović", pic: "https://randomuser.me/api/portraits/women/68.jpg", humanNeeded: false, phone: "svetlana.jovic@firma.rs", msgs: [
+            ms("bs_wa_svetlana","user","Zdravo, zanima me da naručim 8-10 knjiga za kolege kao poklon. Ima li popust za veće narudžbine?",t(8,0),"whatsapp","Svetlana Jović","https://randomuser.me/api/portraits/women/68.jpg"),
+            ms("bs_wa_svetlana","assistant","Zdravo Svetlana! Za grupne narudžbine od 8+ knjiga možemo dogovoriti popust 10-15%. Bestselleri za korporativne poklone: Atomske navike, Ikigaj, Nesavršeni roditelji. Da li biste voleli ponudu na email?",t(7,55),"whatsapp","Svetlana Jović","https://randomuser.me/api/portraits/women/68.jpg"),
+            ms("bs_wa_svetlana","user","Da, sjajno! svetlana.jovic@firma.rs",t(7,50),"whatsapp","Svetlana Jović","https://randomuser.me/api/portraits/women/68.jpg"),
+            ms("bs_wa_svetlana","assistant","Odlično, šaljemo vam detaljnu ponudu u roku od sat vremena. Hvala Svetlana! 📚",t(7,48),"whatsapp","Svetlana Jović","https://randomuser.me/api/portraits/women/68.jpg"),
+        ]},
+        // Website — delivery/pricing question, resolved
+        { id: "bs_web_petra", platform: "website", name: "Petra Stojanović", pic: "https://randomuser.me/api/portraits/women/77.jpg", humanNeeded: false, phone: null, msgs: [
+            ms("bs_web_petra","user","Zdravo, cena na sajtu za 'Budite oslonac svojoj deci' — je li to sa ili bez dostave?",t(1,30),"website","Petra Stojanović","https://randomuser.me/api/portraits/women/77.jpg"),
+            ms("bs_web_petra","assistant","Zdravo Petra! Cena od 1.590 din je bez dostave. Dostava je 350 din, ali je besplatna za narudžbine iznad 2.500 din 😊 Uz ovu knjigu dodajte još jednu i dostava je gratis.",t(1,28),"website","Petra Stojanović","https://randomuser.me/api/portraits/women/77.jpg"),
+            ms("bs_web_petra","user","I da li šaljete subotom?",t(1,20),"website","Petra Stojanović","https://randomuser.me/api/portraits/women/77.jpg"),
+            ms("bs_web_petra","assistant","Da, slažemo subotom za narudžbine do petka u 13h. BEX Express — 1-2 dana za Beograd, 2-3 za ostatak Srbije 📦 Naručite danas i možete očekivati dostavu u utorak.",t(1,18),"website","Petra Stojanović","https://randomuser.me/api/portraits/women/77.jpg"),
+        ]},
+        // Website — address correction, needs human
+        { id: "bs_web_dragan", platform: "website", name: "Dragan Nikolić", pic: "https://randomuser.me/api/portraits/men/72.jpg", humanNeeded: true, phone: null, msgs: [
+            ms("bs_web_dragan","user","Naručio sam knjigu i sad vidim da sam upisao pogrešnu adresu. Mogu li da promenim?",t(0,30),"website","Dragan Nikolić","https://randomuser.me/api/portraits/men/72.jpg"),
+            ms("bs_web_dragan","assistant","Dragan, rešivemo odmah! Ako narudžbina još nije otpremljena, adresa može da se koriguje. Daj mi email ili broj narudžbine da proverim status.",t(0,28),"website","Dragan Nikolić","https://randomuser.me/api/portraits/men/72.jpg"),
+            ms("bs_web_dragan","user","dragan.nikolic@gmail.com",t(0,25),"website","Dragan Nikolić","https://randomuser.me/api/portraits/men/72.jpg"),
+            ms("bs_web_dragan","system","[HUMAN_NEEDED]",t(0,24),"website","Dragan Nikolić","https://randomuser.me/api/portraits/men/72.jpg",{ human_needed: true }),
+        ]},
+    ]
+    const allMessages: any[] = []
+    const conversations: any[] = []
+    for (const def of convDefs) {
+        const sorted = [...def.msgs].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+        const visible = sorted.filter(m => m.role !== "system")
+        conversations.push({
+            id: def.id, leadId: null, messages: def.msgs, platform: def.platform,
+            candidateName: def.name, humanNeeded: def.humanNeeded, phone: def.phone,
+            profilePic: def.pic, lastMessage: sorted[0], lastVisibleMessage: visible[0] || sorted[0],
+        })
+        allMessages.push(...def.msgs)
+    }
+    conversations.sort((a, b) => new Date(b.lastVisibleMessage.created_at).getTime() - new Date(a.lastVisibleMessage.created_at).getTime())
+    return { conversations, allMessages }
+}
 // ─────────────────────────────────────────────────────────────────────────────
 
 // Handles both proper JSONB objects and legacy string-encoded metadata
@@ -201,6 +274,7 @@ export function SocialChatbotModule({ clientId }: SocialChatbotModuleProps) {
     const [togglingFlag, setTogglingFlag] = useState(false)
     const [msgPeriod, setMsgPeriod] = useState<Period>("sedmica")
     const [mobilePanel, setMobilePanel] = useState<"list" | "chat" | "profile">("list")
+    const [channelFilter, setChannelFilter] = useState<'all' | 'instagram' | 'facebook' | 'whatsapp' | 'website'>('all')
     const messagesEndRef = useRef<HTMLDivElement>(null)
     const supabase = createClient()
 
@@ -469,15 +543,49 @@ export function SocialChatbotModule({ clientId }: SocialChatbotModuleProps) {
                     // Mobile: show only when mobilePanel === "list" (or no selection yet)
                     selected ? (mobilePanel === "list" ? "flex" : "hidden md:flex") : "flex"
                 )}>
-                    <div className="px-4 py-3 border-b border-white/[0.05] flex items-center justify-between shrink-0">
-                        <div className="flex items-center gap-2">
-                            <Inbox className="w-3.5 h-3.5 text-zinc-500" />
-                            <span className="text-[10px] font-mono font-bold text-zinc-500 uppercase tracking-widest">Razgovori</span>
+                    <div className="border-b border-white/[0.05] shrink-0">
+                        {/* Title row */}
+                        <div className="px-4 py-2.5 flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                                <Inbox className="w-3.5 h-3.5 text-zinc-500" />
+                                <span className="text-[10px] font-mono font-bold text-zinc-500 uppercase tracking-widest">Razgovori</span>
+                            </div>
+                            <span className="text-[10px] font-mono text-zinc-600 bg-white/5 rounded-full px-2 py-0.5">
+                                {channelFilter === 'all' ? conversations.length : conversations.filter(c => c.platform?.toLowerCase() === channelFilter).length}
+                            </span>
                         </div>
-                        <span className="text-[10px] font-mono text-zinc-600 bg-white/5 rounded-full px-2 py-0.5">{conversations.length}</span>
+                        {/* Channel filter tabs */}
+                        <div className="px-3 pb-2.5 flex items-center gap-1">
+                            {([
+                                { key: 'all',       label: 'Sve',       Icon: Inbox,          color: 'text-zinc-400',    active: 'bg-white/10 text-white' },
+                                { key: 'instagram', label: 'Instagram', Icon: Instagram,       color: 'text-pink-400',    active: 'bg-pink-500/15 text-pink-400' },
+                                { key: 'facebook',  label: 'Facebook',  Icon: Facebook,        color: 'text-blue-400',    active: 'bg-blue-500/15 text-blue-400' },
+                                { key: 'whatsapp',  label: 'WhatsApp',  Icon: MessageCircle,   color: 'text-emerald-400', active: 'bg-emerald-500/15 text-emerald-400' },
+                                { key: 'website',   label: 'Web',       Icon: Globe,           color: 'text-violet-400',  active: 'bg-violet-500/15 text-violet-400' },
+                            ] as const).map(({ key, label, Icon, color, active }) => {
+                                const count = key === 'all' ? conversations.length : conversations.filter(c => c.platform?.toLowerCase() === key).length
+                                if (key !== 'all' && count === 0) return null
+                                return (
+                                    <button
+                                        key={key}
+                                        onClick={() => setChannelFilter(key)}
+                                        className={cn(
+                                            "flex items-center gap-1 px-2 py-1 rounded-lg text-[9px] font-mono font-bold uppercase tracking-wider transition-all duration-150 border",
+                                            channelFilter === key
+                                                ? `${active} border-current/20`
+                                                : `${color} opacity-50 hover:opacity-80 border-transparent`
+                                        )}
+                                    >
+                                        <Icon className="w-2.5 h-2.5" />
+                                        <span className="hidden sm:inline">{label}</span>
+                                        <span className="opacity-70">{count}</span>
+                                    </button>
+                                )
+                            })}
+                        </div>
                     </div>
                     <div className="flex-1 overflow-y-auto scrollbar-none divide-y divide-white/[0.03]">
-                        {conversations.map((conv, idx) => {
+                        {conversations.filter(c => channelFilter === 'all' || c.platform?.toLowerCase() === channelFilter).map((conv, idx) => {
                             const isSelected = selectedId === conv.id
                             const pm = getPlatformMeta(conv.platform)
                             const name = getDisplayName(conv)

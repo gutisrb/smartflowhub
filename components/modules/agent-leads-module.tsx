@@ -19,7 +19,7 @@ import {
     AlertTriangle,
     Package,
 } from "lucide-react"
-import { getKandidatiByClientId, updateKandidat, getCrmHarmonijaByClientId, getCrmPublikByClientId, getCrmStelaByClientId } from "@/lib/supabase/queries"
+import { getKandidatiByClientId, updateKandidat, getCrmHarmonijaByClientId, getCrmPublikByClientId, getCrmStelaByClientId, getCrmAleksandarMNByClientId } from "@/lib/supabase/queries"
 import { getBookStoreConfig, BOOK_STORE_CLIENTS } from "@/lib/bookstore-clients"
 import { createClient } from "@/lib/supabase/client"
 import { motion, AnimatePresence } from "framer-motion"
@@ -96,6 +96,16 @@ const MOCK_BOOKSTORE_CRM_BY_CLIENT: Record<string, any[]> = {
         { id: 's5', full_name: 'Aleksandra Todorović', tema: 'Triler',            knjiga: 'Opake igre',        status: 'Zainteresovan', razlog: 'Pitao za cenu',  status_porudzbine: null,          izvor: 'Instagram', email: null,                      telefon: null,            created_at: hoursAgo(25) },
         { id: 's6', full_name: 'Tijana Rašić',       tema: 'Saga',                knjiga: 'Ptičica na trnju',  status: 'Intervencija',  razlog: null,             status_porudzbine: 'Reklamacija', izvor: 'Instagram', email: null,                      telefon: '+381644444444', created_at: hoursAgo(31) },
     ],
+    // Aleksandar MN — health supplements, vitamins, fitness — B2C retail (Prevencija i Terapija)
+    // ⚠ UUID placeholder — update when real client UUID is known
+    "3255f279-801c-474b-9c16-a75edc336296": [
+        { id: 'a1', full_name: 'Ana Petrović',      zdravstveni_cilj: 'Imunitet',        proizvod: 'iMMUNITA + D3 vitamin 2000',       status: 'Zainteresovan', razlog: 'Pitao za cenu',  status_porudzbine: null,          izvor: 'Instagram', email: 'ana.p@gmail.com',     telefon: null,            created_at: hoursAgo(1)  },
+        { id: 'a2', full_name: 'Milan Savić',       zdravstveni_cilj: 'Zglobovi',        proizvod: 'Joint MD Revolution, 30 tableta',  status: 'Poručio',       razlog: null,             status_porudzbine: 'Dostavljeno', izvor: 'Instagram', email: 'milan.s@gmail.com',   telefon: null,            created_at: hoursAgo(3)  },
+        { id: 'a3', full_name: 'Jelena Kovač',      zdravstveni_cilj: 'Kolagen / koža',  proizvod: null,                               status: 'Novi',          razlog: null,             status_porudzbine: null,          izvor: 'Facebook',  email: null,                  telefon: null,            created_at: hoursAgo(6)  },
+        { id: 'a4', full_name: 'Stefan Jović',      zdravstveni_cilj: 'Zglobovi',        proizvod: 'Joint MD Extra Strength',          status: 'Zainteresovan', razlog: 'Nema na stanju', status_porudzbine: null,          izvor: 'Instagram', email: 'stefan.j@gmail.com',  telefon: null,            created_at: hoursAgo(8)  },
+        { id: 'a5', full_name: 'Tamara Đurić',      zdravstveni_cilj: 'Spavanje / stres',proizvod: 'Liposomalni Melatonin + Cognitiva', status: 'Poručio',      razlog: null,             status_porudzbine: 'Obrađuje se', izvor: 'Instagram', email: 'tamara.d@gmail.com',  telefon: '+381641234567', created_at: hoursAgo(22) },
+        { id: 'a6', full_name: 'Nikola Bogdanović', zdravstveni_cilj: 'Koncentracija',   proizvod: 'Cognitiva Super nutrijent',        status: 'Intervencija',  razlog: null,             status_porudzbine: 'Reklamacija', izvor: 'Instagram', email: null,                  telefon: '+381642345678', created_at: hoursAgo(30) },
+    ],
 }
 
 export function AgentLeadsModule({ clientId, selectedBrandIds, terminology: propTerminology }: AgentLeadsModuleProps) {
@@ -121,6 +131,7 @@ export function AgentLeadsModule({ clientId, selectedBrandIds, terminology: prop
     const isRecruitment = terminology.title === "Regrutacija"
     const bookStoreConfig = getBookStoreConfig(clientId)
     const isHarmonija = bookStoreConfig !== null
+    const isCatalogProducts = bookStoreConfig?.tableType === 'proizvodi'
 
     const loadCandidates = useCallback(async () => {
         if (!clientId) return
@@ -131,6 +142,7 @@ export function AgentLeadsModule({ clientId, selectedBrandIds, terminology: prop
                 if (bookStoreConfig.crmTable === 'crm_harmonija') data = await getCrmHarmonijaByClientId(clientId)
                 else if (bookStoreConfig.crmTable === 'crm_publik') data = await getCrmPublikByClientId(clientId)
                 else if (bookStoreConfig.crmTable === 'crm_stela') data = await getCrmStelaByClientId(clientId)
+                else if (bookStoreConfig.crmTable === 'crm_aleksandarmn') data = await getCrmAleksandarMNByClientId(clientId)
                 else data = await getKandidatiByClientId(clientId)
             } else {
                 data = await getKandidatiByClientId(clientId)
@@ -164,9 +176,11 @@ export function AgentLeadsModule({ clientId, selectedBrandIds, terminology: prop
 
     const filteredLeads = leads.filter(c => {
         const matchesSearch = c.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            (isHarmonija
-                ? c.tema?.toLowerCase().includes(searchTerm.toLowerCase()) || c.knjiga?.toLowerCase().includes(searchTerm.toLowerCase())
-                : c.posao?.toLowerCase().includes(searchTerm.toLowerCase()) || c.lokacija?.toLowerCase().includes(searchTerm.toLowerCase())
+            (isCatalogProducts
+                ? c.zdravstveni_cilj?.toLowerCase().includes(searchTerm.toLowerCase()) || c.proizvod?.toLowerCase().includes(searchTerm.toLowerCase())
+                : isHarmonija
+                    ? c.tema?.toLowerCase().includes(searchTerm.toLowerCase()) || c.knjiga?.toLowerCase().includes(searchTerm.toLowerCase())
+                    : c.posao?.toLowerCase().includes(searchTerm.toLowerCase()) || c.lokacija?.toLowerCase().includes(searchTerm.toLowerCase())
             )
         const candidateStatus = c.status || 'Novi';
         const matchesFilter = filter === 'all' || candidateStatus.toLowerCase() === filter.toLowerCase();
@@ -289,9 +303,11 @@ export function AgentLeadsModule({ clientId, selectedBrandIds, terminology: prop
                         )}
                     </h1>
                     <p className="text-slate-400 mt-2">
-                        {isHarmonija
-                            ? "Kupci koji su kontaktirali agenta — od prvog DM-a do dostavljene knjige"
-                            : `Praćenje dolaznih ${(terminology.entities || 'Kandidata').toLowerCase()} i automatizovanih interakcija`
+                        {isCatalogProducts
+                            ? "Kupci koji su kontaktirali agenta — od prvog DM-a do isporučenog proizvoda"
+                            : isHarmonija
+                                ? "Kupci koji su kontaktirali agenta — od prvog DM-a do dostavljene knjige"
+                                : `Praćenje dolaznih ${(terminology.entities || 'Kandidata').toLowerCase()} i automatizovanih interakcija`
                         }
                     </p>
                     {isHarmonija && bookStoreConfig && (
@@ -323,7 +339,7 @@ export function AgentLeadsModule({ clientId, selectedBrandIds, terminology: prop
                 <div className="relative w-full sm:w-80">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-emerald-500/50" />
                     <Input
-                        placeholder={isHarmonija ? "Pretraži kupce, naslove..." : (terminology.searchPlaceholder || "Pretraži kandidate...")}
+                        placeholder={isCatalogProducts ? "Pretraži kupce, proizvode..." : isHarmonija ? "Pretraži kupce, naslove..." : (terminology.searchPlaceholder || "Pretraži kandidate...")}
                         className="pl-10 bg-black/40 border-white/10 text-white placeholder:text-white/20 focus:border-emerald-500/50 rounded-xl"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
@@ -342,7 +358,7 @@ export function AgentLeadsModule({ clientId, selectedBrandIds, terminology: prop
                             <option value="poručio">Poručili</option>
                             <option value="intervencija">Intervencija</option>
                         </>
-                    ) : (
+                    ) : isRecruitment ? (
                         <>
                             <option value="all">Svi Statusi</option>
                             <option value="novi">Novi</option>
@@ -352,7 +368,7 @@ export function AgentLeadsModule({ clientId, selectedBrandIds, terminology: prop
                             <option value="intervencija">Intervencija</option>
                             <option value="odbijen">Odbijen</option>
                         </>
-                    )}
+                    ) : null}
                 </select>
             </div>
 
@@ -364,8 +380,8 @@ export function AgentLeadsModule({ clientId, selectedBrandIds, terminology: prop
                                 <th className="p-4 text-xs font-mono uppercase tracking-widest text-emerald-400">{isHarmonija ? "Kupac" : "Kandidat"}</th>
                                 {isHarmonija ? (
                                     <>
-                                        <th className="p-4 text-xs font-mono uppercase tracking-widest text-emerald-400">Kategorija</th>
-                                        <th className="p-4 text-xs font-mono uppercase tracking-widest text-emerald-400">Knjiga</th>
+                                        <th className="p-4 text-xs font-mono uppercase tracking-widest text-emerald-400">{bookStoreConfig?.crmTemaLabel || "Kategorija"}</th>
+                                        <th className="p-4 text-xs font-mono uppercase tracking-widest text-emerald-400">{bookStoreConfig?.crmProizvodLabel || "Knjiga"}</th>
                                     </>
                                 ) : (
                                     <th className="p-4 text-xs font-mono uppercase tracking-widest text-emerald-400">Pozicija</th>
@@ -430,23 +446,23 @@ export function AgentLeadsModule({ clientId, selectedBrandIds, terminology: prop
                                                     </div>
                                                 </td>
 
-                                                {/* Bookstore: Kategorija | Knjiga (separate columns) */}
+                                                {/* Bookstore: Kategorija | Knjiga/Proizvod (separate columns) */}
                                                 {isHarmonija ? (
                                                     <>
                                                         <td className="p-4">
-                                                            {lead.tema ? (
+                                                            {(isCatalogProducts ? lead.zdravstveni_cilj : lead.tema) ? (
                                                                 <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-white/5 border border-white/8 text-zinc-400">
-                                                                    {lead.tema}
+                                                                    {isCatalogProducts ? lead.zdravstveni_cilj : lead.tema}
                                                                 </span>
                                                             ) : (
                                                                 <span className="text-zinc-700">—</span>
                                                             )}
                                                         </td>
                                                         <td className="p-4 max-w-[180px]">
-                                                            {lead.knjiga ? (
-                                                                <span className="text-white/80 text-sm font-medium leading-snug line-clamp-2">{lead.knjiga}</span>
+                                                            {(isCatalogProducts ? lead.proizvod : lead.knjiga) ? (
+                                                                <span className="text-white/80 text-sm font-medium leading-snug line-clamp-2">{isCatalogProducts ? lead.proizvod : lead.knjiga}</span>
                                                             ) : (
-                                                                <span className="text-zinc-600 text-xs italic">nije specificirana</span>
+                                                                <span className="text-zinc-600 text-xs italic">nije specificiran/a</span>
                                                             )}
                                                         </td>
                                                     </>

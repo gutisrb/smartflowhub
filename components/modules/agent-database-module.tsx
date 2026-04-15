@@ -24,9 +24,11 @@ import {
     Pencil,
     Trash,
     ExternalLink,
-    BookOpen
+    BookOpen,
+    Package,
+    Tag
 } from "lucide-react"
-import { getJobsByClientId, createJob, updateJob, deleteJob, getKnjigeByClientId } from "@/lib/supabase/queries"
+import { getJobsByClientId, createJob, updateJob, deleteJob, getKnjigeByClientId, getProizvodiByClientId } from "@/lib/supabase/queries"
 import { getBookStoreConfig, BOOK_STORE_CLIENTS } from "@/lib/bookstore-clients"
 import {
     Dialog,
@@ -103,7 +105,32 @@ export function AgentDatabaseModule({
 
     const bookStoreConfig = getBookStoreConfig(clientId)
     const isHarmonija = bookStoreConfig !== null
+    const isCatalogProducts = bookStoreConfig?.tableType === 'proizvodi'
     const bsColor = bookStoreConfig?.color || '#10b981'
+
+    // Mock product catalog for demo — shown when DB is empty (pre-seeding)
+    const MOCK_AMN_PRODUCTS = [
+        { id: 'amn1',  naziv: 'Cognitiva Super nutrijent za mozak', brend: 'Cognitiva',      kategorija: 'Zdravlje – mozak',    cena: 2850, url: 'https://aleksandarmn.com/cognitiva-super-nutrijent-za-mozak-uskoro.html',                            status: 'Aktivan' },
+        { id: 'amn2',  naziv: 'Joint MD Extra Strength, 50 tableta', brend: 'Joint MD',       kategorija: 'Zdravlje – zglobovi', cena: 3192, url: 'https://aleksandarmn.com/joint-md-extra-strength-hondroprotektor-50-tableta.html',                    status: 'Aktivan' },
+        { id: 'amn3',  naziv: 'Joint MD Revolution, 30 tableta',     brend: 'Joint MD',       kategorija: 'Zdravlje – zglobovi', cena: 3199, url: 'https://aleksandarmn.com/joint-md-revolution-30-tableta-pomoc-za-zglobove-i-artritis.html',           status: 'Aktivan' },
+        { id: 'amn4',  naziv: 'Super Collagen + C, 60 tableta',      brend: 'Super Collagen', kategorija: 'Suplementi – kolagen',cena: 1800, url: 'https://aleksandarmn.com/kolagen-tablete-super-collagen-c-60-tableta.html',                           status: 'Aktivan' },
+        { id: 'amn5',  naziv: 'Super Collagen Beauty, 60 tableta',   brend: 'Super Collagen', kategorija: 'Suplementi – kolagen',cena: 1998, url: 'https://aleksandarmn.com/super-collagen-beauty-tablete-60-tableta.html',                              status: 'Aktivan' },
+        { id: 'amn6',  naziv: 'Marnys Liposomalni VIT-C 1000',       brend: 'Marnys',         kategorija: 'Zdravlje – imunitet', cena: 1322, url: 'https://aleksandarmn.com/liposomalni-vit-c-1000-10x10ml.html',                                        status: 'Aktivan' },
+        { id: 'amn7',  naziv: 'Marnys Liposomalni Magnezijum 375mg', brend: 'Marnys',         kategorija: 'Zdravlje – nervi',    cena: 1449, url: 'https://aleksandarmn.com/liposomalni-magnezijum-375.html',                                             status: 'Aktivan' },
+        { id: 'amn8',  naziv: 'Serrap MD Forte 120000 SPU',          brend: 'Serrap MD',      kategorija: 'Zdravlje – upala',    cena: 1351, url: 'https://aleksandarmn.com/serrap-md-120000-spu-forte-10-kapsula-protiv-upala-i-otoka-pojacivac-10004754.html', status: 'Aktivan' },
+        { id: 'amn9',  naziv: 'iMMUNITA + D3 vitamin 2000',          brend: 'AMN',            kategorija: 'Zdravlje – imunitet', cena: 1500, url: 'https://aleksandarmn.com/immunita-d3-vitamin-2000.html',                                               status: 'Aktivan' },
+        { id: 'amn10', naziv: 'Bone Up + D3 vitamin 2000',           brend: 'AMN',            kategorija: 'Zdravlje – kosti',    cena: 1600, url: 'https://aleksandarmn.com/bone-up-d3-vitamin-2000.html',                                                status: 'Aktivan' },
+        { id: 'amn11', naziv: 'Cimsulin + D3 vitamin',               brend: 'AMN',            kategorija: 'Zdravlje – šećer',    cena: 1500, url: 'https://aleksandarmn.com/cimsulin-d3-vitamin.html',                                                    status: 'Aktivan' },
+        { id: 'amn12', naziv: 'Cognitiva + 5HTP + L-Theanine',       brend: 'Cognitiva',      kategorija: 'Zdravlje – mozak',    cena: 2326, url: 'https://aleksandarmn.com/cognitiva-5htp-l-theanine-suplement.html',                                    status: 'Aktivan' },
+        { id: 'amn13', naziv: 'Liposomalni Melatonin + Cognitiva',   brend: 'Cognitiva',      kategorija: 'Zdravlje – spavanje', cena: 1851, url: 'https://aleksandarmn.com/liposomalni-melatonin-cogniva-10-kapsula.html',                               status: 'Aktivan' },
+        { id: 'amn14', naziv: 'Chewy Vites Adults Sleep Support',    brend: 'Chewy Vites',    kategorija: 'Zdravlje – spavanje', cena: 2249, url: 'https://aleksandarmn.com/chewy-vites-adults-sleep-liposomalni-melatonin.html',                          status: 'Aktivan' },
+        { id: 'amn15', naziv: 'Orgain Whey Protein 828g',            brend: 'Orgain',         kategorija: 'Fitness – proteini',  cena: 7072, url: 'https://aleksandarmn.com/orgain-whey-protein-u-prahu-kremasta-cokolada-828g-gratis-magnezijum-relax-gel-150ml.html', status: 'Aktivan' },
+        { id: 'amn16', naziv: 'MVS Set za ravna stopala',            brend: 'MVS',            kategorija: 'Fitness – podrška',   cena: 3315, url: 'https://aleksandarmn.com/mvs-set-za-ravna-stopala-set-lako-i-jednostavno.html',                          status: 'Aktivan' },
+        { id: 'amn17', naziv: 'CERAMIDE Restorative Serum 30ml',     brend: 'Pharmaline',     kategorija: 'Kozmetika',           cena: 1150, url: 'https://aleksandarmn.com/ceramide-20restorative-serum-ceramidni-regenerativni-serum-30ml.html',         status: 'Aktivan' },
+        { id: 'amn18', naziv: 'Super Collagen Keratin + Gel',        brend: 'Super Collagen', kategorija: 'Suplementi – kolagen',cena: 2599, url: 'https://aleksandarmn.com/super-collagen-keratin-pharmaline-gel.html',                                   status: 'Aktivan' },
+        { id: 'amn19', naziv: 'Marnys Organsko Ulje Origana 30ml',   brend: 'Marnys',         kategorija: 'Zdravlje – imunitet', cena: 1799, url: 'https://aleksandarmn.com/marnys-ulje-origana-30-ml-veliko-pakovanje-mala-cena.html',                    status: 'Aktivan' },
+        { id: 'amn20', naziv: 'CimSulin + Kraljevski napitak',       brend: 'AMN',            kategorija: 'Zdravlje – šećer',    cena: 1599, url: 'https://aleksandarmn.com/cimsulin-kraljevski-napitak.html',                                             status: 'Aktivan' },
+    ]
 
     const loadData = useCallback(async () => {
         if (!clientId) return
@@ -113,16 +140,25 @@ export function AgentDatabaseModule({
                 // Multi-brand: fetch katalog for each selected brand and merge
                 const results = await Promise.all(
                     selectedBrandIds.map(async (bid) => {
-                        const rows = await getKnjigeByClientId(bid)
+                        const bConfig = getBookStoreConfig(bid)
+                        const rows = bConfig?.tableType === 'proizvodi'
+                            ? await getProizvodiByClientId(bid)
+                            : await getKnjigeByClientId(bid)
                         return (rows || []).map((r: any) => ({ ...r, brandId: bid }))
                     })
                 )
                 setItems(results.flat())
             } else {
-                const data = isHarmonija
-                    ? await getKnjigeByClientId(clientId)
-                    : await getJobsByClientId(clientId)
-                setItems(data || [])
+                let data: any[] = []
+                if (isCatalogProducts) {
+                    data = await getProizvodiByClientId(clientId) || []
+                    if (data.length === 0) data = MOCK_AMN_PRODUCTS
+                } else if (isHarmonija) {
+                    data = await getKnjigeByClientId(clientId) || []
+                } else {
+                    data = await getJobsByClientId(clientId) || []
+                }
+                setItems(data)
             }
         } catch (error) {
             console.error("Failed to load data", error)
@@ -238,9 +274,14 @@ export function AgentDatabaseModule({
 
     const filteredItems = useMemo(() => {
         return items.filter(item => {
-            const matchesSearch = isHarmonija
-                ? item.naslov?.toLowerCase().includes(searchQuery.toLowerCase()) || item.autor?.toLowerCase().includes(searchQuery.toLowerCase())
-                : item.posao?.toLowerCase().includes(searchQuery.toLowerCase()) || item.firma?.toLowerCase().includes(searchQuery.toLowerCase())
+            let matchesSearch: boolean
+            if (isCatalogProducts) {
+                matchesSearch = item.naziv?.toLowerCase().includes(searchQuery.toLowerCase()) || item.brend?.toLowerCase().includes(searchQuery.toLowerCase()) || item.kategorija?.toLowerCase().includes(searchQuery.toLowerCase())
+            } else if (isHarmonija) {
+                matchesSearch = item.naslov?.toLowerCase().includes(searchQuery.toLowerCase()) || item.autor?.toLowerCase().includes(searchQuery.toLowerCase())
+            } else {
+                matchesSearch = item.posao?.toLowerCase().includes(searchQuery.toLowerCase()) || item.firma?.toLowerCase().includes(searchQuery.toLowerCase())
+            }
             if (!matchesSearch) return false
             if (isHarmonija) {
                 if (bookTab === 'dostupno') return item.status === 'Aktivan'
@@ -248,7 +289,7 @@ export function AgentDatabaseModule({
             }
             return true
         })
-    }, [items, searchQuery, isHarmonija, bookTab])
+    }, [items, searchQuery, isHarmonija, isCatalogProducts, bookTab])
 
     const config = useMemo(() => {
         return {
@@ -269,19 +310,21 @@ export function AgentDatabaseModule({
                             <config.icon className={cn("w-6 h-6", config.color)} />
                         </div>
                         <h2 className="text-4xl font-outfit font-bold text-silver tracking-tight">
-                            {isHarmonija ? "Katalog" : terminology.title === "Recruitment" ? "Baza" : "Databaza"}{" "}
-                            <span className={config.color}>{isHarmonija ? "Knjiga" : terminology.title === "Recruitment" ? "Pozicija" : "Agenta"}</span>
+                            {isCatalogProducts ? "Katalog" : isHarmonija ? "Katalog" : terminology.title === "Recruitment" ? "Baza" : "Databaza"}{" "}
+                            <span className={config.color}>{isCatalogProducts ? bookStoreConfig!.catalogItemLabel + "a" : isHarmonija ? "Knjiga" : terminology.title === "Recruitment" ? "Pozicija" : "Agenta"}</span>
                         </h2>
                         <Badge className="bg-white/5 text-silver/40 border-white/10 font-outfit text-[10px] uppercase tracking-widest">
-                            {isHarmonija ? `${items.length} naslova` : config.label}
+                            {isHarmonija ? `${items.length} ${bookStoreConfig!.catalogItemsLabel}` : config.label}
                         </Badge>
                     </div>
                     <p className="text-silver/60 font-outfit text-lg max-w-xl">
-                        {isHarmonija
-                            ? "Naslovi koje agent preporučuje kupcima. Zaliha i cene biće sinhronizovane sa brainit.rs."
-                            : terminology.title === "Regrutacija" || terminology.title === "Recruitment"
-                                ? "Upravljanje oglasima i kriterijumima za AI selekciju kandidata."
-                                : `Autonomno upravljanje znanjem za ${config.item} čvorove.`}
+                        {isCatalogProducts
+                            ? `${bookStoreConfig!.catalogItemLabel}i koje agent preporučuje kupcima. Sinhronizovano sa ${bookStoreConfig!.websiteUrl}.`
+                            : isHarmonija
+                                ? "Naslovi koje agent preporučuje kupcima. Zaliha i cene biće sinhronizovane sa brainit.rs."
+                                : terminology.title === "Regrutacija" || terminology.title === "Recruitment"
+                                    ? "Upravljanje oglasima i kriterijumima za AI selekciju kandidata."
+                                    : `Autonomno upravljanje znanjem za ${config.item} čvorove.`}
                     </p>
                 </div>
 
@@ -495,7 +538,7 @@ export function AgentDatabaseModule({
                 <div className="relative w-full sm:w-80 group">
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500 group-focus-within:text-emerald transition-colors" />
                     <Input
-                        placeholder={isHarmonija ? "Pretraži katalog knjiga..." : "Pretraži bazu pozicija..."}
+                        placeholder={isCatalogProducts ? `Pretraži ${bookStoreConfig!.catalogItemsLabel}, brendove...` : isHarmonija ? "Pretraži katalog knjiga..." : "Pretraži bazu pozicija..."}
                         className="pl-11 h-12 bg-white/5 border-white/5 rounded-2xl font-outfit focus:border-emerald/30 transition-all"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
@@ -531,7 +574,14 @@ export function AgentDatabaseModule({
                 <Table>
                     <TableHeader className="bg-white/[0.02] border-b border-white/5">
                         <TableRow className="border-none hover:bg-transparent">
-                            {isHarmonija ? (<>
+                            {isCatalogProducts ? (<>
+                                <TableHead className="w-16 py-8 pl-8" />
+                                <TableHead className="text-zinc-500 font-bold uppercase tracking-widest text-[10px] py-8 font-outfit">Naziv / Brend</TableHead>
+                                <TableHead className="text-zinc-500 font-bold uppercase tracking-widest text-[10px] py-8 font-outfit">Kategorija</TableHead>
+                                <TableHead className="text-zinc-500 font-bold uppercase tracking-widest text-[10px] py-8 font-outfit text-center">Cena (RSD)</TableHead>
+                                <TableHead className="text-zinc-500 font-bold uppercase tracking-widest text-[10px] py-8 font-outfit text-center">Dostupnost</TableHead>
+                                <TableHead className="text-right pr-8 py-8 font-outfit">Link</TableHead>
+                            </>) : isHarmonija ? (<>
                                 <TableHead className="w-16 py-8 pl-8" />
                                 <TableHead className="text-zinc-500 font-bold uppercase tracking-widest text-[10px] py-8 font-outfit">Naslov</TableHead>
                                 <TableHead className="text-zinc-500 font-bold uppercase tracking-widest text-[10px] py-8 font-outfit">Kategorije</TableHead>
@@ -566,7 +616,7 @@ export function AgentDatabaseModule({
                             ) : filteredItems.length === 0 ? (
                                 <TableRow className="border-none">
                                     <TableCell colSpan={8} className="h-80 text-center">
-                                        <p className="text-sm font-outfit text-zinc-500 italic opacity-30 tracking-widest uppercase">{isHarmonija ? "Nema knjiga u katalogu" : "Nema pronađenih pozicija u bazi"}</p>
+                                        <p className="text-sm font-outfit text-zinc-500 italic opacity-30 tracking-widest uppercase">{isCatalogProducts ? "Nema proizvoda u katalogu" : isHarmonija ? "Nema knjiga u katalogu" : "Nema pronađenih pozicija u bazi"}</p>
                                     </TableCell>
                                 </TableRow>
                             ) : (
@@ -581,7 +631,60 @@ export function AgentDatabaseModule({
                                         onMouseEnter={isHarmonija ? e => (e.currentTarget.style.backgroundColor = `${bsColor}08`) : undefined}
                                         onMouseLeave={isHarmonija ? e => (e.currentTarget.style.backgroundColor = '') : undefined}
                                     >
-                                        {isHarmonija ? (
+                                        {isCatalogProducts ? (
+                                            <>
+                                                {/* Product icon swatch */}
+                                                <TableCell className="py-5 pl-8 w-16">
+                                                    <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 shadow-md"
+                                                        style={{ background: `${bsColor}18`, border: `1px solid ${bsColor}30` }}>
+                                                        <Package className="w-4 h-4" style={{ color: `${bsColor}cc` }} />
+                                                    </div>
+                                                </TableCell>
+                                                {/* Naziv + Brend */}
+                                                <TableCell className="py-5">
+                                                    <div>
+                                                        <span className="text-silver font-bold font-outfit text-sm group-hover:text-white transition-colors leading-snug block">{item.naziv}</span>
+                                                        <span className="text-zinc-500 text-xs font-outfit mt-0.5 block italic">{item.brend || '—'}</span>
+                                                    </div>
+                                                </TableCell>
+                                                {/* Kategorija */}
+                                                <TableCell>
+                                                    <span className="text-[10px] px-2.5 py-1 rounded-full font-outfit"
+                                                        style={{ background: `${bsColor}12`, border: `1px solid ${bsColor}25`, color: `${bsColor}cc` }}>
+                                                        {item.kategorija || '—'}
+                                                    </span>
+                                                </TableCell>
+                                                {/* Cena */}
+                                                <TableCell className="text-center">
+                                                    {item.cena ? (
+                                                        <span className="text-white font-bold font-mono text-sm">
+                                                            {item.cena.toLocaleString('sr-RS')} <span className="text-zinc-600 text-[10px] font-normal">RSD</span>
+                                                        </span>
+                                                    ) : (
+                                                        <span className="text-zinc-600 text-xs">—</span>
+                                                    )}
+                                                </TableCell>
+                                                {/* Dostupnost */}
+                                                <TableCell className="text-center">
+                                                    {item.status === 'Aktivan'
+                                                        ? <Badge className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border" style={{ background: `${bsColor}12`, color: bsColor, borderColor: `${bsColor}25` }}>Dostupno</Badge>
+                                                        : <Badge className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest bg-red-500/10 text-red-400 border border-red-500/15">Nema na stanju</Badge>
+                                                    }
+                                                </TableCell>
+                                                {/* Link */}
+                                                <TableCell className="text-right pr-8">
+                                                    {item.url && (
+                                                        <a href={item.url} target="_blank" rel="noopener noreferrer"
+                                                            className="inline-flex items-center gap-1.5 text-xs text-zinc-500 transition-colors font-outfit opacity-0 group-hover:opacity-100"
+                                                            onMouseEnter={e => (e.currentTarget.style.color = bsColor)}
+                                                            onMouseLeave={e => (e.currentTarget.style.color = '')}>
+                                                            <ExternalLink className="w-3.5 h-3.5" />
+                                                            Otvori
+                                                        </a>
+                                                    )}
+                                                </TableCell>
+                                            </>
+                                        ) : isHarmonija ? (
                                             <>
                                                 {/* Book cover swatch */}
                                                 <TableCell className="py-5 pl-8 w-16">

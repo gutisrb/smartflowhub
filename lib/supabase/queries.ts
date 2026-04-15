@@ -222,6 +222,30 @@ export async function getCrmStelaByClientId(clientId: string) {
     return data
 }
 
+// Aleksandar MN — Product catalog
+export async function getProizvodiByClientId(clientId: string) {
+    const supabase = createClient()
+    const { data, error } = await supabase
+        .from('proizvodi')
+        .select('*')
+        .eq('client_id', clientId)
+        .order('naziv', { ascending: true })
+    if (error) { console.error('Error fetching proizvodi:', error); return [] }
+    return data
+}
+
+// Aleksandar MN — CRM
+export async function getCrmAleksandarMNByClientId(clientId: string) {
+    const supabase = createClient()
+    const { data, error } = await supabase
+        .from('crm_aleksandarmn')
+        .select('*')
+        .eq('client_id', clientId)
+        .order('created_at', { ascending: false })
+    if (error) { console.error('Error fetching crm_aleksandarmn:', error); return [] }
+    return data
+}
+
 // Module Management
 export async function getClientModules(clientId: string) {
     const supabase = createClient()

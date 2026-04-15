@@ -5,7 +5,7 @@ import { ChevronRight, UserCircle, Database, LayoutDashboard, Zap, BarChart3, Se
 import { useState, useMemo } from "react"
 import { useUnifiedModules } from "@/lib/modules/hooks"
 import { EnabledModule, ModuleCategory, ModuleKey } from "@/lib/modules/types"
-import { BookStoreConfig } from "@/lib/bookstore-clients"
+import { BookStoreConfig, getBookStoreConfig } from "@/lib/bookstore-clients"
 import { BrandSwitcherSidebar } from "@/components/dashboard/brand-switcher"
 
 interface BrandEntry {
@@ -55,6 +55,7 @@ export function Sidebar({
 
   const modules = propModules || hookModules
   const loading = propLoading !== undefined ? propLoading : hookLoading
+  const bookStoreConfig = getBookStoreConfig(clientId)
 
   const [expandedCategories, setExpandedCategories] = useState<Set<ModuleCategory>>(
     new Set(['acquisition', 'fulfillment', 'analytics', 'settings'])
@@ -144,8 +145,12 @@ export function Sidebar({
                 <div className="absolute -top-1 -right-1 w-3 h-3 bg-emerald border-2 border-obsidian rounded-full animate-pulse" />
               </div>
               <div className="flex flex-col">
-                <span className="text-xs font-bold text-emerald uppercase tracking-[0.2em] leading-none mb-1">Smartflow</span>
-                <span className="text-lg md:text-xl font-outfit font-medium text-silver tracking-tight leading-none group-hover:text-white transition-colors">Dashboard</span>
+                <span className="text-xs font-bold text-emerald uppercase tracking-[0.2em] leading-none mb-1">
+                  {bookStoreConfig ? "Powered by" : "Smartflow"}
+                </span>
+                <span className="text-lg md:text-xl font-outfit font-medium text-silver tracking-tight leading-none group-hover:text-white transition-colors">
+                  {bookStoreConfig ? bookStoreConfig.brandName : "Dashboard"}
+                </span>
               </div>
             </div>
             {onClose && (

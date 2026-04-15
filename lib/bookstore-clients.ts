@@ -12,38 +12,79 @@ export interface BookStoreConfig {
     color?: string            // Accent color for brand switcher
     websiteUrl: string        // Domain (no protocol) for display + links
     instagramHandle: string   // Instagram handle incl. @
+    /** 'knjige' = book catalog (naslov/autor/kategorije[]); 'proizvodi' = product catalog (naziv/brend/kategorija/cena) */
+    tableType: 'knjige' | 'proizvodi'
+    /** Singular item label shown in UI, e.g. "Knjiga" or "Proizvod" */
+    catalogItemLabel: string
+    /** Plural count label, e.g. "naslova" or "proizvoda" */
+    catalogItemsLabel: string
+    /** CRM "tema" column label, e.g. "Kategorija" or "Zdravstveni cilj" */
+    crmTemaLabel: string
+    /** CRM "knjiga/proizvod" column label, e.g. "Knjiga" or "Proizvod" */
+    crmProizvodLabel: string
 }
 
 export const BOOK_STORE_CLIENTS: Record<string, BookStoreConfig> = {
     // Harmonija Knjige
     "255db627-c62b-44ce-a9dc-3a7e90dd1b67": {
-        crmTable:        "crm_harmonija",
-        brandName:       "Harmonija Knjige",
-        catalogLabel:    "Knjige",
-        crmLabel:        "CRM",
-        color:           "#10b981",  // emerald
-        websiteUrl:      "harmonijaknjige.rs",
-        instagramHandle: "@harmonija_knjige",
+        crmTable:          "crm_harmonija",
+        brandName:         "Harmonija Knjige",
+        catalogLabel:      "Knjige",
+        crmLabel:          "CRM",
+        color:             "#10b981",
+        websiteUrl:        "harmonijaknjige.rs",
+        instagramHandle:   "@harmonija_knjige",
+        tableType:         "knjige",
+        catalogItemLabel:  "Knjiga",
+        catalogItemsLabel: "naslova",
+        crmTemaLabel:      "Kategorija",
+        crmProizvodLabel:  "Knjiga",
     },
     // Publik Praktikum
     "bd12eb98-e62a-4a87-b620-a9881081449b": {
-        crmTable:        "crm_publik",
-        brandName:       "Publik Praktikum",
-        catalogLabel:    "Knjige",
-        crmLabel:        "CRM",
-        color:           "#f59e0b",  // amber
-        websiteUrl:      "publikpraktikum.rs",
-        instagramHandle: "@publikpraktikum",
+        crmTable:          "crm_publik",
+        brandName:         "Publik Praktikum",
+        catalogLabel:      "Knjige",
+        crmLabel:          "CRM",
+        color:             "#f59e0b",
+        websiteUrl:        "publikpraktikum.rs",
+        instagramHandle:   "@publikpraktikum",
+        tableType:         "knjige",
+        catalogItemLabel:  "Knjiga",
+        catalogItemsLabel: "naslova",
+        crmTemaLabel:      "Kategorija",
+        crmProizvodLabel:  "Knjiga",
     },
     // Stela Knjige
     "d7337d00-db70-46c3-828b-e9ac82e21717": {
-        crmTable:        "crm_stela",
-        brandName:       "Stela Knjige",
-        catalogLabel:    "Knjige",
-        crmLabel:        "CRM",
-        color:           "#a78bfa",  // violet
-        websiteUrl:      "stelaknjige.rs",
-        instagramHandle: "@stela_knjige",
+        crmTable:          "crm_stela",
+        brandName:         "Stela Knjige",
+        catalogLabel:      "Knjige",
+        crmLabel:          "CRM",
+        color:             "#a78bfa",
+        websiteUrl:        "stelaknjige.rs",
+        instagramHandle:   "@stela_knjige",
+        tableType:         "knjige",
+        catalogItemLabel:  "Knjiga",
+        catalogItemsLabel: "naslova",
+        crmTemaLabel:      "Kategorija",
+        crmProizvodLabel:  "Knjiga",
+    },
+    // Aleksandar MN — Prevencija i Terapija
+    // ⚠ UUID below is a placeholder — replace with real UUID from clients table after Supabase insert
+    "3255f279-801c-474b-9c16-a75edc336296": {
+        crmTable:          "crm_aleksandarmn",
+        brandName:         "Aleksandar MN",
+        catalogLabel:      "Proizvodi",
+        crmLabel:          "Kupci",
+        color:             "#3b82f6",  // blue
+        websiteUrl:        "aleksandarmn.com",
+        instagramHandle:   "@aleksandar.mn",
+        tableType:         "proizvodi",
+        catalogItemLabel:  "Proizvod",
+        catalogItemsLabel: "proizvoda",
+        crmTemaLabel:      "Zdravstveni cilj",
+        crmProizvodLabel:  "Proizvod",
     },
 }
 

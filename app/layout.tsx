@@ -8,7 +8,7 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
-  title: "Growth Dashboard | SmartFlow AI",
+  title: "SmartFlow Client Dashboard",
   description: "AI-Powered Lead Acquisition & CRM Unified Dashboard",
 };
 

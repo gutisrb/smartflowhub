@@ -41,18 +41,19 @@ function loadEnv() {
 loadEnv();
 
 // ── Config ────────────────────────────────────────────────────────────────────
-const APIFY_TOKEN      = process.env.APIFY_TOKEN;
-const FB_ADS_ACTOR     = 'XtaWFhbtfxyzqrFmd';
-const IG_PROFILE_ACTOR = 'dSCLg0C3YEZ83HzYX';
+const APIFY_TOKEN        = process.env.APIFY_TOKEN;
+const FB_ADS_ACTOR       = 'XtaWFhbtfxyzqrFmd';
+const SCRAPECREATORS_KEY = process.env.SC_API_KEY || process.env.SCRAPECREATORS_KEY;
 
 const SUPABASE_URL   = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SERVICE_KEY    = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const SMARTFLOW_ID   = '69acf7e9-557e-4ca3-85bd-a785ef39e351';
 const HUNTER_KEY     = process.env.HUNTER_API_KEY;
 
-// q=na: "na" is the most common Serbian preposition (appears in virtually all business ads).
-// This is as broad as possible — approximates the no-query run that produced the April 7 batch.
-const ADS_LIBRARY_URL = 'https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=RS&media_type=video&q=';
+// Broad neutral queries — top words from the April 7 no-query batch (91%, 79%, 51%, 47% hit rate).
+// Multiple URLs passed to Apify in one run; deduplicated by page_id in Stage 2.
+const ADS_BASE_URL = 'https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=RS&media_type=video';
+const ADS_QUERIES  = ['bez', 'koji', 'sve', 'koja'];  // "without", "who/which(m)", "all", "who/which(f)"
 
 const isLocal   = process.argv.includes('--local');   // read from local JSON files, skip Apify Stage 1
 const isTest    = process.argv.includes('--test');    // no DB writes
@@ -361,6 +362,27 @@ async function runApify(actorId, input, label, maxItems, maxCharge = 0.50) {
 
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
+// ── ScrapeCreators: fetch a single IG profile ─────────────────────────────────
+async function scrapeCreatorsProfile(handle) {
+  try {
+    const res = await fetch(
+      `https://api.scrapecreators.com/v1/instagram/profile?handle=${encodeURIComponent(handle)}`,
+      { headers: { 'x-api-key': SCRAPECREATORS_KEY }, signal: AbortSignal.timeout(15000) }
+    );
+    if (!res.ok) return null;
+    const json = await res.json();
+    const u = json?.data?.user;
+    if (!u) return null;
+    return {
+      username      : u.username || handle,
+      followersCount: u.edge_followed_by?.count ?? 0,
+      externalUrl   : u.external_url || null,
+      biography     : u.biography   || null,
+      isVerified    : u.is_verified  || false,
+    };
+  } catch { return null; }
+}
+
 // ── Load local dataset files ──────────────────────────────────────────────────
 function loadLocalDatasets() {
   const files = readdirSync(LOCAL_DATASETS_DIR)
@@ -418,7 +440,7 @@ async function main() {
     console.log('─── Stage 1: FB Ads Library via Apify ──────────────────');
     rawItems = await runApify(
       FB_ADS_ACTOR,
-      { urls: [{ url: ADS_LIBRARY_URL }] },
+      { urls: ADS_QUERIES.map(q => ({ url: `${ADS_BASE_URL}&q=${encodeURIComponent(q)}` })) },
       'FB Ads Library',
       RAW_LIMIT,
       MAX_CHARGE,
@@ -531,30 +553,26 @@ async function main() {
   const noHandleLeads = qualified.filter(l => !l.igHandle);
   console.log(`  Handle candidates: ${withHandles.length}/${qualified.length} (${noHandleLeads.length} have numeric FB IDs — no slug available)\n`);
 
-  // ── Stage 4: Apify IG Profile Scraper — confirm handles + get externalUrl ────
+  // ── Stage 4: ScrapeCreators IG Profile — confirm handles + get externalUrl ──
   // Key insight: the IG profile's externalUrl IS the business website (same as April 7 batch).
   // We confirm which slug guesses are real AND get the domain for free.
-  console.log('─── Stage 4: Apify IG Profile Scraper (confirm + website) ─');
+  console.log('─── Stage 4: ScrapeCreators IG Profile (confirm + website) ─');
 
   const uniqueHandles = [...new Set(withHandles.map(l => l.igHandle))];
-  console.log(`  Submitting ${uniqueHandles.length} handle candidates to Apify...`);
-
-  let igProfiles = [];
-  try {
-    igProfiles = await runApify(
-      IG_PROFILE_ACTOR,
-      { usernames: uniqueHandles },
-      'IG Profile Scraper',
-      uniqueHandles.length,
-      0.50,
-    );
-  } catch (err) {
-    console.warn(`  ⚠ IG Profile Scraper failed: ${err.message}`);
-  }
+  console.log(`  Fetching ${uniqueHandles.length} profiles via ScrapeCreators...`);
 
   const profileByHandle = new Map();
-  for (const p of igProfiles) {
-    if (p.username) profileByHandle.set(p.username.toLowerCase(), p);
+  for (let i = 0; i < uniqueHandles.length; i++) {
+    const handle = uniqueHandles[i];
+    process.stdout.write(`  [${i+1}/${uniqueHandles.length}] @${handle}... `);
+    const profile = await scrapeCreatorsProfile(handle);
+    if (profile) {
+      profileByHandle.set(handle.toLowerCase(), profile);
+      console.log(`${(profile.followersCount/1000).toFixed(1)}k followers`);
+    } else {
+      console.log('not found');
+    }
+    if (i < uniqueHandles.length - 1) await sleep(300);
   }
 
   // Attach confirmed profile data to leads; unconfirmed slug guesses = mark invalid
