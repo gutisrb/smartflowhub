@@ -50,14 +50,23 @@ const SERVICE_KEY    = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const SMARTFLOW_ID   = '69acf7e9-557e-4ca3-85bd-a785ef39e351';
 const HUNTER_KEY     = process.env.HUNTER_API_KEY;
 
-// Broad neutral queries — top words from the April 7 no-query batch (91%, 79%, 51%, 47% hit rate).
-// Multiple URLs passed to Apify in one run; deduplicated by page_id in Stage 2.
+// DM-signal queries: businesses that advertise their inbox as the sales channel are
+// literally describing the problem SmartFlow solves. "poruku/inbox/pišite/javite" catch
+// any industry that uses DMs for sales — completely niche-agnostic.
+// "iskustvo" (experience) is the vague broad catch-all — service-coded, appears in clinics,
+// travel, events, renovation, hospitality across all industries, but rarely in webshop copy.
+// The 20k+ follower gate in Stage 4 handles filtering out small retailers and webshops.
+// Markets: RS = Serbia (primary), BA = Bosnia, HR = Croatia — all same language, untapped
+const ADS_COUNTRIES = ['RS', 'BA', 'HR'];
 const ADS_BASE_URL = 'https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=RS&media_type=video';
-const ADS_QUERIES  = ['bez', 'koji', 'sve', 'koja'];  // "without", "who/which(m)", "all", "who/which(f)"
+// Queries rotate to avoid re-pulling same inventory. Broad service-booking CTAs only.
+// 'informišite' returns < 10 results — dropped. Replaced with 'uputite' and 'naručite'.
+const ADS_QUERIES  = ['zakažite', 'rezervišite', 'pozovite', 'prijavite', 'kontaktirajte', 'naručite'];
 
-const isLocal   = process.argv.includes('--local');   // read from local JSON files, skip Apify Stage 1
-const isTest    = process.argv.includes('--test');    // no DB writes
-const isYes     = process.argv.includes('--yes');     // live Apify run
+const isLocal    = process.argv.includes('--local');      // read from local JSON files, skip Apify Stage 1
+const isTest     = process.argv.includes('--test');       // no DB writes
+const isYes      = process.argv.includes('--yes');        // live Apify run
+const isFindOnly = process.argv.includes('--find-only'); // stop after Stage 4, no enrich/insert
 const limitIdx  = process.argv.indexOf('--limit');
 const budgetIdx = process.argv.indexOf('--budget');
 const LIMIT     = limitIdx  !== -1 ? parseInt(process.argv[limitIdx  + 1]) : Infinity;
@@ -74,15 +83,17 @@ const MAX_CHARGE = isTest ? 0.15 : (BUDGET_USD ? BUDGET_USD + 0.05 : 2.00); // +
 const LOCAL_DATASETS_DIR = resolve(__dirname, '..');  // photonic-lunar/
 const LOCAL_DATASET_GLOB = 'dataset_facebook-ads-library-scraper_';
 
-// Minimum IG followers to qualify a lead
+// IG follower gates — anything outside this range is either too small or a mega-corp
 const MIN_FOLLOWERS = 20000;
+const MAX_FOLLOWERS = 200000;  // cap at 200k — above this are large corps with dedicated CS teams
 
 // ── D2C retail & irrelevant exclusion ─────────────────────────────────────────
 // Anything that sells physical products, media, or has no service DM use-case
 const EXCLUDE_CATS = new Set([
   // Apparel / fashion
   'Clothing (Brand)', 'Boutique store', 'Fashion designer', 'Fashion & beauty',
-  "Women's Clothing", "Men's Clothing", 'Clothing store',
+  "Women's Clothing", "Men's Clothing", 'Clothing store', 'Apparel & Clothing',
+  'Apparel', 'Clothing',
   // Accessories / beauty
   'Jewelry/watches', 'Jewelry', 'Jewelry & Watches', 'Eyewear',
   'Cosmetics store', 'Beauty, cosmetics & personal care',
@@ -98,21 +109,56 @@ const EXCLUDE_CATS = new Set([
   'Phone/Tablet', 'Electronics', 'Computer store', 'Video Games',
   // Health products (not services)
   'Vitamins/supplements', 'Supplement store', 'Health food store',
+  // Cosmetics / perfume retail (D2C)
+  'Health & Beauty', 'Health/beauty',
+  // Food & beverage brands (FMCG corporations + food producers — not restaurants)
+  'Food & beverage company', 'Beverage company', 'Food company',
+  // Books / publishing
+  'Books', 'Book series',
   // Media / entertainment
   'Personal blog', 'Public figure', 'Artist', 'Musician/band', 'Magazine',
   'Media/news company', 'Entertainment website', 'TV channel',
+  // Banking / financial services (can't benefit — no social media inquiry flow)
+  'Bank', 'Banking', 'Financial institution', 'Financial services',
+  'Insurance company', 'Insurance broker', 'Credit union', 'Savings institution',
+  'Mortgage brokers', 'Investment management',
+  // Non-profit / charity / government (no sales motion)
+  'Nonprofit organization', 'Non-profit organization', 'Charity organization',
+  'Charity', 'Government organization', 'Public & government service',
+  'Public utility', 'Religious organization', 'Political party',
+  // Personal brands / lifestyle coaching (not a business with inquiry volume)
+  'Dating Service', 'Life Coach', 'Coach', 'Motivational speaker',
+  'Personal coaching',
+  // Large corporate retail / delivery platforms (already have CS infrastructure)
+  'Department store', 'Superstore', 'Delivery service', 'Food delivery service',
+  'Pharmacy', 'Drug store', 'Drugstore', 'Discount store',
   // Other pure D2C
   'Interest', 'Sports team',
 ]);
+
+// Page name keyword blacklist — catches retail/personal brands that slipped past category filter
+const EXCLUDE_NAME_KEYWORDS = /\b(majice|majic|cipelice|cipela|cipele|obuća|obuca|kiflice|kiflic|torte|haljine|suknje|bluze|jakne|kaputi|šminke|sminke|nakit|parfem|parfemi|podkast|podcast|fondacija|fondacij|humanitar|zaklada|blog|kanal|kreator|otkriva|otkrivamo|istraž|dobrotvorn|volonter|donacij)\b/i;
+
+function isExcludedByName(pageName) {
+  return EXCLUDE_NAME_KEYWORDS.test(pageName || '');
+}
 
 const SOCIAL = new Set([
   'instagram.com', 'facebook.com', 'fb.me', 'fb.com', 'm.facebook.com',
   'bit.ly', 'linktr.ee', 'linktree.com', 'youtube.com', 'tiktok.com', 'wa.me',
 ]);
 
+// Ad-network / tracking domains — if this is the link_url, the page isn't a real direct advertiser
+const AD_NETWORK_DOMAINS = new Set([
+  'ad.doubleclick.net', 'doubleclick.net', 'googleadservices.com', 'googlesyndication.com',
+  'ads.google.com',
+]);
+
 // ── IG handle validation ──────────────────────────────────────────────────────
-const TLDS    = new Set(['com','rs','eu','net','org','io','co','biz','info','hr','ba','si','me','de','fr','uk','it','png','jpg','svg','gif','webp','pdf']);
-const IG_SKIP = new Set(['p','reel','explore','accounts','stories','tv','reels','direct','sharedData','share','privacy','legal','about','blog','help','press','api','static','cdn']);
+const TLDS    = new Set(['com','rs','eu','net','org','io','co','biz','info','hr','ba','si','me','de','fr','uk','it','png','jpg','svg','gif','webp','pdf','php','js','css','html','htm','xml','json']);
+// Known platform/brand slugs that will never be a real Serbian business IG handle
+const IG_SKIP = new Set(['p','reel','explore','accounts','stories','tv','reels','direct','sharedData','share','privacy','legal','about','blog','help','press','api','static','cdn',
+  'google','shopify','facebook','youtube','instagram','twitter','tiktok','linkedin','meta','pinterest','snapchat','whatsapp']);
 
 function isValidIgHandle(h) {
   if (!h || h.length < 2 || h.length > 30) return false;
@@ -130,10 +176,10 @@ function isValidIgHandle(h) {
 const SERBIAN_WORDS = /\b(srbija|beograd|novi sad|niš|kragujevac|subotica|dinar|dinara|dostava|besplatna|porudžbina|usluga|popust|akcija|zakazivanje|termin|naručite|kupite|pogledajte|saznajte|pratite|pratilaca|ponuda|cena|cene|kontakt|telefon|adresa|radno vreme|radi|radimo|otvoreno)\b/i;
 
 function isSerbianBusiness(texts, linkUrls, fbPageUri) {
-  // .rs domain in any URL = Serbian business
+  // .rs / .ba / .hr domain in any URL = regional business (Serbia, Bosnia, Croatia)
   const allUrls = [...linkUrls, fbPageUri || ''];
   for (const url of allUrls) {
-    if (url && /\.rs(\/|$)/i.test(url)) return true;
+    if (url && /\.(rs|ba|hr)(\/|$)/i.test(url)) return true;
   }
   // Serbian-specific vocabulary in ad copy
   const combined = texts.join(' ');
@@ -208,6 +254,24 @@ async function findIgOnWebsite(domain) {
       }
     } catch {}
   }
+  return null;
+}
+
+// ── Firecrawl website scrape for IG handle (JS-rendered pages) ───────────────
+// Fallback when raw HTML fetch misses handles in React/Vue footers
+async function findIgWithFirecrawl(domain) {
+  const url = `https://${domain}`;
+  try {
+    const { stdout } = await execFileAsync('firecrawl', [
+      'scrape', '--url', url, '--format', 'markdown',
+    ], { timeout: 15000 });
+    if (!stdout) return null;
+    const matches = [...stdout.matchAll(/instagram\.com\/([a-zA-Z0-9._]{2,30})\/?/g)];
+    for (const m of matches) {
+      const handle = m[1].replace(/\/$/, '');
+      if (isValidIgHandle(handle)) return handle;
+    }
+  } catch {}
   return null;
 }
 
@@ -304,10 +368,11 @@ async function checkApifyBalance() {
   const data = await res.json();
   const plan = data?.data?.plan || {};
   const used = data?.data?.monthlyUsage?.totalCostUsd ?? 0;
-  const limit = plan.monthlyUsageCreditsUsd ?? 0;
+  // FREE plan may store limit under different field — default to $5 if missing/zero
+  const limit = plan.monthlyUsageCreditsUsd || plan.maxMonthlyUsageUsd || 5;
   const remaining = limit - used;
   console.log(`  💰 Apify balance: $${remaining.toFixed(3)} remaining (used $${used.toFixed(3)} of $${limit})`);
-  if (remaining < 1.00) throw new Error(`Apify balance too low ($${remaining.toFixed(3)} < $1.00 minimum). Top up first.`);
+  if (remaining < 0.25) throw new Error(`Apify balance too low ($${remaining.toFixed(3)} < $0.25 minimum). Top up first.`);
   return remaining;
 }
 
@@ -321,7 +386,9 @@ async function runApify(actorId, input, label, maxItems, maxCharge = 0.50) {
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ...input, maxTotalChargeUsd: maxCharge }),
+      // NOTE: do NOT pass maxTotalChargeUsd — the Apify monthly hard limit check rejects explicit values.
+      // maxItems is the cost cap for PPE actors (items × $0.00075). That's sufficient.
+      body: JSON.stringify(input),
     }
   );
   const data = await res.json();
@@ -420,15 +487,17 @@ async function main() {
     process.exit(1);
   }
 
-  // Load existing page IDs from DB (always — even in test, so filter shows what's already there)
-  let existingPageIds = new Set();
-  const res = await fetch(
-    `${SUPABASE_URL}/rest/v1/contacts?select=facebook_page_id&client_id=eq.${SMARTFLOW_ID}&facebook_page_id=not.is.null`,
+  // Load existing contacts for dedup — by page_id, email, and IG handle
+  const existingRes = await fetch(
+    `${SUPABASE_URL}/rest/v1/contacts?select=facebook_page_id,email,instagram_handle,status,kategorija&client_id=eq.${SMARTFLOW_ID}`,
     { headers: { apikey: SERVICE_KEY, Authorization: `Bearer ${SERVICE_KEY}` } }
   );
-  const existing = await res.json();
-  existingPageIds = new Set((existing || []).map(r => String(r.facebook_page_id)));
-  console.log(`Existing in DB: ${existingPageIds.size}\n`);
+  const existingAll = await existingRes.json() || [];
+  const existingPageIds   = new Set(existingAll.filter(r => r.facebook_page_id).map(r => String(r.facebook_page_id)));
+  // Only block on email/IG if already contacted or disqualified — don't block enriched duplicates that haven't been sent yet
+  const contactedEmails   = new Set(existingAll.filter(r => ['Kontaktiran','Disqualified','Follow Up','Odgovorio','Zakazan Sastanak'].includes(r.status)).map(r => r.email?.toLowerCase()).filter(Boolean));
+  const contactedHandles  = new Set(existingAll.filter(r => ['Kontaktiran','Disqualified','Follow Up','Odgovorio','Zakazan Sastanak'].includes(r.status)).map(r => r.instagram_handle?.toLowerCase()).filter(Boolean));
+  console.log(`Existing in DB: ${existingPageIds.size} page IDs | ${contactedEmails.size} contacted emails | ${contactedHandles.size} contacted handles\n`);
 
   // ── Stage 1: Load raw ads ─────────────────────────────────────────────────────
   let rawItems;
@@ -438,14 +507,37 @@ async function main() {
     console.log(`  Total raw records: ${rawItems.length}\n`);
   } else {
     console.log('─── Stage 1: FB Ads Library via Apify ──────────────────');
-    rawItems = await runApify(
-      FB_ADS_ACTOR,
-      { urls: ADS_QUERIES.map(q => ({ url: `${ADS_BASE_URL}&q=${encodeURIComponent(q)}` })) },
-      'FB Ads Library',
-      RAW_LIMIT,
-      MAX_CHARGE,
-    );
-    console.log(`  Raw records: ${rawItems.length}\n`);
+    // Build URLs across all target countries × all queries
+    const urlsToScrape = [];
+    for (const country of ADS_COUNTRIES) {
+      const base = ADS_BASE_URL.replace('country=RS', `country=${country}`);
+      for (const q of ADS_QUERIES) {
+        urlsToScrape.push({ url: `${base}&q=${encodeURIComponent(q)}`, country, q });
+      }
+    }
+    const numBatches    = urlsToScrape.length;
+    const perBatch      = Math.ceil(RAW_LIMIT / numBatches);
+    const chargePerBatch = parseFloat(Math.min(MAX_CHARGE / numBatches + 0.02, 0.30).toFixed(2));
+    console.log(`  ${numBatches} batch(es) × up to ${perBatch} records, $${chargePerBatch} cap each\n`);
+    const allRawItems = [];
+    for (const urlObj of urlsToScrape) {
+      const label = `FB Ads [${urlObj.country}·q=${urlObj.q}]`;
+      const items = await runApify(
+        FB_ADS_ACTOR,
+        {
+          urls: [{ url: urlObj.url }],
+          'scrapePageAds.countryCode': urlObj.country,
+          'scrapePageAds.activeStatus': 'active',
+          'scrapePageAds.sortBy': 'impressions_desc',
+        },
+        label,
+        perBatch,
+        chargePerBatch,
+      );
+      allRawItems.push(...items);
+    }
+    rawItems = allRawItems;
+    console.log(`\n  Raw records (all batches): ${rawItems.length}\n`);
   }
 
   // ── Stage 2: Post-filter ──────────────────────────────────────────────────────
@@ -467,21 +559,29 @@ async function main() {
   console.log(`  Unique pages: ${byPage.size}`);
 
   const qualified = [];
-  const dbg = { db: 0, noIG: 0, fewAds: 0, noSerbian: 0, tooSmall: 0, tooBig: 0, person: 0, retail: 0, passed: 0 };
+  const dbg = { db: 0, noIG: 0, fewAds: 0, noSerbian: 0, person: 0, retail: 0, adNetwork: 0, passed: 0 };
 
   for (const [pid, { item, adCopies, count }] of byPage) {
     const snap = item.snapshot || {};
     const likes = snap.page_like_count || 0;
     const cats  = snap.page_categories || [];
     const platforms = item.publisher_platform || [];
+    const pageName = snap.page_name || item.page_name || '';
 
     if (existingPageIds.has(pid))                         { dbg.db++;        continue; }
     if (snap.page_entity_type === 'PERSON_PROFILE')       { dbg.person++;    continue; }
     if (!platforms.includes('INSTAGRAM'))                  { dbg.noIG++;      continue; }
-    if (count < 3)                                         { dbg.fewAds++;    continue; }
-    if (likes < 500)                                       { dbg.tooSmall++;  continue; }
-    if (likes > 500000)                                    { dbg.tooBig++;    continue; }
+    if (count < 1)                                         { dbg.fewAds++;    continue; }
+    // No FB likes filter — FB and IG audiences are independent. A business can have 300 FB likes
+    // and 80k IG followers. The 20k IG follower gate lives in Stage 4 where we actually know it.
+    // Skip ads whose link goes to an ad-network domain — not a real direct advertiser
+    try {
+      const linkHost = snap.link_url ? new URL(snap.link_url).hostname : '';
+      if (AD_NETWORK_DOMAINS.has(linkHost))               { dbg.adNetwork++; continue; }
+    } catch {}
     if (cats.some(c => EXCLUDE_CATS.has(c)))               { dbg.retail++;    continue; }
+    // Name-based keyword filter — catches retail/personal brands with generic FB categories
+    if (isExcludedByName(pageName))                        { dbg.retail++;    continue; }
 
     // Serbian business check — requires .rs domain or Serbian-specific vocabulary
     const linkUrls = [snap.link_url, snap.caption].filter(Boolean);
@@ -495,11 +595,11 @@ async function main() {
 
   console.log(`  Already in DB    : ${dbg.db}`);
   console.log(`  No Instagram     : ${dbg.noIG}`);
-  console.log(`  < 3 ads          : ${dbg.fewAds}`);
+  console.log(`  < 1 ad           : ${dbg.fewAds}`);
   console.log(`  Not Serbian      : ${dbg.noSerbian}`);
-  console.log(`  Likes out range  : ${dbg.tooSmall + dbg.tooBig}`);
   console.log(`  Person profile   : ${dbg.person}`);
   console.log(`  D2C retail       : ${dbg.retail}`);
+  console.log(`  Ad network       : ${dbg.adNetwork}`);
   console.log(`  Qualified        : ${dbg.passed} → processing all ${qualified.length} (DB limit: ${LIMIT})\n`);
 
   if (!qualified.length) { console.log('No qualified leads found.'); return; }
@@ -529,9 +629,12 @@ async function main() {
       lead.domain = domainFromAdCopies(lead.adCopies);
     }
 
-    // 3d. If domain found: raw HTML scrape for IG link
+    // 3d. If domain found: raw HTML scrape first, then Firecrawl fallback for JS-rendered sites
     if (lead.domain && !lead.igHandle) {
       lead.igHandle = await findIgOnWebsite(lead.domain);
+    }
+    if (lead.domain && !lead.igHandle) {
+      lead.igHandle = await findIgWithFirecrawl(lead.domain);
     }
 
     // 3e. FB page slug as IG handle candidate — Serbian businesses use same handle on both platforms.
@@ -553,26 +656,35 @@ async function main() {
   const noHandleLeads = qualified.filter(l => !l.igHandle);
   console.log(`  Handle candidates: ${withHandles.length}/${qualified.length} (${noHandleLeads.length} have numeric FB IDs — no slug available)\n`);
 
-  // ── Stage 4: ScrapeCreators IG Profile — confirm handles + get externalUrl ──
-  // Key insight: the IG profile's externalUrl IS the business website (same as April 7 batch).
-  // We confirm which slug guesses are real AND get the domain for free.
-  console.log('─── Stage 4: ScrapeCreators IG Profile (confirm + website) ─');
+  // ── Stage 4: Apify IG Profile Scraper — confirm handles + follower count ──────
+  // Batch call: one run for all handles. ~$0.005/profile, capped at 60 profiles ($0.30 max).
+  console.log('─── Stage 4: Apify IG Profile Scraper (batch) ──────────────');
 
-  const uniqueHandles = [...new Set(withHandles.map(l => l.igHandle))];
-  console.log(`  Fetching ${uniqueHandles.length} profiles via ScrapeCreators...`);
+  const IG_PROFILE_ACTOR = 'dSCLg0C3YEZ83HzYX';
+  // Pre-filter: only verify handles for pages with ≥ 1500 FB likes OR unknown likes.
+  // Pages with < 1500 FB likes almost never reach 20k IG followers — skip them to save ~$0.70/run.
+  const FB_LIKES_MIN_FOR_IG = 1500;
+  const igCandidates = withHandles.filter(l => {
+    const likes = l.item.snapshot?.page_like_count || 0;
+    return likes === 0 || likes >= FB_LIKES_MIN_FOR_IG; // 0 = unknown, include
+  });
+
+  const uniqueHandles = [...new Set(igCandidates.map(l => l.igHandle))];
+  console.log(`  Verifying ${uniqueHandles.length} handles (FB likes ≥ ${FB_LIKES_MIN_FOR_IG} or unknown, filtered from ${withHandles.length})...`);
 
   const profileByHandle = new Map();
-  for (let i = 0; i < uniqueHandles.length; i++) {
-    const handle = uniqueHandles[i];
-    process.stdout.write(`  [${i+1}/${uniqueHandles.length}] @${handle}... `);
-    const profile = await scrapeCreatorsProfile(handle);
-    if (profile) {
-      profileByHandle.set(handle.toLowerCase(), profile);
-      console.log(`${(profile.followersCount/1000).toFixed(1)}k followers`);
-    } else {
-      console.log('not found');
+  if (uniqueHandles.length > 0) {
+    const igItems = await runApify(
+      IG_PROFILE_ACTOR,
+      { usernames: uniqueHandles },
+      'IG Profile Scraper',
+      uniqueHandles.length,
+      parseFloat((uniqueHandles.length * 0.006).toFixed(2)), // $0.006/profile headroom
+    );
+    for (const p of igItems) {
+      if (p.username) profileByHandle.set(p.username.toLowerCase(), p);
     }
-    if (i < uniqueHandles.length - 1) await sleep(300);
+    console.log(`  Profiles returned: ${igItems.length}`);
   }
 
   // Attach confirmed profile data to leads; unconfirmed slug guesses = mark invalid
@@ -602,12 +714,10 @@ async function main() {
     }
   }
 
-  // Gate: keep only leads with confirmed ≥ 20k IG followers OR (no handle + FB likes ≥ 20k proxy)
+  // Gate: 20k–500k followers. Confirmed IG data wins; FB likes used as proxy if no IG handle.
   const toEnrich = qualified.filter(lead => {
-    if (lead.igFollowers != null) return lead.igFollowers >= MIN_FOLLOWERS;
-    // No IG handle — use FB page likes as proxy
-    const likes = lead.item.snapshot?.page_like_count || 0;
-    return likes >= MIN_FOLLOWERS;
+    const followers = lead.igFollowers ?? (lead.item.snapshot?.page_like_count || 0);
+    return followers >= MIN_FOLLOWERS && followers <= MAX_FOLLOWERS;
   });
   const skippedLowFollowers = qualified.length - toEnrich.length;
 
@@ -617,10 +727,29 @@ async function main() {
   console.log(`  Domain from externalUrl: ${qualified.filter(l => l.domain && l.igProfile?.externalUrl).length}`);
   console.log(`  Proceeding with ${toEnrich.length} leads (${MIN_FOLLOWERS/1000}k+ filter applied)\n`);
 
-  // ── Stage 5: Email enrichment ─────────────────────────────────────────────────
-  console.log(`─── Stage 5: Email enrichment (${toEnrich.length} leads) ──────────`);
+  // ── --find-only: print leads, then fall through to DB insert (status = No Draft)
+  if (isFindOnly) {
+    console.log('═══════════════════════════════════════════════════════════');
+    console.log('  Leads found (inserting to DB as No Draft — skipping email enrichment):');
+    console.log('═══════════════════════════════════════════════════════════');
+    toEnrich.forEach((l, i) => {
+      const followers = ((l.igFollowers ?? l.item.snapshot?.page_like_count ?? 0) / 1000).toFixed(1);
+      const name = (l.item.snapshot?.page_name || '').slice(0, 40).padEnd(40);
+      const handle = ('@' + (l.igHandle || '—')).padEnd(28);
+      console.log(`  ${String(i+1).padStart(2)}. ${name} ${handle} ${followers}k followers`);
+    });
+    console.log(`\n  Total: ${toEnrich.length} — proceeding to DB insert without enrichment.\n`);
+    // Skip Stage 5 (email enrichment) — leads go in as No Draft
+    for (const lead of toEnrich) { lead.contact = null; lead.domainFinal = lead.domain || null; }
+    // Fall through to Stage 6
+  }
 
+  // ── Stage 5: Email enrichment (skipped when --find-only) ─────────────────────
   let emailFound = 0;
+  if (isFindOnly) {
+    console.log('─── Stage 5: Skipped (--find-only) — leads will be inserted as No Draft ──\n');
+  } else {
+  console.log(`─── Stage 5: Email enrichment (${toEnrich.length} leads) ──────────`);
 
   for (let i = 0; i < toEnrich.length; i++) {
     const lead = toEnrich[i];
@@ -671,6 +800,7 @@ async function main() {
     await sleep(400);
   }
   console.log(`  Emails found: ${emailFound}/${toEnrich.length}\n`);
+  } // end Stage 5 (skipped when --find-only)
 
   // ── Stage 6: DB upsert ────────────────────────────────────────────────────────
   if (isTest) {
@@ -691,6 +821,12 @@ async function main() {
   for (const lead of toInsert) {
     const snap     = lead.item.snapshot || {};
     const pageName = lead.item.page_name || snap.page_name || '';
+
+    // Skip if we already contacted this business via a different FB page ID
+    const leadEmail  = lead.contact?.email?.toLowerCase();
+    const leadHandle = lead.igHandle?.toLowerCase();
+    if (leadEmail  && contactedEmails.has(leadEmail))   { console.log(`  ⟳ skip dup email:  ${pageName}`);  failed++; continue; }
+    if (leadHandle && contactedHandles.has(leadHandle)) { console.log(`  ⟳ skip dup handle: ${pageName}`);  failed++; continue; }
     const domain   = lead.domainFinal;
     const niche    = mapNiche(pageName, lead.adCopies[0] || '', snap.page_categories || []);
     const likes    = snap.page_like_count || 0;

@@ -216,7 +216,7 @@ export default function DashboardPage() {
       case 'agent-leads':
         return <AgentLeadsModule clientId={effectiveClientId} terminology={terminology} selectedBrandIds={isBookStoreClient && selectedBrandIds.length > 1 ? selectedBrandIds : undefined} />
       case 'social-chatbot':
-        return <SocialChatbotModule clientId={effectiveClientId} />
+        return <SocialChatbotModule clientId={effectiveClientId} selectedBrandIds={isBookStoreClient && selectedBrandIds.length > 0 ? selectedBrandIds : undefined} />
       case 'website-chatbot':
         return <WebsiteChatbotModule clientId={effectiveClientId} />
       case 'chatbot-analytics':

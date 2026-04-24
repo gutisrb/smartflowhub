@@ -260,11 +260,14 @@ export function EmailOutreachModule({
   }
 
   const handleRemoveLead = async (lead: Lead) => {
-    const res = await fetch(`/api/leads/${lead.id}`, { method: 'DELETE' })
-    if (!res.ok) {
-      const { error } = await res.json().catch(() => ({ error: 'Unknown error' }))
-      console.error('Delete failed:', error)
-      alert(`Failed to delete lead: ${error}`)
+    const supabase = createClient()
+    const { error } = await supabase
+      .from('contacts')
+      .update({ kategorija: 'Disqualified', status: 'Disqualified' })
+      .eq('id', lead.id)
+    if (error) {
+      console.error('Disqualify failed:', error)
+      alert(`Failed to disqualify lead: ${error.message}`)
       return
     }
     setLeads(prev => prev.filter(l => l.id !== lead.id))

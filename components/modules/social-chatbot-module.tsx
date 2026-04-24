@@ -168,7 +168,10 @@ function generateMockData() {
 
 // ── Bookstore demo conversations ───────────────────────────────────────────────
 // Used as fallback when a bookstore client has no real conversations yet
-function generateBookstoreDemoData(): ReturnType<typeof generateMockData> {
+const PUBLIK_ID  = "bd12eb98-e62a-4a87-b620-a9881081449b"
+const STELA_ID   = "d7337d00-db70-46c3-828b-e9ac82e21717"
+
+function generateBookstoreDemoData(clientId?: string): ReturnType<typeof generateMockData> {
     const CID = "demo_bookstore"
     const ms = (id: string, role: string, text: string, ts: string, platform: string, name: string, pic: string, extra?: any) => ({
         id: `${id}-${role}-${ts}`, id_razgovora: id, role, message: text,
@@ -179,7 +182,90 @@ function generateBookstoreDemoData(): ReturnType<typeof generateMockData> {
         d.setHours(d.getHours() - hoursBack, d.getMinutes() - minutesBack, 0, 0)
         return d.toISOString()
     }
-    const convDefs = [
+
+    // ── Publik Praktikum — children's books, parents as customers ─────────────
+    const publikConvDefs = [
+        { id: "pp_ig_jelena", platform: "instagram", name: "Jelena Marinović", pic: "https://randomuser.me/api/portraits/women/33.jpg", humanNeeded: false, phone: null, msgs: [
+            ms("pp_ig_jelena","user","Zdravo, tražim slikovnicu za ćerku od 3 godine koja upravo uči slova",t(1,30),"instagram","Jelena Marinović","https://randomuser.me/api/portraits/women/33.jpg"),
+            ms("pp_ig_jelena","assistant","Zdravo Jelena! Za uzrast 3 godine koji uči slova, preporučujem 'Piši-briši: Azbuka' — interaktivna tabla sa markerom, dete vežba pisanje slova bez papira. Ima i verziju sa brojevima. Obe su na stanju 😊",t(1,28),"instagram","Jelena Marinović","https://randomuser.me/api/portraits/women/33.jpg"),
+            ms("pp_ig_jelena","user","Super! I da li imate nešto sa zvukovima ili pop-up stranicama?",t(1,15),"instagram","Jelena Marinović","https://randomuser.me/api/portraits/women/33.jpg"),
+            ms("pp_ig_jelena","assistant","Da! 'Priča sa iskakalicama: Šuma' je hit za taj uzrast — svaka stranica ima pop-up likove. Za zvukove imamo 'Moje prve reči sa zvukom' — pritisneš dugme, čuješ reč. Šaljem vam linkove za obe 📚",t(1,13),"instagram","Jelena Marinović","https://randomuser.me/api/portraits/women/33.jpg"),
+        ]},
+        { id: "pp_ig_dragan", platform: "instagram", name: "Dragan Tomić", pic: "https://randomuser.me/api/portraits/men/47.jpg", humanNeeded: true, phone: "+381641112233", msgs: [
+            ms("pp_ig_dragan","user","Naručio sam 3 knjige za sina, stigle su ali jedna je pocepana na koricama pri isporuci",t(3,20),"instagram","Dragan Tomić","https://randomuser.me/api/portraits/men/47.jpg"),
+            ms("pp_ig_dragan","assistant","Dragan, žao mi je što se to desilo — nije prihvatljivo. Prosleđujem vaš slučaj timu odmah. Možete li mi dati broj narudžbine ili email da ubrzamo zamenu?",t(3,18),"instagram","Dragan Tomić","https://randomuser.me/api/portraits/men/47.jpg"),
+            ms("pp_ig_dragan","user","dragan.tomic@gmail.com, narudžbina od juče",t(3,10),"instagram","Dragan Tomić","https://randomuser.me/api/portraits/men/47.jpg"),
+            ms("pp_ig_dragan","system","[HUMAN_NEEDED]",t(3,9),"instagram","Dragan Tomić","https://randomuser.me/api/portraits/men/47.jpg",{ human_needed: true }),
+        ]},
+        { id: "pp_fb_vesna", platform: "facebook", name: "Vesna Đorđević", pic: "https://randomuser.me/api/portraits/women/61.jpg", humanNeeded: false, phone: null, msgs: [
+            ms("pp_fb_vesna","user","Dobar dan, tražim poklon za unuku od 6 godina koja voli životinje",t(5,0),"facebook","Vesna Đorđević","https://randomuser.me/api/portraits/women/61.jpg"),
+            ms("pp_fb_vesna","assistant","Dobar dan! Za devojčicu od 6 koja voli životinje, idealna je 'Dinozauri: Velika enciklopedija' — bogato ilustrovana, stranice su debele. Ili 'Životinje sveta sa mapom' — interaktivna, uči kontinente kroz životinje. Obe su odlični pokloni 🎁",t(4,58),"facebook","Vesna Đorđević","https://randomuser.me/api/portraits/women/61.jpg"),
+            ms("pp_fb_vesna","user","Sviđa mi se ona sa mapom! Može li da stigne do petka?",t(4,45),"facebook","Vesna Đorđević","https://randomuser.me/api/portraits/women/61.jpg"),
+            ms("pp_fb_vesna","assistant","Za narudžbine do sutra u podne dostava stiže do petka. Naručite na publikpraktikum.rs ili mi ostavite email pa vam šaljem direktan link 📦",t(4,43),"facebook","Vesna Đorđević","https://randomuser.me/api/portraits/women/61.jpg"),
+        ]},
+        { id: "pp_wa_marija", platform: "whatsapp", name: "Marija Stanković", pic: "https://randomuser.me/api/portraits/women/71.jpg", humanNeeded: false, phone: "marija.stankovic@os.edu.rs", msgs: [
+            ms("pp_wa_marija","user","Zdravo, ja sam učiteljica prvog razreda. Da li imate popust za narudžbinu od 20-25 knjiga za učionicu?",t(7,0),"whatsapp","Marija Stanković","https://randomuser.me/api/portraits/women/71.jpg"),
+            ms("pp_wa_marija","assistant","Zdravo Marija! Za školske/grupne narudžbine od 20+ primeraka možemo dogovoriti popust. Koji naslovi vas zanimaju — čitanke, bojanka, enciklopedije?",t(6,55),"whatsapp","Marija Stanković","https://randomuser.me/api/portraits/women/71.jpg"),
+            ms("pp_wa_marija","user","Uglavnom piši-briši table i bojanke za kraj godine. marija.stankovic@os.edu.rs",t(6,48),"whatsapp","Marija Stanković","https://randomuser.me/api/portraits/women/71.jpg"),
+            ms("pp_wa_marija","assistant","Odlično! Šaljem vam na email kompletnu ponudu za školski popust do kraja dana. Hvala Marija 📚",t(6,45),"whatsapp","Marija Stanković","https://randomuser.me/api/portraits/women/71.jpg"),
+        ]},
+        { id: "pp_web_ivana", platform: "website", name: "Ivana Petrović", pic: "https://randomuser.me/api/portraits/women/82.jpg", humanNeeded: false, phone: null, msgs: [
+            ms("pp_web_ivana","user","Da li je 'Piši-briši: Dinozauri' trenutno na stanju?",t(1,0),"website","Ivana Petrović","https://randomuser.me/api/portraits/women/82.jpg"),
+            ms("pp_web_ivana","assistant","Zdravo! Da, 'Piši-briši: Dinozauri' je na stanju — cena je 990 din. Ima i 'Piši-briši: Azbuka' i 'Piši-briši: Brojevi' ako vas zanima komplet. Naručite direktno na sajtu ili vam šaljem link 😊",t(0,58),"website","Ivana Petrović","https://randomuser.me/api/portraits/women/82.jpg"),
+            ms("pp_web_ivana","user","Savršeno, hvala! Koliko dana dostava do Kragujevca?",t(0,50),"website","Ivana Petrović","https://randomuser.me/api/portraits/women/82.jpg"),
+            ms("pp_web_ivana","assistant","Do Kragujevca BEX Express isporučuje za 2-3 radna dana. Za narudžbine do 14h danas, možete očekivati pakete do četvrtka 📦",t(0,48),"website","Ivana Petrović","https://randomuser.me/api/portraits/women/82.jpg"),
+        ]},
+        { id: "pp_web_nikola", platform: "website", name: "Nikola Rašić", pic: "https://randomuser.me/api/portraits/men/63.jpg", humanNeeded: true, phone: "+381642223344", msgs: [
+            ms("pp_web_nikola","user","Primio sam pogrešnu knjigu — naručio sam 'Dinozauri velika enciklopedija' a u paketu je bila neka bojanka",t(0,20),"website","Nikola Rašić","https://randomuser.me/api/portraits/men/63.jpg"),
+            ms("pp_web_nikola","assistant","Nikola, izvinjavam se zbog greške u isporuci — to ne bi smelo da se desi. Prosleđujem odmah timu za zamenu. Koji je vaš email ili broj narudžbine?",t(0,18),"website","Nikola Rašić","https://randomuser.me/api/portraits/men/63.jpg"),
+            ms("pp_web_nikola","user","nikola.rasic@gmail.com",t(0,15),"website","Nikola Rašić","https://randomuser.me/api/portraits/men/63.jpg"),
+            ms("pp_web_nikola","system","[HUMAN_NEEDED]",t(0,14),"website","Nikola Rašić","https://randomuser.me/api/portraits/men/63.jpg",{ human_needed: true }),
+        ]},
+    ]
+
+    // ── Stela Knjige — adult fiction, romance, thriller ───────────────────────
+    const stelaConvDefs = [
+        { id: "sk_ig_aleksandra", platform: "instagram", name: "Aleksandra Vuković", pic: "https://randomuser.me/api/portraits/women/26.jpg", humanNeeded: false, phone: null, msgs: [
+            ms("sk_ig_aleksandra","user","Čitala sam 'Ugly Love' i bila sam oduševljena. Šta biste preporučili sledeće od Colleen Hoover?",t(2,10),"instagram","Aleksandra Vuković","https://randomuser.me/api/portraits/women/26.jpg"),
+            ms("sk_ig_aleksandra","assistant","Odlično — Ugly Love je klasik 🖤 Sledeće svakako 'It Ends with Us' — emotivno najjača od svih njenih knjiga. Posle toga 'Verity' ako voliš psihološki triler, pa 'November 9'. Sve tri imamo na stanju.",t(2,8),"instagram","Aleksandra Vuković","https://randomuser.me/api/portraits/women/26.jpg"),
+            ms("sk_ig_aleksandra","user","It Ends with Us je već na mojoj listi! Šta je sa 'Reminders of Him'?",t(2,0),"instagram","Aleksandra Vuković","https://randomuser.me/api/portraits/women/26.jpg"),
+            ms("sk_ig_aleksandra","assistant","'Reminders of Him' je divna — tužna ali lepa priča o iskupljenju. Imamo je na stanju, 1.390 din. Da li biste uzeli više naslova — kombinujte za besplatnu dostavu 📦",t(1,58),"instagram","Aleksandra Vuković","https://randomuser.me/api/portraits/women/26.jpg"),
+        ]},
+        { id: "sk_ig_mila", platform: "instagram", name: "Mila Đorđević", pic: "https://randomuser.me/api/portraits/women/38.jpg", humanNeeded: false, phone: null, msgs: [
+            ms("sk_ig_mila","user","Koji je redosled čitanja Stieg Larsson 'Milenijum' trilogije?",t(4,5),"instagram","Mila Đorđević","https://randomuser.me/api/portraits/women/38.jpg"),
+            ms("sk_ig_mila","assistant","Redosled je: 1. 'Muškarci koji mrze žene', 2. 'Devojka koja se igrala vatrom', 3. 'Zamak od peska koji se srušio'. Sve tri imamo, mogu se naručiti kao komplet sa popustom 🕵️",t(4,3),"instagram","Mila Đorđević","https://randomuser.me/api/portraits/women/38.jpg"),
+            ms("sk_ig_mila","user","Ima li komplet u ponudi, koliko košta?",t(3,50),"instagram","Mila Đorđević","https://randomuser.me/api/portraits/women/38.jpg"),
+            ms("sk_ig_mila","assistant","Komplet sve tri knjige je 3.990 din (umesto 4.470 din pojedinačno). Dostava besplatna jer prelazi limit. Naručite na stelaknjige.rs ili ostavite email 📚",t(3,48),"instagram","Mila Đorđević","https://randomuser.me/api/portraits/women/38.jpg"),
+        ]},
+        { id: "sk_fb_sandra", platform: "facebook", name: "Sandra Kovačević", pic: "https://randomuser.me/api/portraits/women/57.jpg", humanNeeded: false, phone: null, msgs: [
+            ms("sk_fb_sandra","user","Tražim poklon za drugaricu koja voli dark romance, ima 28 godina",t(6,0),"facebook","Sandra Kovačević","https://randomuser.me/api/portraits/women/57.jpg"),
+            ms("sk_fb_sandra","assistant","Za ljubiteljicu dark romancea, top izbori: 'Twisted Love' (Ana Huang) — intenzivna ljubavna priča sa bodyguard dinamikom, 'Haunting Adeline' — za hrabrije čitaoce, 'Ugly Love' (Colleen Hoover) — klasik žanra. Sve tri imamo 🖤",t(5,58),"facebook","Sandra Kovačević","https://randomuser.me/api/portraits/women/57.jpg"),
+            ms("sk_fb_sandra","user","Twisted Love zvuči savršeno! Da li može poklon pakovanje?",t(5,45),"facebook","Sandra Kovačević","https://randomuser.me/api/portraits/women/57.jpg"),
+            ms("sk_fb_sandra","assistant","Nudimo poklon pakovanje uz narudžbinu — napomenite u komentaru pri naručivanju. Naručite na stelaknjige.rs ili mi ostavite email 🎁",t(5,43),"facebook","Sandra Kovačević","https://randomuser.me/api/portraits/women/57.jpg"),
+        ]},
+        { id: "sk_wa_tamara", platform: "whatsapp", name: "Tamara Ilić", pic: "https://randomuser.me/api/portraits/women/44.jpg", humanNeeded: false, phone: null, msgs: [
+            ms("sk_wa_tamara","user","Da li ćete imati 'Twisted Lies' od Ane Huang? Videla sam da izlazi uskoro u prevodu",t(8,0),"whatsapp","Tamara Ilić","https://randomuser.me/api/portraits/women/44.jpg"),
+            ms("sk_wa_tamara","assistant","Zdravo Tamara! 'Twisted Lies' je u planu — čekamo potvrdu datuma isporuke. Ako ostaviš email, obaveštavamo te čim bude dostupna i možeš da je rezervišeš 📖",t(7,55),"whatsapp","Tamara Ilić","https://randomuser.me/api/portraits/women/44.jpg"),
+            ms("sk_wa_tamara","user","tamara.ilic@gmail.com — super, hvala!",t(7,48),"whatsapp","Tamara Ilić","https://randomuser.me/api/portraits/women/44.jpg"),
+            ms("sk_wa_tamara","assistant","Upisana si na listu čekanja 🖤 Javljamo se čim stigne. Do tada, imaš li nešto drugo na listi — može biti da imamo već u stanju?",t(7,46),"whatsapp","Tamara Ilić","https://randomuser.me/api/portraits/women/44.jpg"),
+        ]},
+        { id: "sk_web_bojana", platform: "website", name: "Bojana Stefanović", pic: "https://randomuser.me/api/portraits/women/91.jpg", humanNeeded: false, phone: null, msgs: [
+            ms("sk_web_bojana","user","Da li prodajete i e-knjige, ili samo fizičke?",t(0,45),"website","Bojana Stefanović","https://randomuser.me/api/portraits/women/91.jpg"),
+            ms("sk_web_bojana","assistant","Zdravo Bojana! Za sada nudimo samo fizičke knjige — e-knjige trenutno nisu u ponudi. Dostava je brza, BEX Express 1-3 radna dana 📦 Da li tražite neki određeni naslov?",t(0,43),"website","Bojana Stefanović","https://randomuser.me/api/portraits/women/91.jpg"),
+            ms("sk_web_bojana","user","Tražila sam 'It Ends with Us', ali ok ako je samo fizička. Koliko košta dostava?",t(0,35),"website","Bojana Stefanović","https://randomuser.me/api/portraits/women/91.jpg"),
+            ms("sk_web_bojana","assistant","'It Ends with Us' je na stanju — 1.490 din. Dostava je 350 din, besplatna za narudžbine iznad 2.500 din. Naručite direktno na stelaknjige.rs 📚",t(0,33),"website","Bojana Stefanović","https://randomuser.me/api/portraits/women/91.jpg"),
+        ]},
+        { id: "sk_web_katarina", platform: "website", name: "Katarina Marković", pic: "https://randomuser.me/api/portraits/women/48.jpg", humanNeeded: true, phone: null, msgs: [
+            ms("sk_web_katarina","user","Kupila sam 'November 9' i ima par stranica štampanih duplo, nedostaju stranice 78-82",t(0,15),"website","Katarina Marković","https://randomuser.me/api/portraits/women/48.jpg"),
+            ms("sk_web_katarina","assistant","Katarina, izvinjavam se — štamparska greška nije prihvatljiva. Zamenjujemo odmah. Daj mi email i broj narudžbine pa ubrzamo.",t(0,13),"website","Katarina Marković","https://randomuser.me/api/portraits/women/48.jpg"),
+            ms("sk_web_katarina","user","katarina.markovic@gmail.com",t(0,10),"website","Katarina Marković","https://randomuser.me/api/portraits/women/48.jpg"),
+            ms("sk_web_katarina","system","[HUMAN_NEEDED]",t(0,9),"website","Katarina Marković","https://randomuser.me/api/portraits/women/48.jpg",{ human_needed: true }),
+        ]},
+    ]
+
+    const convDefs = clientId === PUBLIK_ID ? publikConvDefs
+        : clientId === STELA_ID ? stelaConvDefs
+        : [
         // Instagram — delivery inquiry, warm lead
         { id: "bs_ig_ana", platform: "instagram", name: "Ana Živković", pic: "https://randomuser.me/api/portraits/women/29.jpg", humanNeeded: false, phone: null, msgs: [
             ms("bs_ig_ana","user","Zdravo 😊 Da li imate 'Moć sadašnjeg trenutka' od Ekharta Tolija na stanju?",t(2,20),"instagram","Ana Živković","https://randomuser.me/api/portraits/women/29.jpg"),
@@ -251,6 +337,7 @@ function parseMeta(m: any): Record<string, any> {
 
 interface SocialChatbotModuleProps {
     clientId: string
+    selectedBrandIds?: string[]
 }
 
 function getPlatformMeta(platform: string) {
@@ -264,8 +351,12 @@ function getPlatformMeta(platform: string) {
 
 type Period = "danas" | "sedmica" | "mesec"
 
-export function SocialChatbotModule({ clientId }: SocialChatbotModuleProps) {
+export function SocialChatbotModule({ clientId, selectedBrandIds }: SocialChatbotModuleProps) {
     const bookStoreConfig = getBookStoreConfig(clientId)
+    const isMultiBrand = (selectedBrandIds?.length ?? 0) > 1
+    const brandIds = selectedBrandIds && selectedBrandIds.length > 0 ? selectedBrandIds : [clientId]
+    const brandIdsKey = brandIds.join(',')
+    const brandIdsRef = useRef(brandIds)
 
     const [conversations, setConversations] = useState<any[]>([])
     const [allMessages, setAllMessages] = useState<any[]>([])
@@ -278,51 +369,76 @@ export function SocialChatbotModule({ clientId }: SocialChatbotModuleProps) {
     const messagesEndRef = useRef<HTMLDivElement>(null)
     const supabase = createClient()
 
+    useEffect(() => { brandIdsRef.current = brandIds }, [brandIdsKey]) // eslint-disable-line
+
     const fetchConversations = useCallback(async () => {
-        const { data, error } = await supabase
-            .from("razgovori")
-            .select("*")
-            .eq("client_id", clientId)
-            .order("created_at", { ascending: false })
-            .limit(1000)
+        const ids = brandIdsRef.current
 
-        if (error || !data) return
-        setAllMessages(data)
+        const results = await Promise.all(
+            ids.map(bid =>
+                supabase.from("razgovori").select("*")
+                    .eq("client_id", bid)
+                    .order("created_at", { ascending: false })
+                    .limit(1000)
+            )
+        )
 
-        const grouped: Record<string, any> = {}
-        for (const msg of data) {
-            const id = msg.id_razgovora
-            if (!grouped[id]) {
-                grouped[id] = {
-                    id, leadId: msg.lead_id, lastMessage: msg,
-                    messages: [], platform: msg.platform || "instagram",
-                    candidateName: null, humanNeeded: false, phone: null, profilePic: null
-                }
+        const allMsgs: any[] = []
+        const allConvs: any[] = []
+
+        for (let i = 0; i < ids.length; i++) {
+            const bid = ids[i]
+            const { data, error } = results[i]
+            if (error || !data) continue
+
+            if (data.length === 0 && getBookStoreConfig(bid)) {
+                const { conversations: demoConvs, allMessages: demoMsgs } = generateBookstoreDemoData(bid)
+                allConvs.push(...demoConvs.map((c: any) => ({ ...c, brandId: bid })))
+                allMsgs.push(...demoMsgs)
+                continue
             }
-            grouped[id].messages.push(msg)
-            const meta = parseMeta(msg.metadata)
-            if (msg.role === "system" && meta.human_needed) grouped[id].humanNeeded = true
-            if (new Date(msg.created_at) > new Date(grouped[id].lastMessage.created_at)) grouped[id].lastMessage = msg
-            if (meta.name && !grouped[id].candidateName) grouped[id].candidateName = meta.name
-            if ((meta.phone || meta.number) && !grouped[id].phone)
-                grouped[id].phone = meta.phone || meta.number
-            if (meta.profile_pic && !grouped[id].profilePic)
-                grouped[id].profilePic = meta.profile_pic
+
+            allMsgs.push(...data)
+
+            const grouped: Record<string, any> = {}
+            for (const msg of data) {
+                const id = msg.id_razgovora
+                if (!grouped[id]) {
+                    grouped[id] = {
+                        id, leadId: msg.lead_id, lastMessage: msg,
+                        messages: [], platform: msg.platform || "instagram",
+                        candidateName: null, humanNeeded: false, phone: null, profilePic: null,
+                        brandId: bid,
+                    }
+                }
+                grouped[id].messages.push(msg)
+                const meta = parseMeta(msg.metadata)
+                if (msg.role === "system" && meta.human_needed) grouped[id].humanNeeded = true
+                if (new Date(msg.created_at) > new Date(grouped[id].lastMessage.created_at)) grouped[id].lastMessage = msg
+                if (meta.name && !grouped[id].candidateName) grouped[id].candidateName = meta.name
+                if ((meta.phone || meta.number) && !grouped[id].phone)
+                    grouped[id].phone = meta.phone || meta.number
+                if (meta.profile_pic && !grouped[id].profilePic)
+                    grouped[id].profilePic = meta.profile_pic
+            }
+
+            for (const id of Object.keys(grouped)) {
+                const ns = grouped[id].messages
+                    .filter((m: any) => m.role !== "system")
+                    .sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+                grouped[id].lastVisibleMessage = ns[0] || grouped[id].lastMessage
+            }
+
+            allConvs.push(...Object.values(grouped))
         }
 
-        for (const id of Object.keys(grouped)) {
-            const ns = grouped[id].messages
-                .filter((m: any) => m.role !== "system")
-                .sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-            grouped[id].lastVisibleMessage = ns[0] || grouped[id].lastMessage
-        }
-
-        const list = Object.values(grouped).sort((a: any, b: any) =>
+        allConvs.sort((a: any, b: any) =>
             new Date(b.lastVisibleMessage.created_at).getTime() - new Date(a.lastVisibleMessage.created_at).getTime()
         )
-        setConversations(list)
+        setConversations(allConvs)
+        setAllMessages(allMsgs)
 
-        const razgovorIds = list.map((c: any) => c.id).filter(Boolean)
+        const razgovorIds = allConvs.map((c: any) => c.id).filter(Boolean)
         if (razgovorIds.length > 0) {
             const { data: kandRows } = await supabase
                 .from("kandidati")
@@ -335,7 +451,7 @@ export function SocialChatbotModule({ clientId }: SocialChatbotModuleProps) {
                 setNameMap(map)
             }
         }
-    }, [clientId, supabase])
+    }, [supabase]) // eslint-disable-line react-hooks/exhaustive-deps
 
     useEffect(() => {
         if (DEMO_MODE) {
@@ -344,14 +460,38 @@ export function SocialChatbotModule({ clientId }: SocialChatbotModuleProps) {
             setAllMessages(mockMsgs)
             return
         }
+
+        // Instant pre-populate for bookstore clients — eliminates blank flash on brand switch
+        const ids = brandIdsRef.current
+        const instantConvs: any[] = []
+        for (const bid of ids) {
+            if (getBookStoreConfig(bid)) {
+                const { conversations: dc } = generateBookstoreDemoData(bid)
+                instantConvs.push(...dc.map((c: any) => ({ ...c, brandId: bid })))
+            }
+        }
+        if (instantConvs.length > 0) {
+            instantConvs.sort((a: any, b: any) =>
+                new Date(b.lastVisibleMessage.created_at).getTime() - new Date(a.lastVisibleMessage.created_at).getTime()
+            )
+            setConversations(instantConvs)
+        }
+
         fetchConversations()
-        const channel = supabase
-            .channel(`razgovori-rt-${clientId}`)
-            .on("postgres_changes", { event: "INSERT", schema: "public", table: "razgovori", filter: `client_id=eq.${clientId}` },
-                () => fetchConversations())
-            .subscribe()
-        return () => { supabase.removeChannel(channel) }
-    }, [clientId]) // eslint-disable-line react-hooks/exhaustive-deps
+
+        const channels = ids.map(bid =>
+            supabase.channel(`razgovori-rt-${bid}`)
+                .on("postgres_changes", { event: "INSERT", schema: "public", table: "razgovori", filter: `client_id=eq.${bid}` },
+                    () => fetchConversations())
+                .subscribe()
+        )
+        return () => { channels.forEach(ch => supabase.removeChannel(ch)) }
+    }, [brandIdsKey]) // eslint-disable-line react-hooks/exhaustive-deps
+
+    // Reset selection when brand set changes so we don't show a conversation from a hidden brand
+    useEffect(() => {
+        setSelectedId(null)
+    }, [brandIdsKey]) // eslint-disable-line react-hooks/exhaustive-deps
 
     useEffect(() => {
         if (conversations.length > 0 && !selectedId) setSelectedId(conversations[0].id)
@@ -454,7 +594,11 @@ export function SocialChatbotModule({ clientId }: SocialChatbotModuleProps) {
                         </span>
                     </h2>
                     <p className="text-[11px] font-mono text-zinc-500 mt-0.5 tracking-wider">
-                        {bookStoreConfig ? `${bookStoreConfig.brandName} AI Agent · Multi-channel` : "SmartFlow AI Agent · Multi-channel"}
+                        {isMultiBrand
+                            ? `Svi brendovi · ${brandIds.length} brenda`
+                            : bookStoreConfig
+                                ? `${bookStoreConfig.brandName} AI Agent · Multi-channel`
+                                : "SmartFlow AI Agent · Multi-channel"}
                     </p>
                 </div>
                 <div className="hidden sm:flex items-center gap-2.5">
@@ -463,14 +607,34 @@ export function SocialChatbotModule({ clientId }: SocialChatbotModuleProps) {
                         <Wifi className="w-3 h-3 text-emerald-400" />
                         <span className="text-[10px] font-mono font-bold text-emerald-400 uppercase tracking-widest">Live</span>
                     </div>
-                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-pink-500/20 bg-pink-500/[0.07]">
-                        <Instagram className="w-3 h-3 text-pink-400" />
-                        <span className="text-[10px] font-mono font-bold text-pink-400 tracking-wide">{bookStoreConfig ? bookStoreConfig.instagramHandle : "@smartflow.rs"}</span>
-                    </div>
-                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/[0.07] bg-white/[0.03]">
-                        <Globe className="w-3 h-3 text-zinc-400" />
-                        <span className="text-[10px] font-mono text-zinc-400 tracking-wide">{bookStoreConfig ? bookStoreConfig.websiteUrl : "smartflow.rs"}</span>
-                    </div>
+                    {isMultiBrand ? (
+                        <div className="flex items-center gap-1">
+                            {brandIds.map(bid => {
+                                const bc = getBookStoreConfig(bid)
+                                if (!bc) return null
+                                return (
+                                    <div key={bid} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full border"
+                                        style={{ borderColor: `${bc.color}30`, background: `${bc.color}10` }}>
+                                        <div className="w-1.5 h-1.5 rounded-full" style={{ background: bc.color }} />
+                                        <span className="text-[9px] font-mono font-bold tracking-widest" style={{ color: bc.color }}>
+                                            {bc.brandName.split(' ').map((w: string) => w[0]).join('').slice(0, 2)}
+                                        </span>
+                                    </div>
+                                )
+                            })}
+                        </div>
+                    ) : (
+                        <>
+                            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-pink-500/20 bg-pink-500/[0.07]">
+                                <Instagram className="w-3 h-3 text-pink-400" />
+                                <span className="text-[10px] font-mono font-bold text-pink-400 tracking-wide">{bookStoreConfig ? bookStoreConfig.instagramHandle : "@smartflow.rs"}</span>
+                            </div>
+                            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/[0.07] bg-white/[0.03]">
+                                <Globe className="w-3 h-3 text-zinc-400" />
+                                <span className="text-[10px] font-mono text-zinc-400 tracking-wide">{bookStoreConfig ? bookStoreConfig.websiteUrl : "smartflow.rs"}</span>
+                            </div>
+                        </>
+                    )}
                 </div>
             </div>
 
@@ -589,6 +753,8 @@ export function SocialChatbotModule({ clientId }: SocialChatbotModuleProps) {
                             const isSelected = selectedId === conv.id
                             const pm = getPlatformMeta(conv.platform)
                             const name = getDisplayName(conv)
+                            const convBrandConfig = getBookStoreConfig(conv.brandId ?? clientId)
+                            const brandColor = convBrandConfig?.color
                             return (
                                 <motion.button
                                     key={conv.id}
@@ -600,8 +766,9 @@ export function SocialChatbotModule({ clientId }: SocialChatbotModuleProps) {
                                         "w-full text-left px-4 py-3.5 transition-all duration-200 relative border-l-2",
                                         isSelected
                                             ? "bg-pink-500/[0.08] border-l-pink-500"
-                                            : "border-l-transparent hover:bg-white/[0.03]"
+                                            : "hover:bg-white/[0.03]"
                                     )}
+                                    style={!isSelected ? { borderLeftColor: brandColor ? `${brandColor}50` : 'transparent', borderLeftWidth: '2px', borderLeftStyle: 'solid' } : undefined}
                                 >
                                     <div className="flex items-start gap-3">
                                         {/* Avatar */}
@@ -623,6 +790,14 @@ export function SocialChatbotModule({ clientId }: SocialChatbotModuleProps) {
                                             <div className="flex items-center gap-1.5 mb-1">
                                                 <pm.Icon className={cn("w-2.5 h-2.5", pm.color)} />
                                                 <span className={cn("text-[9px] font-mono font-bold uppercase tracking-wider", pm.color)}>{pm.label}</span>
+                                                {isMultiBrand && convBrandConfig && (
+                                                    <span
+                                                        className="text-[8px] font-mono font-bold px-1.5 py-0.5 rounded-full leading-none"
+                                                        style={{ color: convBrandConfig.color, background: `${convBrandConfig.color}15`, border: `1px solid ${convBrandConfig.color}30` }}
+                                                    >
+                                                        {convBrandConfig.brandName.split(' ').map((w: string) => w[0]).join('').slice(0, 2)}
+                                                    </span>
+                                                )}
                                             </div>
                                             <p className="text-xs text-zinc-500 truncate leading-relaxed">
                                                 {conv.lastVisibleMessage?.role === "assistant" ? "🤖 " : ""}

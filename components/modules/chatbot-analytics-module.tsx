@@ -201,38 +201,38 @@ const MOCK_CRM_DATA_BY_CLIENT: Record<string, any[]> = {
     ],
     // ── Aleksandar MN (zdravstveni_cilj → tema, proizvod → knjiga) ────────────
     "3255f279-801c-474b-9c16-a75edc336296": [
-        { tema: "Imunitet",          knjiga: "iMMUNITA + D3 vitamin 2000",         status: "Poručio",       razlog: null,                          izvor: "Instagram", created_at: d(0)  },
-        { tema: "Zglobovi",          knjiga: "Joint MD Revolution, 30 tab",        status: "Zainteresovan", razlog: "Pitao za cenu",                izvor: "Instagram", created_at: d(0)  },
-        { tema: "Kolagen / koža",    knjiga: "Super Collagen Beauty, 60 tab",      status: "Poručio",       razlog: null,                          izvor: "Facebook",  created_at: d(1)  },
-        { tema: "Spavanje / stres",  knjiga: null,                                 status: "Novi",          razlog: null,                          izvor: "Instagram", created_at: d(1)  },
-        { tema: "Zglobovi",          knjiga: "Joint MD Extra Strength, 50 tab",    status: "Poručio",       razlog: null,                          izvor: "Instagram", created_at: d(1)  },
-        { tema: "Imunitet",          knjiga: "Marnys Liposomalni VIT-C 1000",      status: "Zainteresovan", razlog: "Nema na stanju",               izvor: "Instagram", created_at: d(2)  },
-        { tema: "Kolagen / koža",    knjiga: "CERAMIDE Restorative Serum 30ml",    status: "Poručio",       razlog: null,                          izvor: "Facebook",  created_at: d(2)  },
-        { tema: "Imunitet",          knjiga: null,                                 status: "Novi",          razlog: null,                          izvor: "Website",   created_at: d(2)  },
-        { tema: "Mozak / fokus",     knjiga: "Cognitiva Super nutrijent za mozak", status: "Zainteresovan", razlog: "Pitao za cenu",                izvor: "Instagram", created_at: d(3)  },
-        { tema: "Zglobovi",          knjiga: "Joint MD Revolution, 30 tab",        status: "Poručio",       razlog: null,                          izvor: "Instagram", created_at: d(3)  },
-        { tema: "Imunitet",          knjiga: "iMMUNITA + D3 vitamin 2000",         status: "Zainteresovan", razlog: "Nije odgovorio",               izvor: "Facebook",  created_at: d(4)  },
-        { tema: "Spavanje / stres",  knjiga: "Marnys Liposomalni Magnezijum 375", status: "Poručio",       razlog: null,                          izvor: "Instagram", created_at: d(4)  },
-        { tema: "Medicinski upit",   knjiga: "Cimsulin + D3 vitamin",              status: "Intervencija",  razlog: "Medicinski upit – eskalacija", izvor: "Facebook",  created_at: d(4)  },
-        { tema: "Kolagen / koža",    knjiga: "Super Collagen + C, 60 tab",         status: "Zainteresovan", razlog: "Čeka isporuku",                izvor: "Instagram", created_at: d(5)  },
-        { tema: "Fitnes / sport",    knjiga: null,                                 status: "Novi",          razlog: null,                          izvor: "Instagram", created_at: d(5)  },
-        { tema: "Zglobovi",          knjiga: "Serrap MD Forte 120000 SPU",         status: "Zainteresovan", razlog: "Pitao za cenu",                izvor: "Instagram", created_at: d(6)  },
-        { tema: "Imunitet",          knjiga: "iMMUNITA + D3 vitamin 2000",         status: "Poručio",       razlog: null,                          izvor: "Website",   created_at: d(6)  },
-        { tema: "Spavanje / stres",  knjiga: "Cognitiva Super nutrijent za mozak", status: "Zainteresovan", razlog: "Premislio se",                 izvor: "Instagram", created_at: d(7)  },
-        { tema: "Kolagen / koža",    knjiga: "Super Collagen Beauty, 60 tab",      status: "Poručio",       razlog: null,                          izvor: "Instagram", created_at: d(7)  },
-        { tema: "Imunitet",          knjiga: null,                                 status: "Novi",          razlog: null,                          izvor: "Facebook",  created_at: d(8)  },
-        { tema: "Zglobovi",          knjiga: "Joint MD Extra Strength, 50 tab",    status: "Zainteresovan", razlog: "Nema na stanju",               izvor: "Instagram", created_at: d(8)  },
-        { tema: "Fitnes / sport",    knjiga: "MVS set za ravna stopala",           status: "Poručio",       razlog: null,                          izvor: "Instagram", created_at: d(9)  },
-        { tema: "Kolagen / koža",    knjiga: null,                                 status: "Novi",          razlog: null,                          izvor: "Website",   created_at: d(9)  },
-        { tema: "Imunitet",          knjiga: "Marnys Liposomalni VIT-C 1000",      status: "Poručio",       razlog: null,                          izvor: "Instagram", created_at: d(10) },
-        { tema: "Zglobovi",          knjiga: "Joint MD Revolution, 30 tab",        status: "Zainteresovan", razlog: "Nije odgovorio",               izvor: "Facebook",  created_at: d(10) },
-        { tema: "Medicinski upit",   knjiga: null,                                 status: "Intervencija",  razlog: "Medicinski upit – eskalacija", izvor: "Instagram", created_at: d(11) },
-        { tema: "Spavanje / stres",  knjiga: "Marnys Liposomalni Magnezijum 375", status: "Poručio",       razlog: null,                          izvor: "Instagram", created_at: d(11) },
-        { tema: "Imunitet",          knjiga: "iMMUNITA + D3 vitamin 2000",         status: "Poručio",       razlog: null,                          izvor: "Instagram", created_at: d(12) },
-        { tema: "Kolagen / koža",    knjiga: "CERAMIDE Restorative Serum 30ml",    status: "Zainteresovan", razlog: "Pitao za cenu",                izvor: "Facebook",  created_at: d(12) },
-        { tema: "Fitnes / sport",    knjiga: null,                                 status: "Novi",          razlog: null,                          izvor: "Instagram", created_at: d(13) },
-        { tema: "Zglobovi",          knjiga: "Serrap MD Forte 120000 SPU",         status: "Poručio",       razlog: null,                          izvor: "Instagram", created_at: d(13) },
-        { tema: "Imunitet",          knjiga: "iMMUNITA + D3 vitamin 2000",         status: "Zainteresovan", razlog: "Čeka isporuku",                izvor: "Website",   created_at: d(13) },
+        { knjiga: "iMMUNITA + D3 vitamin 2000",         autor: "AMN",       status: "Poručio",       razlog: null,                          izvor: "Instagram", created_at: d(0)  },
+        { knjiga: "Joint MD Revolution, 30 tab",        autor: "AMN",       status: "Zainteresovan", razlog: "Pitao za cenu",                izvor: "Instagram", created_at: d(0)  },
+        { knjiga: "Super Collagen Beauty, 60 tab",      autor: "AMN",       status: "Poručio",       razlog: null,                          izvor: "Facebook",  created_at: d(1)  },
+        { knjiga: null,                                 autor: null,        status: "Novi",          razlog: null,                          izvor: "Instagram", created_at: d(1)  },
+        { knjiga: "Joint MD Extra Strength, 50 tab",    autor: "AMN",       status: "Poručio",       razlog: null,                          izvor: "Instagram", created_at: d(1)  },
+        { knjiga: "Marnys Liposomalni VIT-C 1000",      autor: "Marnys",    status: "Zainteresovan", razlog: "Nema na stanju",               izvor: "Instagram", created_at: d(2)  },
+        { knjiga: "CERAMIDE Restorative Serum 30ml",    autor: "AMN",       status: "Poručio",       razlog: null,                          izvor: "Facebook",  created_at: d(2)  },
+        { knjiga: null,                                 autor: null,        status: "Novi",          razlog: null,                          izvor: "Website",   created_at: d(2)  },
+        { knjiga: "Cognitiva Super nutrijent za mozak", autor: "Cognitiva", status: "Zainteresovan", razlog: "Pitao za cenu",                izvor: "Instagram", created_at: d(3)  },
+        { knjiga: "Joint MD Revolution, 30 tab",        autor: "AMN",       status: "Poručio",       razlog: null,                          izvor: "Instagram", created_at: d(3)  },
+        { knjiga: "iMMUNITA + D3 vitamin 2000",         autor: "AMN",       status: "Zainteresovan", razlog: "Nije odgovorio",               izvor: "Facebook",  created_at: d(4)  },
+        { knjiga: "Marnys Liposomalni Magnezijum 375",  autor: "Marnys",    status: "Poručio",       razlog: null,                          izvor: "Instagram", created_at: d(4)  },
+        { knjiga: "Cimsulin + D3 vitamin",              autor: "AMN",       status: "Intervencija",  razlog: "Medicinski upit – eskalacija", izvor: "Facebook",  created_at: d(4)  },
+        { knjiga: "Super Collagen + C, 60 tab",         autor: "AMN",       status: "Zainteresovan", razlog: "Čeka isporuku",                izvor: "Instagram", created_at: d(5)  },
+        { knjiga: null,                                 autor: null,        status: "Novi",          razlog: null,                          izvor: "Instagram", created_at: d(5)  },
+        { knjiga: "Serrap MD Forte 120000 SPU",         autor: "Serrap MD", status: "Zainteresovan", razlog: "Pitao za cenu",                izvor: "Instagram", created_at: d(6)  },
+        { knjiga: "iMMUNITA + D3 vitamin 2000",         autor: "AMN",       status: "Poručio",       razlog: null,                          izvor: "Website",   created_at: d(6)  },
+        { knjiga: "Cognitiva Super nutrijent za mozak", autor: "Cognitiva", status: "Zainteresovan", razlog: "Premislio se",                 izvor: "Instagram", created_at: d(7)  },
+        { knjiga: "Super Collagen Beauty, 60 tab",      autor: "AMN",       status: "Poručio",       razlog: null,                          izvor: "Instagram", created_at: d(7)  },
+        { knjiga: null,                                 autor: null,        status: "Novi",          razlog: null,                          izvor: "Facebook",  created_at: d(8)  },
+        { knjiga: "Joint MD Extra Strength, 50 tab",    autor: "AMN",       status: "Zainteresovan", razlog: "Nema na stanju",               izvor: "Instagram", created_at: d(8)  },
+        { knjiga: "MVS set za ravna stopala",           autor: "MVS",       status: "Poručio",       razlog: null,                          izvor: "Instagram", created_at: d(9)  },
+        { knjiga: null,                                 autor: null,        status: "Novi",          razlog: null,                          izvor: "Website",   created_at: d(9)  },
+        { knjiga: "Marnys Liposomalni VIT-C 1000",      autor: "Marnys",    status: "Poručio",       razlog: null,                          izvor: "Instagram", created_at: d(10) },
+        { knjiga: "Joint MD Revolution, 30 tab",        autor: "AMN",       status: "Zainteresovan", razlog: "Nije odgovorio",               izvor: "Facebook",  created_at: d(10) },
+        { knjiga: null,                                 autor: null,        status: "Intervencija",  razlog: "Medicinski upit – eskalacija", izvor: "Instagram", created_at: d(11) },
+        { knjiga: "Marnys Liposomalni Magnezijum 375",  autor: "Marnys",    status: "Poručio",       razlog: null,                          izvor: "Instagram", created_at: d(11) },
+        { knjiga: "iMMUNITA + D3 vitamin 2000",         autor: "AMN",       status: "Poručio",       razlog: null,                          izvor: "Instagram", created_at: d(12) },
+        { knjiga: "CERAMIDE Restorative Serum 30ml",    autor: "AMN",       status: "Zainteresovan", razlog: "Pitao za cenu",                izvor: "Facebook",  created_at: d(12) },
+        { knjiga: null,                                 autor: null,        status: "Novi",          razlog: null,                          izvor: "Instagram", created_at: d(13) },
+        { knjiga: "Serrap MD Forte 120000 SPU",         autor: "Serrap MD", status: "Poručio",       razlog: null,                          izvor: "Instagram", created_at: d(13) },
+        { knjiga: "iMMUNITA + D3 vitamin 2000",         autor: "AMN",       status: "Zainteresovan", razlog: "Čeka isporuku",                izvor: "Website",   created_at: d(13) },
     ],
 }
 
@@ -619,53 +619,53 @@ function BookstoreAnalytics({ clientId, config, selectedBrandIds }: { clientId: 
 
             {/* ── Teme (pill grid) + Autori ── */}
             <div className="grid grid-cols-12 gap-4">
-                {/* Top teme — redesigned as colored pill grid */}
-                <motion.div variants={fadeUp} className="col-span-12 lg:col-span-6">
-                    <Panel>
-                        <div className="flex items-center gap-3 mb-5">
-                            <div className="w-8 h-8 rounded-xl flex items-center justify-center"
-                                style={{ background: "rgba(245,158,11,0.1)", border: "1px solid rgba(245,158,11,0.2)" }}>
-                                <Tag size={13} style={{ color: "#f59e0b" }} />
+                {/* Top teme — hidden for product clients (AMN), shown for book clients */}
+                {config.tableType !== 'proizvodi' && (
+                    <motion.div variants={fadeUp} className="col-span-12 lg:col-span-6">
+                        <Panel>
+                            <div className="flex items-center gap-3 mb-5">
+                                <div className="w-8 h-8 rounded-xl flex items-center justify-center"
+                                    style={{ background: "rgba(245,158,11,0.1)", border: "1px solid rgba(245,158,11,0.2)" }}>
+                                    <Tag size={13} style={{ color: "#f59e0b" }} />
+                                </div>
+                                <div>
+                                    <p className="text-[10px] font-bold uppercase tracking-[0.18em]" style={{ color: "#52525b" }}>Kategorije</p>
+                                    <p className="text-sm font-semibold text-white">Najpopularnije teme</p>
+                                </div>
                             </div>
-                            <div>
-                                <p className="text-[10px] font-bold uppercase tracking-[0.18em]" style={{ color: "#52525b" }}>Kategorije</p>
-                                <p className="text-sm font-semibold text-white">{config.tableType === 'proizvodi' ? "Zdravstveni ciljevi kupaca" : "Najpopularnije teme"}</p>
+                            <div className="grid grid-cols-2 gap-2.5">
+                                {m.topTeme.map((t, i) => {
+                                    const color = TEMA_COLORS[i] ?? "#52525b"
+                                    const pct = m.total > 0 ? Math.round((t.count / m.total) * 100) : 0
+                                    return (
+                                        <div key={t.name} className="relative rounded-xl px-3 py-2.5 overflow-hidden"
+                                            style={{
+                                                background: `linear-gradient(135deg,${color}14,${color}06)`,
+                                                border: `1px solid ${color}28`,
+                                            }}>
+                                            <div className="flex items-center justify-between mb-1.5">
+                                                <span className="text-xs font-semibold truncate pr-2" style={{ color: "#e4e4e7" }}>{t.name}</span>
+                                                <span className="text-xs font-black shrink-0" style={{ color }}>{t.count}</span>
+                                            </div>
+                                            <div className="h-[3px] rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.06)" }}>
+                                                <motion.div initial={{ width: 0 }} animate={{ width: `${pct}%` }}
+                                                    transition={{ duration: 1, delay: 0.3 + i * 0.06, ease: "easeOut" }}
+                                                    className="h-full rounded-full" style={{ background: color }} />
+                                            </div>
+                                            <p className="text-[9px] mt-1 font-bold" style={{ color: `${color}90` }}>{pct}% razgovora</p>
+                                        </div>
+                                    )
+                                })}
                             </div>
-                        </div>
-                        <div className="grid grid-cols-2 gap-2.5">
-                            {m.topTeme.map((t, i) => {
-                                const color = TEMA_COLORS[i] ?? "#52525b"
-                                const pct = m.total > 0 ? Math.round((t.count / m.total) * 100) : 0
-                                return (
-                                    <div key={t.name} className="relative rounded-xl px-3 py-2.5 overflow-hidden"
-                                        style={{
-                                            background: `linear-gradient(135deg,${color}14,${color}06)`,
-                                            border: `1px solid ${color}28`,
-                                        }}>
-                                        <div className="flex items-center justify-between mb-1.5">
-                                            <span className="text-xs font-semibold truncate pr-2" style={{ color: "#e4e4e7" }}>{t.name}</span>
-                                            <span className="text-xs font-black shrink-0" style={{ color }}>{t.count}</span>
-                                        </div>
-                                        <div className="h-[3px] rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.06)" }}>
-                                            <motion.div initial={{ width: 0 }} animate={{ width: `${pct}%` }}
-                                                transition={{ duration: 1, delay: 0.3 + i * 0.06, ease: "easeOut" }}
-                                                className="h-full rounded-full" style={{ background: color }} />
-                                        </div>
-                                        <p className="text-[9px] mt-1 font-bold" style={{ color: `${color}90` }}>{pct}% razgovora</p>
-                                    </div>
-                                )
-                            })}
-                        </div>
-                        <p className="text-[10px] mt-4 leading-snug" style={{ color: "#3f3f46" }}>
-                            {config.tableType === 'proizvodi'
-                                ? "Korisno za planiranje promotivnih kampanja i fokus na najtraženije kategorije."
-                                : "Korisno za planiranje zaliha i odabir naslova za promotivne kampanje."}
-                        </p>
-                    </Panel>
-                </motion.div>
+                            <p className="text-[10px] mt-4 leading-snug" style={{ color: "#3f3f46" }}>
+                                Korisno za planiranje zaliha i odabir naslova za promotivne kampanje.
+                            </p>
+                        </Panel>
+                    </motion.div>
+                )}
 
-                {/* Top autori — new panel */}
-                <motion.div variants={fadeUp} className="col-span-12 lg:col-span-6">
+                {/* Top autori / brendovi */}
+                <motion.div variants={fadeUp} className={config.tableType === 'proizvodi' ? "col-span-12" : "col-span-12 lg:col-span-6"}>
                     <Panel>
                         <div className="flex items-center gap-3 mb-5">
                             <div className="w-8 h-8 rounded-xl flex items-center justify-center"
@@ -674,16 +674,40 @@ function BookstoreAnalytics({ clientId, config, selectedBrandIds }: { clientId: 
                             </div>
                             <div>
                                 <p className="text-[10px] font-bold uppercase tracking-[0.18em]" style={{ color: "#52525b" }}>Potražnja</p>
-                                <p className="text-sm font-semibold text-white">{config.tableType === 'proizvodi' ? "Top brendovi / kategorije" : "Najpopularniji autori"}</p>
+                                <p className="text-sm font-semibold text-white">{config.tableType === 'proizvodi' ? "Top brendovi" : "Najpopularniji autori"}</p>
                             </div>
                         </div>
                         {m.topAutori.length === 0 ? (
                             <p className="text-xs italic" style={{ color: "#3f3f46" }}>Nema dovoljno podataka</p>
                         ) : (
-                            <div className="space-y-3">
+                            <div className={config.tableType === 'proizvodi' ? "grid grid-cols-2 md:grid-cols-4 gap-3" : "space-y-3"}>
                                 {m.topAutori.map((a, i) => {
                                     const pct = Math.round((a.count / maxAutor) * 100)
                                     const medal = MEDALS[i]
+                                    if (config.tableType === 'proizvodi') {
+                                        const isTop = i === 0
+                                        return (
+                                            <div key={a.name} className="relative rounded-xl p-4 flex flex-col gap-2"
+                                                style={{
+                                                    background: isTop
+                                                        ? "linear-gradient(135deg,rgba(139,92,246,0.14),rgba(139,92,246,0.06))"
+                                                        : "linear-gradient(135deg,rgba(255,255,255,0.05),rgba(255,255,255,0.02))",
+                                                    border: isTop ? "1px solid rgba(139,92,246,0.3)" : "1px solid rgba(255,255,255,0.06)",
+                                                }}>
+                                                <div className="flex items-start justify-between">
+                                                    <span className="text-lg leading-none">{medal ?? <span className="text-[11px] font-black" style={{ color: "#52525b" }}>#{i+1}</span>}</span>
+                                                    <span className="text-2xl font-black leading-none" style={{ color: isTop ? "#8b5cf6" : "#52525b" }}>{a.count}</span>
+                                                </div>
+                                                <p className="text-sm font-bold leading-snug" style={{ color: isTop ? "#e4e4e7" : "#a1a1aa" }}>{a.name}</p>
+                                                <div className="mt-auto pt-2 h-[3px] rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.05)" }}>
+                                                    <motion.div initial={{ width: 0 }} animate={{ width: `${pct}%` }}
+                                                        transition={{ duration: 1, delay: 0.3 + i * 0.1, ease: "easeOut" }}
+                                                        className="h-full rounded-full"
+                                                        style={{ background: isTop ? "#8b5cf6" : "rgba(255,255,255,0.2)" }} />
+                                                </div>
+                                            </div>
+                                        )
+                                    }
                                     return (
                                         <div key={a.name} className="flex items-center gap-3 group">
                                             <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 text-sm"
@@ -711,7 +735,7 @@ function BookstoreAnalytics({ clientId, config, selectedBrandIds }: { clientId: 
                         )}
                         <p className="text-[10px] mt-5 leading-snug" style={{ color: "#3f3f46" }}>
                             {config.tableType === 'proizvodi'
-                                ? "Brendovi i linije koje kupci najčešće traže — koristi za prioritizaciju zaliha."
+                                ? "Brendovi koje kupci najčešće traže — koristi za prioritizaciju zaliha i promotivnih kampanja."
                                 : "Autori čija dela kupci najčešće traže — koristi za nabavku novih naslova istih autora."}
                         </p>
                     </Panel>

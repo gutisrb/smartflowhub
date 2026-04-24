@@ -83,11 +83,26 @@ SmartFlow builds a custom AI agent that handles Instagram, Facebook, WhatsApp, a
 This is ONE sentence. Not two. Not a list. One sentence with an em dash.
 
 **Structure:**
-`Radim sa [specific role] koji [specific pressure they're in right now] — izgradio sam AI sistem koji preuzima svu komunikaciju sa [kupcima/klijentima] na društvenim mrežama i sajtu, odgovara, kvalifikuje i [završava prodaju / zakazuje / završava prijavljivanje], dok se sve poruke slivaju u jednu preglednu aplikaciju odakle možete ući u svaki razgovor kad god je potrebno.`
+`Radim sa [specific role] koji [specific operational pressure they feel daily] — izgradio sam AI sistem koji preuzima svu komunikaciju sa [kupcima/klijentima] na društvenim mrežama i sajtu, odgovara, kvalifikuje i [završava prodaju / zakazuje / završava prijavljivanje], dok se sve poruke slivaju u jednu preglednu aplikaciju odakle možete ući u svaki razgovor kad god je potrebno.`
 
 - Never list platforms (no "Instagramu, Facebooku, WhatsAppu") — always "društvene mreže i sajt"
-- "završava prodaju" for product businesses, "zakazuje" for service businesses
-- The pressure after "koji" must be specific to this lead's situation — not generic
+- Closing verb must match the niche precisely:
+  - Product/ecommerce → `završava prodaju`
+  - Medical/clinic/dental/aesthetic → `zakazuje preglede` or `zakazuje termine`
+  - Travel agency → `završava prijavljivanje` or `zakazuje konsultacije`
+  - Real estate → `zakazuje razgledanja`
+  - Fitness/wellness/spa → `zakazuje termine`
+  - Education/courses → `zakazuje probni čas` or `završava prijavljivanje`
+  - Furniture/decor/home → `zakazuje posete salonu` or `završava narudžbinu`
+  - Solar/construction/home services → `zakazuje procenu`
+  - Other service → `zakazuje termine`
+  - **NEVER use `zakazuje razgledanja` for non-real-estate businesses**
+- **CRITICAL — the pressure clause after "koji":** describe their daily operational problem — NOT their ad count, NOT their follower count, NOT generic filler. It must feel like you understand their specific situation. Examples of GOOD pressure clauses:
+  - `koji se suočavaju sa velikim brojem upita za [specific service/product]` — high inquiry volume
+  - `koji svakodnevno primaju upite za termine dok im tim nije uvek dostupan` — availability gap
+  - `koji tokom sezone prime stotine upita a ručno odgovaraju na svaki` — seasonal overload
+  - `kojima klijenti pišu u svako doba i čekaju odgovor satima` — response time pressure
+- **NEVER put ad count or follower count in P1** — those belong in P2 as evidence
 
 **Decision-maker email (`email_classification: decision_maker`):**
 - MUST start with `Zdravo [contact_name in vocative],\n\n`
@@ -111,9 +126,14 @@ This is ONE sentence. Not two. Not a list. One sentence with an em dash.
 ### P2 — Transformation specific to this lead
 
 Use the actual lead data to describe what specifically changes for this business. Reference their real situation:
-- If they run ads: mention the number of active ads
-- If high followers: reference scale
+- Mention follower count as scale evidence
+- If they run ads: mention the number of active ads as evidence of outreach volume
 - Name the specific transformation: from chaos to clarity, from guessing to knowing, from missing inquiries to capturing every one
+
+**Personalization — MANDATORY when ad_copies are available:**
+Read the `ad_copies` field. If it contains specific language, services, or offers (e.g. "besplatna procena", "letovanje u Grčkoj", "ugradni setovi", "anticelulit tretmani", "specijalistički pregledi"), use that exact vocabulary in P2 when describing what they now gain visibility into. This makes the email feel like it was written by someone who actually looked at their business — not a template.
+
+Example: if their ad says "Sumnjate u karcinom? Ovo je jedna od najpreciznijih tehnologija..." → P2 should reference "upiti o dijagnostičkim procedurama" not just "upiti o uslugama".
 
 **CRITICAL word rules:**
 - Product businesses (fashion, food, beauty, ecommerce): use "proizvodi", "kupci", "kupovine"
@@ -142,6 +162,8 @@ Then: connect the data to marketing. Frame it naturally for their niche — the 
 
 "Kada god biste imali dvadesetak minuta slobodno, voleo bih da Vam pokažem kako ovaj sistem izgleda konkretno za [company_name] — bez ikakvih obaveza. Ako odlučite da ga uvedete, integracija traje 7 dana i plaćate tek kada je sve aktivno: https://cal.com/smartflow.rs/20min"
 
+**Company name in P4:** Use a short, natural form of the name. If the full name is very long or contains commas/parentheses (e.g. "OPAL plasticna,rekonstruktivna i estetska hirurgija"), use just the first recognizable part ("OPAL" or "OPAL kliniku"). Never paste a long comma-separated company name verbatim into the CTA sentence.
+
 ---
 
 ### Signature (always identical)
@@ -166,6 +188,8 @@ Pick the variant based on `subject_variant` (0, 1, or 2):
 The transformation/outcome in the subject must be specific to this lead — not a generic phrase. Write it as if you know their business.
 
 **NEVER use in the subject:** "automatiz-" (any form), "optimizuj-", "sistematizuj-", "unapredi komunikaciju", "upravljanje upitima". These are weak, generic, and banned.
+
+**NEVER use these words anywhere in the email (subject or body):** "automatizovati", "automatizuje", "automatizovano", "automatizovan", "automatizacija", "automatizovati".
 
 ---
 
@@ -200,7 +224,7 @@ For general inbox emails: don't imply the system replaces the person reading. Fr
 ```json
 {
   "subject": "Kako TRI O može da pretvori svaki DM u evidentirani prodajni razgovor",
-  "body": "Zdravo Stefane,\n\nRadim sa vlasnicima brendova koji vode **8+ aktivnih kampanja** i primaju stalne upite — izgradio sam AI sistem koji preuzima svu komunikaciju sa **kupcima** na društvenim mrežama i sajtu, odgovara, kvalifikuje i **završava prodaju**, dok se sve poruke slivaju u jednu preglednu aplikaciju odakle možete ući u svaki razgovor kad god je potrebno.\n\nZa **TRI O** konkretno — sa skoro **12.000 pratilaca** i aktivnim kampanjama, svaki dan stiže novi talas upita o proizvodima.\nDanas ti razgovori najčešće završavaju bez traga.\nSa ovim sistemom, svaki upit postaje evidentiran razgovor: znaćete koji **proizvodi** privlače najviše interesovanja, koje kampanje donose stvarne kupce, i gde kupci najčešće odustaju.\n\nSistem prosečno uštedi **15-20 sati nedeljno** i smanji vreme posvećeno upitima za **90%**, pružajući kupcima brz i jednostavan proces kupovine.\nKada konverzacija zahteva Vaš lični dodir, sistem Vas obavesti — ništa ne prođe nezabeleženo.\nSve platforme, jedan interfejs.\n_Agent razume i fotografije i videe koje kupci šalju u porukama i odgovorima na storije — jedino rešenje te vrste na srpskom tržištu._\nA podaci koje sistem generiše govore Vam tačno šta da testirate sledeće u Vašim kampanjama.\n\nKada god biste imali dvadesetak minuta slobodno, voleo bih da Vam pokažem kako ovaj sistem izgleda konkretno za TRI O — bez ikakvih obaveza.\n_Ako odlučite da ga uvedete, integracija traje 7 dana i plaćate tek kada je sve aktivno: https://cal.com/smartflow.rs/20min_\n\nVeliki pozdrav,\nNikola Guteša\nSmartflow | Smartflow.rs | +381 64 118 2200"
+  "body": "Zdravo Stefane,\n\nRadim sa vlasnicima brendova koji svakodnevno primaju upite za proizvode a ručno odgovaraju na svaki — izgradio sam AI sistem koji preuzima svu komunikaciju sa **kupcima** na društvenim mrežama i sajtu, odgovara, kvalifikuje i **završava prodaju**, dok se sve poruke slivaju u jednu preglednu aplikaciju odakle možete ući u svaki razgovor kad god je potrebno.\n\nZa **TRI O** konkretno — sa skoro **12.000 pratilaca** i **8 aktivnih kampanja**, svaki dan stiže novi talas upita o proizvodima.\nDanas ti razgovori najčešće završavaju bez traga.\nSa ovim sistemom, svaki upit postaje evidentiran razgovor: znaćete koji **proizvodi** privlače najviše interesovanja, koje kampanje donose stvarne kupce, i gde kupci najčešće odustaju.\n\nSistem prosečno uštedi **15-20 sati nedeljno** i smanji vreme posvećeno upitima za **90%**, pružajući kupcima brz i jednostavan proces kupovine.\nKada konverzacija zahteva Vaš lični dodir, sistem Vas obavesti — ništa ne prođe nezabeleženo.\nSve platforme, jedan interfejs.\n_Agent razume i fotografije i videe koje kupci šalju u porukama i odgovorima na storije — jedino rešenje te vrste na srpskom tržištu._\nA podaci koje sistem generiše govore Vam tačno šta da testirate sledeće u Vašim kampanjama.\n\nKada god biste imali dvadesetak minuta slobodno, voleo bih da Vam pokažem kako ovaj sistem izgleda konkretno za TRI O — bez ikakvih obaveza.\n_Ako odlučite da ga uvedete, integracija traje 7 dana i plaćate tek kada je sve aktivno: https://cal.com/smartflow.rs/20min_\n\nVeliki pozdrav,\nNikola Guteša\nSmartflow | Smartflow.rs | +381 64 118 2200"
 }
 ```
 
@@ -211,7 +235,7 @@ For general inbox emails: don't imply the system replaces the person reading. Fr
 ```json
 {
   "subject": "Agencije za nekretnine — šta se dešava sa upitima koji stignu vikendom",
-  "body": "Dobar dan,\n\nRadim sa agencijama za nekretnine koje vode aktivne kampanje i primaju stalne upite — izgradio sam AI sistem koji preuzima svu komunikaciju sa **klijentima** na društvenim mrežama i sajtu, odgovara, kvalifikuje i **zakazuje razgledanja**, dok se sve poruke slivaju u jednu preglednu aplikaciju odakle Vaš tim može ući u svaki razgovor kad god je potrebno.\n\nSa **4 aktivne kampanje** i stalnim prilivom upita, svaki dan stiže novi set potencijalnih klijenata.\nDanas ti razgovori najčešće završavaju bez odgovora ili bez evidencije.\nSa ovim sistemom, svaki upit postaje evidentiran razgovor: znaćete koje **usluge** privlače najviše interesovanja, koje kampanje donose ozbiljne klijente, i gde najčešće dolazi do odustajanja.\n\nSistem prosečno uštedi **15-20 sati nedeljno** i smanji vreme posvećeno upitima za **90%**, pružajući klijentima brz i jednostavan proces zakazivanja.\nKada razgovor zahteva lični pristup agenta, sistem to signalizira — ništa ne prođe nezabeleženo.\nSve platforme, jedan interfejs.\n_Agent razume i fotografije nekretnina koje klijenti šalju — jedino rešenje te vrste na srpskom tržištu._\nPodaci koje sistem generiše govore Vam tačno koji sadržaj i koji oglasi donose stvarne zahteve za razgledanjem.\n\nKada god biste imali dvadesetak minuta slobodno, voleo bih da Vam pokažem kako ovaj sistem izgleda konkretno za Vašu agenciju — bez ikakvih obaveza.\n_Ako odlučite da ga uvedete, integracija traje 7 dana i plaćate tek kada je sve aktivno: https://cal.com/smartflow.rs/20min_\n\nVeliki pozdrav,\nNikola Guteša\nSmartflow | Smartflow.rs | +381 64 118 2200"
+  "body": "Dobar dan,\n\nRadim sa agencijama za nekretnine kojima klijenti šalju upite za nekretnine u svako doba a tim nije uvek dostupan da odgovori — izgradio sam AI sistem koji preuzima svu komunikaciju sa **klijentima** na društvenim mrežama i sajtu, odgovara, kvalifikuje i **zakazuje razgledanja**, dok se sve poruke slivaju u jednu preglednu aplikaciju odakle Vaš tim može ući u svaki razgovor kad god je potrebno.\n\nSa **4 aktivne kampanje** i stalnim prilivom upita, svaki dan stiže novi set potencijalnih klijenata.\nDanas ti razgovori najčešće završavaju bez odgovora ili bez evidencije.\nSa ovim sistemom, svaki upit postaje evidentiran razgovor: znaćete koje **usluge** privlače najviše interesovanja, koje kampanje donose ozbiljne klijente, i gde najčešće dolazi do odustajanja.\n\nSistem prosečno uštedi **15-20 sati nedeljno** i smanji vreme posvećeno upitima za **90%**, pružajući klijentima brz i jednostavan proces zakazivanja.\nKada razgovor zahteva lični pristup agenta, sistem to signalizira — ništa ne prođe nezabeleženo.\nSve platforme, jedan interfejs.\n_Agent razume i fotografije nekretnina koje klijenti šalju — jedino rešenje te vrste na srpskom tržištu._\nPodaci koje sistem generiše govore Vam tačno koji sadržaj i koji oglasi donose stvarne zahteve za razgledanjem.\n\nKada god biste imali dvadesetak minuta slobodno, voleo bih da Vam pokažem kako ovaj sistem izgleda konkretno za Vašu agenciju — bez ikakvih obaveza.\n_Ako odlučite da ga uvedete, integracija traje 7 dana i plaćate tek kada je sve aktivno: https://cal.com/smartflow.rs/20min_\n\nVeliki pozdrav,\nNikola Guteša\nSmartflow | Smartflow.rs | +381 64 118 2200"
 }
 ```
 

@@ -55,20 +55,25 @@ const modeIdx     = process.argv.indexOf('--mode');
 const MODE        = modeIdx !== -1 ? process.argv[modeIdx + 1] : 'initial'; // 'initial' | 'followup'
 const companyIdx  = process.argv.indexOf('--company');
 const COMPANY     = companyIdx !== -1 ? process.argv[companyIdx + 1] : null;
-const DELAY_MIN_MS = 90_000;  // min 90s between sends
-const DELAY_MAX_MS = 180_000; // max 180s — randomized to look human
+const DELAY_MIN_MS = 180_000; // min 3min between sends (cold email best practice)
+const DELAY_MAX_MS = 360_000; // max 6min — randomized to look human
 function randomDelay() { return DELAY_MIN_MS + Math.floor(Math.random() * (DELAY_MAX_MS - DELAY_MIN_MS)); }
 
 // ── Ordering ───────────────────────────────────────────────────────────────────
 const KAT_ORDER  = { 'Vreo': 0, 'Topao': 1, 'Hladan': 2 };
 const SKIP_NAMES = new Set(['Temu Asia', 'Orion Telekom', 'CGSHOPPP', 'PATIKE HUB', 'Zen House Sarajevo']);
+// Banned words that should never appear in the subject — drafts containing these need regeneration
+const BANNED_SUBJECT_RX = /automatizovati|automatizuje|automatizovano|automatizacija/i;
 // Domains that are clearly not real business emails
 const BOGUS_DOMAINS = new Set(['instagram.com', 'airbnb.com', 'facebook.com', 'tiktok.com', 'pubgmobile.com']);
-// Emails that are clearly image filenames scraped by mistake
+// Emails that are clearly image filenames scraped by mistake, or have invalid domains
 function isBogusEmail(email) {
   if (!email) return true;
   if (/\.(webp|png|jpg|jpeg|gif|svg)(@|$)/i.test(email)) return true;
   if (/@.*\.(webp|png|jpg|jpeg|gif|svg)$/i.test(email)) return true;
+  // Domain must have a valid TLD (2-10 lowercase letters, nothing else after)
+  const domain = email.split('@')[1] || '';
+  if (!/^[a-z0-9][a-z0-9.\-]+\.[a-z]{2,10}$/i.test(domain)) return true;
   return false;
 }
 
@@ -168,6 +173,8 @@ async function main() {
       if (SKIP_NAMES.has(l.company_name)) return false;
       if (!l[draftField]) return false;
       if (isBogusEmail(l.email)) return false;
+      const subject = l[draftField].split('\n')[0];
+      if (BANNED_SUBJECT_RX.test(subject)) { console.warn(`⚠  ${l.company_name} — banned word in subject, skipping (needs regen)`); return false; }
       const domain = l.email?.split('@')[1]?.toLowerCase();
       if (domain && BOGUS_DOMAINS.has(domain)) return false;
       // Deduplicate: skip if we already have this recipient address
@@ -218,6 +225,10 @@ async function main() {
         text:    textBody,
         html:    htmlBody,
         replyTo: GMAIL_USER,
+        headers: {
+          'List-Unsubscribe': `<mailto:${GMAIL_USER}?subject=unsubscribe>`,
+          'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
+        },
       });
 
       // Mark sent (only for real sends, not test)

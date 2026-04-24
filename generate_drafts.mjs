@@ -14,6 +14,7 @@
  *   node generate_drafts.mjs --limit 10                   — cap batch size
  */
 
+import OpenAI from 'openai';
 import { createClient } from '@supabase/supabase-js';
 import { readFileSync } from 'fs';
 import { resolve, dirname } from 'path';
@@ -36,15 +37,14 @@ loadEnv();
 const SUPABASE_URL  = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SERVICE_KEY   = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const SMARTFLOW_ID  = '69acf7e9-557e-4ca3-85bd-a785ef39e351';
-const GEMINI_KEY    = process.env.GEMINI_API_KEY;
-const GEMINI_MODEL          = 'gemini-3.1-flash-lite-preview';
-const GEMINI_MODEL_FALLBACK = 'gemini-2.5-flash';
-const GEMINI_URL = (model) => `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_KEY}`;
+const OPENAI_KEY   = process.env.OPENAI_API_KEY;
+const OPENAI_MODEL = 'gpt-4o-mini';
 
-if (!GEMINI_KEY) {
-  console.error('✗ GEMINI_API_KEY not set in .env.local');
+if (!OPENAI_KEY) {
+  console.error('✗ OPENAI_API_KEY not set in .env.local');
   process.exit(1);
 }
+const openai = new OpenAI({ apiKey: OPENAI_KEY });
 
 // ── CLI args ───────────────────────────────────────────────────────────────────
 const isDryRun    = process.argv.includes('--dry-run');
@@ -55,7 +55,7 @@ const limitIdx    = process.argv.indexOf('--limit');
 const LIMIT       = limitIdx !== -1 ? parseInt(process.argv[limitIdx + 1]) : 0;
 const modeIdx     = process.argv.indexOf('--mode');
 const MODE        = modeIdx !== -1 ? process.argv[modeIdx + 1] : 'all'; // 'all' | 'initial' | 'followup'
-const DELAY_MS    = 2000; // 2s between Gemini calls
+const DELAY_MS    = 500; // 0.5s between calls — OpenAI has generous rate limits
 
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
@@ -182,8 +182,8 @@ function buildLeadIntel(lead, emailType) {
     .map(r => r.caption || r.transcript || '')
     .filter(Boolean);
 
-  // Ad copies
-  const adCopies = (enrichment.ad_copies || []).slice(0, 2).filter(Boolean);
+  // Ad copies — stored at top-level intake_data.ad_copies (from source_leads pipeline)
+  const adCopies = (lead.intake_data?.ad_copies || enrichment.ad_copies || []).slice(0, 3).filter(Boolean);
 
   const businessType = inferBusinessTypeFromContext(lead.niche, bio, companyName);
 
@@ -210,6 +210,7 @@ function buildLeadIntel(lead, emailType) {
     active_ads_count: lead.intake_data?.active_ads_count || 0,
     instagram_reels: reelSamples,
     ad_copies: adCopies,
+    website_summary: enrichment.website_summary || null,
     subject_variant: subjectVariant(lead.company_name || lead.ime || ''),
   };
 }
@@ -223,76 +224,30 @@ function getSystemPrompt() {
   }
 }
 
-// ── Gemini API Call ────────────────────────────────────────────────────────────
-async function callGemini(url, body) {
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
-  });
-  return res;
-}
-
+// ── OpenAI API Call ───────────────────────────────────────────────────────────
 async function generateDraft(leadIntel, systemPrompt) {
-  const body = {
-    system_instruction: {
-      parts: [{ text: systemPrompt }]
-    },
-    contents: [{
-      role: 'user',
-      parts: [{ text: JSON.stringify(leadIntel, null, 2) }]
-    }],
-    generationConfig: {
-      temperature: 0.85,
-      maxOutputTokens: 1500,
-    }
-  };
+  const completion = await openai.chat.completions.create({
+    model:           OPENAI_MODEL,
+    temperature:     0.85,
+    response_format: { type: 'json_object' },
+    messages: [
+      { role: 'system', content: systemPrompt },
+      { role: 'user',   content: JSON.stringify(leadIntel, null, 2) },
+    ],
+  });
 
-  let res = await callGemini(GEMINI_URL(GEMINI_MODEL), body);
-
-  // Fallback to 2.5-flash on quota/rate errors
-  if (!res.ok && (res.status === 429 || res.status === 503 || res.status === 500)) {
-    console.warn(`  ⚠  ${GEMINI_MODEL} unavailable (${res.status}), retrying with ${GEMINI_MODEL_FALLBACK}...`);
-    res = await callGemini(GEMINI_URL(GEMINI_MODEL_FALLBACK), body);
-  }
-
-  if (!res.ok) {
-    const errText = await res.text();
-    throw new Error(`Gemini API error ${res.status}: ${errText.slice(0, 200)}`);
-  }
-
-  const data = await res.json();
-  const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
-
-  // Strip any accidental markdown code fences
-  let cleaned = text.trim().replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```$/, '');
-
-  // Extract just the JSON object (first { to last })
-  const firstBrace = cleaned.indexOf('{');
-  const lastBrace = cleaned.lastIndexOf('}');
-  if (firstBrace !== -1 && lastBrace !== -1) cleaned = cleaned.slice(firstBrace, lastBrace + 1);
-
+  const text = completion.choices[0].message.content || '';
   let parsed;
   try {
-    parsed = JSON.parse(cleaned);
+    parsed = JSON.parse(text);
   } catch {
-    // Fallback: repair literal newlines inside string values
-    try {
-      const repaired = cleaned.replace(/"(body|subject)":\s*"([\s\S]*?)(?<!\\)"/g, (_, k, v) => {
-        const escaped = v.replace(/\n/g, '\\n').replace(/\r/g, '');
-        return `"${k}": "${escaped}"`;
-      });
-      parsed = JSON.parse(repaired);
-    } catch {
-      throw new Error(`Gemini returned non-JSON: ${cleaned.slice(0, 300)}`);
-    }
+    throw new Error(`OpenAI returned non-JSON: ${text.slice(0, 300)}`);
   }
 
   if (!parsed.subject || !parsed.body) {
-    throw new Error(`Gemini response missing subject or body: ${JSON.stringify(parsed).slice(0, 200)}`);
+    throw new Error(`OpenAI response missing subject or body: ${JSON.stringify(parsed).slice(0, 200)}`);
   }
 
-  // Convert to parseDraft() format: "Subject: ...\n\nbody"
   return `Subject: ${parsed.subject}\n\n${parsed.body}`;
 }
 
@@ -324,6 +279,7 @@ async function main() {
 
   // Skip leads that already have drafts unless --force or --company is set
   if (!COMPANY && !isForce) {
+    enrichedQuery    = enrichedQuery.is('email_draft', null);
     kontaktiranQuery = kontaktiranQuery.is('email_2_draft', null);
   }
 
@@ -349,7 +305,7 @@ async function main() {
   const date = new Date().toLocaleDateString('sr-RS', { day: '2-digit', month: '2-digit', year: 'numeric' });
   console.log(`\nSmartFlow Draft Generator — ${date}`);
   console.log(`Enriched (initial): ${enriched.length}  |  Kontaktiran (follow-up): ${kontaktiran.length}  |  Queue: ${queue.length}${isDryRun ? ' [DRY RUN]' : ''}`);
-  console.log(`Model: ${GEMINI_MODEL}  (fallback: ${GEMINI_MODEL_FALLBACK})\n`);
+  console.log(`Model: ${OPENAI_MODEL}\n`);
 
   if (queue.length === 0) {
     console.log('Nothing to generate — all eligible leads already have drafts.');
