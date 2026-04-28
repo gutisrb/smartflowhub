@@ -165,7 +165,10 @@ export function AgentLeadsModule({ clientId, selectedBrandIds, terminology: prop
             const brandMock = activeBrandIds.flatMap(bid =>
                 (MOCK_BOOKSTORE_CRM_BY_CLIENT[bid] ?? []).map((item: any) => ({ ...item, brandId: bid }))
             )
-            setLeads(bookStoreConfig && (!data || data.length === 0) ? brandMock : (data || []))
+            const fallback = brandMock.length > 0
+                ? brandMock
+                : (MOCK_BOOKSTORE_CRM_BY_CLIENT[clientId!] ?? [])
+            setLeads(bookStoreConfig && (!data || data.length === 0) ? fallback : (data || []))
         } catch (error) {
             console.error("Failed to load candidates", error)
             toast.error("Greška pri učitavanju")

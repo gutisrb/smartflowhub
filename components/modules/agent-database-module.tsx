@@ -108,7 +108,23 @@ export function AgentDatabaseModule({
     const isCatalogProducts = bookStoreConfig?.tableType === 'proizvodi'
     const bsColor = bookStoreConfig?.color || '#10b981'
 
-    // Mock product catalog for demo — shown when DB is empty (pre-seeding)
+    // Mock product catalog for Maguna Dizajn — furniture e-commerce
+    const MOCK_MAGUNA_PRODUCTS = [
+        { id: 'mg1',  naziv: 'Sklopivi sto kutija BELI',               brend: 'Maguna', kategorija: 'Sklopivi stolovi',     cena: 8990,  url: 'https://maguna.rs', status: 'Aktivan' },
+        { id: 'mg2',  naziv: 'Sklopivi radni sto BELI',                brend: 'Maguna', kategorija: 'Sklopivi stolovi',     cena: 6490,  url: 'https://maguna.rs', status: 'Aktivan' },
+        { id: 'mg3',  naziv: 'Sklopivi klub sto 2u1',                  brend: 'Maguna', kategorija: 'Sklopivi klub stolovi',cena: 5990,  url: 'https://maguna.rs', status: 'Aktivan' },
+        { id: 'mg4',  naziv: 'Sklopivi četvrtasti sto BELI',           brend: 'Maguna', kategorija: 'Sklopivi stolovi',     cena: 4990,  url: 'https://maguna.rs', status: 'Aktivan' },
+        { id: 'mg5',  naziv: 'Sklopivi sto zaobljeni ćoškovi A427',   brend: 'Maguna', kategorija: 'Sklopivi stolovi',     cena: 7490,  url: 'https://maguna.rs', status: 'Aktivan' },
+        { id: 'mg6',  naziv: 'Sklopivi sto sa policom BELI',           brend: 'Maguna', kategorija: 'Sklopivi stolovi',     cena: 10990, url: 'https://maguna.rs', status: 'Aktivan' },
+        { id: 'mg7',  naziv: 'Sklopivi sto CRNI mat',                  brend: 'Maguna', kategorija: 'Sklopivi stolovi',     cena: 7990,  url: 'https://maguna.rs', status: 'Aktivan' },
+        { id: 'mg8',  naziv: 'Sklopivi klub sto SIVI',                 brend: 'Maguna', kategorija: 'Sklopivi klub stolovi',cena: 5490,  url: 'https://maguna.rs', status: 'Nedostupno' },
+        { id: 'mg9',  naziv: 'Stočić za šminkanje STILSKI',            brend: 'Maguna', kategorija: 'Šminkanje / dekor',   cena: 12990, url: 'https://maguna.rs', status: 'Aktivan' },
+        { id: 'mg10', naziv: 'Stočić za šminkanje sa ogledalom LED',   brend: 'Maguna', kategorija: 'Šminkanje / dekor',   cena: 18990, url: 'https://maguna.rs', status: 'Aktivan' },
+        { id: 'mg11', naziv: 'Dečiji radni sto sa fiokama BELI',       brend: 'Maguna', kategorija: 'Dečiji nameštaj',     cena: 9490,  url: 'https://maguna.rs', status: 'Aktivan' },
+        { id: 'mg12', naziv: 'Dečija polica za knjige BELA',           brend: 'Maguna', kategorija: 'Dečiji nameštaj',     cena: 4290,  url: 'https://maguna.rs', status: 'Aktivan' },
+    ]
+
+    // Mock product catalog for Aleksandar MN — shown when DB is empty (pre-seeding)
     const MOCK_AMN_PRODUCTS = [
         { id: 'amn1',  naziv: 'Cognitiva Super nutrijent za mozak', brend: 'Cognitiva',      kategorija: 'Zdravlje – mozak',    cena: 2850, url: 'https://aleksandarmn.com/cognitiva-super-nutrijent-za-mozak-uskoro.html',                            status: 'Aktivan' },
         { id: 'amn2',  naziv: 'Joint MD Extra Strength, 50 tableta', brend: 'Joint MD',       kategorija: 'Zdravlje – zglobovi', cena: 3192, url: 'https://aleksandarmn.com/joint-md-extra-strength-hondroprotektor-50-tableta.html',                    status: 'Aktivan' },
@@ -152,7 +168,11 @@ export function AgentDatabaseModule({
                 let data: any[] = []
                 if (isCatalogProducts) {
                     data = await getProizvodiByClientId(clientId) || []
-                    if (data.length === 0) data = MOCK_AMN_PRODUCTS
+                    if (data.length === 0) {
+                        data = clientId === '0c25e7c2-360c-418a-816a-34444d304698'
+                            ? MOCK_MAGUNA_PRODUCTS
+                            : MOCK_AMN_PRODUCTS
+                    }
                 } else if (isHarmonija) {
                     data = await getKnjigeByClientId(clientId) || []
                 } else {
