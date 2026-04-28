@@ -234,6 +234,18 @@ export async function getProizvodiByClientId(clientId: string) {
     return data
 }
 
+// Maguna Dizajn — CRM
+export async function getCrmMagunaByClientId(clientId: string) {
+    const supabase = createClient()
+    const { data, error } = await supabase
+        .from('crm_maguna')
+        .select('*')
+        .eq('client_id', clientId)
+        .order('created_at', { ascending: false })
+    if (error) { console.error('Error fetching crm_maguna:', error); return [] }
+    return data
+}
+
 // Aleksandar MN — CRM
 export async function getCrmAleksandarMNByClientId(clientId: string) {
     const supabase = createClient()

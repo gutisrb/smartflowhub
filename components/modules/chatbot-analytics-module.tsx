@@ -9,8 +9,8 @@ import {
     CartesianGrid,
 } from "recharts"
 import { TrendingUp, MessageSquare, Users, Zap, Activity, BookOpen, Tag, ShoppingBag, } from "lucide-react"
-import { getBookStoreConfig, BookStoreConfig, BOOK_STORE_CLIENTS } from "@/lib/bookstore-clients"
-import { getCrmHarmonijaByClientId, getCrmPublikByClientId, getCrmStelaByClientId, getCrmAleksandarMNByClientId } from "@/lib/supabase/queries"
+import { getBookStoreConfig, BookStoreConfig, BOOK_STORE_CLIENTS } from "@/lib/brand-configs"
+import { getCrmHarmonijaByClientId, getCrmPublikByClientId, getCrmStelaByClientId, getCrmAleksandarMNByClientId, getCrmMagunaByClientId } from "@/lib/supabase/queries"
 
 interface ChatbotAnalyticsModuleProps {
     clientId: string
@@ -234,6 +234,40 @@ const MOCK_CRM_DATA_BY_CLIENT: Record<string, any[]> = {
         { knjiga: "Serrap MD Forte 120000 SPU",         autor: "Serrap MD", status: "Poručio",       razlog: null,                          izvor: "Instagram", created_at: d(13) },
         { knjiga: "iMMUNITA + D3 vitamin 2000",         autor: "AMN",       status: "Zainteresovan", razlog: "Čeka isporuku",                izvor: "Website",   created_at: d(13) },
     ],
+    // ── Maguna Dizajn (zdravstveni_cilj → kategorija/tema, proizvod → knjiga) ──
+    "0c25e7c2-360c-418a-816a-34444d304698": [
+        { tema: "Sklopivi stolovi",    knjiga: "Sklopivi sto kutija BELI 70×70",       status: "Poručio",       razlog: null,              izvor: "Instagram", created_at: d(0)  },
+        { tema: "Sklopivi stolovi",    knjiga: "Sklopivi radni sto BELI 100×60",       status: "Zainteresovan", razlog: "Pitao za cenu",   izvor: "Instagram", created_at: d(0)  },
+        { tema: "Šminkanje",           knjiga: "Stočić za šminkanje sa ogledalom",     status: "Poručio",       razlog: null,              izvor: "Facebook",  created_at: d(1)  },
+        { tema: "Sklopivi stolovi",    knjiga: null,                                   status: "Novi",          razlog: null,              izvor: "Instagram", created_at: d(1)  },
+        { tema: "Dečiji nameštaj",     knjiga: "Sklopivi dečiji sto i stolica SET",    status: "Poručio",       razlog: null,              izvor: "Instagram", created_at: d(1)  },
+        { tema: "Sklopivi stolovi",    knjiga: "Sklopivi sto kutija BELI 70×70",       status: "Zainteresovan", razlog: "Nema na stanju",  izvor: "Instagram", created_at: d(2)  },
+        { tema: "Dečiji nameštaj",     knjiga: "Dečiji sto sa policama BEO",           status: "Poručio",       razlog: null,              izvor: "Facebook",  created_at: d(2)  },
+        { tema: "Sklopivi stolovi",    knjiga: null,                                   status: "Novi",          razlog: null,              izvor: "Website",   created_at: d(2)  },
+        { tema: "Šminkanje",           knjiga: "Stočić za šminkanje LUKSUZ roza",      status: "Zainteresovan", razlog: "Pitao za cenu",   izvor: "Instagram", created_at: d(3)  },
+        { tema: "Sklopivi stolovi",    knjiga: "Sklopivi radni sto sa policom 120×60", status: "Poručio",       razlog: null,              izvor: "Instagram", created_at: d(3)  },
+        { tema: "Sklopivi stolovi",    knjiga: "Sklopivi sto kutija BELI 70×70",       status: "Zainteresovan", razlog: "Nije odgovorio",  izvor: "Facebook",  created_at: d(4)  },
+        { tema: "Dečiji nameštaj",     knjiga: "Sklopivi dečiji sto i stolica SET",    status: "Poručio",       razlog: null,              izvor: "Instagram", created_at: d(4)  },
+        { tema: "Sklopivi stolovi",    knjiga: "Sklopivi radni sto BELI 100×60",       status: "Intervencija",  razlog: null,              izvor: "Facebook",  created_at: d(4)  },
+        { tema: "Šminkanje",           knjiga: null,                                   status: "Novi",          razlog: null,              izvor: "Instagram", created_at: d(5)  },
+        { tema: "Sklopivi stolovi",    knjiga: "Sklopivi sto za laptop 60×40",         status: "Zainteresovan", razlog: "Pitao za cenu",   izvor: "Instagram", created_at: d(5)  },
+        { tema: "Dečiji nameštaj",     knjiga: "Dečiji sto sa policama BEO",           status: "Zainteresovan", razlog: "Nema na stanju",  izvor: "Instagram", created_at: d(6)  },
+        { tema: "Sklopivi stolovi",    knjiga: "Sklopivi sto kutija BELI 70×70",       status: "Poručio",       razlog: null,              izvor: "Website",   created_at: d(6)  },
+        { tema: "Šminkanje",           knjiga: "Stočić za šminkanje sa ogledalom",     status: "Poručio",       razlog: null,              izvor: "Instagram", created_at: d(7)  },
+        { tema: "Sklopivi stolovi",    knjiga: null,                                   status: "Novi",          razlog: null,              izvor: "Facebook",  created_at: d(7)  },
+        { tema: "Sklopivi stolovi",    knjiga: "Sklopivi radni sto sa policom 120×60", status: "Zainteresovan", razlog: "Premislio se",    izvor: "Instagram", created_at: d(8)  },
+        { tema: "Dečiji nameštaj",     knjiga: "Sklopivi dečiji sto i stolica SET",    status: "Zainteresovan", razlog: "Pitao za cenu",   izvor: "Instagram", created_at: d(8)  },
+        { tema: "Sklopivi stolovi",    knjiga: "Sklopivi radni sto BELI 100×60",       status: "Poručio",       razlog: null,              izvor: "Instagram", created_at: d(9)  },
+        { tema: "Šminkanje",           knjiga: "Stočić za šminkanje LUKSUZ roza",      status: "Poručio",       razlog: null,              izvor: "Facebook",  created_at: d(9)  },
+        { tema: "Sklopivi stolovi",    knjiga: null,                                   status: "Novi",          razlog: null,              izvor: "Website",   created_at: d(10) },
+        { tema: "Sklopivi stolovi",    knjiga: "Sklopivi sto za laptop 60×40",         status: "Poručio",       razlog: null,              izvor: "Instagram", created_at: d(10) },
+        { tema: "Dečiji nameštaj",     knjiga: null,                                   status: "Novi",          razlog: null,              izvor: "Facebook",  created_at: d(11) },
+        { tema: "Sklopivi stolovi",    knjiga: "Sklopivi sto kutija BELI 70×70",       status: "Zainteresovan", razlog: "Nema na stanju",  izvor: "Instagram", created_at: d(11) },
+        { tema: "Šminkanje",           knjiga: "Stočić za šminkanje sa ogledalom",     status: "Zainteresovan", razlog: "Pitao za cenu",   izvor: "Instagram", created_at: d(12) },
+        { tema: "Sklopivi stolovi",    knjiga: "Sklopivi radni sto BELI 100×60",       status: "Poručio",       razlog: null,              izvor: "Instagram", created_at: d(12) },
+        { tema: "Dečiji nameštaj",     knjiga: "Dečiji sto sa policama BEO",           status: "Zainteresovan", razlog: "Čeka isporuku",   izvor: "Website",   created_at: d(13) },
+        { tema: "Sklopivi stolovi",    knjiga: "Sklopivi radni sto sa policom 120×60", status: "Poručio",       razlog: null,              izvor: "Instagram", created_at: d(13) },
+    ],
 }
 
 function deriveBookstoreMetrics(rows: any[], days = 14) {
@@ -352,8 +386,9 @@ function BookstoreAnalytics({ clientId, config, selectedBrandIds }: { clientId: 
                 else if (cfg.crmTable === 'crm_publik') data = await getCrmPublikByClientId(bid) as any[]
                 else if (cfg.crmTable === 'crm_stela') data = await getCrmStelaByClientId(bid) as any[]
                 else if (cfg.crmTable === 'crm_aleksandarmn') data = await getCrmAleksandarMNByClientId(bid) as any[]
-                // Normalize AMN field names to match deriveBookstoreMetrics expectations
-                if (cfg.crmTable === 'crm_aleksandarmn') {
+                else if (cfg.crmTable === 'crm_maguna') data = await getCrmMagunaByClientId(bid) as any[]
+                // Normalize product CRM field names to match deriveBookstoreMetrics expectations
+                if (cfg.crmTable === 'crm_aleksandarmn' || cfg.crmTable === 'crm_maguna') {
                     data = data.map(r => ({ ...r, tema: r.zdravstveni_cilj, knjiga: r.proizvod }))
                 }
                 if (data && data.length > 0) {

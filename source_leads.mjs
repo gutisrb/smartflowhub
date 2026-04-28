@@ -50,18 +50,14 @@ const SERVICE_KEY    = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const SMARTFLOW_ID   = '69acf7e9-557e-4ca3-85bd-a785ef39e351';
 const HUNTER_KEY     = process.env.HUNTER_API_KEY;
 
-// DM-signal queries: businesses that advertise their inbox as the sales channel are
-// literally describing the problem SmartFlow solves. "poruku/inbox/pišite/javite" catch
-// any industry that uses DMs for sales — completely niche-agnostic.
-// "iskustvo" (experience) is the vague broad catch-all — service-coded, appears in clinics,
-// travel, events, renovation, hospitality across all industries, but rarely in webshop copy.
-// The 20k+ follower gate in Stage 4 handles filtering out small retailers and webshops.
-// Markets: RS = Serbia (primary), BA = Bosnia, HR = Croatia — all same language, untapped
-const ADS_COUNTRIES = ['RS', 'BA', 'HR'];
+// DM-signal queries: broad action/benefit words that appear in any service business's ad copy.
+// PRINCIPLE: queries are a mechanical key, not a niche selector. Cast the widest net.
+// AVOID: ecommerce words (kupi/popust), international words (hotel/spa), city terms.
+// Markets: RS (Serbia) + BA (Bosnia) + HR (Croatia) — same language family, 3× pool
+const ADS_COUNTRIES = ['RS'];
 const ADS_BASE_URL = 'https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=RS&media_type=video';
-// Queries rotate to avoid re-pulling same inventory. Broad service-booking CTAs only.
-// 'informišite' returns < 10 results — dropped. Replaced with 'uputite' and 'naručite'.
-const ADS_QUERIES  = ['zakažite', 'rezervišite', 'pozovite', 'prijavite', 'kontaktirajte', 'naručite'];
+// B3 batch — fresh queries. B2 used 2026-04-28. Update SOURCING_LOG after run.
+const ADS_QUERIES  = ['vaši snovi', 'bez stresa', 'bez čekanja', 'brzo i lako', 'odmah', 'bez obaveza', 'besplatna procena'];
 
 const isLocal    = process.argv.includes('--local');      // read from local JSON files, skip Apify Stage 1
 const isTest     = process.argv.includes('--test');       // no DB writes
@@ -83,8 +79,8 @@ const MAX_CHARGE = isTest ? 0.15 : (BUDGET_USD ? BUDGET_USD + 0.05 : 2.00); // +
 const LOCAL_DATASETS_DIR = resolve(__dirname, '..');  // photonic-lunar/
 const LOCAL_DATASET_GLOB = 'dataset_facebook-ads-library-scraper_';
 
-// IG follower gates — anything outside this range is either too small or a mega-corp
-const MIN_FOLLOWERS = 20000;
+// IG follower gates — strict 15k minimum, no exceptions
+const MIN_FOLLOWERS = 15000;
 const MAX_FOLLOWERS = 200000;  // cap at 200k — above this are large corps with dedicated CS teams
 
 // ── D2C retail & irrelevant exclusion ─────────────────────────────────────────
@@ -170,9 +166,8 @@ function isValidIgHandle(h) {
   return true;
 }
 
-// ── Serbian business detection ────────────────────────────────────────────────
-// Requires .rs domain OR Serbian-specific words — rejects Polish/Croatian/Bosnian
-// that merely target RS audience with Cyrillic-adjacent diacritics
+// ── BCS (Serbian/Bosnian/Croatian) business detection ─────────────────────────
+// Requires .rs/.ba/.hr domain OR BCS-specific vocabulary — rejects unrelated languages
 const SERBIAN_WORDS = /\b(srbija|beograd|novi sad|niš|kragujevac|subotica|dinar|dinara|dostava|besplatna|porudžbina|usluga|popust|akcija|zakazivanje|termin|naručite|kupite|pogledajte|saznajte|pratite|pratilaca|ponuda|cena|cene|kontakt|telefon|adresa|radno vreme|radi|radimo|otvoreno)\b/i;
 
 function isSerbianBusiness(texts, linkUrls, fbPageUri) {
@@ -345,7 +340,7 @@ async function findEmailOnWebsite(domain) {
     `https://${domain}/o-nama`,
     `https://${domain}`,
   ];
-  const SKIP = /noreply|no-reply|example|sentry|wix|schema|privacy|jquery|\.(png|jpg|jpeg|gif|svg|webp|pdf|css|js)(@|$)/i;
+  const SKIP = /noreply|no-reply|example|johndoe|test@|sentry|wix|schema|privacy|jquery|qodeinteractive|@website\.|@domena\.|^(posao|hr|kadrovi|jobs|career|zaposlenje|rekrutacij)@|\.(png|jpg|jpeg|gif|svg|webp|pdf|css|js)(@|$)/i;
   for (const url of urls) {
     try {
       const res = await fetch(url, {
@@ -661,16 +656,17 @@ async function main() {
   console.log('─── Stage 4: Apify IG Profile Scraper (batch) ──────────────');
 
   const IG_PROFILE_ACTOR = 'dSCLg0C3YEZ83HzYX';
-  // Pre-filter: only verify handles for pages with ≥ 1500 FB likes OR unknown likes.
-  // Pages with < 1500 FB likes almost never reach 20k IG followers — skip them to save ~$0.70/run.
-  const FB_LIKES_MIN_FOR_IG = 1500;
+  // Pre-filter: only verify pages with 10k+ FB likes OR an explicit IG URL in their profile.
+  // Pages with <10k FB likes almost never have 15k+ IG followers — verifying them wastes $0.005/each.
+  const FB_LIKES_MIN_FOR_IG = 10000;
   const igCandidates = withHandles.filter(l => {
     const likes = l.item.snapshot?.page_like_count || 0;
-    return likes === 0 || likes >= FB_LIKES_MIN_FOR_IG; // 0 = unknown, include
+    const hasExplicitIg = (l.item.snapshot?.page_profile_uri || '').includes('instagram.com');
+    return hasExplicitIg || likes >= FB_LIKES_MIN_FOR_IG;
   });
 
   const uniqueHandles = [...new Set(igCandidates.map(l => l.igHandle))];
-  console.log(`  Verifying ${uniqueHandles.length} handles (FB likes ≥ ${FB_LIKES_MIN_FOR_IG} or unknown, filtered from ${withHandles.length})...`);
+  console.log(`  Verifying ${uniqueHandles.length} handles (FB likes ≥ ${FB_LIKES_MIN_FOR_IG} or explicit IG URL, filtered from ${withHandles.length})...`);
 
   const profileByHandle = new Map();
   if (uniqueHandles.length > 0) {
@@ -696,12 +692,20 @@ async function main() {
       lead.igFollowers = profile.followersCount || 0;
       confirmed++;
       if (lead.igFollowers >= MIN_FOLLOWERS) above20k++;
-      // KEY: use IG bio's external_url as the website if we don't have one yet
-      const extUrl = profile.externalUrl;
-      if (extUrl && !lead.domain) {
-        try {
-          lead.domain = new URL(extUrl).hostname.replace(/^www\./, '');
-        } catch {}
+      // Extract website from IG profile's externalUrls array (actor returns array, not string)
+      if (!lead.domain) {
+        const urls = profile.externalUrls || [];
+        for (const entry of urls) {
+          const raw = entry?.url || entry;
+          if (!raw || typeof raw !== 'string') continue;
+          try {
+            const host = new URL(raw).hostname.replace(/^www\./, '');
+            if (host && !SOCIAL.has(host) && !host.includes('linkin.bio') && !host.includes('linktr.ee')) {
+              lead.domain = host;
+              break;
+            }
+          } catch {}
+        }
       }
     } else if (lead.igHandleIsGuess) {
       // Slug guess rejected by Apify — clear it so we don't insert a wrong handle
@@ -714,18 +718,21 @@ async function main() {
     }
   }
 
-  // Gate: 20k–500k followers. Confirmed IG data wins; FB likes used as proxy if no IG handle.
-  const toEnrich = qualified.filter(lead => {
-    const followers = lead.igFollowers ?? (lead.item.snapshot?.page_like_count || 0);
+  // Strict gate: must have 15k–200k IG followers. No exceptions.
+  const igVerified = qualified.filter(lead => {
+    const followers = lead.igFollowers ?? 0;
     return followers >= MIN_FOLLOWERS && followers <= MAX_FOLLOWERS;
   });
+
+  // Only proceed with IG-verified leads that passed the follower gate. No unverified no-handle leads.
+  const toEnrich = igVerified;
+
   const skippedLowFollowers = qualified.length - toEnrich.length;
 
   console.log(`  Confirmed handles  : ${confirmed}/${uniqueHandles.length}`);
-  console.log(`  ≥ ${MIN_FOLLOWERS/1000}k followers     : ${above20k}`);
-  console.log(`  Skipped (< ${MIN_FOLLOWERS/1000}k)    : ${skippedLowFollowers}`);
-  console.log(`  Domain from externalUrl: ${qualified.filter(l => l.domain && l.igProfile?.externalUrl).length}`);
-  console.log(`  Proceeding with ${toEnrich.length} leads (${MIN_FOLLOWERS/1000}k+ filter applied)\n`);
+  console.log(`  ≥ ${MIN_FOLLOWERS/1000}k followers (IG verified) : ${igVerified.length}`);
+  console.log(`  Skipped (< ${MIN_FOLLOWERS/1000}k or unverified)  : ${skippedLowFollowers}`);
+  console.log(`  Proceeding with ${toEnrich.length} leads total\n`);
 
   // ── --find-only: print leads, then fall through to DB insert (status = No Draft)
   if (isFindOnly) {
@@ -774,12 +781,14 @@ async function main() {
       if (domain) lead.domain = domain;
     }
 
-    if (fbEmail) {
+    const GARBAGE_EMAIL = /^(posao|hr|kadrovi|jobs|career|zaposlenje|rekrutacij)@/i;
+    if (fbEmail && !GARBAGE_EMAIL.test(fbEmail)) {
       contact = { email: fbEmail, name: null, title: null };
     } else if (domain) {
       // Hunter first
       process.stdout.write(`  Hunter (${domain})... `);
-      contact = await hunterDomain(domain);
+      const hunterContact = await hunterDomain(domain);
+      contact = (hunterContact && !GARBAGE_EMAIL.test(hunterContact.email)) ? hunterContact : null;
       if (contact) {
         console.log(`${contact.email}${contact.name ? ` (${contact.name})` : ''}`);
       } else {
@@ -856,7 +865,7 @@ async function main() {
               bio              : lead.igProfile.biography || null,
               business_category: lead.igProfile.businessCategoryName || null,
               is_verified      : lead.igProfile.isVerified || false,
-              external_url     : lead.igProfile.externalUrl || null,
+              external_url     : lead.igProfile.externalUrls?.[0]?.url || null,
             }
           : lead.igHandle
             ? { username: lead.igHandle, followers }

@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { getClientModules } from "@/lib/supabase/queries"
 import { MODULE_REGISTRY } from "./registry"
 import { ClientModule, EnabledModule, ModuleKey } from "./types"
-import { BOOK_STORE_CLIENTS } from "@/lib/bookstore-clients"
+import { BOOK_STORE_CLIENTS } from "@/lib/brand-configs"
 
 // Fetch enabled modules from DB for a specific client
 export function useClientModules(clientId: string | null) {
@@ -163,16 +163,6 @@ export function useUnifiedModules(clientId: string | null) {
           created_at: new Date().toISOString(),
           settings: null
         },
-        {
-          id: "fb6",
-          client_id: clientId as string,
-          module_key: "website-chatbot",
-          is_enabled: true,
-          display_name: "Website Chatbot",
-          sort_order: 5,
-          created_at: new Date().toISOString(),
-          settings: null
-        }
       ] : [])
     ] as ClientModule[]
   }

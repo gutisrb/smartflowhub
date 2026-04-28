@@ -5,7 +5,7 @@ import { ChevronRight, UserCircle, Database, LayoutDashboard, Zap, BarChart3, Se
 import { useState, useMemo } from "react"
 import { useUnifiedModules } from "@/lib/modules/hooks"
 import { EnabledModule, ModuleCategory, ModuleKey } from "@/lib/modules/types"
-import { BookStoreConfig, getBookStoreConfig } from "@/lib/bookstore-clients"
+import { BookStoreConfig, getBookStoreConfig } from "@/lib/brand-configs"
 import { BrandSwitcherSidebar } from "@/components/dashboard/brand-switcher"
 
 interface BrandEntry {

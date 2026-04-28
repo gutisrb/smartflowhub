@@ -11,7 +11,7 @@ import {
 } from "lucide-react"
 import { motion } from "framer-motion"
 import { cn } from "@/lib/utils"
-import { getBookStoreConfig } from "@/lib/bookstore-clients"
+import { getBookStoreConfig } from "@/lib/brand-configs"
 
 // ── Demo mode ────────────────────────────────────────────────────────────────
 const DEMO_MODE = false
@@ -531,13 +531,18 @@ export function SocialChatbotModule({ clientId, selectedBrandIds }: SocialChatbo
     }
 
     // Calculate stats based on period
+    const isCatalogProducts = bookStoreConfig?.tableType === 'proizvodi'
+
     const _baseUpiti = DEMO_MODE ? 524 : conversations.length
     const upitiPeriod = msgPeriod === "danas" ? Math.round(_baseUpiti / 30) : msgPeriod === "sedmica" ? Math.round(_baseUpiti / 4 * 1.2) : _baseUpiti
 
-    const _basePrijave = DEMO_MODE ? 142 : allMessages.filter(m =>
-        m.role === "user" && ["prijavim", "prijaviti", "prijavl", "zainteresova"].some(kw => m.message?.toLowerCase().includes(kw))
+    const _baseKonverzije = DEMO_MODE ? 142 : allMessages.filter(m =>
+        m.role === "user" && (isCatalogProducts
+            ? ["cena", "kupim", "narudžbin", "naruč", "dostav", "plaćan"].some(kw => m.message?.toLowerCase().includes(kw))
+            : ["prijavim", "prijaviti", "prijavl", "zainteresova"].some(kw => m.message?.toLowerCase().includes(kw))
+        )
     ).length
-    const prijavePeriod = msgPeriod === "danas" ? Math.round(_basePrijave / 30) : msgPeriod === "sedmica" ? Math.round(_basePrijave / 4 * 1.5) : _basePrijave
+    const prijavePeriod = msgPeriod === "danas" ? Math.round(_baseKonverzije / 30) : msgPeriod === "sedmica" ? Math.round(_baseKonverzije / 4 * 1.5) : _baseKonverzije
 
     const _baseMsgs = DEMO_MODE ? 1340 : allMessages.filter(m => m.role !== "system").length
     const msgCount = msgPeriod === "danas" ? Math.round(_baseMsgs / 30 * 1.2) : msgPeriod === "sedmica" ? Math.round(_baseMsgs / 4 * 1.1) : _baseMsgs
@@ -641,7 +646,7 @@ export function SocialChatbotModule({ clientId, selectedBrandIds }: SocialChatbo
             {/* ── Stats ──────────────────────────────────────────────────────── */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3 shrink-0">
                 <StatCard icon={<MessageCircle className="w-4 h-4" />} label={`Upiti · ${periodLabel}`} value={upitiPeriod} variant="pink" />
-                <StatCard icon={<UserCheck className="w-4 h-4" />} label={`Prijave · ${periodLabel}`} value={prijavePeriod} variant="emerald" />
+                <StatCard icon={<UserCheck className="w-4 h-4" />} label={`${isCatalogProducts ? "Zainteresovani" : "Prijave"} · ${periodLabel}`} value={prijavePeriod} variant="emerald" />
                 <StatCard
                     icon={<AlertTriangle className="w-4 h-4" />}
                     label="Intervencije"

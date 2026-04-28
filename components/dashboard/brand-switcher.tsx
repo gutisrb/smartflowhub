@@ -3,7 +3,7 @@
 import { motion } from "framer-motion"
 import { BookOpen, Sparkles, Users, ChevronDown, Check } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { BookStoreConfig } from "@/lib/bookstore-clients"
+import { BookStoreConfig } from "@/lib/brand-configs"
 import { useState, useRef, useEffect } from "react"
 
 interface BrandEntry {

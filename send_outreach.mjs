@@ -55,9 +55,9 @@ const modeIdx     = process.argv.indexOf('--mode');
 const MODE        = modeIdx !== -1 ? process.argv[modeIdx + 1] : 'initial'; // 'initial' | 'followup'
 const companyIdx  = process.argv.indexOf('--company');
 const COMPANY     = companyIdx !== -1 ? process.argv[companyIdx + 1] : null;
-const DELAY_MIN_MS = 180_000; // min 3min between sends (cold email best practice)
-const DELAY_MAX_MS = 360_000; // max 6min — randomized to look human
-function randomDelay() { return DELAY_MIN_MS + Math.floor(Math.random() * (DELAY_MAX_MS - DELAY_MIN_MS)); }
+const DELAY_MIN_MS = 180_000; // 3min fixed between sends
+const DELAY_MAX_MS = 180_000;
+function randomDelay() { return DELAY_MIN_MS; }
 
 // ── Ordering ───────────────────────────────────────────────────────────────────
 const KAT_ORDER  = { 'Vreo': 0, 'Topao': 1, 'Hladan': 2 };

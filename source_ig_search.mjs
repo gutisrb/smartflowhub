@@ -41,46 +41,20 @@ const isDryRun = process.argv.includes('--dry-run');
 const limitIdx = process.argv.indexOf('--limit');
 const LIMIT    = limitIdx !== -1 ? parseInt(process.argv[limitIdx + 1]) : Infinity;
 
-const MIN_FOLLOWERS = 20000;
+const MIN_FOLLOWERS = 15000;
 const MAX_FOLLOWERS = 200000;
 
-// City + service type — what actually works for IG user search
-// Avoid pure CTAs (don't appear in usernames), avoid too-generic (no follower filter match)
+// Identity/location words that appear in IG bios and usernames of Serbian businesses.
+// Rules: NOT niche-specific. Terms that appear across ALL service types.
+// EXHAUSTED (top-100 all in DB — DO NOT re-add): beograd, belgrade, srbija, novi sad, bg rs, novi beograd, zemun, vracar, belgrade serbia, beograd rs, serbia
+// Behavior-signal terms: appear ONLY in bios of businesses that sell/convert through Instagram DMs.
+// Non-niche, non-location — any industry that uses IG as a sales channel writes these.
 const SEARCHES = [
-  // Belgrade neighborhoods — untapped
-  'zemun beograd',
-  'novi beograd',
-  'vozdovac beograd',
-  'zvezdara beograd',
-  'palilula beograd',
-  'cukarica beograd',
-  // Generic business-type words + beograd
-  'beograd agencija',
-  'beograd servis',
-  'beograd hotel',
-  'beograd hostel',
-  'beograd market',
-  'beograd club',
-  'beograd lounge',
-  'beograd booking',
-  'beograd design',
-  'beograd solutions',
-  'beograd agency',
-  'beograd doo',
-  'beograd iskustvo',
-  'beograd kvalitet',
-  // More Novi Sad variety
-  'novi sad agencija',
-  'novi sad servis',
-  'novi sad studio',
-  'novi sad hotel',
-  'novi sad club',
-  // Bilingual combos
-  'belgrade club',
-  'belgrade agency',
-  'belgrade hotel',
-  'belgrade design',
-  'serbia beograd',
+  'dm za',            // "DM za cenu / info / rezervaciju" — universal DM-sales signal
+  'inbox',            // "pišite na inbox" — same signal, different word
+  'zakazivanje',      // "online zakazivanje" — appointment booking, any service type
+  'poruci',           // "poruci na DM" — order via DM, broad commerce signal
+  'link u bio',       // link-in-bio sellers — any product/service type
 ];
 
 // Domains that are link aggregators / booking platforms — not the business's own site
@@ -129,11 +103,11 @@ function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
 async function startRun(term) {
   const res = await fetch(
-    `https://api.apify.com/v2/acts/${ACTOR}/runs?token=${TOKEN}&maxItems=10`,
+    `https://api.apify.com/v2/acts/${ACTOR}/runs?token=${TOKEN}&maxItems=100`,
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ searchType: 'user', searchLimit: 10, search: term, resultsType: 'details' }),
+      body: JSON.stringify({ searchType: 'user', searchLimit: 100, search: term, resultsType: 'details' }),
     }
   );
   const data = await res.json();

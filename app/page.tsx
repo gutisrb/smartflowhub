@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button"
 import { LogOut, Bell, Search, Sparkles, Menu, Activity, X as XIcon } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { cn } from "@/lib/utils"
-import { isGroupClient, GROUP_CLIENTS, BOOK_STORE_CLIENTS, getBookStoreConfig } from "@/lib/bookstore-clients"
+import { isGroupClient, GROUP_CLIENTS, BOOK_STORE_CLIENTS, getBookStoreConfig } from "@/lib/brand-configs"
 
 // Import module components
 import { PipelineModule } from "@/components/modules/pipeline-module"

@@ -19,8 +19,8 @@ import {
     AlertTriangle,
     Package,
 } from "lucide-react"
-import { getKandidatiByClientId, updateKandidat, getCrmHarmonijaByClientId, getCrmPublikByClientId, getCrmStelaByClientId, getCrmAleksandarMNByClientId } from "@/lib/supabase/queries"
-import { getBookStoreConfig, BOOK_STORE_CLIENTS } from "@/lib/bookstore-clients"
+import { getKandidatiByClientId, updateKandidat, getCrmHarmonijaByClientId, getCrmPublikByClientId, getCrmStelaByClientId, getCrmAleksandarMNByClientId, getCrmMagunaByClientId } from "@/lib/supabase/queries"
+import { getBookStoreConfig, BOOK_STORE_CLIENTS } from "@/lib/brand-configs"
 import { createClient } from "@/lib/supabase/client"
 import { motion, AnimatePresence } from "framer-motion"
 import { cn } from "@/lib/utils"
@@ -96,6 +96,15 @@ const MOCK_BOOKSTORE_CRM_BY_CLIENT: Record<string, any[]> = {
         { id: 's5', full_name: 'Aleksandra Todorović', tema: 'Triler',            knjiga: 'Opake igre',        status: 'Zainteresovan', razlog: 'Pitao za cenu',  status_porudzbine: null,          izvor: 'Instagram', email: null,                      telefon: null,            created_at: hoursAgo(25) },
         { id: 's6', full_name: 'Tijana Rašić',       tema: 'Saga',                knjiga: 'Ptičica na trnju',  status: 'Intervencija',  razlog: null,             status_porudzbine: 'Reklamacija', izvor: 'Instagram', email: null,                      telefon: '+381644444444', created_at: hoursAgo(31) },
     ],
+    // Maguna Dizajn — folding tables, children's furniture, vanity tables — B2C e-commerce Serbia
+    "0c25e7c2-360c-418a-816a-34444d304698": [
+        { id: 'm1', full_name: 'Jovana Filipović',  zdravstveni_cilj: 'Sklopivi stolovi',     proizvod: 'Sklopivi sto kutija BELI',              status: 'Poručio',       razlog: null,                  status_porudzbine: 'Poslato',     izvor: 'Instagram', email: 'jovana.filipovic@gmail.com', telefon: null,           created_at: hoursAgo(26) },
+        { id: 'm2', full_name: 'Marko Petrović',    zdravstveni_cilj: 'Dečiji nameštaj',      proizvod: 'Sklopivi radni sto BELI',               status: 'Poručio',       razlog: null,                  status_porudzbine: 'Dostavljeno', izvor: 'Instagram', email: 'marko.petrovic2@gmail.com', telefon: null,           created_at: hoursAgo(120) },
+        { id: 'm3', full_name: 'Milica Jovanović',  zdravstveni_cilj: 'Sklopivi klub stolovi', proizvod: 'Sklopivi klub sto 2u1',                status: 'Zainteresovan', razlog: 'Nema u crnoj boji',   status_porudzbine: null,          izvor: 'Facebook',  email: 'milica.j@outlook.com',      telefon: null,           created_at: hoursAgo(48) },
+        { id: 'm4', full_name: 'Dragan Tomić',      zdravstveni_cilj: 'Sklopivi stolovi',     proizvod: 'Sklopivi sto zaobljeni ćoškovi A427',  status: 'Zainteresovan', razlog: 'Pita za popust',       status_porudzbine: null,          izvor: 'Facebook',  email: 'dragan.tomic@firma.rs',     telefon: null,           created_at: hoursAgo(22) },
+        { id: 'm5', full_name: 'Nina Vasić',        zdravstveni_cilj: 'Šminkanje / dekor',   proizvod: 'Stočić za šminkanje STILSKI',           status: 'Poručio',       razlog: null,                  status_porudzbine: 'Obrađuje se', izvor: 'Instagram', email: null,                        telefon: null,           created_at: hoursAgo(48) },
+        { id: 'm6', full_name: 'Aleksandar Lukić',  zdravstveni_cilj: 'Sklopivi stolovi',     proizvod: 'Sklopivi četvrtasti sto BELI',          status: 'Intervencija',  razlog: null,                  status_porudzbine: 'Reklamacija', izvor: 'Website',   email: 'aleksandar.l@gmail.com',    telefon: null,           created_at: hoursAgo(8) },
+    ],
     // Aleksandar MN — health supplements, vitamins, fitness — B2C retail (Prevencija i Terapija)
     // ⚠ UUID placeholder — update when real client UUID is known
     "3255f279-801c-474b-9c16-a75edc336296": [
@@ -132,6 +141,7 @@ export function AgentLeadsModule({ clientId, selectedBrandIds, terminology: prop
     const bookStoreConfig = getBookStoreConfig(clientId)
     const isHarmonija = bookStoreConfig !== null
     const isCatalogProducts = bookStoreConfig?.tableType === 'proizvodi'
+    const bsColor = bookStoreConfig?.color || '#10b981'
 
     const loadCandidates = useCallback(async () => {
         if (!clientId) return
@@ -143,6 +153,7 @@ export function AgentLeadsModule({ clientId, selectedBrandIds, terminology: prop
                 else if (bookStoreConfig.crmTable === 'crm_publik') data = await getCrmPublikByClientId(clientId)
                 else if (bookStoreConfig.crmTable === 'crm_stela') data = await getCrmStelaByClientId(clientId)
                 else if (bookStoreConfig.crmTable === 'crm_aleksandarmn') data = await getCrmAleksandarMNByClientId(clientId)
+                else if (bookStoreConfig.crmTable === 'crm_maguna') data = await getCrmMagunaByClientId(clientId)
                 else data = await getKandidatiByClientId(clientId)
             } else {
                 data = await getKandidatiByClientId(clientId)
@@ -377,18 +388,18 @@ export function AgentLeadsModule({ clientId, selectedBrandIds, terminology: prop
                     <table className="w-full text-left border-collapse">
                         <thead>
                             <tr className="bg-white/5 border-b border-white/10">
-                                <th className="p-4 text-xs font-mono uppercase tracking-widest text-emerald-400">{isHarmonija ? "Kupac" : "Kandidat"}</th>
+                                <th className="p-4 text-xs font-mono uppercase tracking-widest" style={{ color: bsColor }}>{isHarmonija ? "Kupac" : "Kandidat"}</th>
                                 {isHarmonija ? (
                                     <>
-                                        <th className="p-4 text-xs font-mono uppercase tracking-widest text-emerald-400">{bookStoreConfig?.crmTemaLabel || "Kategorija"}</th>
-                                        <th className="p-4 text-xs font-mono uppercase tracking-widest text-emerald-400">{bookStoreConfig?.crmProizvodLabel || "Knjiga"}</th>
+                                        <th className="p-4 text-xs font-mono uppercase tracking-widest" style={{ color: bsColor }}>{bookStoreConfig?.crmTemaLabel || "Kategorija"}</th>
+                                        <th className="p-4 text-xs font-mono uppercase tracking-widest" style={{ color: bsColor }}>{bookStoreConfig?.crmProizvodLabel || "Knjiga"}</th>
                                     </>
                                 ) : (
-                                    <th className="p-4 text-xs font-mono uppercase tracking-widest text-emerald-400">Pozicija</th>
+                                    <th className="p-4 text-xs font-mono uppercase tracking-widest" style={{ color: bsColor }}>Pozicija</th>
                                 )}
-                                <th className="p-4 text-xs font-mono uppercase tracking-widest text-emerald-400">Status</th>
-                                <th className="p-4 text-xs font-mono uppercase tracking-widest text-emerald-400">{isHarmonija ? "Kontakt" : "Prijavljen"}</th>
-                                <th className="p-4 text-xs font-mono uppercase tracking-widest text-emerald-400">Kanal</th>
+                                <th className="p-4 text-xs font-mono uppercase tracking-widest" style={{ color: bsColor }}>Status</th>
+                                <th className="p-4 text-xs font-mono uppercase tracking-widest" style={{ color: bsColor }}>{isHarmonija ? "Kontakt" : "Prijavljen"}</th>
+                                <th className="p-4 text-xs font-mono uppercase tracking-widest" style={{ color: bsColor }}>Kanal</th>
                                 <th className="p-4" />
                             </tr>
                         </thead>
@@ -413,19 +424,34 @@ export function AgentLeadsModule({ clientId, selectedBrandIds, terminology: prop
                                     filteredLeads.map((lead, idx) => {
                                         const kanal = getKanal(lead)
                                         const prijavljen = lead.status?.toLowerCase() !== 'novi'
+                                        const isIntervencija = lead.status?.toLowerCase() === 'intervencija'
+                                        const isPorucio = lead.status?.toLowerCase() === 'poručio'
+                                        const temaValue = isCatalogProducts ? lead.zdravstveni_cilj : lead.tema
+                                        const proizvodValue = isCatalogProducts ? lead.proizvod : lead.knjiga
                                         return (
                                             <motion.tr
                                                 key={lead.id}
                                                 initial={{ opacity: 0, scale: 0.98, y: 10 }}
                                                 animate={{ opacity: 1, scale: 1, y: 0 }}
                                                 transition={{ delay: idx * 0.03, duration: 0.4 }}
-                                                className="group border-b border-white/[0.03] hover:bg-emerald/[0.02] transition-all duration-300"
+                                                className="group border-b border-white/[0.03] transition-all duration-300 relative"
+                                                style={{
+                                                    borderLeft: isIntervencija ? `3px solid ${bsColor === '#f97316' ? '#f97316' : '#ef4444'}88` : '3px solid transparent',
+                                                    backgroundColor: isIntervencija ? 'rgba(239,68,68,0.04)' : isPorucio ? 'rgba(16,185,129,0.02)' : undefined,
+                                                }}
+                                                onMouseEnter={e => { if (!isIntervencija && !isPorucio) e.currentTarget.style.backgroundColor = `${bsColor}06` }}
+                                                onMouseLeave={e => { if (!isIntervencija && !isPorucio) e.currentTarget.style.backgroundColor = '' }}
                                             >
                                                 {/* Kupac */}
                                                 <td className="p-4">
                                                     <div className="flex items-center gap-3">
                                                         <div className="relative shrink-0">
-                                                            <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-emerald-500/20 to-cyan-500/20 border border-white/10 flex items-center justify-center text-emerald-400 font-bold">
+                                                            <div className="h-10 w-10 rounded-xl border flex items-center justify-center font-bold text-sm"
+                                                                style={{
+                                                                    background: `linear-gradient(135deg, ${bsColor}25, ${bsColor}10)`,
+                                                                    borderColor: `${bsColor}30`,
+                                                                    color: bsColor,
+                                                                }}>
                                                                 {lead.full_name?.[0] || 'K'}
                                                             </div>
                                                             {/* Brand color dot — shown in multi-brand mode */}
@@ -450,17 +476,18 @@ export function AgentLeadsModule({ clientId, selectedBrandIds, terminology: prop
                                                 {isHarmonija ? (
                                                     <>
                                                         <td className="p-4">
-                                                            {(isCatalogProducts ? lead.zdravstveni_cilj : lead.tema) ? (
-                                                                <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-white/5 border border-white/8 text-zinc-400">
-                                                                    {isCatalogProducts ? lead.zdravstveni_cilj : lead.tema}
+                                                            {temaValue ? (
+                                                                <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full"
+                                                                    style={{ background: `${bsColor}15`, border: `1px solid ${bsColor}30`, color: `${bsColor}cc` }}>
+                                                                    {temaValue}
                                                                 </span>
                                                             ) : (
                                                                 <span className="text-zinc-700">—</span>
                                                             )}
                                                         </td>
-                                                        <td className="p-4 max-w-[180px]">
-                                                            {(isCatalogProducts ? lead.proizvod : lead.knjiga) ? (
-                                                                <span className="text-white/80 text-sm font-medium leading-snug line-clamp-2">{isCatalogProducts ? lead.proizvod : lead.knjiga}</span>
+                                                        <td className="p-4 max-w-[200px]">
+                                                            {proizvodValue ? (
+                                                                <span className="text-white/85 text-sm font-medium leading-snug line-clamp-2">{proizvodValue}</span>
                                                             ) : (
                                                                 <span className="text-zinc-600 text-xs italic">nije specificiran/a</span>
                                                             )}
@@ -620,7 +647,10 @@ export function AgentLeadsModule({ clientId, selectedBrandIds, terminology: prop
                                                             variant="ghost"
                                                             size="icon"
                                                             onClick={() => setSelectedLead(lead)}
-                                                            className="w-8 h-8 rounded-xl bg-white/5 hover:bg-emerald/10 hover:text-emerald transition-all opacity-0 group-hover:opacity-100"
+                                                            className="w-8 h-8 rounded-xl bg-white/5 transition-all opacity-0 group-hover:opacity-100"
+                                                            style={{ ['--hover-bg' as string]: `${bsColor}18` } as React.CSSProperties}
+                                                            onMouseEnter={e => { e.currentTarget.style.backgroundColor = `${bsColor}18`; e.currentTarget.style.color = bsColor }}
+                                                            onMouseLeave={e => { e.currentTarget.style.backgroundColor = ''; e.currentTarget.style.color = '' }}
                                                         >
                                                             <User className="w-3.5 h-3.5" />
                                                         </Button>

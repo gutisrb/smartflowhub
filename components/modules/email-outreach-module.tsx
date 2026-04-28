@@ -117,6 +117,7 @@ export function EmailOutreachModule({
       .from('kontakti')
       .select('status, last_sent_at, meeting_time, replied_at')
       .eq('client_id', clientId)
+      .or('kategorija.neq.Disqualified,kategorija.is.null')
 
     if (error) {
       console.error('Error fetching email stats:', error)
@@ -144,7 +145,6 @@ export function EmailOutreachModule({
       .eq('client_id', clientId)
       .or('kategorija.neq.Disqualified,kategorija.is.null')
       .order('prioritet_skor', { ascending: false })
-      .limit(200)
 
     if (error || !data) {
       setLeads([])
@@ -176,10 +176,13 @@ export function EmailOutreachModule({
     return leads.filter(l => l.status === statusFilter)
   }, [leads, statusFilter])
 
-  const uniqueStatuses = useMemo(() => {
-    const s = new Set(leads.map(l => l.status).filter(Boolean))
-    return Array.from(s)
-  }, [leads])
+  const PIPELINE_STATUS_PILLS = [
+    { status: 'Follow Up', label: 'follow up' },
+    { status: 'enriched',  label: 'enriched'  },
+    { status: 'No Draft',  label: 'no draft'  },
+    { status: 'No Email',  label: 'no email'  },
+    { status: 'Lost',      label: 'lost'      },
+  ]
 
   const handleCopyDraft = async (text: string) => {
     await navigator.clipboard.writeText(text)
@@ -382,12 +385,16 @@ export function EmailOutreachModule({
                   onClick={() => setStatusFilter('no_response')}
                   className={cn("px-3 py-1 rounded-full text-xs font-outfit transition-all", statusFilter === 'no_response' ? 'bg-silver/30 text-obsidian font-bold' : 'bg-silver/5 text-silver/40 hover:bg-silver/10')}
                 >bez odgovora ({leads.filter(l => (l.last_sent_at || l.status === 'Kontaktiran') && !l.replied_at && l.status !== 'Zakazan Sastanak' && l.status !== 'Meeting Booked').length})</button>
-                {uniqueStatuses.map(s => (
-                  <button key={s}
-                    onClick={() => setStatusFilter(s)}
-                    className={cn("px-3 py-1 rounded-full text-xs font-outfit transition-all", statusFilter === s ? 'bg-emerald text-obsidian font-bold' : 'bg-emerald/10 text-silver/50 hover:bg-emerald/20')}
-                  >{s} ({leads.filter(l => l.status === s).length})</button>
-                ))}
+                {PIPELINE_STATUS_PILLS.map(({ status, label }) => {
+                  const count = leads.filter(l => l.status === status).length
+                  if (count === 0) return null
+                  return (
+                    <button key={status}
+                      onClick={() => setStatusFilter(status)}
+                      className={cn("px-3 py-1 rounded-full text-xs font-outfit transition-all", statusFilter === status ? 'bg-emerald text-obsidian font-bold' : 'bg-emerald/10 text-silver/50 hover:bg-emerald/20')}
+                    >{label} ({count})</button>
+                  )
+                })}
               </div>
             </div>
 

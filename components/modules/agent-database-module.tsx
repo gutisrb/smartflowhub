@@ -29,7 +29,7 @@ import {
     Tag
 } from "lucide-react"
 import { getJobsByClientId, createJob, updateJob, deleteJob, getKnjigeByClientId, getProizvodiByClientId } from "@/lib/supabase/queries"
-import { getBookStoreConfig, BOOK_STORE_CLIENTS } from "@/lib/bookstore-clients"
+import { getBookStoreConfig, BOOK_STORE_CLIENTS } from "@/lib/brand-configs"
 import {
     Dialog,
     DialogContent,
@@ -547,14 +547,13 @@ export function AgentDatabaseModule({
 
                 {isHarmonija ? (
                     <div className="flex items-center gap-2 p-1.5 bg-white/5 border border-white/5 rounded-2xl">
-                        {([['all', 'Sve knjige'], ['dostupno', 'Dostupno'], ['nedostupno', 'Nema na stanju']] as const).map(([key, label]) => (
+                        {([['all', isCatalogProducts ? 'Svi proizvodi' : 'Sve knjige'], ['dostupno', 'Dostupno'], ['nedostupno', 'Nema na stanju']] as [string, string][]).map(([key, label]) => (
                             <Button key={key} variant="ghost" size="sm"
-                                onClick={() => setBookTab(key)}
+                                onClick={() => setBookTab(key as 'all' | 'dostupno' | 'nedostupno')}
+                                style={bookTab === key ? { color: bsColor, backgroundColor: `${bsColor}18` } : {}}
                                 className={cn(
                                     "h-9 px-5 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all",
-                                    bookTab === key
-                                        ? "text-emerald bg-emerald/10 shadow-lg shadow-emerald/5"
-                                        : "text-zinc-500 hover:text-silver"
+                                    bookTab === key ? "" : "text-zinc-500 hover:text-silver"
                                 )}>
                                 {label}
                             </Button>
@@ -575,12 +574,11 @@ export function AgentDatabaseModule({
                     <TableHeader className="bg-white/[0.02] border-b border-white/5">
                         <TableRow className="border-none hover:bg-transparent">
                             {isCatalogProducts ? (<>
-                                <TableHead className="w-16 py-8 pl-8" />
-                                <TableHead className="text-zinc-500 font-bold uppercase tracking-widest text-[10px] py-8 font-outfit">Naziv / Brend</TableHead>
-                                <TableHead className="text-zinc-500 font-bold uppercase tracking-widest text-[10px] py-8 font-outfit">Kategorija</TableHead>
-                                <TableHead className="text-zinc-500 font-bold uppercase tracking-widest text-[10px] py-8 font-outfit text-center">Cena (RSD)</TableHead>
-                                <TableHead className="text-zinc-500 font-bold uppercase tracking-widest text-[10px] py-8 font-outfit text-center">Dostupnost</TableHead>
-                                <TableHead className="text-right pr-8 py-8 font-outfit">Link</TableHead>
+                                <TableHead className="w-20 py-8 pl-8" />
+                                <TableHead className="text-zinc-500 font-bold uppercase tracking-widest text-[10px] py-8 font-outfit">Proizvod</TableHead>
+                                <TableHead className="text-zinc-500 font-bold uppercase tracking-widest text-[10px] py-8 font-outfit text-right pr-8">Cena</TableHead>
+                                <TableHead className="text-zinc-500 font-bold uppercase tracking-widest text-[10px] py-8 font-outfit text-center">Status</TableHead>
+                                <TableHead className="w-16 py-8 pr-8" />
                             </>) : isHarmonija ? (<>
                                 <TableHead className="w-16 py-8 pl-8" />
                                 <TableHead className="text-zinc-500 font-bold uppercase tracking-widest text-[10px] py-8 font-outfit">Naslov</TableHead>
@@ -633,53 +631,77 @@ export function AgentDatabaseModule({
                                     >
                                         {isCatalogProducts ? (
                                             <>
-                                                {/* Product icon swatch */}
-                                                <TableCell className="py-5 pl-8 w-16">
-                                                    <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 shadow-md"
-                                                        style={{ background: `${bsColor}18`, border: `1px solid ${bsColor}30` }}>
-                                                        <Package className="w-4 h-4" style={{ color: `${bsColor}cc` }} />
-                                                    </div>
-                                                </TableCell>
-                                                {/* Naziv + Brend */}
-                                                <TableCell className="py-5">
-                                                    <div>
-                                                        <span className="text-silver font-bold font-outfit text-sm group-hover:text-white transition-colors leading-snug block">{item.naziv}</span>
-                                                        <span className="text-zinc-500 text-xs font-outfit mt-0.5 block italic">{item.brend || '—'}</span>
-                                                    </div>
-                                                </TableCell>
-                                                {/* Kategorija */}
-                                                <TableCell>
-                                                    <span className="text-[10px] px-2.5 py-1 rounded-full font-outfit"
-                                                        style={{ background: `${bsColor}12`, border: `1px solid ${bsColor}25`, color: `${bsColor}cc` }}>
-                                                        {item.kategorija || '—'}
-                                                    </span>
-                                                </TableCell>
-                                                {/* Cena */}
-                                                <TableCell className="text-center">
-                                                    {item.cena ? (
-                                                        <span className="text-white font-bold font-mono text-sm">
-                                                            {item.cena.toLocaleString('sr-RS')} <span className="text-zinc-600 text-[10px] font-normal">RSD</span>
+                                                {/* Product thumbnail swatch */}
+                                                <TableCell className="py-4 pl-8 w-20">
+                                                    <div className="w-12 h-14 rounded-2xl flex flex-col items-center justify-center shrink-0 relative overflow-hidden"
+                                                        style={{
+                                                            background: `linear-gradient(145deg, ${bsColor}22, ${bsColor}08)`,
+                                                            border: `1px solid ${bsColor}30`,
+                                                            boxShadow: `0 4px 16px -4px ${bsColor}30`,
+                                                        }}>
+                                                        <span className="text-xl font-black leading-none"
+                                                            style={{ color: `${bsColor}cc` }}>
+                                                            {(item.naziv || '?').charAt(0)}
                                                         </span>
+                                                        <div className="absolute bottom-0 left-0 right-0 h-[3px] rounded-b-2xl"
+                                                            style={{ background: `linear-gradient(90deg, ${bsColor}80, ${bsColor}20)` }} />
+                                                    </div>
+                                                </TableCell>
+                                                {/* Naziv + Brend + Kategorija */}
+                                                <TableCell className="py-4">
+                                                    <div className="flex flex-col gap-1.5">
+                                                        <span className="text-white font-semibold font-outfit text-[15px] group-hover:text-white leading-snug block transition-colors">{item.naziv}</span>
+                                                        <div className="flex items-center gap-2 flex-wrap">
+                                                            {item.kategorija && (
+                                                                <span className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full"
+                                                                    style={{ background: `${bsColor}15`, border: `1px solid ${bsColor}30`, color: `${bsColor}cc` }}>
+                                                                    {item.kategorija}
+                                                                </span>
+                                                            )}
+                                                            {item.brend && (
+                                                                <span className="text-[10px] text-zinc-500 font-outfit">{item.brend}</span>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </TableCell>
+                                                {/* Cena — right-aligned, prominent */}
+                                                <TableCell className="text-right pr-8">
+                                                    {item.cena ? (
+                                                        <div className="flex flex-col items-end gap-0.5">
+                                                            <span className="text-lg font-black font-mono leading-none"
+                                                                style={{ color: bsColor, textShadow: `0 0 20px ${bsColor}40` }}>
+                                                                {item.cena.toLocaleString('sr-RS')}
+                                                            </span>
+                                                            <span className="text-[9px] font-bold uppercase tracking-widest text-zinc-600">RSD</span>
+                                                        </div>
                                                     ) : (
                                                         <span className="text-zinc-600 text-xs">—</span>
                                                     )}
                                                 </TableCell>
                                                 {/* Dostupnost */}
                                                 <TableCell className="text-center">
-                                                    {item.status === 'Aktivan'
-                                                        ? <Badge className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border" style={{ background: `${bsColor}12`, color: bsColor, borderColor: `${bsColor}25` }}>Dostupno</Badge>
-                                                        : <Badge className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest bg-red-500/10 text-red-400 border border-red-500/15">Nema na stanju</Badge>
-                                                    }
+                                                    {item.status === 'Aktivan' ? (
+                                                        <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-bold uppercase tracking-widest"
+                                                            style={{ background: `${bsColor}12`, border: `1px solid ${bsColor}25`, color: bsColor }}>
+                                                            <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: bsColor }} />
+                                                            Dostupno
+                                                        </div>
+                                                    ) : (
+                                                        <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-bold uppercase tracking-widest bg-red-500/10 text-red-400 border border-red-500/20">
+                                                            <div className="w-1.5 h-1.5 rounded-full bg-red-500/60" />
+                                                            Nema na stanju
+                                                        </div>
+                                                    )}
                                                 </TableCell>
                                                 {/* Link */}
-                                                <TableCell className="text-right pr-8">
+                                                <TableCell className="text-right pr-8 w-16">
                                                     {item.url && (
                                                         <a href={item.url} target="_blank" rel="noopener noreferrer"
-                                                            className="inline-flex items-center gap-1.5 text-xs text-zinc-500 transition-colors font-outfit opacity-0 group-hover:opacity-100"
-                                                            onMouseEnter={e => (e.currentTarget.style.color = bsColor)}
-                                                            onMouseLeave={e => (e.currentTarget.style.color = '')}>
+                                                            className="inline-flex items-center justify-center w-8 h-8 rounded-xl bg-white/[0.04] border border-white/[0.06] text-zinc-600 transition-all opacity-0 group-hover:opacity-100"
+                                                            onMouseEnter={e => { e.currentTarget.style.backgroundColor = `${bsColor}18`; e.currentTarget.style.color = bsColor; e.currentTarget.style.borderColor = `${bsColor}30` }}
+                                                            onMouseLeave={e => { e.currentTarget.style.backgroundColor = ''; e.currentTarget.style.color = ''; e.currentTarget.style.borderColor = '' }}
+                                                            title={item.url}>
                                                             <ExternalLink className="w-3.5 h-3.5" />
-                                                            Otvori
                                                         </a>
                                                     )}
                                                 </TableCell>
