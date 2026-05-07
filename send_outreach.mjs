@@ -208,11 +208,27 @@ async function main() {
     if (!parsed) { console.warn(`⚠  ${lead.company_name} — unparseable draft (${draftField}), skipping`); failed++; continue; }
 
     const to = TEST_EMAIL || lead.email;
-    console.log(`[${i + 1}/${queue.length}] ${lead.company_name} [${lead.kategorija}]`);
+    console.log(`[${i + 1}/${queue.length}] ${lead.company_name}`);
     console.log(`  To:      ${to}${TEST_EMAIL ? `  (real: ${lead.email})` : ''}`);
     console.log(`  Subject: ${parsed.subject}`);
 
     if (isDryRun) { console.log(`  ✓ [DRY RUN]\n`); continue; }
+
+    // Atomically claim this lead before sending — prevents double-send if two
+    // script instances run concurrently (TOCTOU race on the initial bulk fetch).
+    if (!TEST_EMAIL) {
+      const claimField = isFollowUp ? 'email_2_poslat' : 'email_1_poslat';
+      const { data: claimed } = await sb
+        .from('contacts')
+        .update({ [claimField]: true })
+        .eq('id', lead.id)
+        .eq(claimField, false)
+        .select('id');
+      if (!claimed || claimed.length === 0) {
+        console.log(`  ↷ Already claimed by another process, skipping\n`);
+        continue;
+      }
+    }
 
     try {
       const textBody = stripMarkdown(parsed.body);
@@ -231,18 +247,23 @@ async function main() {
         },
       });
 
-      // Mark sent (only for real sends, not test)
+      // Update metadata after successful send (flag already set in claim step)
       if (!TEST_EMAIL) {
-        const markPayload = isFollowUp
-          ? { email_2_poslat: true, last_sent_at: new Date().toISOString(), status: 'Follow Up' }
-          : { email_1_poslat: true, last_sent_at: new Date().toISOString(), status: 'Kontaktiran' };
-        await sb.from('contacts').update(markPayload).eq('id', lead.id);
+        const metaPayload = isFollowUp
+          ? { last_sent_at: new Date().toISOString(), status: 'Follow Up' }
+          : { last_sent_at: new Date().toISOString(), status: 'Kontaktiran' };
+        await sb.from('contacts').update(metaPayload).eq('id', lead.id);
       }
 
       console.log(`  ✓ Sent  [${info.messageId}]\n`);
       sent++;
     } catch (err) {
-      console.error(`  ✗ Failed: ${err.message}\n`);
+      // Roll back the claim so the lead can be retried in the next run
+      if (!TEST_EMAIL) {
+        const claimField = isFollowUp ? 'email_2_poslat' : 'email_1_poslat';
+        await sb.from('contacts').update({ [claimField]: false }).eq('id', lead.id);
+      }
+      console.error(`  ✗ Failed: ${err.message} (claim rolled back)\n`);
       failed++;
     }
 

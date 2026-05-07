@@ -22,7 +22,7 @@
 
 import { execFile } from 'child_process';
 import { promisify } from 'util';
-import { readFileSync, readdirSync } from 'fs';
+import { readFileSync, readdirSync, writeFileSync } from 'fs';
 import { resolve, dirname, join } from 'path';
 import { fileURLToPath } from 'url';
 
@@ -56,15 +56,20 @@ const HUNTER_KEY     = process.env.HUNTER_API_KEY;
 // Markets: RS (Serbia) + BA (Bosnia) + HR (Croatia) — same language family, 3× pool
 const ADS_COUNTRIES = ['RS'];
 const ADS_BASE_URL = 'https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=RS&media_type=video';
-// B3 batch — fresh queries. B2 used 2026-04-28. Update SOURCING_LOG after run.
-const ADS_QUERIES  = ['vaši snovi', 'bez stresa', 'bez čekanja', 'brzo i lako', 'odmah', 'bez obaveza', 'besplatna procena'];
+// B4 remaining — fresh, never run before. Track usage in MEMORY.md after each run.
+// Used: B0(kontaktirajte...), B1(otkrijte...), B2(preuzmite...), B3(vaši snovi...),
+//       B4 partial(rezultati/uspeh/kvalitet — 2026-05-05), B5(vaš/nas — EXHAUSTED)
+const ADS_QUERIES  = ['pouzdano', 'profesionalno', 'stručnost', 'iskustvo'];
 
 const isLocal    = process.argv.includes('--local');      // read from local JSON files, skip Apify Stage 1
 const isTest     = process.argv.includes('--test');       // no DB writes
 const isYes      = process.argv.includes('--yes');        // live Apify run
 const isFindOnly = process.argv.includes('--find-only'); // stop after Stage 4, no enrich/insert
+const skipIg     = process.argv.includes('--skip-ig');   // skip parallel IG caption search (use when Apify memory is constrained)
 const limitIdx  = process.argv.indexOf('--limit');
 const budgetIdx = process.argv.indexOf('--budget');
+const fileIdx   = process.argv.indexOf('--file');
+const FILE_PATH = fileIdx !== -1 ? process.argv[fileIdx + 1] : null; // --file <path>: load single JSON file
 const LIMIT     = limitIdx  !== -1 ? parseInt(process.argv[limitIdx  + 1]) : Infinity;
 
 // --budget X: cost cap in USD for the FB ads scraper (e.g. --budget 0.45 → ~600 records)
@@ -93,24 +98,16 @@ const EXCLUDE_CATS = new Set([
   // Accessories / beauty
   'Jewelry/watches', 'Jewelry', 'Jewelry & Watches', 'Eyewear',
   'Cosmetics store', 'Beauty, cosmetics & personal care',
-  // Retail / shopping
-  'Shopping & retail', 'Shopping', 'Retail company', 'Website',
-  'Brand', 'Bags/luggage',
   // Toys / kids / baby
   'Toy store', 'Toys', 'Baby goods/kids goods',
   // Food & beverage
   'Grocery store', 'Supermarket', 'Food & beverage', 'Restaurant',
   'Fast food restaurant', 'Bakery', 'Food delivery service',
-  // Phones / electronics
-  'Phone/Tablet', 'Electronics', 'Computer store', 'Video Games',
-  // Health products (not services)
-  'Vitamins/supplements', 'Supplement store', 'Health food store',
-  // Cosmetics / perfume retail (D2C)
-  'Health & Beauty', 'Health/beauty',
+  // Electronics, supplements, books intentionally NOT excluded — niche brands are valid leads
+  // Cosmetics / perfume retail (D2C) — NOTE: 'Health & Beauty' intentionally NOT excluded
+  // because FB uses it for clinics/wellness too. Name keywords catch retail cosmetics instead.
   // Food & beverage brands (FMCG corporations + food producers — not restaurants)
   'Food & beverage company', 'Beverage company', 'Food company',
-  // Books / publishing
-  'Books', 'Book series',
   // Media / entertainment
   'Personal blog', 'Public figure', 'Artist', 'Musician/band', 'Magazine',
   'Media/news company', 'Entertainment website', 'TV channel',
@@ -128,12 +125,14 @@ const EXCLUDE_CATS = new Set([
   // Large corporate retail / delivery platforms (already have CS infrastructure)
   'Department store', 'Superstore', 'Delivery service', 'Food delivery service',
   'Pharmacy', 'Drug store', 'Drugstore', 'Discount store',
+  // Gambling / betting / lottery
+  'Gambling', 'Casino', 'Sports betting', 'Lottery', 'Betting center',
   // Other pure D2C
   'Interest', 'Sports team',
 ]);
 
 // Page name keyword blacklist — catches retail/personal brands that slipped past category filter
-const EXCLUDE_NAME_KEYWORDS = /\b(majice|majic|cipelice|cipela|cipele|obuća|obuca|kiflice|kiflic|torte|haljine|suknje|bluze|jakne|kaputi|šminke|sminke|nakit|parfem|parfemi|podkast|podcast|fondacija|fondacij|humanitar|zaklada|blog|kanal|kreator|otkriva|otkrivamo|istraž|dobrotvorn|volonter|donacij)\b/i;
+const EXCLUDE_NAME_KEYWORDS = /\b(majice|majic|cipelice|cipela|cipele|obuća|obuca|kiflice|kiflic|torte|haljine|suknje|bluze|jakne|kaputi|šminke|sminke|nakit|parfem|parfemi|podkast|podcast|fondacija|fondacij|humanitar|zaklada|blog|kanal|kreator|otkriva|otkrivamo|istraž|dobrotvorn|volonter|donacij|kladionic|kladion|kazino|casino|betting|lutrij|temu|shein|aliexpress|garderob|butik|kolekcij|aksesoir|fashion|torb[aei]|nakita|narukvic|minđuš|mindjus|ogrlica|piercing|pirsing|bisuter)\b/i;
 
 function isExcludedByName(pageName) {
   return EXCLUDE_NAME_KEYWORDS.test(pageName || '');
@@ -141,7 +140,7 @@ function isExcludedByName(pageName) {
 
 const SOCIAL = new Set([
   'instagram.com', 'facebook.com', 'fb.me', 'fb.com', 'm.facebook.com',
-  'bit.ly', 'linktr.ee', 'linktree.com', 'youtube.com', 'tiktok.com', 'wa.me',
+  'bit.ly', 'linktr.ee', 'linktree.com', 'youtube.com', 'youtu.be', 'tiktok.com', 'wa.me',
 ]);
 
 // Ad-network / tracking domains — if this is the link_url, the page isn't a real direct advertiser
@@ -168,7 +167,7 @@ function isValidIgHandle(h) {
 
 // ── BCS (Serbian/Bosnian/Croatian) business detection ─────────────────────────
 // Requires .rs/.ba/.hr domain OR BCS-specific vocabulary — rejects unrelated languages
-const SERBIAN_WORDS = /\b(srbija|beograd|novi sad|niš|kragujevac|subotica|dinar|dinara|dostava|besplatna|porudžbina|usluga|popust|akcija|zakazivanje|termin|naručite|kupite|pogledajte|saznajte|pratite|pratilaca|ponuda|cena|cene|kontakt|telefon|adresa|radno vreme|radi|radimo|otvoreno)\b/i;
+const SERBIAN_WORDS = /\b(srbija|beograd|novi sad|niš|kragujevac|subotica|dinar|dinara|dostava|besplatna|porudžbina|usluga|popust|akcija|zakazivanje|termin|naručite|kupite|pogledajte|saznajte|pratite|pratilaca|ponuda|cena|cene|kontakt|telefon|adresa|radno vreme|radi|radimo|otvoreno|preuzmite|rezervišite|pokrenite|rešite|proverite|smanjite|kreirajte|otkrijte|promenite|poboljšajte|povećajte|garantujemo|rezultati|iskustvo|kvalitet|profesionalno|naručite|zakažite|javite|pošaljite|saznajte|ostvarite|sačuvajte|obezbedite|izgradite|priuštite|uštedite|dostupno)\b/i;
 
 function isSerbianBusiness(texts, linkUrls, fbPageUri) {
   // .rs / .ba / .hr domain in any URL = regional business (Serbia, Bosnia, Croatia)
@@ -252,22 +251,33 @@ async function findIgOnWebsite(domain) {
   return null;
 }
 
-// ── Firecrawl website scrape for IG handle (JS-rendered pages) ───────────────
-// Fallback when raw HTML fetch misses handles in React/Vue footers
-async function findIgWithFirecrawl(domain) {
-  const url = `https://${domain}`;
-  try {
-    const { stdout } = await execFileAsync('firecrawl', [
-      'scrape', '--url', url, '--format', 'markdown',
-    ], { timeout: 15000 });
-    if (!stdout) return null;
-    const matches = [...stdout.matchAll(/instagram\.com\/([a-zA-Z0-9._]{2,30})\/?/g)];
-    for (const m of matches) {
-      const handle = m[1].replace(/\/$/, '');
-      if (isValidIgHandle(handle)) return handle;
-    }
-  } catch {}
-  return null;
+// ── Firecrawl website scrape for IG handle + email (JS-rendered pages) ───────
+// Returns { handle, email } — both resolved in one pass so Stage 5 can reuse without re-scraping.
+// Fallback when raw HTML fetch misses handles in React/Vue footers.
+async function findIgAndEmailWithFirecrawl(domain) {
+  const result = { handle: null, email: null };
+  const SKIP_EMAIL = /noreply|no-reply|example|johndoe|test@|sentry|wix|schema|privacy|jquery|qodeinteractive|@website\.|@domena\.|^(posao|hr|kadrovi|jobs|career|zaposlenje|rekrutacij|workspace)@|\.(png|jpg|jpeg|gif|svg|webp|pdf|css|js)(@|$)/i;
+  for (const path of ['', '/kontakt', '/o-nama', '/contact', '/about']) {
+    try {
+      const { stdout } = await execFileAsync('firecrawl', [
+        'scrape', '--url', `https://${domain}${path}`, '--format', 'markdown',
+      ], { timeout: 15000 });
+      if (!stdout) continue;
+      if (!result.handle) {
+        const matches = [...stdout.matchAll(/instagram\.com\/([a-zA-Z0-9._]{2,30})\/?/g)];
+        for (const m of matches) {
+          const handle = m[1].replace(/\/$/, '');
+          if (isValidIgHandle(handle)) { result.handle = handle; break; }
+        }
+      }
+      if (!result.email) {
+        const m = stdout.match(/([a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,})/);
+        if (m && !SKIP_EMAIL.test(m[1]) && emailDomainMatches(m[1], domain)) result.email = m[1];
+      }
+      if (result.handle && result.email) break;
+    } catch {}
+  }
+  return result;
 }
 
 // ── Scrape Facebook /about for website + IG + email ──────────────────────────
@@ -333,6 +343,60 @@ async function hunterDomain(domain) {
   } catch { return null; }
 }
 
+// ── Linktree / aggregator URL resolution ─────────────────────────────────────
+const AGGREGATOR_HOSTS = new Set([
+  'linktr.ee','linktree.ee','bio.site','taplink.cc','beacons.ai','zaap.bio',
+  'allmylinks.com','campsite.bio','lit.link','solo.to','milkshake.app','singlelink.co',
+]);
+const BAD_WEBSITE_HOSTS = new Set([
+  'instagram.com','facebook.com','wa.me','t.me','tiktok.com','youtube.com','youtu.be',
+  'maps.google.com','help.instagram.com','webinarjam.com','alteg.io','booksy.com',
+  'fresha.com','treatwell.com','calendly.com',
+]);
+
+function classifyWebsite(url) {
+  if (!url) return 'none';
+  try {
+    const host = new URL(url.startsWith('http') ? url : `https://${url}`).hostname.replace(/^www\./, '');
+    if (BAD_WEBSITE_HOSTS.has(host) || [...BAD_WEBSITE_HOSTS].some(b => host.includes(b))) return 'bad';
+    if (AGGREGATOR_HOSTS.has(host) || [...AGGREGATOR_HOSTS].some(a => host.includes(a))) return 'aggregator';
+    return 'real';
+  } catch { return 'none'; }
+}
+
+async function resolveAggregatorUrl(url) {
+  try {
+    const res = await fetch(url, {
+      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; SmartFlow/1.0)' },
+      signal: AbortSignal.timeout(8000), redirect: 'follow',
+    });
+    if (!res.ok) return null;
+    const html = await res.text();
+    const SOCIAL = ['instagram.com','facebook.com','tiktok.com','twitter.com','youtube.com','linkedin.com','wa.me','t.me'];
+    const links = [...html.matchAll(/href=["'](https?:\/\/[^"'#?]{4,})["']/g)].map(m => m[1]);
+    for (const link of links) {
+      try {
+        const host = new URL(link).hostname.replace(/^www\./, '');
+        if (!host || SOCIAL.some(s => host.includes(s)) || classifyWebsite(link) !== 'real') continue;
+        if (host.includes('.') && !host.startsWith('cdn') && !host.startsWith('static')) return host;
+      } catch {}
+    }
+    return null;
+  } catch { return null; }
+}
+
+// Returns true if the email's domain plausibly belongs to the same business as websiteDomain.
+// Rejects emails scraped from wrong-company templates (e.g. theme builder's own address).
+function emailDomainMatches(email, websiteDomain) {
+  try {
+    const emailDomain = email.split('@')[1]?.toLowerCase().replace(/^www\./, '');
+    if (!emailDomain) return false;
+    const siteDomain = websiteDomain.toLowerCase().replace(/^www\./, '');
+    const personal = /^(gmail|yahoo|hotmail|outlook)\.(com|rs|net|ba|hr)$/.test(emailDomain);
+    return personal || emailDomain === siteDomain || siteDomain.endsWith('.' + emailDomain);
+  } catch { return true; }
+}
+
 async function findEmailOnWebsite(domain) {
   const urls = [
     `https://${domain}/kontakt`,
@@ -340,7 +404,7 @@ async function findEmailOnWebsite(domain) {
     `https://${domain}/o-nama`,
     `https://${domain}`,
   ];
-  const SKIP = /noreply|no-reply|example|johndoe|test@|sentry|wix|schema|privacy|jquery|qodeinteractive|@website\.|@domena\.|^(posao|hr|kadrovi|jobs|career|zaposlenje|rekrutacij)@|\.(png|jpg|jpeg|gif|svg|webp|pdf|css|js)(@|$)/i;
+  const SKIP = /noreply|no-reply|example|johndoe|test@|sentry|wix|schema|privacy|jquery|qodeinteractive|@website\.|@domena\.|^(posao|hr|kadrovi|jobs|career|zaposlenje|rekrutacij|workspace)@|\.(png|jpg|jpeg|gif|svg|webp|pdf|css|js)(@|$)/i;
   for (const url of urls) {
     try {
       const res = await fetch(url, {
@@ -351,7 +415,7 @@ async function findEmailOnWebsite(domain) {
       if (!res.ok) continue;
       const html = await res.text();
       const m = html.match(/([a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,})/);
-      if (m && !SKIP.test(m[1])) return m[1];
+      if (m && !SKIP.test(m[1]) && emailDomainMatches(m[1], domain)) return m[1];
     } catch {}
   }
   return null;
@@ -366,7 +430,12 @@ async function checkApifyBalance() {
   // FREE plan may store limit under different field — default to $5 if missing/zero
   const limit = plan.monthlyUsageCreditsUsd || plan.maxMonthlyUsageUsd || 5;
   const remaining = limit - used;
-  console.log(`  💰 Apify balance: $${remaining.toFixed(3)} remaining (used $${used.toFixed(3)} of $${limit})`);
+  // Warn if the balance looks unrealistically high (stale cache — Apify known issue)
+  if (remaining === limit && used === 0 && limit <= 5) {
+    console.log(`  💰 Apify balance: ~$${remaining.toFixed(2)} (⚠ usage may be cached — actual balance unknown)`);
+  } else {
+    console.log(`  💰 Apify balance: $${remaining.toFixed(3)} remaining (used $${used.toFixed(3)} of $${limit})`);
+  }
   if (remaining < 0.25) throw new Error(`Apify balance too low ($${remaining.toFixed(3)} < $0.25 minimum). Top up first.`);
   return remaining;
 }
@@ -447,6 +516,12 @@ async function scrapeCreatorsProfile(handle) {
 
 // ── Load local dataset files ──────────────────────────────────────────────────
 function loadLocalDatasets() {
+  if (FILE_PATH) {
+    const data = JSON.parse(readFileSync(FILE_PATH, 'utf8'));
+    const arr = Array.isArray(data) ? data : [];
+    console.log(`  Loaded ${arr.length} records from ${FILE_PATH.split('/').pop()}`);
+    return arr;
+  }
   const files = readdirSync(LOCAL_DATASETS_DIR)
     .filter(f => f.startsWith(LOCAL_DATASET_GLOB) && f.endsWith('.json'))
     .map(f => join(LOCAL_DATASETS_DIR, f));
@@ -494,6 +569,19 @@ async function main() {
   const contactedHandles  = new Set(existingAll.filter(r => ['Kontaktiran','Disqualified','Follow Up','Odgovorio','Zakazan Sastanak'].includes(r.status)).map(r => r.instagram_handle?.toLowerCase()).filter(Boolean));
   console.log(`Existing in DB: ${existingPageIds.size} page IDs | ${contactedEmails.size} contacted emails | ${contactedHandles.size} contacted handles\n`);
 
+  // Launch IG caption search in parallel with FB ads (only on live --yes runs, unless --skip-ig)
+  let igProcess = null, igOutput = '';
+  if (isYes && !skipIg && process.env.IG_SESSION_ID) {
+    const { spawn } = await import('child_process');
+    igProcess = spawn('node', [resolve(__dirname, 'source_ig_search.mjs')], {
+      stdio: ['ignore', 'pipe', 'pipe'],
+      cwd: __dirname,
+    });
+    igProcess.stdout.on('data', d => { igOutput += d; });
+    igProcess.stderr.on('data', d => { igOutput += d; });
+    console.log('  ▶ IG caption search launched in parallel\n');
+  }
+
   // ── Stage 1: Load raw ads ─────────────────────────────────────────────────────
   let rawItems;
   if (isLocal) {
@@ -512,27 +600,37 @@ async function main() {
     }
     const numBatches    = urlsToScrape.length;
     const perBatch      = Math.ceil(RAW_LIMIT / numBatches);
-    const chargePerBatch = parseFloat(Math.min(MAX_CHARGE / numBatches + 0.02, 0.30).toFixed(2));
+    const chargePerBatch = parseFloat((MAX_CHARGE / numBatches + 0.02).toFixed(2));
     console.log(`  ${numBatches} batch(es) × up to ${perBatch} records, $${chargePerBatch} cap each\n`);
     const allRawItems = [];
     for (const urlObj of urlsToScrape) {
       const label = `FB Ads [${urlObj.country}·q=${urlObj.q}]`;
-      const items = await runApify(
-        FB_ADS_ACTOR,
-        {
-          urls: [{ url: urlObj.url }],
-          'scrapePageAds.countryCode': urlObj.country,
-          'scrapePageAds.activeStatus': 'active',
-          'scrapePageAds.sortBy': 'impressions_desc',
-        },
-        label,
-        perBatch,
-        chargePerBatch,
-      );
+      let items = [];
+      try {
+        items = await runApify(
+          FB_ADS_ACTOR,
+          {
+            urls: [{ url: urlObj.url }],
+            'scrapePageAds.countryCode': urlObj.country,
+            'scrapePageAds.activeStatus': 'active',
+            'scrapePageAds.sortBy': 'impressions_desc',
+          },
+          label,
+          perBatch,
+          chargePerBatch,
+        );
+      } catch (e) {
+        console.warn(`  ⚠ Batch ${label} failed (${e.message}) — skipping, continuing with other batches`);
+      }
       allRawItems.push(...items);
     }
     rawItems = allRawItems;
-    console.log(`\n  Raw records (all batches): ${rawItems.length}\n`);
+    console.log(`\n  Raw records (all batches): ${rawItems.length}`);
+    // Auto-save for replay with --local --file
+    const saveTag = ADS_QUERIES.slice(0,2).join('_').replace(/[^a-z0-9]/gi, '');
+    const savePath = join(LOCAL_DATASETS_DIR, `${LOCAL_DATASET_GLOB}${new Date().toISOString().slice(0,10)}_${saveTag}.json`);
+    writeFileSync(savePath, JSON.stringify(rawItems, null, 2));
+    console.log(`  💾 Saved to ${savePath.split('/').pop()} (replay with --local --file ${savePath})\n`);
   }
 
   // ── Stage 2: Post-filter ──────────────────────────────────────────────────────
@@ -567,6 +665,7 @@ async function main() {
     if (snap.page_entity_type === 'PERSON_PROFILE')       { dbg.person++;    continue; }
     if (!platforms.includes('INSTAGRAM'))                  { dbg.noIG++;      continue; }
     if (count < 1)                                         { dbg.fewAds++;    continue; }
+    // No FB likes range filter — FB likes are independent of IG followers and not a valid proxy.
     // No FB likes filter — FB and IG audiences are independent. A business can have 300 FB likes
     // and 80k IG followers. The 20k IG follower gate lives in Stage 4 where we actually know it.
     // Skip ads whose link goes to an ad-network domain — not a real direct advertiser
@@ -601,7 +700,7 @@ async function main() {
 
   // ── Stage 3: IG handle extraction (multi-source) ─────────────────────────────
   console.log('─── Stage 3: IG handle extraction (multi-source) ───────');
-  console.log(`  Sources: snapshot URL → ad copy domain → website HTML → Firecrawl FB /about → slug\n`);
+  console.log(`  Sources: profile_uri → link_url/caption IG → website HTML → Firecrawl website → FB slug\n`);
 
   for (let i = 0; i < qualified.length; i++) {
     const lead = qualified[i];
@@ -616,6 +715,18 @@ async function main() {
       } catch {}
     }
 
+    // 3a.5. link_url or caption points directly to instagram.com/<handle> — very common: businesses
+    // run ads with IG as the CTA destination. extractDomain filters these out as social links,
+    // so we must extract the handle here before that step discards them.
+    if (!lead.igHandle) {
+      for (const src of [snap.link_url, snap.caption]) {
+        if (!src) continue;
+        const m = src.match(/instagram\.com\/([a-zA-Z0-9._]{2,30})\/?(?:[?#]|$)/);
+        if (m && isValidIgHandle(m[1])) { lead.igHandle = m[1]; process.stdout.write('L'); break; }
+      }
+      if (lead.igHandle) continue;
+    }
+
     // 3b. Extract domain from snapshot (link_url, caption)
     lead.domain = extractDomain(snap);
 
@@ -624,12 +735,15 @@ async function main() {
       lead.domain = domainFromAdCopies(lead.adCopies);
     }
 
-    // 3d. If domain found: raw HTML scrape first, then Firecrawl fallback for JS-rendered sites
+    // 3d. If domain found: raw HTML scrape first, then Firecrawl fallback for JS-rendered sites.
+    // Firecrawl also extracts email in the same pass — cached on lead.fcEmail for Stage 5 reuse.
     if (lead.domain && !lead.igHandle) {
       lead.igHandle = await findIgOnWebsite(lead.domain);
     }
     if (lead.domain && !lead.igHandle) {
-      lead.igHandle = await findIgWithFirecrawl(lead.domain);
+      const fc = await findIgAndEmailWithFirecrawl(lead.domain);
+      if (fc.handle) lead.igHandle = fc.handle;
+      if (fc.email)  lead.fcEmail  = fc.email;
     }
 
     // 3e. FB page slug as IG handle candidate — Serbian businesses use same handle on both platforms.
@@ -656,17 +770,12 @@ async function main() {
   console.log('─── Stage 4: Apify IG Profile Scraper (batch) ──────────────');
 
   const IG_PROFILE_ACTOR = 'dSCLg0C3YEZ83HzYX';
-  // Pre-filter: only verify pages with 10k+ FB likes OR an explicit IG URL in their profile.
-  // Pages with <10k FB likes almost never have 15k+ IG followers — verifying them wastes $0.005/each.
-  const FB_LIKES_MIN_FOR_IG = 10000;
-  const igCandidates = withHandles.filter(l => {
-    const likes = l.item.snapshot?.page_like_count || 0;
-    const hasExplicitIg = (l.item.snapshot?.page_profile_uri || '').includes('instagram.com');
-    return hasExplicitIg || likes >= FB_LIKES_MIN_FOR_IG;
-  });
+  // No FB likes pre-filter — FB and IG audiences are independent; a business can have 500 FB likes
+  // and 50k IG followers. Only Stage 4 (real IG profile) is authoritative.
+  const igCandidates = withHandles;
 
   const uniqueHandles = [...new Set(igCandidates.map(l => l.igHandle))];
-  console.log(`  Verifying ${uniqueHandles.length} handles (FB likes ≥ ${FB_LIKES_MIN_FOR_IG} or explicit IG URL, filtered from ${withHandles.length})...`);
+  console.log(`  Verifying ${uniqueHandles.length} handles (all, no FB likes pre-filter)...`);
 
   const profileByHandle = new Map();
   if (uniqueHandles.length > 0) {
@@ -698,13 +807,12 @@ async function main() {
         for (const entry of urls) {
           const raw = entry?.url || entry;
           if (!raw || typeof raw !== 'string') continue;
-          try {
-            const host = new URL(raw).hostname.replace(/^www\./, '');
-            if (host && !SOCIAL.has(host) && !host.includes('linkin.bio') && !host.includes('linktr.ee')) {
-              lead.domain = host;
-              break;
-            }
-          } catch {}
+          const kind = classifyWebsite(raw);
+          if (kind === 'real') {
+            try { lead.domain = new URL(raw).hostname.replace(/^www\./, ''); break; } catch {}
+          } else if (kind === 'aggregator' && !lead._aggregatorUrl) {
+            lead._aggregatorUrl = raw; // resolve in Stage 5
+          }
         }
       }
     } else if (lead.igHandleIsGuess) {
@@ -781,10 +889,35 @@ async function main() {
       if (domain) lead.domain = domain;
     }
 
-    const GARBAGE_EMAIL = /^(posao|hr|kadrovi|jobs|career|zaposlenje|rekrutacij)@/i;
-    if (fbEmail && !GARBAGE_EMAIL.test(fbEmail)) {
+    const GARBAGE_EMAIL = /^(posao|hr|kadrovi|jobs|career|zaposlenje|rekrutacij|knjigovodstvo|racunovodstvo|pravna|administracij|office\.hr|info\.hr)@/i;
+    const EMAIL_RE = /\b[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}\b/;
+
+    // IG bio email — cheapest, check first
+    const bio = lead.igProfile?.biography || '';
+    const bioEmail = bio.match(EMAIL_RE)?.[0];
+    if (bioEmail && !GARBAGE_EMAIL.test(bioEmail) && !bioEmail.includes('example') && !bioEmail.includes('domain.com')) {
+      contact = { email: bioEmail.toLowerCase(), name: null, title: null };
+      console.log(`  ✓ Email from IG bio: ${bioEmail}`);
+    }
+
+    // Resolve aggregator URL → real domain (if no direct domain yet)
+    if (!contact && !domain && lead._aggregatorUrl) {
+      process.stdout.write(`  Resolving aggregator (${lead._aggregatorUrl.slice(0, 40)})... `);
+      const resolved = await resolveAggregatorUrl(lead._aggregatorUrl);
+      if (resolved) { domain = resolved; lead.domain = resolved; console.log(resolved); }
+      else console.log('no real URL found');
+    }
+
+    // Strip bad/useless website domains so we don't waste Hunter/scrape calls
+    if (domain && classifyWebsite(`https://${domain}`) !== 'real') domain = null;
+
+    // Use email found by Firecrawl in Stage 3 (same scrape, no extra cost)
+    if (!contact && lead.fcEmail && !GARBAGE_EMAIL.test(lead.fcEmail)) {
+      contact = { email: lead.fcEmail, name: null, title: null };
+      console.log(`  ✓ Email from Stage 3 Firecrawl: ${lead.fcEmail}`);
+    } else if (!contact && fbEmail && !GARBAGE_EMAIL.test(fbEmail)) {
       contact = { email: fbEmail, name: null, title: null };
-    } else if (domain) {
+    } else if (!contact && domain) {
       // Hunter first
       process.stdout.write(`  Hunter (${domain})... `);
       const hunterContact = await hunterDomain(domain);
@@ -796,9 +929,9 @@ async function main() {
         process.stdout.write(`not found → website scrape... `);
         const email = await findEmailOnWebsite(domain);
         console.log(email || 'not found');
-        if (email) contact = { email, name: null, title: null };
+        if (email && !GARBAGE_EMAIL.test(email)) contact = { email, name: null, title: null };
       }
-    } else {
+    } else if (!contact) {
       console.log(`  No website — skipping email enrichment`);
     }
 
@@ -919,6 +1052,15 @@ async function main() {
   console.log(`  Failed        : ${failed}`);
   console.log('\n  node generate_drafts.mjs --mode initial');
   console.log('  node send_outreach.mjs --dry-run');
+
+  // Wait for IG caption search to finish and print its output
+  if (igProcess) {
+    console.log('\n\n' + '═'.repeat(56));
+    console.log('  Waiting for IG caption search to finish...');
+    console.log('═'.repeat(56));
+    await new Promise(r => igProcess.on('close', r));
+    console.log(igOutput);
+  }
 }
 
 main().catch(err => { console.error('✗ Fatal:', err.message); process.exit(1); });

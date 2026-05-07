@@ -2,6 +2,24 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Second Brain (READ THIS FIRST)
+
+This project has a persistent wiki in the Smartflow Obsidian vault.
+**Read it at the start of every session. Update it at the end.**
+
+Wiki path: `/Users/johhn/Library/Mobile Documents/iCloud~md~obsidian/Documents/Smartflow/`
+
+| File | What's in it |
+|------|-------------|
+| `wiki/status.md` | **START HERE** — last session, blockers, next actions |
+| `wiki/clients.md` | All clients: configs, live status, issues |
+| `wiki/modules.md` | All modules: Active / WIP / Placeholder |
+| `wiki/outreach.md` | Email pipeline state and scripts reference |
+| `wiki/architecture.md` | Data model, module system, n8n patterns |
+| `wiki/workflows.md` | n8n workflow inventory |
+
+Session protocol: read `wiki/status.md` → do work → update `wiki/status.md` + append to `log.md`.
+
 ## Development Commands
 
 ```bash

@@ -31,11 +31,13 @@ function loadEnv() {
 loadEnv();
 
 const TOKEN        = process.env.APIFY_TOKEN;
-const ACTOR        = 'shu8hvrXbJbY3Eb9W'; // apify/instagram-scraper
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const SERVICE_KEY  = process.env.SUPABASE_SERVICE_ROLE_KEY;
-const HUNTER_KEY   = process.env.HUNTER_API_KEY;
-const SMARTFLOW_ID = '69acf7e9-557e-4ca3-85bd-a785ef39e351';
+const ACTOR            = 'OQkrGAtl0AfRFKnJr'; // crawlerbros/instagram-keyword-search-scraper (caption/post search)
+const IG_PROFILE_ACTOR = 'dSCLg0C3YEZ83HzYX'; // apify/instagram-profile-scraper (PPE $0.005/profile)
+const SUPABASE_URL  = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const SERVICE_KEY   = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const HUNTER_KEY    = process.env.HUNTER_API_KEY;
+const IG_SESSION_ID = process.env.IG_SESSION_ID; // Instagram sessionid cookie — required for caption search
+const SMARTFLOW_ID  = '69acf7e9-557e-4ca3-85bd-a785ef39e351';
 
 const isDryRun = process.argv.includes('--dry-run');
 const limitIdx = process.argv.indexOf('--limit');
@@ -44,17 +46,19 @@ const LIMIT    = limitIdx !== -1 ? parseInt(process.argv[limitIdx + 1]) : Infini
 const MIN_FOLLOWERS = 15000;
 const MAX_FOLLOWERS = 200000;
 
-// Identity/location words that appear in IG bios and usernames of Serbian businesses.
-// Rules: NOT niche-specific. Terms that appear across ALL service types.
-// EXHAUSTED (top-100 all in DB — DO NOT re-add): beograd, belgrade, srbija, novi sad, bg rs, novi beograd, zemun, vracar, belgrade serbia, beograd rs, serbia
-// Behavior-signal terms: appear ONLY in bios of businesses that sell/convert through Instagram DMs.
-// Non-niche, non-location — any industry that uses IG as a sales channel writes these.
+// Caption/post search phrases — these appear in actual business post captions.
+// Multi-word phrases work because this is caption text search, not hashtag search.
+// 9 diverse terms → more unique account owners → ~15+ qualified leads per run.
 const SEARCHES = [
-  'dm za',            // "DM za cenu / info / rezervaciju" — universal DM-sales signal
-  'inbox',            // "pišite na inbox" — same signal, different word
-  'zakazivanje',      // "online zakazivanje" — appointment booking, any service type
-  'poruci',           // "poruci na DM" — order via DM, broad commerce signal
-  'link u bio',       // link-in-bio sellers — any product/service type
+  'javite se',
+  'pošaljite nam',
+  'zakažite termin',
+  'naručite online',
+  'kontaktirajte nas',
+  'slobodnih termina',       // "appointment slots available" — clinics, salons, fitness
+  'besplatna konsultacija',  // "free consultation" — agencies, professional services
+  'upit u DM',               // "inquiry in DM" — B2B and service businesses
+  'za saradnju',             // "for collaboration" — brands seeking B2B partners
 ];
 
 // Domains that are link aggregators / booking platforms — not the business's own site
@@ -89,42 +93,66 @@ const EXCLUDE_CATS = new Set([
   'Artist', 'Musician/band', 'Media/news company', 'Shopping & retail',
   'Book series', 'Books', 'TV channel', 'Entertainment website',
   'Sports team', 'Interest',
-  // News, media, government — keep slipping through with broad terms
+  // Content creators / influencers / entertainment
+  'Digital creator', 'Content creator', 'Blogger', 'Creators & Celebrities',
+  'Comedian', 'Entertainer', 'Actor/director',
+  // Community / local pages — not businesses
+  'Community Organization', 'Community', 'Local business', 'City', 'Region',
+  // News, media, government
   'News & media website', 'News personality', 'News/media website',
   'Government organization', 'Government website', 'Government official',
   'Political party', 'Politician', 'Non-profit organization', 'Nonprofit organization',
   'Magazine', 'Newspaper', 'Broadcasting & media production company',
   'Radio station', 'Podcast',
+  // Food & beverage (restaurants, bars, cafes)
+  'Restaurant', 'Cafe', 'Bar', 'Bar & grill', 'Fast food restaurant',
+  'Pizza place', 'Bakery', 'Food & beverage company', 'Winery/vineyard',
 ]);
+
+// Bio signals that indicate a D2C product seller or fraud service.
+// "prodajemo" = "we sell [products]" — service businesses say "pružamo" (we provide).
+const PRODUCT_SELLER_BIO = /\bprodajemo\b|\bwebshop\b|web\s+shop|\bnakit\s+od\b|garderob[au].*brendov|šolj[ae].*jastuci|majice.*jastuci|obuć[au].*brendov|prodaja pratilaca|prodaj[ae] lajkov|kupovina pratilaca|boost.*pratilac/i;
 
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
-// ── IG search: start all runs in parallel ─────────────────────────────────────
+// ── IG caption keyword search (single run, all keywords at once) ──────────────
 
-async function startRun(term) {
+async function runKeywordSearch(keywords, sessionId) {
   const res = await fetch(
-    `https://api.apify.com/v2/acts/${ACTOR}/runs?token=${TOKEN}&maxItems=100`,
+    `https://api.apify.com/v2/acts/${ACTOR}/runs?token=${TOKEN}`,
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ searchType: 'user', searchLimit: 100, search: term, resultsType: 'details' }),
+      body: JSON.stringify({
+        keywords,
+        maxPosts: 150,
+        cookies: JSON.stringify([{ name: 'sessionid', value: sessionId }]),
+        sessionName: 'smartflow',
+      }),
     }
   );
   const data = await res.json();
   if (data.error) throw new Error(data.error.message);
-  return { term, runId: data.data.id, datasetId: data.data.defaultDatasetId };
+  return { runId: data.data.id, datasetId: data.data.defaultDatasetId };
 }
 
-async function waitAndFetch({ term, runId, datasetId }) {
+async function waitForRun(runId) {
   let status = 'RUNNING';
-  for (let i = 0; i < 60; i++) {
-    await sleep(8000);
+  for (let i = 0; i < 90; i++) {
+    await sleep(10000);
     const s = await fetch(`https://api.apify.com/v2/actor-runs/${runId}?token=${TOKEN}`);
     status = (await s.json()).data?.status;
+    process.stdout.write(` ${status}(${(i + 1) * 10}s)...`);
     if (!['RUNNING', 'READY'].includes(status)) break;
   }
-  const r = await fetch(`https://api.apify.com/v2/datasets/${datasetId}/items?token=${TOKEN}&limit=200`);
-  return { term, items: await r.json() };
+  // If still running after 900s, abort — otherwise it keeps billing on Apify servers
+  if (['RUNNING', 'READY'].includes(status)) {
+    await fetch(`https://api.apify.com/v2/actor-runs/${runId}/abort?token=${TOKEN}`, { method: 'POST' });
+    status = 'ABORTED';
+    console.log(' → aborted (poll timeout)');
+  }
+  console.log();
+  return status;
 }
 
 // ── Domain resolution ─────────────────────────────────────────────────────────
@@ -259,6 +287,45 @@ async function firecrawlWebsite(domain) {
   return result;
 }
 
+// ── IG Profile Scraper (batch) ────────────────────────────────────────────────
+async function verifyProfiles(usernames) {
+  if (!usernames.length) return [];
+  const maxCharge = (usernames.length * 0.005).toFixed(2);
+  console.log(`\n─── IG Profile Scraper (${usernames.length} handles, max $${maxCharge}) ────────`);
+
+  const res = await fetch(
+    `https://api.apify.com/v2/acts/${IG_PROFILE_ACTOR}/runs?token=${TOKEN}&maxItems=${usernames.length}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ usernames }),
+    }
+  );
+  const data = await res.json();
+  if (data.error) throw new Error(`Profile scraper failed to start: ${data.error.message}`);
+
+  const { id: runId, defaultDatasetId: datasetId } = data.data;
+  process.stdout.write(`  Run: ${runId} `);
+
+  let status = 'RUNNING';
+  for (let i = 0; i < 60; i++) {
+    await sleep(10000);
+    const s = await fetch(`https://api.apify.com/v2/actor-runs/${runId}?token=${TOKEN}`);
+    status = (await s.json()).data?.status;
+    process.stdout.write(` ${status}(${(i + 1) * 10}s)...`);
+    if (!['RUNNING', 'READY'].includes(status)) break;
+  }
+  console.log();
+
+  const r = await fetch(
+    `https://api.apify.com/v2/datasets/${datasetId}/items?token=${TOKEN}&limit=500`
+  );
+  const items = await r.json();
+  if (!Array.isArray(items)) return [];
+  console.log(`  ✓ ${items.length} profiles returned`);
+  return items;
+}
+
 function mapNiche(bio = '', cat = '') {
   const t = (bio + ' ' + cat).toLowerCase();
   if (/kozmet|spa|wellness|estet|stomatol|fizioter|klinika|ordinacija|bolnica|dermatol|beauty|dental/.test(t)) return 'klinika_wellness';
@@ -273,9 +340,17 @@ function mapNiche(bio = '', cat = '') {
 
 async function main() {
   console.log('═══════════════════════════════════════════════════════════');
-  console.log('  SmartFlow Lead Sourcer — Instagram User Search');
-  console.log(`  Mode: ${isDryRun ? 'DRY RUN' : 'LIVE'} | Searches: ${SEARCHES.length} | ~$${(SEARCHES.length * 10 * 0.0023).toFixed(2)}`);
+  console.log('  SmartFlow Lead Sourcer — Instagram Caption Search');
+  console.log(`  Mode: ${isDryRun ? 'DRY RUN' : 'LIVE'} | Keywords: ${SEARCHES.length} | profiles max ~$0.75`);
   console.log('═══════════════════════════════════════════════════════════\n');
+
+  if (!IG_SESSION_ID) {
+    console.error('✗ IG_SESSION_ID not set in .env.local');
+    console.error('  1. Log into instagram.com in Chrome');
+    console.error('  2. DevTools → Application → Cookies → instagram.com');
+    console.error('  3. Copy "sessionid" value → add IG_SESSION_ID=<value> to .env.local');
+    process.exit(1);
+  }
 
   // Load existing handles + emails for dedup
   const existingRes = await fetch(
@@ -287,58 +362,66 @@ async function main() {
   const existingEmails  = new Set(existingAll.map(r => r.email?.toLowerCase()).filter(Boolean));
   console.log(`Existing in DB: ${existingHandles.size} handles | ${existingEmails.size} emails\n`);
 
-  // ── Start runs in batches of 4 (free plan: 8192MB / 1024MB per run = 8 max) ──
-  // Wait for each batch to finish before starting next to stay under memory limit
-  console.log('─── Launching searches (batches of 4) ───────────────────\n');
-  const BATCH = 4;
-  const results = [];
-  for (let i = 0; i < SEARCHES.length; i += BATCH) {
-    const batch = SEARCHES.slice(i, i + BATCH);
-    const started = await Promise.allSettled(batch.map(term => startRun(term)));
-    const activeRuns = [];
-    for (let j = 0; j < started.length; j++) {
-      if (started[j].status === 'fulfilled') {
-        activeRuns.push(started[j].value);
-        process.stdout.write(`  ✓ Started "${batch[j]}"\n`);
-      } else {
-        console.log(`  ✗ Failed to start "${batch[j]}": ${started[j].reason?.message?.slice(0, 80)}`);
-      }
-    }
-    // Wait for this batch to complete before starting next
-    const batchResults = await Promise.allSettled(activeRuns.map(run => waitAndFetch(run)));
-    results.push(...batchResults);
-    if (i + BATCH < SEARCHES.length) await sleep(500);
+  // ── Stage 1: Caption keyword search ──────────────────────────────────────────
+  console.log('─── Stage 1: IG Caption Search ──────────────────────────');
+  console.log(`  Keywords: ${SEARCHES.map(s => `"${s}"`).join(' · ')}\n`);
+  const { runId, datasetId } = await runKeywordSearch(SEARCHES, IG_SESSION_ID);
+  process.stdout.write(`  Run: ${runId} `);
+  await waitForRun(runId);
+  const rawRes = await fetch(`https://api.apify.com/v2/datasets/${datasetId}/items?token=${TOKEN}&limit=1000`);
+  const rawText = await rawRes.text();
+  let rawPosts;
+  try { rawPosts = JSON.parse(rawText); } catch {
+    console.error(`  ✗ Dataset response was not JSON (run may have failed): ${rawText.slice(0, 120)}`);
+    rawPosts = [];
   }
-  console.log(`\n  All batches done.\n`);
+  const items = Array.isArray(rawPosts) ? rawPosts : [];
+  console.log(`  ✓ ${items.length} posts fetched\n`);
 
-  const seen = new Set();
+  // ── Stage 2: Extract unique owner usernames ───────────────────────────────────
+  console.log('─── Stage 2: Extracting post owners ─────────────────────');
+  const ownerMap = new Map(); // lowercase → original case
+  for (const post of items) {
+    const owner = post.ownerUsername || post.username || post.author;
+    if (!owner || typeof owner !== 'string') continue;
+    const low = owner.toLowerCase();
+    if (existingHandles.has(low)) continue;
+    if (!ownerMap.has(low)) ownerMap.set(low, owner);
+  }
+  const uniqueOwners = [...ownerMap.values()];
+  console.log(`  Posts: ${items.length} | Unique new owners: ${uniqueOwners.length}\n`);
+  if (!uniqueOwners.length) { console.log('No new owner handles found.'); return; }
+
+  // Stage 3: Verify profiles via IG Profile Scraper
+  const profiles = await verifyProfiles(uniqueOwners.slice(0, 150));
+
+  // Stage 4: Filter profiles (business account, follower range, Serbian market, not excluded)
   const candidates = [];
-
-  for (const result of results) {
-    if (result.status !== 'fulfilled') continue;
-    const { term, items } = result.value;
-    if (!Array.isArray(items)) continue;
-    let newFound = 0;
-    for (const p of items) {
-      if (!p.username || seen.has(p.username.toLowerCase())) continue;
-      seen.add(p.username.toLowerCase());
-      const f = p.followersCount || 0;
-      if (!p.isBusinessAccount) continue;
-      if (f < MIN_FOLLOWERS || f > MAX_FOLLOWERS) continue;
-      if (p.private) continue;
-      const cats = (p.businessCategoryName || '').split(',').map(c => c.trim()).filter(Boolean);
-      if (cats.some(c => EXCLUDE_CATS.has(c))) continue;
-      if (existingHandles.has(p.username.toLowerCase())) continue;
-      candidates.push(p);
-      newFound++;
-    }
-    console.log(`  "${term}" → ${newFound} new qualified`);
+  for (const p of profiles) {
+    if (!p.username) continue;
+    const low = p.username.toLowerCase();
+    if (existingHandles.has(low)) continue;
+    const f = p.followersCount || 0;
+    if (!p.isBusinessAccount) continue;
+    if (f < MIN_FOLLOWERS || f > MAX_FOLLOWERS) continue;
+    if (p.private) continue;
+    const cats = (p.businessCategoryName || '').split(',').map(c => c.trim()).filter(Boolean);
+    if (cats.some(c => EXCLUDE_CATS.has(c))) continue;
+    if (PRODUCT_SELLER_BIO.test(p.biography || '')) continue;
+    const extDomain = (() => { try { return new URL(p.externalUrl || '').hostname.toLowerCase(); } catch { return ''; } })();
+    const bioText = (p.biography || '').toLowerCase();
+    const hasSerbianDomain = extDomain.endsWith('.rs');
+    const hasSerbianGeo = /srbija|srbiji|beograd|novi sad|niš|kragujevac|subotica|čačak|valjevo|užice|smederevo/.test(bioText);
+    const hasSerbianScript = /[šćčžđŠĆČŽĐ]/.test(p.biography || '');
+    if (!hasSerbianDomain && !hasSerbianGeo && !hasSerbianScript) continue;
+    candidates.push(p);
   }
+  console.log(`\n  Qualified (15k+, Serbian, business): ${candidates.length}`);
 
   candidates.sort((a, b) => (b.followersCount || 0) - (a.followersCount || 0));
   const toProcess = Number.isFinite(LIMIT) ? candidates.slice(0, LIMIT) : candidates;
 
-  console.log(`\n  Found ${candidates.length} unique qualified leads (processing ${toProcess.length})\n`);
+  console.log(`  Processing: ${toProcess.length}\n`);
   if (!toProcess.length) { console.log('No new leads found.'); return; }
 
   // ── Enrich with email ─────────────────────────────────────────────────────

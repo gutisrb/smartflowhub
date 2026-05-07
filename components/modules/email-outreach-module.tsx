@@ -23,6 +23,7 @@ interface EmailStats {
   replied: number
   meetings_booked: number
   no_response: number
+  bounced: number
 }
 
 interface Lead {
@@ -106,6 +107,7 @@ export function EmailOutreachModule({
     replied: 0,
     meetings_booked: 0,
     no_response: 0,
+    bounced: 0,
   })
   const [leads, setLeads] = useState<Lead[]>([])
   const [loading, setLoading] = useState(true)
@@ -129,9 +131,10 @@ export function EmailOutreachModule({
       const total_sent = data.filter((l: any) => l.last_sent_at || sentStatuses.includes(l.status)).length
       const replied = data.filter((l: any) => (l as any).replied_at || l.status === 'Odgovorio').length
       const meetings_booked = data.filter((l: any) => l.status === 'Zakazan Sastanak' || l.status === 'Meeting Booked' || l.meeting_time).length
-      const no_response = data.filter((l: any) => (l.last_sent_at || l.status === 'Kontaktiran') && !(l as any).replied_at && l.status !== 'Zakazan Sastanak' && l.status !== 'Meeting Booked').length
+      const bounced = data.filter((l: any) => l.status === 'Bounced').length
+      const no_response = data.filter((l: any) => (l.last_sent_at || l.status === 'Kontaktiran') && !(l as any).replied_at && l.status !== 'Zakazan Sastanak' && l.status !== 'Meeting Booked' && l.status !== 'Bounced').length
 
-      setStats({ total_sent, replied, meetings_booked, no_response })
+      setStats({ total_sent, replied, meetings_booked, no_response, bounced })
     }
   }, [clientId])  // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -182,6 +185,7 @@ export function EmailOutreachModule({
     { status: 'No Draft',  label: 'no draft'  },
     { status: 'No Email',  label: 'no email'  },
     { status: 'Lost',      label: 'lost'      },
+    { status: 'Bounced',   label: 'bounce'    },
   ]
 
   const handleCopyDraft = async (text: string) => {
@@ -309,9 +313,9 @@ export function EmailOutreachModule({
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {[
           { label: "Poslato", value: stats.total_sent, sub: "Emails delivered", icon: Send, color: "text-emerald" },
-          { label: "Odgovorili", value: stats.replied, sub: stats.total_sent > 0 ? `${Math.round((stats.replied / stats.total_sent) * 100)}% reply rate` : "No sends yet", icon: MessageSquare, color: "text-purple-400" },
+          { label: "Odgovorili", value: stats.replied, sub: stats.total_sent > 0 ? `${((stats.replied / Math.max(stats.total_sent - stats.bounced, 1)) * 100).toFixed(1)}% reply rate` : "No sends yet", icon: MessageSquare, color: "text-purple-400" },
           { label: "Zakazano", value: stats.meetings_booked, sub: "Meetings booked", icon: CheckCircle, color: "text-emerald-400" },
-          { label: "Bez odgovora", value: stats.no_response, sub: "Awaiting reply", icon: UserCheck, color: "text-blue-400" },
+          { label: "Bounce", value: stats.bounced, sub: stats.total_sent > 0 ? `${((stats.bounced / stats.total_sent) * 100).toFixed(1)}% bounce rate` : "No sends yet", icon: UserCheck, color: "text-red-400" },
         ].map((item, i) => (
           <motion.div
             key={item.label}

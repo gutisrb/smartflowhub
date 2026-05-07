@@ -1,0 +1,28 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -Rs '{hookSpecificOutput:{hookEventName:\"SessionStart\",additionalContext:(\"=== SMARTFLOW WIKI STATUS (auto-loaded) ===\\n\" + .)}}' '/Users/johhn/Library/Mobile Documents/iCloud~md~obsidian/Documents/Smartflow/wiki/status.md' 2>/dev/null || true",
+            "timeout": 10,
+            "statusMessage": "Loading wiki context..."
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "PROJ='/Users/johhn/.gemini/antigravity/playground/photonic-lunar/ai-growth-dashboard'; LOG='/Users/johhn/Library/Mobile Documents/iCloud~md~obsidian/Documents/Smartflow/log.md'; LAST=$(cd \"$PROJ\" && git log --oneline -1 2>/dev/null); DATE=$(date +%Y-%m-%d); printf '\\n## [%s] session | %s\\n' \"$DATE\" \"$LAST\" >> \"$LOG\" 2>/dev/null || true",
+            "timeout": 10,
+            "statusMessage": "Updating wiki log..."
+          }
+        ]
+      }
+    ]
+  }
+}
