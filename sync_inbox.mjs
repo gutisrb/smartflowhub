@@ -81,19 +81,79 @@ function extractBounceRecipient(parsed, emailIndex) {
 }
 
 // ── Reply intent classification ───────────────────────────────────────────────
-function classifyIntent(text) {
+// LLM-based — classifies intent AND distinguishes auto-replies from real human responses.
+// Falls back to keyword heuristic if LLM call fails.
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+const VALID_INTENTS = new Set([
+  'interested', 'meeting_requested', 'not_interested', 'wrong_contact',
+  'out_of_office', 'auto_reply', 'price_question', 'question', 'unclear'
+]);
+
+async function classifyIntentLLM(text, fromAddr) {
+  if (!GEMINI_API_KEY || !text) return classifyIntentKeyword(text);
+  const prompt = `You classify cold-outreach replies for a Serbian B2B SaaS sender.
+Read the reply below and output ONLY one label from this list:
+
+- interested            : human reply showing genuine interest, even cautious
+- meeting_requested     : explicitly asks to schedule a call/meeting/demo, or provides a contact for one
+- price_question        : asks about price, quote, or cost
+- question              : asks any other clarifying question
+- not_interested        : polite or hard rejection
+- wrong_contact         : "I am no longer at this company" / "send to X" / contact moved on
+- out_of_office         : human OOO/vacation/maternity reply (NOT a customer-service auto-reply)
+- auto_reply            : automated customer-service / "your inquiry is registered" / "we will get back to you" / signed by a "tim"/"servis"/"služba" with no human personalization
+- unclear               : cannot determine
+
+Important:
+- Treat boilerplate like "primili smo Vašu poruku, biće odgovoreno u najkraćem roku" or "Vaš zahtev je registrovan pod brojem" as auto_reply, not interested.
+- Treat "Vašu ponudu možete proslediti na X@Y" as meeting_requested ONLY if it sounds like a forwarding ask for a real conversation; if it's a generic "send to compliance" reply, it's wrong_contact.
+- Output ONLY the label. No explanation.
+
+FROM: ${fromAddr || 'unknown'}
+REPLY:
+${text.slice(0, 1500)}
+
+LABEL:`;
+  try {
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: { temperature: 0.0, maxOutputTokens: 16 }
+      }),
+      signal: AbortSignal.timeout(15000),
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    const label = (data?.candidates?.[0]?.content?.parts?.[0]?.text || '').trim().toLowerCase().replace(/[^a-z_]/g, '');
+    if (VALID_INTENTS.has(label)) return label;
+    return classifyIntentKeyword(text);
+  } catch {
+    return classifyIntentKeyword(text);
+  }
+}
+
+// Keyword fallback (the old classifier)
+function classifyIntentKeyword(text) {
   const t = (text || '').toLowerCase();
-  if (/ne zanima|nije nam|nema interesovanja|zahvaljujemo|hvala.*ne|ne trebamo|nismo zainteresovani|no thanks|not interested|unsubscribe|odjavi/i.test(t))
+  if (/primili smo vašu|biće vam odgovoreno|registrovan pod brojem|hvala vam što ste nas kontaktirali|vaša poruka je uspešno primljena/i.test(t))
+    return 'auto_reply';
+  if (/ne zanima|nije nam|nema interesovanja|zahvaljujemo.*ali|hvala.*ne|ne trebamo|nismo zainteresovani|no thanks|not interested|unsubscribe|odjavi/i.test(t))
     return 'not_interested';
-  if (/zakaž|zakažimo|sastanak|demo|kad ste slobodni|termin|dogovorimo|when can|schedule|meeting/i.test(t))
+  if (/nije.*deo kompanije|no longer with|left the company|napustio|prosledite na|sve mailove šaljite na/i.test(t))
+    return 'wrong_contact';
+  if (/zakaž|zakažimo|sastanak|demo|kad ste slobodni|dogovorimo|when can|schedule|meeting/i.test(t))
     return 'meeting_requested';
+  if (/koja je cena|koliko košta|cenu|price|cost|quote/i.test(t))
+    return 'price_question';
   if (/out of office|van kancela|odsutan|nisam dostupan|automatski odgovor|auto.reply/i.test(t))
     return 'out_of_office';
-  if (/\?|šta|koji|kako|koliko|možete li|možete mi|recite mi|tell me|what is|how does|can you/i.test(t))
+  if (/\?|šta|koji|kako|koliko|možete li|recite mi|tell me|what is|how does|can you/i.test(t))
     return 'question';
-  if (/da|interesuje|hvala|odlično|super|sounds good|interested|zainteresovan/i.test(t))
+  if (/interesuje|odlično|super|sounds good|interested|zainteresovan/i.test(t))
     return 'interested';
-  return 'other';
+  return 'unclear';
 }
 
 // ── Main ──────────────────────────────────────────────────────────────────────
@@ -174,19 +234,32 @@ async function main() {
 
           const body   = parsed.text || '';
           const snippet = body.replace(/\s+/g, ' ').trim().slice(0, 200);
-          const intent = classifyIntent(body);
-          const newStatus = (intent === 'meeting_requested') ? 'Zakazan Sastanak'
-            : (intent === 'not_interested')   ? 'Lost'
-            : (intent === 'out_of_office')    ? contact.status // don't change status
-            : 'Odgovorio';
+          const intent = await classifyIntentLLM(body, fromAddr);
+
+          // Status mapping by intent — auto_reply must NOT mark as replied/move status
+          const STATUS_BY_INTENT = {
+            meeting_requested: 'Zakazan Sastanak',
+            interested:        'Odgovorio',
+            price_question:    'Odgovorio',
+            question:          'Odgovorio',
+            not_interested:    'Lost',
+            wrong_contact:     'Wrong Contact',
+            out_of_office:     contact.status,   // don't change
+            auto_reply:        contact.status,   // don't change
+            unclear:           'Odgovorio',
+          };
+          const newStatus = STATUS_BY_INTENT[intent] ?? 'Odgovorio';
 
           const payload = {
-            replied_at:     (parsed.date || new Date()).toISOString(),
-            reply_snippet:  snippet,
-            reply_intent:   intent,
+            reply_snippet:   snippet,
+            reply_intent:    intent,
             gmail_thread_id: msg.uid?.toString(),
           };
-          if (intent !== 'out_of_office') payload.status = newStatus;
+          // Only mark as a real reply if it's a human response (not an auto-reply / OOO)
+          if (intent !== 'auto_reply' && intent !== 'out_of_office') {
+            payload.replied_at = (parsed.date || new Date()).toISOString();
+            payload.status = newStatus;
+          }
 
           await sb.from('contacts').update(payload).eq('id', contact.id);
 

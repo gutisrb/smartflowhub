@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useMemo, useCallback } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Mail, TrendingUp, CheckCircle, RefreshCw, BarChart3, Layout, Send, UserCheck, MessageSquare, X, Copy, Check, Star, Pencil, Linkedin, Instagram, Tag, Zap, Trash2 } from "lucide-react"
+import { Mail, TrendingUp, CheckCircle, RefreshCw, BarChart3, Layout, Send, UserCheck, MessageSquare, X, Copy, Check, Star, Pencil, Linkedin, Instagram, Tag, Zap, Trash2, Eye, Phone } from "lucide-react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { createClient } from "@/lib/supabase/client"
@@ -24,6 +24,7 @@ interface EmailStats {
   meetings_booked: number
   no_response: number
   bounced: number
+  opened: number
 }
 
 interface Lead {
@@ -53,6 +54,13 @@ interface Lead {
   client_id?: string
   replied_at?: string
   reply_snippet?: string
+  reply_intent?: string
+  email_opened_at?: string
+  open_count?: number
+  manual_contacts?: any[]
+  bounced_at?: string
+  niche_v2?: string
+  subject_variant?: number
   intake_data?: {
     active_ads_count?: number
     enrichment?: {
@@ -108,6 +116,7 @@ export function EmailOutreachModule({
     meetings_booked: 0,
     no_response: 0,
     bounced: 0,
+    opened: 0,
   })
   const [leads, setLeads] = useState<Lead[]>([])
   const [loading, setLoading] = useState(true)
@@ -117,7 +126,7 @@ export function EmailOutreachModule({
     const supabase = createClient()
     const { data, error } = await supabase
       .from('kontakti')
-      .select('status, last_sent_at, meeting_time, replied_at')
+      .select('status, last_sent_at, meeting_time, replied_at, email_opened_at')
       .eq('client_id', clientId)
       .or('kategorija.neq.Disqualified,kategorija.is.null')
 
@@ -132,9 +141,10 @@ export function EmailOutreachModule({
       const replied = data.filter((l: any) => (l as any).replied_at || l.status === 'Odgovorio').length
       const meetings_booked = data.filter((l: any) => l.status === 'Zakazan Sastanak' || l.status === 'Meeting Booked' || l.meeting_time).length
       const bounced = data.filter((l: any) => l.status === 'Bounced').length
+      const opened = data.filter((l: any) => l.email_opened_at).length
       const no_response = data.filter((l: any) => (l.last_sent_at || l.status === 'Kontaktiran') && !(l as any).replied_at && l.status !== 'Zakazan Sastanak' && l.status !== 'Meeting Booked' && l.status !== 'Bounced').length
 
-      setStats({ total_sent, replied, meetings_booked, no_response, bounced })
+      setStats({ total_sent, replied, meetings_booked, no_response, bounced, opened })
     }
   }, [clientId])  // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -310,9 +320,10 @@ export function EmailOutreachModule({
       </div>
 
       {/* Glass Stat Prism */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
         {[
           { label: "Poslato", value: stats.total_sent, sub: "Emails delivered", icon: Send, color: "text-emerald" },
+          { label: "Otvoreno", value: stats.opened, sub: stats.total_sent > 0 ? `${((stats.opened / Math.max(stats.total_sent - stats.bounced, 1)) * 100).toFixed(1)}% open rate` : "Tracking pixel", icon: Eye, color: "text-cyan-400" },
           { label: "Odgovorili", value: stats.replied, sub: stats.total_sent > 0 ? `${((stats.replied / Math.max(stats.total_sent - stats.bounced, 1)) * 100).toFixed(1)}% reply rate` : "No sends yet", icon: MessageSquare, color: "text-purple-400" },
           { label: "Zakazano", value: stats.meetings_booked, sub: "Meetings booked", icon: CheckCircle, color: "text-emerald-400" },
           { label: "Bounce", value: stats.bounced, sub: stats.total_sent > 0 ? `${((stats.bounced / stats.total_sent) * 100).toFixed(1)}% bounce rate` : "No sends yet", icon: UserCheck, color: "text-red-400" },
@@ -518,7 +529,19 @@ export function EmailOutreachModule({
                           </TableCell>
                           <TableCell className="py-4">
                             <div className="flex flex-col gap-0.5">
-                              <span className="font-outfit font-semibold text-silver text-sm">{lead.company_name || lead.ime}</span>
+                              <div className="flex items-center gap-1.5">
+                                <span className="font-outfit font-semibold text-silver text-sm">{lead.company_name || lead.ime}</span>
+                                {lead.email_opened_at && (
+                                  <span title={`Opened — ${(lead.open_count || 1)}× total`} className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-[9px] font-bold uppercase tracking-widest">
+                                    <Eye className="w-2.5 h-2.5" />{lead.open_count && lead.open_count > 1 ? lead.open_count : ''}
+                                  </span>
+                                )}
+                                {lead.manual_contacts && lead.manual_contacts.length > 0 && (
+                                  <span title={`${lead.manual_contacts.length} off-channel touches (phone/whatsapp/etc)`} className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-amber-400/10 border border-amber-400/20 text-amber-400 text-[9px] font-bold uppercase tracking-widest">
+                                    <Phone className="w-2.5 h-2.5" />{lead.manual_contacts.length}
+                                  </span>
+                                )}
+                              </div>
                               {/* Comment row */}
                               {editingComment?.id === lead.id ? (
                                 <div className="flex items-center gap-1 mt-1">

@@ -54,7 +54,7 @@ const COMPANY     = companyIdx !== -1 ? process.argv[companyIdx + 1] : null;
 const limitIdx    = process.argv.indexOf('--limit');
 const LIMIT       = limitIdx !== -1 ? parseInt(process.argv[limitIdx + 1]) : 0;
 const modeIdx     = process.argv.indexOf('--mode');
-const MODE        = modeIdx !== -1 ? process.argv[modeIdx + 1] : 'all'; // 'all' | 'initial' | 'followup'
+const MODE        = modeIdx !== -1 ? process.argv[modeIdx + 1] : 'all'; // 'all' | 'initial' | 'followup' | 'e2' | 'e3'
 const DELAY_MS    = 500; // 0.5s between calls — OpenAI has generous rate limits
 
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
@@ -190,6 +190,7 @@ function buildLeadIntel(lead, emailType) {
   return {
     email_classification: classification,
     email_type: emailType,
+    demo_tenant_url: lead.demo_tenant_url || null,
     company_name: companyName,
     contact_name: (() => {
       if (classification !== 'decision_maker') return null;
@@ -215,13 +216,36 @@ function buildLeadIntel(lead, emailType) {
   };
 }
 
-// ── System Prompt ──────────────────────────────────────────────────────────────
-function getSystemPrompt() {
+// ── System Prompts (A/B framework test + follow-up sequence) ──────────────────
+// Arm A: long form (4-paragraph "system overview") — current default
+// Arm B: short form (3-line specific observation + question) — challenger
+// E2: second touch ("did you log in?")
+// E3: third touch ("closing your demo")
+const FRAMEWORKS = {
+  '4-para-overview':   { file: 'ai-agent-email-prompt.md',       label: 'A (long)'  },
+  '3-line-question':   { file: 'ai-agent-email-prompt-short.md', label: 'B (short)' },
+  'e2-did-you-log-in': { file: 'ai-agent-email-prompt-e2.md',    label: 'E2'        },
+  'e3-closing-demo':   { file: 'ai-agent-email-prompt-e3.md',    label: 'E3'        },
+};
+
+function getSystemPrompt(framework) {
+  const fw = FRAMEWORKS[framework];
+  if (!fw) throw new Error(`Unknown framework: ${framework}`);
   try {
-    return readFileSync(resolve(__dirname, 'ai-agent-email-prompt.md'), 'utf8');
+    return readFileSync(resolve(__dirname, fw.file), 'utf8');
   } catch {
-    throw new Error('ai-agent-email-prompt.md not found');
+    throw new Error(`${fw.file} not found`);
   }
+}
+
+// 50/50 deterministic assignment from lead.id (UUID) so reruns are stable per lead.
+// Uses the first hex char of the UUID — even = A, odd = B.
+function assignFramework(leadId) {
+  const force = process.env.FORCE_FRAMEWORK;
+  if (force && FRAMEWORKS[force]) return force;
+  const c = (leadId || '').replace(/-/g, '').charAt(0);
+  const n = parseInt(c, 16);
+  return Number.isNaN(n) ? '4-para-overview' : (n % 2 === 0 ? '4-para-overview' : '3-line-question');
 }
 
 // ── OpenAI API Call ───────────────────────────────────────────────────────────
@@ -254,12 +278,19 @@ async function generateDraft(leadIntel, systemPrompt) {
 // ── Main ───────────────────────────────────────────────────────────────────────
 async function main() {
   const sb = createClient(SUPABASE_URL, SERVICE_KEY);
-  const systemPrompt = getSystemPrompt();
+  // Cache prompts so we don't re-read for every lead
+  const promptCache = {
+    '4-para-overview': getSystemPrompt('4-para-overview'),
+    '3-line-question': getSystemPrompt('3-line-question'),
+  };
 
   // .neq alone silently drops NULL rows in Postgres — must explicitly include NULLs
   const notDisqualified = 'kategorija.neq.Disqualified,kategorija.is.null';
 
   // Fetch enriched leads (initial outreach)
+  // Gate on demo_built_at for initial outreach — skip leads without a demo unless --force
+  const ALLOW_NO_DEMO = process.argv.includes('--allow-no-demo') || isForce;
+
   let enrichedQuery = sb
     .from('contacts')
     .select('*')
@@ -268,8 +299,22 @@ async function main() {
     .or(notDisqualified)
     .not('email', 'is', null);
 
-  // Fetch Kontaktiran leads (follow-up)
-  let kontaktiranQuery = sb
+  // Only generate for leads whose demo tenant is already built (unless bypassed)
+  if (!ALLOW_NO_DEMO) {
+    enrichedQuery = enrichedQuery.not('demo_built_at', 'is', null);
+  }
+
+  // Fetch Kontaktiran leads (E2 second touch)
+  let e2Query = sb
+    .from('contacts')
+    .select('*')
+    .eq('client_id', SMARTFLOW_ID)
+    .eq('status', 'Kontaktiran')
+    .or(notDisqualified)
+    .not('email', 'is', null);
+
+  // Fetch Kontaktiran leads (E3 third touch — same status, different draft field)
+  let e3Query = sb
     .from('contacts')
     .select('*')
     .eq('client_id', SMARTFLOW_ID)
@@ -279,32 +324,40 @@ async function main() {
 
   // Skip leads that already have drafts unless --force or --company is set
   if (!COMPANY && !isForce) {
-    enrichedQuery    = enrichedQuery.is('email_draft', null);
-    kontaktiranQuery = kontaktiranQuery.is('email_2_draft', null);
+    enrichedQuery = enrichedQuery.is('email_draft', null);
+    e2Query       = e2Query.is('email_2_draft', null);
+    e3Query       = e3Query.is('email_3_draft', null);
   }
 
   if (COMPANY) {
-    enrichedQuery   = enrichedQuery.ilike('company_name', `%${COMPANY}%`);
-    kontaktiranQuery = kontaktiranQuery.ilike('company_name', `%${COMPANY}%`);
+    enrichedQuery = enrichedQuery.ilike('company_name', `%${COMPANY}%`);
+    e2Query       = e2Query.ilike('company_name', `%${COMPANY}%`);
+    e3Query       = e3Query.ilike('company_name', `%${COMPANY}%`);
   }
 
-  const [{ data: enrichedLeads, error: e1 }, { data: kontaktiranLeads, error: e2 }] = await Promise.all([
+  const isE2Mode = MODE === 'e2' || MODE === 'followup';
+  const isE3Mode = MODE === 'e3';
+
+  const [{ data: enrichedLeads, error: e1Err }, { data: e2Leads, error: e2Err }, { data: e3Leads, error: e3Err }] = await Promise.all([
     enrichedQuery,
-    kontaktiranQuery,
+    e2Query,
+    e3Query,
   ]);
 
-  if (e1) { console.error('Supabase error (enriched):', e1.message); process.exit(1); }
-  if (e2) { console.error('Supabase error (kontaktiran):', e2.message); process.exit(1); }
+  if (e1Err) { console.error('Supabase error (enriched):', e1Err.message); process.exit(1); }
+  if (e2Err) { console.error('Supabase error (e2):', e2Err.message); process.exit(1); }
+  if (e3Err) { console.error('Supabase error (e3):', e3Err.message); process.exit(1); }
 
-  const enriched    = MODE !== 'followup' ? (enrichedLeads  || []).map(l => ({ lead: l, emailType: 'enriched'     })) : [];
-  const kontaktiran = MODE !== 'initial'  ? (kontaktiranLeads || []).map(l => ({ lead: l, emailType: 'kontaktirani' })) : [];
-  let queue = [...enriched, ...kontaktiran];
+  const enriched    = (!isE2Mode && !isE3Mode) ? (enrichedLeads || []).map(l => ({ lead: l, emailType: 'enriched' })) : [];
+  const followupsE2 = (isE2Mode || MODE === 'all')  ? (e2Leads || []).map(l => ({ lead: l, emailType: 'e2' })) : [];
+  const followupsE3 = isE3Mode ? (e3Leads || []).map(l => ({ lead: l, emailType: 'e3' })) : [];
+  let queue = [...enriched, ...followupsE2, ...followupsE3];
 
   if (LIMIT > 0) queue = queue.slice(0, LIMIT);
 
   const date = new Date().toLocaleDateString('sr-RS', { day: '2-digit', month: '2-digit', year: 'numeric' });
   console.log(`\nSmartFlow Draft Generator — ${date}`);
-  console.log(`Enriched (initial): ${enriched.length}  |  Kontaktiran (follow-up): ${kontaktiran.length}  |  Queue: ${queue.length}${isDryRun ? ' [DRY RUN]' : ''}`);
+  console.log(`Enriched (initial): ${enriched.length}  |  E2 (follow-up): ${followupsE2.length}  |  E3 (closing): ${followupsE3.length}  |  Queue: ${queue.length}${isDryRun ? ' [DRY RUN]' : ''}`);
   console.log(`Model: ${OPENAI_MODEL}\n`);
 
   if (queue.length === 0) {
@@ -317,31 +370,59 @@ async function main() {
   for (let i = 0; i < queue.length; i++) {
     const { lead, emailType } = queue[i];
     const name = lead.company_name || lead.ime || '(no name)';
-    const isFollowUp = emailType === 'kontaktirani';
+    const isFollowUp = emailType === 'e2' || emailType === 'e3';
+    const emailTypeLabel = emailType === 'e3' ? 'E3' : emailType === 'e2' ? 'E2' : 'initial';
 
-    console.log(`[${i + 1}/${queue.length}] ${name}  [${isFollowUp ? 'follow-up' : 'initial'}]`);
+    console.log(`[${i + 1}/${queue.length}] ${name}  [${emailTypeLabel}]`);
     console.log(`  Email: ${lead.email}`);
 
+    // Per-lead framework assignment (A/B test) — only for initial outreach.
+    // E2/E3 follow-ups use their own dedicated prompts.
+    const framework = emailType === 'e3' ? 'e3-closing-demo'
+                    : emailType === 'e2' ? 'e2-did-you-log-in'
+                    : assignFramework(lead.id);
+    const systemPrompt = promptCache[framework];
+
+    const intel = buildLeadIntel(lead, emailType);
+
+    // Personalization-context guard (T4.2): if we have NO ad copy AND NO reel content
+    // AND no website summary, the LLM has nothing concrete to anchor a hook to and
+    // produces generic templated drafts that historically don't convert. Skip.
+    const hasContext = (intel.ad_copies?.length || 0) > 0
+      || (intel.instagram_reels?.length || 0) > 0
+      || !!intel.website_summary;
+    if (!isFollowUp && !hasContext && !isForce) {
+      console.log(`  ↷ No ad/reel/website context — marking enriched_no_context, skipping\n`);
+      if (!isDryRun) {
+        await sb.from('contacts').update({ status: 'enriched_no_context' }).eq('id', lead.id);
+      }
+      continue;
+    }
+
+    const draftFieldName = emailType === 'e3' ? 'email_3_draft' : emailType === 'e2' ? 'email_2_draft' : 'email_draft';
+
     if (isDryRun) {
-      const intel = buildLeadIntel(lead, emailType);
-      console.log(`  Classification: ${intel.email_classification}  |  Followers: ${intel.instagram_followers}  |  Ads: ${intel.active_ads_count}  |  Variant: ${intel.subject_variant}`);
-      console.log(`  ✓ [DRY RUN — would generate ${isFollowUp ? 'email_2_draft' : 'email_draft'}]\n`);
+      console.log(`  Classification: ${intel.email_classification}  |  Followers: ${intel.instagram_followers}  |  Ads: ${intel.active_ads_count}  |  Variant: ${intel.subject_variant}  |  Framework: ${framework}`);
+      console.log(`  ✓ [DRY RUN — would generate ${draftFieldName}]\n`);
       continue;
     }
 
     try {
-      const intel = buildLeadIntel(lead, emailType);
       const draft = await generateDraft(intel, systemPrompt);
 
       const subjectLine = draft.match(/^Subject:\s*(.*)$/m)?.[1] || '(no subject)';
       console.log(`  Subject: ${subjectLine}`);
 
-      const updateField = isFollowUp ? { email_2_draft: draft } : { email_draft: draft, email_framework: '3-sentence' };
+      const updateField = emailType === 'e3'
+        ? { email_3_draft: draft }
+        : emailType === 'e2'
+          ? { email_2_draft: draft }
+          : { email_draft: draft, email_framework: framework, subject_variant: intel.subject_variant };
       const { error: updateErr } = await sb.from('contacts').update(updateField).eq('id', lead.id);
 
       if (updateErr) throw new Error(`DB update failed: ${updateErr.message}`);
 
-      console.log(`  ✓ Saved to ${isFollowUp ? 'email_2_draft' : 'email_draft'}\n`);
+      console.log(`  ✓ Saved to ${draftFieldName}\n`);
       done++;
     } catch (err) {
       console.error(`  ✗ Failed: ${err.message}\n`);

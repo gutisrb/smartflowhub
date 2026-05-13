@@ -84,8 +84,10 @@ const MAX_CHARGE = isTest ? 0.15 : (BUDGET_USD ? BUDGET_USD + 0.05 : 2.00); // +
 const LOCAL_DATASETS_DIR = resolve(__dirname, '..');  // photonic-lunar/
 const LOCAL_DATASET_GLOB = 'dataset_facebook-ads-library-scraper_';
 
-// IG follower gates — strict 15k minimum, no exceptions
-const MIN_FOLLOWERS = 15000;
+// IG follower gates — raised from 15K → 30K based on send analysis (2026-05-07):
+// every replied lead in our 338-send history had 22K+ followers (or a decision-maker email).
+// 15K-floor accounts had ~0% reply rate — pain not felt at that scale.
+const MIN_FOLLOWERS = 30000;
 const MAX_FOLLOWERS = 200000;  // cap at 200k — above this are large corps with dedicated CS teams
 
 // ── D2C retail & irrelevant exclusion ─────────────────────────────────────────

@@ -122,8 +122,56 @@ function B2BLeadIntelPanel({ lead }: { lead: any }) {
         )
     }
 
+    const manualContacts: any[] = Array.isArray(lead.manual_contacts) ? lead.manual_contacts : []
+    const opens = lead.open_count || 0
+    const openedAt = lead.email_opened_at
+
     return (
         <div className="px-8 py-6 space-y-5 pb-12">
+
+            {/* Manual touch log — surfaces phone calls, WhatsApp, off-channel work */}
+            {manualContacts.length > 0 && (
+                <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="rounded-2xl border border-amber-400/20 bg-amber-400/[0.03] overflow-hidden">
+                    <div className="px-5 py-3 border-b border-amber-400/10 flex items-center justify-between">
+                        <span className="text-[10px] font-bold text-amber-400 uppercase tracking-widest">Manual Contact Log</span>
+                        <span className="text-[10px] text-zinc-500">{manualContacts.length} touch{manualContacts.length === 1 ? '' : 'es'}</span>
+                    </div>
+                    <div className="px-5 py-4 space-y-3">
+                        {manualContacts.map((t: any, i: number) => (
+                            <div key={i} className="flex gap-3 text-xs">
+                                <div className="w-16 shrink-0 text-zinc-500 font-mono">{t.date || '—'}</div>
+                                <div className="flex-1">
+                                    <div className="flex items-center gap-2">
+                                        <Badge className="bg-white/[0.05] text-zinc-400 border-white/10 text-[9px] uppercase tracking-widest px-1.5 py-0">
+                                            {t.channel || 'note'}
+                                        </Badge>
+                                        {t.outcome && (
+                                            <span className="text-[10px] text-zinc-500">→ {t.outcome}</span>
+                                        )}
+                                    </div>
+                                    {t.notes && <div className="text-zinc-300 mt-1 leading-relaxed">{t.notes}</div>}
+                                    {t.next_action && (
+                                        <div className="mt-1.5 text-[10px] text-amber-400/90 italic">
+                                            Next: {t.next_action}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </motion.div>
+            )}
+
+            {/* Email open tracking */}
+            {openedAt && (
+                <div className="rounded-2xl border border-emerald-500/15 bg-emerald-500/[0.03] px-5 py-3 flex items-center gap-3">
+                    <Eye className="w-4 h-4 text-emerald-400" />
+                    <span className="text-xs text-zinc-300">
+                        Opened {format(new Date(openedAt), 'MMM d, HH:mm')}
+                        {opens > 1 && <span className="text-zinc-500"> · {opens}× total</span>}
+                    </span>
+                </div>
+            )}
 
             {/* Decision Maker */}
             {dm && (
