@@ -629,11 +629,20 @@ async function seedAppointments(sb, clientId, appointments, services) {
   const SPREAD = appointments.length
 
   const rows = appointments.map((a, i) => {
-    // Always generate fresh future dates — LLM often returns stale 2023/2024 dates
-    const dayOffset = 1 + Math.floor((i / SPREAD) * 14) // spread evenly across next 14 days
-    const hour      = 9 + (i % 8)                       // 9h–17h
+    // Spread appointments: first 30% in the past (-4 to -1 days), rest in the future (1-12 days)
+    const fraction = i / SPREAD
+    const dayOffset = fraction < 0.3
+      ? Math.round(-4 + fraction / 0.3 * 3)   // -4 to -1 for past appointments
+      : Math.round(1 + (fraction - 0.3) / 0.7 * 11) // 1 to 12 for future
+    const hour      = 9 + (i % 8)             // 9h–17h
     const minute    = [0, 30][i % 2]
     const startsAt  = daysFromNow(dayOffset, hour, minute)
+
+    // Status must match temporal logic: past appts = completed/no_show, future = confirmed/cancelled
+    const isPast = dayOffset < 0
+    const deterministicStatus = isPast
+      ? (i % 5 === 0 ? 'no_show' : 'completed')
+      : (i % 7 === 0 ? 'cancelled' : 'confirmed')
 
     const duration = serviceDurations[a.service_name] || a.duration_minutes || 60
     const endsAt   = (() => {
@@ -650,7 +659,7 @@ async function seedAppointments(sb, clientId, appointments, services) {
       service_color:  serviceColors[a.service_name] || a.service_color || '#6366f1',
       starts_at:      startsAt,
       ends_at:        endsAt,
-      status:         VALID_STATUSES.has(a.status) ? a.status : 'confirmed',
+      status:         deterministicStatus,
       urgency:        VALID_URGENCY.has(a.urgency) ? a.urgency : null,
       urgency_reason: a.urgency_reason || null,
       source:         a.source || 'Instagram',

@@ -12,6 +12,7 @@ import {
 import { motion } from "framer-motion"
 import { cn } from "@/lib/utils"
 import { getBookStoreConfig } from "@/lib/brand-configs"
+import { NicheKey, NICHE_CONFIGS } from "@/lib/niche-config"
 
 // ── Demo mode ────────────────────────────────────────────────────────────────
 const DEMO_MODE = false
@@ -339,6 +340,7 @@ interface SocialChatbotModuleProps {
     clientId: string
     selectedBrandIds?: string[]
     clientName?: string
+    nicheKey?: NicheKey
 }
 
 function getPlatformMeta(platform: string) {
@@ -352,7 +354,7 @@ function getPlatformMeta(platform: string) {
 
 type Period = "danas" | "sedmica" | "mesec"
 
-export function SocialChatbotModule({ clientId, selectedBrandIds, clientName }: SocialChatbotModuleProps) {
+export function SocialChatbotModule({ clientId, selectedBrandIds, clientName, nicheKey }: SocialChatbotModuleProps) {
     const bookStoreConfig = getBookStoreConfig(clientId)
     const isMultiBrand = (selectedBrandIds?.length ?? 0) > 1
     const brandIds = selectedBrandIds && selectedBrandIds.length > 0 ? selectedBrandIds : [clientId]
@@ -541,6 +543,9 @@ export function SocialChatbotModule({ clientId, selectedBrandIds, clientName }: 
 
     // Calculate stats based on period
     const isCatalogProducts = bookStoreConfig?.tableType === 'proizvodi'
+    const leadsLabel = nicheKey
+        ? (NICHE_CONFIGS[nicheKey]?.terminology.plural ?? 'Korisnici')
+        : isCatalogProducts ? 'Zainteresovani' : 'Prijave'
 
     const _baseUpiti = DEMO_MODE ? 524 : conversations.length
     const upitiPeriod = msgPeriod === "danas" ? Math.round(_baseUpiti / 30) : msgPeriod === "sedmica" ? Math.round(_baseUpiti / 4 * 1.2) : _baseUpiti
@@ -661,7 +666,7 @@ export function SocialChatbotModule({ clientId, selectedBrandIds, clientName }: 
             {/* ── Stats ──────────────────────────────────────────────────────── */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3 shrink-0">
                 <StatCard icon={<MessageCircle className="w-4 h-4" />} label={`Upiti · ${periodLabel}`} value={upitiPeriod} variant="pink" />
-                <StatCard icon={<UserCheck className="w-4 h-4" />} label={`${isCatalogProducts ? "Zainteresovani" : "Prijave"} · ${periodLabel}`} value={prijavePeriod} variant="emerald" />
+                <StatCard icon={<UserCheck className="w-4 h-4" />} label={`${leadsLabel} · ${periodLabel}`} value={prijavePeriod} variant="emerald" />
                 <StatCard
                     icon={<AlertTriangle className="w-4 h-4" />}
                     label="Intervencije"

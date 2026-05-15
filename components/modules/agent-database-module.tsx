@@ -26,9 +26,12 @@ import {
     ExternalLink,
     BookOpen,
     Package,
-    Tag
+    Tag,
+    Check,
+    X,
+    Power,
 } from "lucide-react"
-import { getJobsByClientId, createJob, updateJob, deleteJob, getKnjigeByClientId, getProizvodiByClientId, getServicesCatalogByClientId } from "@/lib/supabase/queries"
+import { getJobsByClientId, createJob, updateJob, deleteJob, getKnjigeByClientId, getProizvodiByClientId, getServicesCatalogByClientId, updateServiceAvailability, updateServicePrice } from "@/lib/supabase/queries"
 import { getBookStoreConfig, BOOK_STORE_CLIENTS } from "@/lib/brand-configs"
 import {
     Dialog,
@@ -972,6 +975,7 @@ interface ServiceItem {
     image_url: string | null
     color_hex: string
     is_featured: boolean
+    is_active: boolean
     sort_order: number
 }
 
@@ -979,11 +983,16 @@ function ServicesCatalogView({ items, loading, label, onRefresh }: { items: Serv
     const [search, setSearch] = useState("")
     const [selectedCategory, setSelectedCategory] = useState<string>("all")
     const [selected, setSelected] = useState<ServiceItem | null>(null)
+    const [localItems, setLocalItems] = useState<ServiceItem[]>(items)
+    const [savingId, setSavingId] = useState<string | null>(null)
+    const [editingPrice, setEditingPrice] = useState<{ id: string; min: string; max: string } | null>(null)
 
-    const categories = Array.from(new Set(items.map(i => i.category).filter(Boolean))) as string[]
-    const hasImages = items.some(i => i.image_url)
+    useEffect(() => { setLocalItems(items) }, [items])
 
-    const filtered = items.filter(i => {
+    const categories = Array.from(new Set(localItems.map(i => i.category).filter(Boolean))) as string[]
+    const hasImages = localItems.some(i => i.image_url)
+
+    const filtered = localItems.filter(i => {
         const matchSearch = !search || i.name.toLowerCase().includes(search.toLowerCase()) || i.category?.toLowerCase().includes(search.toLowerCase())
         const matchCat = selectedCategory === "all" || i.category === selectedCategory
         return matchSearch && matchCat
@@ -997,12 +1006,43 @@ function ServicesCatalogView({ items, loading, label, onRefresh }: { items: Serv
         return `${(min ?? max)!.toLocaleString('sr')} RSD`
     }
 
+    const patchLocal = (id: string, patch: Partial<ServiceItem>) => {
+        setLocalItems(prev => prev.map(i => i.id === id ? { ...i, ...patch } : i))
+        setSelected(prev => prev?.id === id ? { ...prev, ...patch } : prev)
+    }
+
+    const handleToggleAvailability = async (id: string, current: boolean) => {
+        const next = !current
+        setSavingId(id)
+        patchLocal(id, { is_active: next })
+        try {
+            await updateServiceAvailability(id, next)
+        } catch {
+            patchLocal(id, { is_active: current })
+        }
+        setSavingId(null)
+    }
+
+    const handleSavePrice = async (id: string, minStr: string, maxStr: string) => {
+        const min = parseFloat(minStr) || 0
+        const max = parseFloat(maxStr) || min
+        patchLocal(id, { price_min: min, price_max: max })
+        setEditingPrice(null)
+        setSavingId(id)
+        try {
+            await updateServicePrice(id, min, max)
+        } catch {
+            // next refresh will restore from DB
+        }
+        setSavingId(null)
+    }
+
     return (
         <div className="p-6 space-y-6">
             <div className="flex items-center justify-between">
                 <div>
                     <h2 className="text-xl font-outfit font-semibold text-white">{label}</h2>
-                    <p className="text-sm text-slate-400 mt-0.5">{items.length} stavki u katalogu</p>
+                    <p className="text-sm text-slate-400 mt-0.5">{localItems.length} stavki · {localItems.filter(i => i.is_active).length} dostupno</p>
                 </div>
                 <button onClick={onRefresh} className="p-2 rounded-lg glass-card hover:bg-white/10 transition-colors">
                     <RefreshCw className="w-4 h-4 text-slate-400" />
@@ -1049,7 +1089,7 @@ function ServicesCatalogView({ items, loading, label, onRefresh }: { items: Serv
             ) : filtered.length === 0 ? (
                 <div className="glass-card rounded-2xl p-12 text-center">
                     <Package className="w-10 h-10 text-slate-600 mx-auto mb-3" />
-                    <p className="text-slate-400">{items.length === 0 ? "Katalog je prazan" : "Nema rezultata"}</p>
+                    <p className="text-slate-400">{localItems.length === 0 ? "Katalog je prazan" : "Nema rezultata"}</p>
                 </div>
             ) : hasImages ? (
                 /* Image grid for visual niches */
@@ -1058,7 +1098,7 @@ function ServicesCatalogView({ items, loading, label, onRefresh }: { items: Serv
                         <button
                             key={item.id}
                             onClick={() => setSelected(item)}
-                            className="glass-card rounded-2xl overflow-hidden text-left hover:scale-[1.02] transition-transform"
+                            className={cn("glass-card rounded-2xl overflow-hidden text-left hover:scale-[1.02] transition-all", !item.is_active && "opacity-50")}
                         >
                             {item.image_url ? (
                                 <img src={item.image_url} alt={item.name} className="w-full h-40 object-cover" />
@@ -1068,11 +1108,14 @@ function ServicesCatalogView({ items, loading, label, onRefresh }: { items: Serv
                                 </div>
                             )}
                             <div className="p-3">
-                                {item.is_featured && <span className="text-[10px] font-medium text-amber-400 uppercase tracking-wider">Istaknuto</span>}
+                                <div className="flex items-center gap-1.5 flex-wrap">
+                                    {item.is_featured && <span className="text-[10px] font-medium text-amber-400 uppercase tracking-wider">Istaknuto</span>}
+                                    {!item.is_active && <span className="text-[10px] font-medium text-red-400 uppercase tracking-wider">Nedostupno</span>}
+                                </div>
                                 <p className="text-sm font-medium text-white mt-0.5 line-clamp-2">{item.name}</p>
                                 {item.category && <p className="text-xs text-slate-500 mt-0.5">{item.category}</p>}
                                 {formatPrice(item.price_min, item.price_max) && (
-                                    <p className="text-sm font-semibold mt-1" style={{ color: item.color_hex }}>{formatPrice(item.price_min, item.price_max)}</p>
+                                    <p className={cn("text-sm font-semibold mt-1", !item.is_active && "line-through text-slate-500")} style={item.is_active ? { color: item.color_hex } : {}}>{formatPrice(item.price_min, item.price_max)}</p>
                                 )}
                                 {item.duration_minutes && (
                                     <p className="text-xs text-slate-500 mt-0.5 flex items-center gap-1">
@@ -1090,22 +1133,23 @@ function ServicesCatalogView({ items, loading, label, onRefresh }: { items: Serv
                         <button
                             key={item.id}
                             onClick={() => setSelected(item)}
-                            className="w-full text-left flex items-center gap-4 px-5 py-4 hover:bg-white/[0.03] transition-colors"
+                            className={cn("w-full text-left flex items-center gap-4 px-5 py-4 hover:bg-white/[0.03] transition-colors", !item.is_active && "opacity-50")}
                         >
                             <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: `${item.color_hex}20` }}>
-                                <Tag className="w-4 h-4" style={{ color: item.color_hex }} />
+                                <Tag className="w-4 h-4" style={{ color: item.is_active ? item.color_hex : '#64748b' }} />
                             </div>
                             <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-2">
-                                    <p className="text-sm font-medium text-white">{item.name}</p>
+                                    <p className={cn("text-sm font-medium", item.is_active ? "text-white" : "text-slate-500 line-through")}>{item.name}</p>
                                     {item.is_featured && <span className="text-[10px] text-amber-400 bg-amber-400/10 px-1.5 py-0.5 rounded-full">Istaknuto</span>}
+                                    {!item.is_active && <span className="text-[10px] text-red-400 bg-red-400/10 px-1.5 py-0.5 rounded-full">Nedostupno</span>}
                                 </div>
                                 {item.category && <p className="text-xs text-slate-500 mt-0.5">{item.category}</p>}
                                 {item.description && <p className="text-xs text-slate-400 mt-0.5 line-clamp-1">{item.description}</p>}
                             </div>
                             <div className="text-right shrink-0">
                                 {formatPrice(item.price_min, item.price_max) && (
-                                    <p className="text-sm font-semibold" style={{ color: item.color_hex }}>{formatPrice(item.price_min, item.price_max)}</p>
+                                    <p className={cn("text-sm font-semibold", !item.is_active && "line-through text-slate-500")} style={item.is_active ? { color: item.color_hex } : {}}>{formatPrice(item.price_min, item.price_max)}</p>
                                 )}
                                 {item.duration_minutes && (
                                     <p className="text-xs text-slate-500 flex items-center gap-1 justify-end mt-0.5">
@@ -1131,13 +1175,49 @@ function ServicesCatalogView({ items, loading, label, onRefresh }: { items: Serv
                             <h3 className="text-lg font-semibold text-white mt-1">{selected.name}</h3>
                         </div>
                         {selected.description && <p className="text-sm text-slate-300">{selected.description}</p>}
-                        <div className="flex gap-4">
-                            {formatPrice(selected.price_min, selected.price_max) && (
-                                <div>
-                                    <p className="text-xs text-slate-500">Cena</p>
-                                    <p className="text-base font-bold" style={{ color: selected.color_hex }}>{formatPrice(selected.price_min, selected.price_max)}</p>
-                                </div>
-                            )}
+
+                        {/* Price + duration */}
+                        <div className="flex gap-4 items-start">
+                            <div className="flex-1">
+                                <p className="text-xs text-slate-500 mb-1">Cena</p>
+                                {editingPrice?.id === selected.id ? (
+                                    <div className="flex items-center gap-1.5">
+                                        <input
+                                            type="number"
+                                            value={editingPrice.min}
+                                            onChange={e => setEditingPrice(p => p ? { ...p, min: e.target.value } : null)}
+                                            placeholder="od"
+                                            className="w-20 bg-white/5 border border-white/10 rounded-lg px-2 py-1 text-sm text-white focus:border-emerald-500/50 focus:outline-none"
+                                        />
+                                        <span className="text-slate-500">–</span>
+                                        <input
+                                            type="number"
+                                            value={editingPrice.max}
+                                            onChange={e => setEditingPrice(p => p ? { ...p, max: e.target.value } : null)}
+                                            placeholder="do"
+                                            className="w-20 bg-white/5 border border-white/10 rounded-lg px-2 py-1 text-sm text-white focus:border-emerald-500/50 focus:outline-none"
+                                        />
+                                        <button onClick={() => handleSavePrice(selected.id, editingPrice.min, editingPrice.max)} className="p-1 rounded-lg bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 transition-colors">
+                                            <Check className="w-3.5 h-3.5" />
+                                        </button>
+                                        <button onClick={() => setEditingPrice(null)} className="p-1 rounded-lg bg-white/5 text-slate-400 hover:bg-white/10 transition-colors">
+                                            <X className="w-3.5 h-3.5" />
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <div className="flex items-center gap-2">
+                                        <p className="text-base font-bold" style={{ color: selected.color_hex }}>
+                                            {formatPrice(selected.price_min, selected.price_max) ?? '—'}
+                                        </p>
+                                        <button
+                                            onClick={() => setEditingPrice({ id: selected.id, min: String(selected.price_min ?? ''), max: String(selected.price_max ?? '') })}
+                                            className="p-1 rounded-lg bg-white/5 text-slate-500 hover:text-white hover:bg-white/10 transition-colors"
+                                        >
+                                            <Pencil className="w-3 h-3" />
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
                             {selected.duration_minutes && (
                                 <div>
                                     <p className="text-xs text-slate-500">Trajanje</p>
@@ -1145,6 +1225,32 @@ function ServicesCatalogView({ items, loading, label, onRefresh }: { items: Serv
                                 </div>
                             )}
                         </div>
+
+                        {/* Availability toggle */}
+                        <div className="flex items-center justify-between py-3 border-t border-white/[0.06]">
+                            <div>
+                                <p className="text-sm font-medium text-white flex items-center gap-2">
+                                    <Power className="w-4 h-4 text-slate-400" />
+                                    Dostupnost usluge
+                                </p>
+                                <p className="text-xs text-slate-500 mt-0.5">AI agent koristi ovo za znanje o ponudi</p>
+                            </div>
+                            <button
+                                onClick={() => handleToggleAvailability(selected.id, selected.is_active)}
+                                disabled={savingId === selected.id}
+                                className={cn(
+                                    "relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 focus:outline-none",
+                                    selected.is_active ? "bg-emerald-500/80" : "bg-white/10",
+                                    savingId === selected.id && "opacity-50 cursor-not-allowed"
+                                )}
+                            >
+                                <span className={cn(
+                                    "inline-block h-4 w-4 rounded-full bg-white shadow transition-transform duration-200",
+                                    selected.is_active ? "translate-x-6" : "translate-x-1"
+                                )} />
+                            </button>
+                        </div>
+
                         <button onClick={() => setSelected(null)} className="w-full py-2 rounded-xl bg-white/10 text-white text-sm hover:bg-white/15 transition-colors">
                             Zatvori
                         </button>

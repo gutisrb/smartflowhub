@@ -4,10 +4,11 @@ import { useState, useEffect, useCallback } from "react"
 import { createClient } from "@/lib/supabase/client"
 import {
   CalendarDays, Clock, AlertTriangle, CheckCircle, XCircle,
-  ChevronLeft, ChevronRight, Sparkles
+  ChevronLeft, ChevronRight, Sparkles, UserX
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { NicheKey, NICHE_CONFIGS } from "@/lib/niche-config"
+import { updateAppointmentStatus } from "@/lib/supabase/queries"
 
 interface Appointment {
   id: string
@@ -96,6 +97,16 @@ export function CalendarModule({ clientId, nicheKey = 'generic' }: Props) {
   }, [clientId])
 
   useEffect(() => { fetchAppointments() }, [fetchAppointments])
+
+  const handleApptStatus = async (id: string, newStatus: Appointment['status']) => {
+    setAppointments(prev => prev.map(a => a.id === id ? { ...a, status: newStatus } : a))
+    setSelectedAppt(prev => prev?.id === id ? { ...prev, status: newStatus } : prev)
+    try {
+      await updateAppointmentStatus(id, newStatus)
+    } catch {
+      fetchAppointments()
+    }
+  }
 
   useEffect(() => {
     const channel = supabase
@@ -197,43 +208,69 @@ export function CalendarModule({ clientId, nicheKey = 'generic' }: Props) {
               </div>
 
               {/* Day headers */}
-              <div className="grid grid-cols-7 border-b border-white/5">
-                {weekDays.map((day, i) => (
-                  <div key={i} className={cn('p-3 text-center', isSameDay(day, new Date()) && 'bg-white/5')}>
-                    <p className="text-xs text-slate-500">{DAYS_SR[i]}</p>
-                    <p className={cn('text-lg font-semibold', isSameDay(day, new Date()) ? 'text-sky-400' : 'text-white')}>{day.getDate()}</p>
-                  </div>
-                ))}
+              <div className="flex border-b border-white/5">
+                <div className="w-12 shrink-0" />
+                <div className="grid grid-cols-7 flex-1">
+                  {weekDays.map((day, i) => (
+                    <div key={i} className={cn('p-3 text-center border-l border-white/[0.04]', isSameDay(day, new Date()) && 'bg-white/5')}>
+                      <p className="text-xs text-slate-500">{DAYS_SR[i]}</p>
+                      <p className={cn('text-lg font-semibold', isSameDay(day, new Date()) ? 'text-sky-400' : 'text-white')}>{day.getDate()}</p>
+                    </div>
+                  ))}
+                </div>
               </div>
 
-              {/* Appointment blocks per day */}
-              <div className="grid grid-cols-7 divide-x divide-white/[0.04] min-h-[400px]">
-                {weekDays.map((day, i) => {
-                  const dayAppts = apptsByDay(day)
-                  return (
-                    <div key={i} className={cn('p-2 space-y-1.5', isSameDay(day, new Date()) && 'bg-white/[0.02]')}>
-                      {dayAppts.length === 0 ? null : dayAppts.map(a => (
-                        <button
-                          key={a.id}
-                          onClick={() => setSelectedAppt(a)}
-                          className={cn(
-                            'w-full text-left rounded-lg border px-2 py-1.5 transition-all hover:scale-[1.02]',
-                            STATUS_COLORS[a.status]
-                          )}
-                          style={{ borderLeftColor: a.service_color, borderLeftWidth: 3 }}
-                        >
-                          <p className="text-xs font-medium text-white truncate">{a.customer_name}</p>
-                          <p className="text-[10px] text-slate-400">{formatTime(a.starts_at)}</p>
-                          {a.urgency === 'high' && (
-                            <span className="inline-flex items-center gap-0.5 text-[10px] text-amber-400">
-                              <Sparkles className="w-2.5 h-2.5" /> Hitno
-                            </span>
-                          )}
-                        </button>
-                      ))}
+              {/* Time grid */}
+              <div className="flex overflow-y-auto max-h-[520px]">
+                {/* Hour labels */}
+                <div className="w-12 shrink-0">
+                  {HOURS.map(h => (
+                    <div key={h} className="h-14 flex items-start justify-end pr-2 pt-1 border-t border-white/[0.04]">
+                      <span className="text-[10px] text-slate-600 font-mono leading-none">{h}:00</span>
                     </div>
-                  )
-                })}
+                  ))}
+                </div>
+
+                {/* Day columns with time-positioned blocks */}
+                <div className="grid grid-cols-7 flex-1 border-l border-white/[0.04]">
+                  {weekDays.map((day, i) => {
+                    const dayAppts = apptsByDay(day)
+                    return (
+                      <div key={i} className={cn('relative border-l border-white/[0.04]', isSameDay(day, new Date()) && 'bg-white/[0.02]')}>
+                        {/* Hour grid lines */}
+                        {HOURS.map(h => (
+                          <div key={h} className="h-14 border-t border-white/[0.04]" />
+                        ))}
+                        {/* Appointments — positioned by time */}
+                        {dayAppts.map(a => {
+                          const start = new Date(a.starts_at)
+                          const end = new Date(a.ends_at)
+                          const startH = start.getHours() + start.getMinutes() / 60
+                          const endH = end.getHours() + end.getMinutes() / 60
+                          const top = Math.max(0, (startH - 8) * 56)
+                          const height = Math.max(24, (endH - startH) * 56)
+                          return (
+                            <button
+                              key={a.id}
+                              onClick={() => setSelectedAppt(a)}
+                              className={cn(
+                                'absolute left-0.5 right-0.5 rounded-md border overflow-hidden transition-all hover:z-10 hover:scale-[1.03] text-left px-1.5 py-1',
+                                STATUS_COLORS[a.status]
+                              )}
+                              style={{ top, height, borderLeftColor: a.service_color, borderLeftWidth: 3 }}
+                            >
+                              <p className="text-[10px] font-medium text-white truncate leading-tight">{a.customer_name}</p>
+                              {height > 32 && <p className="text-[9px] text-slate-400 leading-tight">{formatTime(a.starts_at)}</p>}
+                              {height > 48 && a.urgency === 'high' && (
+                                <Sparkles className="w-2.5 h-2.5 text-amber-400 mt-0.5" />
+                              )}
+                            </button>
+                          )
+                        })}
+                      </div>
+                    )
+                  })}
+                </div>
               </div>
             </div>
           ) : (
@@ -349,6 +386,42 @@ export function CalendarModule({ clientId, nicheKey = 'generic' }: Props) {
                   <p className="text-xs text-slate-500 mb-1">Napomena</p>
                   <p className="text-sm text-slate-300">{selectedAppt.notes}</p>
                 </div>
+              )}
+            </div>
+
+            {/* Status action buttons */}
+            <div className="flex flex-wrap gap-2 pt-1 border-t border-white/[0.06]">
+              {selectedAppt.status !== 'confirmed' && (
+                <button
+                  onClick={() => handleApptStatus(selectedAppt.id, 'confirmed')}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/15 text-emerald-400 border border-emerald-500/20 text-xs font-medium hover:bg-emerald-500/25 transition-colors"
+                >
+                  <CheckCircle className="w-3.5 h-3.5" /> Potvrdi
+                </button>
+              )}
+              {selectedAppt.status === 'confirmed' && (
+                <>
+                  <button
+                    onClick={() => handleApptStatus(selectedAppt.id, 'completed')}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-sky-500/15 text-sky-400 border border-sky-500/20 text-xs font-medium hover:bg-sky-500/25 transition-colors"
+                  >
+                    <CheckCircle className="w-3.5 h-3.5" /> Završeno
+                  </button>
+                  <button
+                    onClick={() => handleApptStatus(selectedAppt.id, 'no_show')}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-orange-500/15 text-orange-400 border border-orange-500/20 text-xs font-medium hover:bg-orange-500/25 transition-colors"
+                  >
+                    <UserX className="w-3.5 h-3.5" /> Nije došao
+                  </button>
+                </>
+              )}
+              {selectedAppt.status !== 'cancelled' && (
+                <button
+                  onClick={() => handleApptStatus(selectedAppt.id, 'cancelled')}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-500/15 text-red-400 border border-red-500/20 text-xs font-medium hover:bg-red-500/25 transition-colors"
+                >
+                  <XCircle className="w-3.5 h-3.5" /> Otkaži
+                </button>
               )}
             </div>
 

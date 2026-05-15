@@ -21,7 +21,6 @@ import { WebsiteChatbotModule } from "@/components/modules/website-chatbot-modul
 import { AgentDatabaseModule } from "@/components/modules/agent-database-module"
 import { AgentLeadsModule } from "@/components/modules/agent-leads-module"
 import { ChatbotAnalyticsModule } from "@/components/modules/chatbot-analytics-module"
-import { DemoCrmModule } from "@/components/modules/demo-crm-module"
 import { CalendarModule } from "@/components/modules/calendar-module"
 import { inferNicheKey, NICHE_CONFIGS } from "@/lib/niche-config"
 
@@ -211,7 +210,7 @@ export default function DashboardPage() {
           statuses={settings.statuses || ['Novi Lead', 'enriched', 'Kontaktiran', 'Meeting Booked', 'Closed', 'Lost', 'Sent']}
         />
       case 'business-crm':
-        if (demoNiche) return <DemoCrmModule clientId={effectiveClientId} nicheKey={inferNicheKey(demoNiche)} />
+        if (demoNiche) return <AgentLeadsModule clientId={effectiveClientId} demoMode nicheKey={inferNicheKey(demoNiche)} />
         return <GrowthEngineModule
           clientId={effectiveClientId}
           tableName="kontakti"
@@ -239,7 +238,7 @@ export default function DashboardPage() {
       case 'agent-leads':
         return <AgentLeadsModule clientId={effectiveClientId} terminology={terminology} selectedBrandIds={isBookStoreClient && selectedBrandIds.length > 1 ? selectedBrandIds : undefined} />
       case 'social-chatbot':
-        return <SocialChatbotModule clientId={effectiveClientId} selectedBrandIds={isBookStoreClient && selectedBrandIds.length > 0 ? selectedBrandIds : undefined} clientName={clientName} />
+        return <SocialChatbotModule clientId={effectiveClientId} selectedBrandIds={isBookStoreClient && selectedBrandIds.length > 0 ? selectedBrandIds : undefined} clientName={clientName} nicheKey={demoNiche ? inferNicheKey(demoNiche) : undefined} />
       case 'website-chatbot':
         return <WebsiteChatbotModule clientId={effectiveClientId} />
       case 'chatbot-analytics':

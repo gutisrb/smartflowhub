@@ -19,7 +19,8 @@ import {
     AlertTriangle,
     Package,
 } from "lucide-react"
-import { getKandidatiByClientId, updateKandidat, getCrmHarmonijaByClientId, getCrmPublikByClientId, getCrmStelaByClientId, getCrmAleksandarMNByClientId, getCrmMagunaByClientId } from "@/lib/supabase/queries"
+import { getKandidatiByClientId, updateKandidat, getCrmHarmonijaByClientId, getCrmPublikByClientId, getCrmStelaByClientId, getCrmAleksandarMNByClientId, getCrmMagunaByClientId, getDemoCrmByClientId, updateDemoCrmStatus } from "@/lib/supabase/queries"
+import { NicheKey, NICHE_CONFIGS } from "@/lib/niche-config"
 import { getBookStoreConfig, BOOK_STORE_CLIENTS } from "@/lib/brand-configs"
 import { createClient } from "@/lib/supabase/client"
 import { motion, AnimatePresence } from "framer-motion"
@@ -41,6 +42,8 @@ interface AgentLeadsModuleProps {
         searchPlaceholder?: string;
         tableHeaders?: string[];
     };
+    demoMode?: boolean;
+    nicheKey?: NicheKey;
 }
 
 // ── Delivery status options ────────────────────────────────────────────────────
@@ -117,7 +120,7 @@ const MOCK_BOOKSTORE_CRM_BY_CLIENT: Record<string, any[]> = {
     ],
 }
 
-export function AgentLeadsModule({ clientId, selectedBrandIds, terminology: propTerminology }: AgentLeadsModuleProps) {
+export function AgentLeadsModule({ clientId, selectedBrandIds, terminology: propTerminology, demoMode, nicheKey }: AgentLeadsModuleProps) {
     const [leads, setLeads] = useState<any[]>([])
     const [loading, setLoading] = useState(true)
     const [searchTerm, setSearchTerm] = useState('')
@@ -143,10 +146,21 @@ export function AgentLeadsModule({ clientId, selectedBrandIds, terminology: prop
     const isCatalogProducts = bookStoreConfig?.tableType === 'proizvodi'
     const bsColor = bookStoreConfig?.color || '#10b981'
 
+    const isDemoMode = !!demoMode && !!nicheKey
+    const nicheConfig = isDemoMode && nicheKey ? NICHE_CONFIGS[nicheKey] : null
+
     const loadCandidates = useCallback(async () => {
         if (!clientId) return
         setLoading(true)
         try {
+            // Demo mode: load from demo_crm table
+            if (isDemoMode) {
+                const data = await getDemoCrmByClientId(clientId)
+                setLeads(data || [])
+                setLoading(false)
+                return
+            }
+
             let data
             if (bookStoreConfig) {
                 if (bookStoreConfig.crmTable === 'crm_harmonija') data = await getCrmHarmonijaByClientId(clientId)
@@ -174,19 +188,19 @@ export function AgentLeadsModule({ clientId, selectedBrandIds, terminology: prop
             toast.error("Greška pri učitavanju")
         }
         setLoading(false)
-    }, [clientId, bookStoreConfig, selectedBrandIds])
+    }, [clientId, isDemoMode, bookStoreConfig, selectedBrandIds])
 
     useEffect(() => {
         loadCandidates()
         const supabase = createClient()
-        const tableName = bookStoreConfig ? bookStoreConfig.crmTable : "kandidati"
+        const tableName = isDemoMode ? 'demo_crm' : (bookStoreConfig ? bookStoreConfig.crmTable : "kandidati")
         const channel = supabase
             .channel(`${tableName}-rt-${clientId}`)
             .on("postgres_changes", { event: "*", schema: "public", table: tableName, filter: `client_id=eq.${clientId}` },
                 () => loadCandidates())
             .subscribe()
         return () => { supabase.removeChannel(channel) }
-    }, [loadCandidates, clientId, bookStoreConfig])
+    }, [loadCandidates, clientId, isDemoMode, bookStoreConfig])
 
     const filteredLeads = leads.filter(c => {
         const matchesSearch = c.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -222,7 +236,11 @@ export function AgentLeadsModule({ clientId, selectedBrandIds, terminology: prop
         setLeads(prev => prev.map(l => l.id === leadId ? { ...l, status: newStatus } : l))
         setEditingStatusId(null)
         try {
-            await updateKandidat(leadId, { status: newStatus })
+            if (isDemoMode) {
+                await updateDemoCrmStatus(leadId, newStatus)
+            } else {
+                await updateKandidat(leadId, { status: newStatus })
+            }
         } catch {
             toast.error("Greška pri ažuriranju statusa")
             loadCandidates()
@@ -254,6 +272,9 @@ export function AgentLeadsModule({ clientId, selectedBrandIds, terminology: prop
     const getStatusColor = (status: string) => {
         const s = status?.toLowerCase()
         if (s === 'poručio')       return 'bg-emerald/15 text-emerald border-emerald/20'
+        if (s === 'zakazano')      return 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20'
+        if (s === 'završeno')      return 'bg-emerald/15 text-emerald border-emerald/20'
+        if (s === 'reklamacija')   return 'bg-orange-500/15 text-orange-400 border-orange-500/25'
         if (s === 'zainteresovan') return 'bg-amber-500/10 text-amber-400 border-amber-500/20'
         if (s === 'zaposlen')      return 'bg-emerald/15 text-emerald border-emerald/20'
         if (s === 'intervju')      return 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20'
@@ -291,6 +312,259 @@ export function AgentLeadsModule({ clientId, selectedBrandIds, terminology: prop
     }
 
     if (!clientId) return null
+
+    // ── Demo CRM rendering (auto-generated demos) ──────────────────────────────
+    if (isDemoMode && nicheConfig) {
+        const nc = nicheConfig
+        const dmColor = nc.brandColor
+        const dmFiltered = leads.filter(l => {
+            const matchSearch = !searchTerm ||
+                l.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                l.kategorija?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                l.proizvod?.toLowerCase().includes(searchTerm.toLowerCase())
+            const matchFilter = filter === 'all' || l.status?.toLowerCase() === filter.toLowerCase()
+            return matchSearch && matchFilter
+        })
+        const dmTotal = leads.length
+        const dmZakazano = leads.filter(l => ['zakazano', 'završeno'].includes(l.status?.toLowerCase() || '')).length
+        const dmReklamacije = leads.filter(l => l.status?.toLowerCase() === 'reklamacija').length
+        const dmIntervencije = leads.filter(l => l.status?.toLowerCase() === 'intervencija').length
+
+        return (
+            <div className="space-y-6 pb-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+                    <div>
+                        <h1 className="text-4xl font-bold tracking-tight text-white flex items-center gap-3">
+                            <span className="bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 to-cyan-400">
+                                {nc.crmLabel}
+                            </span>
+                            <div className="px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[10px] font-mono text-emerald-400 uppercase tracking-widest">
+                                Live Feed
+                            </div>
+                        </h1>
+                        <p className="text-slate-400 mt-2">
+                            {`${nc.terminology.plural} koji su kontaktirali agenta — praćenje u realnom vremenu`}
+                        </p>
+                    </div>
+                    <Button
+                        variant="ghost"
+                        onClick={loadCandidates}
+                        className={cn("h-12 px-6 rounded-2xl bg-white/5 border border-white/5 text-silver font-outfit transition-all hover:border-emerald/30", loading && "opacity-50")}
+                    >
+                        <RefreshCw className={cn("w-4 h-4 mr-2 text-emerald", loading && "animate-spin")} />
+                        Osveži
+                    </Button>
+                </div>
+
+                <div className="flex items-center gap-4">
+                    <div className="relative w-full sm:w-80">
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-emerald-500/50" />
+                        <Input
+                            placeholder={`Pretraži ${nc.terminology.plural.toLowerCase()}, usluge...`}
+                            className="pl-10 bg-black/40 border-white/10 text-white placeholder:text-white/20 focus:border-emerald-500/50 rounded-xl"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                    </div>
+                    <select
+                        className="bg-black/40 border border-white/10 text-white rounded-xl px-4 py-2 outline-none focus:border-emerald-500/50 transition-colors"
+                        value={filter}
+                        onChange={(e) => setFilter(e.target.value)}
+                    >
+                        <option value="all">Svi statusi</option>
+                        {nc.terminology.statuses.map(s => (
+                            <option key={s} value={s.toLowerCase()}>{s}</option>
+                        ))}
+                    </select>
+                </div>
+
+                <GlassCard className="overflow-hidden border-white/5">
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-left border-collapse">
+                            <thead>
+                                <tr className="bg-white/5 border-b border-white/10">
+                                    <th className="p-4 text-xs font-mono uppercase tracking-widest" style={{ color: dmColor }}>{nc.terminology.singular}</th>
+                                    <th className="p-4 text-xs font-mono uppercase tracking-widest" style={{ color: dmColor }}>Kategorija</th>
+                                    <th className="p-4 text-xs font-mono uppercase tracking-widest" style={{ color: dmColor }}>Usluga / Interes</th>
+                                    <th className="p-4 text-xs font-mono uppercase tracking-widest" style={{ color: dmColor }}>Status</th>
+                                    <th className="p-4 text-xs font-mono uppercase tracking-widest" style={{ color: dmColor }}>Kontakt</th>
+                                    <th className="p-4 text-xs font-mono uppercase tracking-widest" style={{ color: dmColor }}>Kanal</th>
+                                    <th className="p-4" />
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <AnimatePresence mode="popLayout">
+                                    {loading ? (
+                                        <TableRow className="border-none">
+                                            <TableCell colSpan={7} className="h-80 text-center">
+                                                <div className="flex flex-col items-center gap-4">
+                                                    <RefreshCw className="w-10 h-10 text-emerald animate-spin opacity-20" />
+                                                    <span className="text-sm text-zinc-500 font-outfit font-light uppercase tracking-widest">Učitavanje...</span>
+                                                </div>
+                                            </TableCell>
+                                        </TableRow>
+                                    ) : dmFiltered.length === 0 ? (
+                                        <TableRow className="border-none">
+                                            <TableCell colSpan={7} className="h-80 text-center">
+                                                <p className="text-sm font-outfit text-zinc-500 italic">Nema {nc.terminology.plural.toLowerCase()}</p>
+                                            </TableCell>
+                                        </TableRow>
+                                    ) : (
+                                        dmFiltered.map((lead, idx) => {
+                                            const kanal = getKanal(lead)
+                                            const isIntervencija = lead.status?.toLowerCase() === 'intervencija'
+                                            const isZakazano = lead.status?.toLowerCase() === 'zakazano'
+                                            return (
+                                                <motion.tr
+                                                    key={lead.id}
+                                                    initial={{ opacity: 0, scale: 0.98, y: 10 }}
+                                                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                                                    transition={{ delay: idx * 0.03, duration: 0.4 }}
+                                                    className="group border-b border-white/[0.03] transition-all duration-300 relative"
+                                                    style={{
+                                                        borderLeft: isIntervencija ? '3px solid rgba(239,68,68,0.53)' : '3px solid transparent',
+                                                        backgroundColor: isIntervencija ? 'rgba(239,68,68,0.04)' : isZakazano ? 'rgba(16,185,129,0.02)' : undefined,
+                                                    }}
+                                                >
+                                                    <td className="p-4">
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="h-10 w-10 rounded-xl border flex items-center justify-center font-bold text-sm shrink-0"
+                                                                style={{
+                                                                    background: `linear-gradient(135deg, ${dmColor}25, ${dmColor}10)`,
+                                                                    borderColor: `${dmColor}30`,
+                                                                    color: dmColor,
+                                                                }}>
+                                                                {lead.full_name?.[0] || 'K'}
+                                                            </div>
+                                                            <div>
+                                                                <div className="font-semibold text-white">{lead.full_name}</div>
+                                                                <div className="text-[10px] text-white/30 mt-0.5 font-mono">{formatRelativeTime(lead.created_at)}</div>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td className="p-4">
+                                                        {lead.kategorija ? (
+                                                            <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full"
+                                                                style={{ background: `${dmColor}15`, border: `1px solid ${dmColor}30`, color: `${dmColor}cc` }}>
+                                                                {lead.kategorija}
+                                                            </span>
+                                                        ) : <span className="text-zinc-700">—</span>}
+                                                    </td>
+                                                    <td className="p-4 max-w-[200px]">
+                                                        {lead.proizvod ? (
+                                                            <span className="text-white/85 text-sm font-medium leading-snug line-clamp-2">{lead.proizvod}</span>
+                                                        ) : (
+                                                            <span className="text-zinc-600 text-xs italic">nije specifikovano</span>
+                                                        )}
+                                                    </td>
+                                                    <td className="p-4">
+                                                        {editingStatusId === lead.id ? (
+                                                            <select
+                                                                autoFocus
+                                                                defaultValue={lead.status || 'Novi'}
+                                                                onBlur={() => setEditingStatusId(null)}
+                                                                onChange={e => handleStatusChange(lead.id, e.target.value)}
+                                                                className="bg-black/60 border border-emerald/30 text-white text-xs rounded-lg px-2 py-1.5 outline-none"
+                                                            >
+                                                                {nc.terminology.statuses.map(s => (
+                                                                    <option key={s} value={s}>{s}</option>
+                                                                ))}
+                                                            </select>
+                                                        ) : (
+                                                            <Badge
+                                                                onClick={() => setEditingStatusId(lead.id)}
+                                                                title="Klikni za izmenu"
+                                                                className={cn(
+                                                                    "px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border cursor-pointer hover:brightness-125 transition-all w-fit",
+                                                                    getStatusColor(lead.status || 'Novi')
+                                                                )}
+                                                            >
+                                                                {isIntervencija && <AlertTriangle className="w-2.5 h-2.5 mr-1 inline" />}
+                                                                {lead.status || 'Novi'}
+                                                            </Badge>
+                                                        )}
+                                                    </td>
+                                                    <td className="p-4">
+                                                        <div className="flex flex-col gap-0.5 text-xs text-zinc-400">
+                                                            {lead.email && <span>{lead.email}</span>}
+                                                            {lead.telefon && <span>{lead.telefon}</span>}
+                                                            {!lead.email && !lead.telefon && <span className="text-zinc-600">—</span>}
+                                                        </div>
+                                                    </td>
+                                                    <td className="p-4">
+                                                        <div className="flex items-center gap-2">
+                                                            <div className={cn("w-1.5 h-1.5 rounded-full", kanal.dot)} />
+                                                            <span className="text-[10px] text-zinc-400 uppercase tracking-widest font-bold font-outfit">{kanal.label}</span>
+                                                        </div>
+                                                    </td>
+                                                    <td className="p-4 text-right pr-6">
+                                                        <div className="flex items-center justify-end gap-1.5">
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="icon"
+                                                                title={isIntervencija ? 'Ukloni intervenciju' : 'Označi za intervenciju'}
+                                                                onClick={() => handleStatusChange(lead.id, isIntervencija ? 'Novi' : 'Intervencija')}
+                                                                className={cn(
+                                                                    "w-8 h-8 rounded-xl transition-all",
+                                                                    isIntervencija
+                                                                        ? "bg-orange-500/20 text-orange-400 opacity-100"
+                                                                        : "opacity-0 group-hover:opacity-100 bg-white/5 hover:bg-orange-500/10 hover:text-orange-400 text-zinc-600"
+                                                                )}
+                                                            >
+                                                                <AlertTriangle className="w-3.5 h-3.5" />
+                                                            </Button>
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="icon"
+                                                                onClick={() => setSelectedLead(lead)}
+                                                                className="w-8 h-8 rounded-xl bg-white/5 transition-all opacity-0 group-hover:opacity-100 hover:bg-emerald/10 hover:text-emerald"
+                                                            >
+                                                                <User className="w-3.5 h-3.5" />
+                                                            </Button>
+                                                        </div>
+                                                    </td>
+                                                </motion.tr>
+                                            )
+                                        })
+                                    )}
+                                </AnimatePresence>
+                            </tbody>
+                        </table>
+                    </div>
+                </GlassCard>
+
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 px-1">
+                    {[
+                        { label: `Ukupno ${nc.terminology.plural}`, value: dmTotal, icon: Sparkles },
+                        { label: 'Zakazano / Završeno', value: dmZakazano, icon: UserCheck },
+                        { label: 'Reklamacije', value: dmReklamacije, icon: MessageSquare },
+                        { label: 'Intervencije', value: dmIntervencije, icon: AlertTriangle },
+                    ].map((stat, i) => (
+                        <GlassCard key={i} className="p-5 flex items-center gap-4 hover:border-emerald/20 transition-all duration-500 group">
+                            <div className="w-10 h-10 rounded-xl bg-emerald/5 border border-emerald/10 flex items-center justify-center group-hover:bg-emerald/10 transition-colors shrink-0">
+                                <stat.icon className="w-4 h-4 text-emerald-400" />
+                            </div>
+                            <div>
+                                <p className="text-[10px] text-zinc-500 uppercase tracking-widest font-bold mb-0.5 font-outfit">{stat.label}</p>
+                                <p className="text-2xl font-outfit font-bold text-silver">{stat.value}</p>
+                            </div>
+                        </GlassCard>
+                    ))}
+                </div>
+
+                <AnimatePresence>
+                    {selectedLead && (
+                        <LeadIntelligenceViewer
+                            lead={selectedLead}
+                            isOpen={!!selectedLead}
+                            onClose={() => setSelectedLead(null)}
+                            isRecruitment={false}
+                        />
+                    )}
+                </AnimatePresence>
+            </div>
+        )
+    }
 
     return (
         <div className="space-y-6 pb-12 animate-in fade-in slide-in-from-bottom-4 duration-700">

@@ -346,3 +346,27 @@ export async function getAppointmentsByClientId(clientId: string, fromDate?: str
     if (error) { console.error('Error fetching appointments:', error); return [] }
     return data ?? []
 }
+
+export async function updateDemoCrmStatus(id: string, status: string) {
+    const supabase = createClient()
+    const { error } = await supabase.from('demo_crm').update({ status }).eq('id', id)
+    if (error) throw error
+}
+
+export async function updateAppointmentStatus(id: string, status: 'confirmed' | 'cancelled' | 'completed' | 'no_show') {
+    const supabase = createClient()
+    const { error } = await supabase.from('appointments').update({ status }).eq('id', id)
+    if (error) throw error
+}
+
+export async function updateServiceAvailability(id: string, isActive: boolean) {
+    const supabase = createClient()
+    const { error } = await supabase.from('services_catalog').update({ is_active: isActive }).eq('id', id)
+    if (error) throw error
+}
+
+export async function updateServicePrice(id: string, priceMin: number, priceMax: number) {
+    const supabase = createClient()
+    const { error } = await supabase.from('services_catalog').update({ price_min: priceMin, price_max: priceMax }).eq('id', id)
+    if (error) throw error
+}
