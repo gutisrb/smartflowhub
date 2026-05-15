@@ -338,6 +338,7 @@ function parseMeta(m: any): Record<string, any> {
 interface SocialChatbotModuleProps {
     clientId: string
     selectedBrandIds?: string[]
+    clientName?: string
 }
 
 function getPlatformMeta(platform: string) {
@@ -351,7 +352,7 @@ function getPlatformMeta(platform: string) {
 
 type Period = "danas" | "sedmica" | "mesec"
 
-export function SocialChatbotModule({ clientId, selectedBrandIds }: SocialChatbotModuleProps) {
+export function SocialChatbotModule({ clientId, selectedBrandIds, clientName }: SocialChatbotModuleProps) {
     const bookStoreConfig = getBookStoreConfig(clientId)
     const isMultiBrand = (selectedBrandIds?.length ?? 0) > 1
     const brandIds = selectedBrandIds && selectedBrandIds.length > 0 ? selectedBrandIds : [clientId]
@@ -366,6 +367,7 @@ export function SocialChatbotModule({ clientId, selectedBrandIds }: SocialChatbo
     const [msgPeriod, setMsgPeriod] = useState<Period>("sedmica")
     const [mobilePanel, setMobilePanel] = useState<"list" | "chat" | "profile">("list")
     const [channelFilter, setChannelFilter] = useState<'all' | 'instagram' | 'facebook' | 'whatsapp' | 'website'>('all')
+    const [crmRows, setCrmRows] = useState<any[]>([])
     const messagesEndRef = useRef<HTMLDivElement>(null)
     const supabase = createClient()
 
@@ -488,6 +490,13 @@ export function SocialChatbotModule({ clientId, selectedBrandIds }: SocialChatbo
         return () => { channels.forEach(ch => supabase.removeChannel(ch)) }
     }, [brandIdsKey]) // eslint-disable-line react-hooks/exhaustive-deps
 
+    // Fetch demo CRM rows for sidebar enrichment (non-bookstore clients)
+    useEffect(() => {
+        if (bookStoreConfig || DEMO_MODE) return
+        supabase.from('demo_crm').select('full_name, status, proizvod, kategorija, telefon, izvor').eq('client_id', clientId)
+            .then(({ data }) => { if (data) setCrmRows(data) })
+    }, [clientId]) // eslint-disable-line react-hooks/exhaustive-deps
+
     // Reset selection when brand set changes so we don't show a conversation from a hidden brand
     useEffect(() => {
         setSelectedId(null)
@@ -603,7 +612,9 @@ export function SocialChatbotModule({ clientId, selectedBrandIds }: SocialChatbo
                             ? `Svi brendovi · ${brandIds.length} brenda`
                             : bookStoreConfig
                                 ? `${bookStoreConfig.brandName} AI Agent · Multi-channel`
-                                : "SmartFlow AI Agent · Multi-channel"}
+                                : clientName
+                                    ? `${clientName} AI Agent · Multi-channel`
+                                    : "AI Inbox · Multi-channel"}
                     </p>
                 </div>
                 <div className="hidden sm:flex items-center gap-2.5">
@@ -630,14 +641,18 @@ export function SocialChatbotModule({ clientId, selectedBrandIds }: SocialChatbo
                         </div>
                     ) : (
                         <>
-                            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-pink-500/20 bg-pink-500/[0.07]">
-                                <Instagram className="w-3 h-3 text-pink-400" />
-                                <span className="text-[10px] font-mono font-bold text-pink-400 tracking-wide">{bookStoreConfig ? bookStoreConfig.instagramHandle : "@smartflow.rs"}</span>
-                            </div>
-                            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/[0.07] bg-white/[0.03]">
-                                <Globe className="w-3 h-3 text-zinc-400" />
-                                <span className="text-[10px] font-mono text-zinc-400 tracking-wide">{bookStoreConfig ? bookStoreConfig.websiteUrl : "smartflow.rs"}</span>
-                            </div>
+                            {bookStoreConfig && (
+                            <>
+                                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-pink-500/20 bg-pink-500/[0.07]">
+                                    <Instagram className="w-3 h-3 text-pink-400" />
+                                    <span className="text-[10px] font-mono font-bold text-pink-400 tracking-wide">{bookStoreConfig.instagramHandle}</span>
+                                </div>
+                                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/[0.07] bg-white/[0.03]">
+                                    <Globe className="w-3 h-3 text-zinc-400" />
+                                    <span className="text-[10px] font-mono text-zinc-400 tracking-wide">{bookStoreConfig.websiteUrl}</span>
+                                </div>
+                            </>
+                        )}
                         </>
                     )}
                 </div>
@@ -720,7 +735,11 @@ export function SocialChatbotModule({ clientId, selectedBrandIds }: SocialChatbo
                                 <span className="text-[10px] font-mono font-bold text-zinc-500 uppercase tracking-widest">Razgovori</span>
                             </div>
                             <span className="text-[10px] font-mono text-zinc-600 bg-white/5 rounded-full px-2 py-0.5">
-                                {channelFilter === 'all' ? conversations.length : conversations.filter(c => c.platform?.toLowerCase() === channelFilter).length}
+                                {conversations.filter(c => {
+                                    if (channelFilter !== 'all' && c.platform?.toLowerCase() !== channelFilter) return false
+                                    if (c.lastVisibleMessage?.created_at && !inDateRange(c.lastVisibleMessage.created_at)) return false
+                                    return true
+                                }).length}
                             </span>
                         </div>
                         {/* Channel filter tabs */}
@@ -754,12 +773,23 @@ export function SocialChatbotModule({ clientId, selectedBrandIds }: SocialChatbo
                         </div>
                     </div>
                     <div className="flex-1 overflow-y-auto scrollbar-none divide-y divide-white/[0.03]">
-                        {conversations.filter(c => channelFilter === 'all' || c.platform?.toLowerCase() === channelFilter).map((conv, idx) => {
+                        {conversations.filter(c => {
+                            if (channelFilter !== 'all' && c.platform?.toLowerCase() !== channelFilter) return false
+                            if (c.lastVisibleMessage?.created_at && !inDateRange(c.lastVisibleMessage.created_at)) return false
+                            return true
+                        }).map((conv, idx) => {
                             const isSelected = selectedId === conv.id
                             const pm = getPlatformMeta(conv.platform)
                             const name = getDisplayName(conv)
                             const convBrandConfig = getBookStoreConfig(conv.brandId ?? clientId)
                             const brandColor = convBrandConfig?.color
+                            const fullName = getFullName(conv) || conv.candidateName
+                            const crmMatch = crmRows.find(r => r.full_name?.toLowerCase() === fullName?.toLowerCase())
+                            const STATUS_DOT: Record<string, string> = {
+                                Naručio: '#10b981', Isporučeno: '#8b5cf6',
+                                Zainteresovan: '#f59e0b', Novi: '#0ea5e9',
+                                Reklamacija: '#f97316', Intervencija: '#ef4444',
+                            }
                             return (
                                 <motion.button
                                     key={conv.id}
@@ -803,11 +833,22 @@ export function SocialChatbotModule({ clientId, selectedBrandIds }: SocialChatbo
                                                         {convBrandConfig.brandName.split(' ').map((w: string) => w[0]).join('').slice(0, 2)}
                                                     </span>
                                                 )}
+                                                {crmMatch?.status && (
+                                                    <span className="text-[8px] font-mono font-bold px-1.5 py-0.5 rounded-full leading-none flex items-center gap-1"
+                                                        style={{ color: STATUS_DOT[crmMatch.status] ?? '#6366f1', background: `${STATUS_DOT[crmMatch.status] ?? '#6366f1'}15`, border: `1px solid ${STATUS_DOT[crmMatch.status] ?? '#6366f1'}30` }}>
+                                                        <span className="w-1 h-1 rounded-full" style={{ background: STATUS_DOT[crmMatch.status] ?? '#6366f1' }} />
+                                                        {crmMatch.status}
+                                                    </span>
+                                                )}
                                             </div>
-                                            <p className="text-xs text-zinc-500 truncate leading-relaxed">
-                                                {conv.lastVisibleMessage?.role === "assistant" ? "🤖 " : ""}
-                                                {conv.lastVisibleMessage?.message?.substring(0, 50)}
-                                            </p>
+                                            {crmMatch?.proizvod ? (
+                                                <p className="text-[10px] text-zinc-600 truncate leading-relaxed font-mono">📦 {crmMatch.proizvod}</p>
+                                            ) : (
+                                                <p className="text-xs text-zinc-500 truncate leading-relaxed">
+                                                    {conv.lastVisibleMessage?.role === "assistant" ? "🤖 " : ""}
+                                                    {conv.lastVisibleMessage?.message?.substring(0, 50)}
+                                                </p>
+                                            )}
                                         </div>
                                     </div>
                                 </motion.button>
@@ -1040,12 +1081,14 @@ export function SocialChatbotModule({ clientId, selectedBrandIds }: SocialChatbo
                                     <InfoRow icon={<Hash />} label="Meta Sender ID" value={selected.id.substring(0, 12) + "…"} mono />
                                     <InfoRow icon={<Instagram />} label="Platforma" value={getPlatformMeta(selected.platform).label + " DM"} />
                                     <InfoRow icon={<Phone />} label="Telefon" value={selected.phone || "—"} />
-                                    <InfoRow
-                                        icon={<Globe />}
-                                        label="Website"
-                                        value={bookStoreConfig ? bookStoreConfig.websiteUrl : "smartflow.rs"}
-                                        link={bookStoreConfig ? `https://${bookStoreConfig.websiteUrl}` : "https://smartflow.rs"}
-                                    />
+                                    {bookStoreConfig && (
+                                        <InfoRow
+                                            icon={<Globe />}
+                                            label="Website"
+                                            value={bookStoreConfig.websiteUrl}
+                                            link={`https://${bookStoreConfig.websiteUrl}`}
+                                        />
+                                    )}
                                 </div>
                             </div>
 
@@ -1080,6 +1123,53 @@ export function SocialChatbotModule({ clientId, selectedBrandIds }: SocialChatbo
                                 )}
                             </button>
 
+                            {/* CRM breakdown for this customer */}
+                            {(() => {
+                                const fullName = getFullName(selected) || selected.candidateName
+                                const crmMatch = crmRows.find(r => r.full_name?.toLowerCase() === fullName?.toLowerCase())
+                                if (!crmMatch) return null
+                                const STATUS_COLOR: Record<string, string> = {
+                                    Naručio: '#10b981', Isporučeno: '#8b5cf6',
+                                    Zainteresovan: '#f59e0b', Novi: '#0ea5e9',
+                                    Reklamacija: '#f97316', Intervencija: '#ef4444',
+                                }
+                                const sc = STATUS_COLOR[crmMatch.status] ?? '#6366f1'
+                                return (
+                                    <div className="rounded-2xl border border-white/[0.07] bg-white/[0.02] p-4 backdrop-blur-xl shrink-0">
+                                        <p className="text-[9px] font-mono font-bold text-zinc-600 uppercase tracking-widest mb-3">Narudžbina / CRM</p>
+                                        <div className="space-y-2.5">
+                                            {crmMatch.status && (
+                                                <div className="flex items-center justify-between">
+                                                    <span className="text-[10px] text-zinc-600 font-mono">Status</span>
+                                                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full"
+                                                        style={{ color: sc, background: `${sc}18`, border: `1px solid ${sc}30` }}>
+                                                        {crmMatch.status}
+                                                    </span>
+                                                </div>
+                                            )}
+                                            {crmMatch.proizvod && (
+                                                <div>
+                                                    <p className="text-[9px] text-zinc-600 font-mono uppercase tracking-widest mb-0.5">Proizvod</p>
+                                                    <p className="text-xs text-zinc-300 leading-snug">{crmMatch.proizvod}</p>
+                                                </div>
+                                            )}
+                                            {crmMatch.kategorija && (
+                                                <div className="flex items-center justify-between">
+                                                    <span className="text-[10px] text-zinc-600 font-mono">Kategorija</span>
+                                                    <span className="text-[10px] text-zinc-400">{crmMatch.kategorija}</span>
+                                                </div>
+                                            )}
+                                            {crmMatch.izvor && (
+                                                <div className="flex items-center justify-between">
+                                                    <span className="text-[10px] text-zinc-600 font-mono">Izvor</span>
+                                                    <span className="text-[10px] text-zinc-400">{crmMatch.izvor}</span>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                )
+                            })()}
+
                             {/* AI Agent info */}
                             <div className="rounded-2xl border border-emerald-500/15 bg-emerald-500/[0.04] p-4 backdrop-blur-xl shrink-0">
                                 <div className="flex items-center gap-2 mb-2">
@@ -1087,7 +1177,11 @@ export function SocialChatbotModule({ clientId, selectedBrandIds }: SocialChatbo
                                     <span className="text-[10px] font-mono font-bold text-emerald-400 uppercase tracking-widest">AI Agent Aktivan</span>
                                 </div>
                                 <p className="text-[11px] font-mono text-zinc-500 leading-relaxed">
-                                    {bookStoreConfig ? `${bookStoreConfig.brandName} AI Agent obradjuje poruke 24/7 i automatski odgovara kupcima na svim kanalima.` : "SmartFlow AI Agent obradjuje poruke 24/7 i automatski odgovara kandidatima na svim kanalima."}
+                                    {bookStoreConfig
+                                        ? `${bookStoreConfig.brandName} AI Agent obradjuje poruke 24/7 i automatski odgovara kupcima na svim kanalima.`
+                                        : clientName
+                                            ? `${clientName} AI Agent obradjuje poruke 24/7 i automatski odgovara klijentima na svim kanalima.`
+                                            : "AI Agent obradjuje poruke 24/7 i automatski odgovara klijentima na svim kanalima."}
                                 </p>
                             </div>
                         </>

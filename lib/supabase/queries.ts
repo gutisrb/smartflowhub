@@ -310,3 +310,39 @@ export async function disableModuleForClient(clientId: string, moduleKey: string
     }
     return true
 }
+
+export async function getServicesCatalogByClientId(clientId: string) {
+    const supabase = createClient()
+    const { data, error } = await supabase
+        .from('services_catalog')
+        .select('*')
+        .eq('client_id', clientId)
+        .order('sort_order', { ascending: true })
+    if (error) { console.error('Error fetching services_catalog:', error); return [] }
+    return data ?? []
+}
+
+export async function getDemoCrmByClientId(clientId: string) {
+    const supabase = createClient()
+    const { data, error } = await supabase
+        .from('demo_crm')
+        .select('*')
+        .eq('client_id', clientId)
+        .order('created_at', { ascending: false })
+    if (error) { console.error('Error fetching demo_crm:', error); return [] }
+    return data ?? []
+}
+
+export async function getAppointmentsByClientId(clientId: string, fromDate?: string, toDate?: string) {
+    const supabase = createClient()
+    let query = supabase
+        .from('appointments')
+        .select('*')
+        .eq('client_id', clientId)
+        .order('starts_at', { ascending: true })
+    if (fromDate) query = query.gte('starts_at', fromDate)
+    if (toDate) query = query.lte('starts_at', toDate)
+    const { data, error } = await query
+    if (error) { console.error('Error fetching appointments:', error); return [] }
+    return data ?? []
+}

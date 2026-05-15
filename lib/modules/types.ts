@@ -10,6 +10,7 @@ export type ModuleKey =
   | 'website-chatbot'
   | 'chatbot-analytics'
   | 'growth-engine'
+  | 'calendar'
 
 export type ModuleCategory = 'acquisition' | 'fulfillment' | 'analytics' | 'settings'
 

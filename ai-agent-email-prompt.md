@@ -50,7 +50,16 @@ The reader is a Serbian business owner or decision-maker. They are skeptical of 
   "instagram_reels": ["caption 1", "caption 2"],
   "ad_copies": ["ad text 1"],
   "demo_tenant_url": "https://app.smartflow.rs",
-  "subject_variant": 0
+  "subject_variant": 0,
+  "demo_stats": {
+    "conversations_count": 6,
+    "conversations_channels": ["WhatsApp", "Instagram", "Facebook"],
+    "crm_count": 14,
+    "services_count": 8,
+    "appointments_count": 17,
+    "has_calendar": true,
+    "has_catalog": true
+  }
 }
 ```
 
@@ -246,7 +255,18 @@ Podaci koje sistem prikuplja pokazuju Vam tačno [3-4 niche-appropriate patterns
 
 ### P4 — Demo as proof + CTA
 
-**Structure of P4 (almost verbatim — only `[Company]` adapts):**
+**When `demo_stats` is provided and non-null:** use the counts to make the demo feel real and already-populated. Reference the actual numbers — don't round or make up new ones. Adapt what you mention to what's actually populated (`has_calendar`, `has_catalog`).
+
+**Structure of P4 with `demo_stats` (counts-aware):**
+
+```
+Za **[Company]** sam već postavio radnu verziju ovog sistema — AI Inbox pokazuje [conversations_count] razgovora ([channels joined with " / "]) sa primerom kada sistem prebacuje razgovor na Vaš tim[, [crm_count] kontakata u CRM-u][, [services_count] [usluga/proizvoda] u katalogu][, a Termini prikazuje [appointments_count] zakazanih termina u sledećih 14 dana].
+Login podaci su ispod, pogledajte par minuta pa mi javite šta mislite.
+```
+
+Include the bracketed segments only when the corresponding value is > 0 or has_* is true. Vary word order naturally — don't list every number robotically if it reads like a spec sheet. The goal is: "their specific dashboard, already alive with their content."
+
+**Structure of P4 without `demo_stats` (generic fallback):**
 
 ```
 Za **[Company]** sam već postavio radnu verziju ovog sistema — sa Vašim [uslugama / proizvodima / programom — match to niche] i primerima razgovora koji u njoj već žive.
@@ -290,6 +310,7 @@ Pick variant based on `subject_variant`:
 - **Variant 0:** `Sve poruke, svi kanali, jedan sistem — za delić cene radnika`
 - **Variant 1:** `[FirstName] — sistem koji 24/7 obrađuje sve digitalne kanale [Company]` — **REQUIRES `email_classification='decision_maker'` AND non-empty `contact_name`. If either condition fails, USE VARIANT 0 instead. Never write "Dobar dan — ..." as a subject.**
 - **Variant 2:** `[Company] — već postavljen sistem za sve Vaše digitalne upite`
+- **Variant 3:** `[Company] — Vaš sistem je živ, pogledajte šta već radi` — use ONLY when `demo_stats` is non-null (confirms data is seeded). If `demo_stats` is null, fall back to Variant 0.
 
 The subject must NOT contain: `automatizacija`, `automatizovati`, `automatizovano`, `optimizuj`, `chatbot`, `bot`, `unapredi komunikaciju`, `upravljanje upitima`, scenario painting, emoji, the salutation word `Dobar dan` or `Zdravo`.
 
@@ -326,12 +347,12 @@ The subject must NOT contain: `automatizacija`, `automatizovati`, `automatizovan
 
 These are illustrations of how the principles produce different output for different leads. **You are not allowed to copy phrases or sentences directly from these samples** — they show what dynamic adaptation looks like, not what to output.
 
-### Sample 1 — Crowndental (dental clinic, general inbox, Vision AI skipped)
+### Sample 1 — Crowndental (dental clinic, general inbox, Vision AI skipped, demo_stats present)
 
 ```json
 {
-  "subject": "Sve poruke, svi kanali, jedan sistem — za delić cene radnika",
-  "body": "Dobar dan,\n\nRadim sa stomatološkim ordinacijama koje su shvatile da Instagram inbox, WhatsApp poruke i sajt chat više nisu sporedna stvar, već glavna prodajna linija.\nZa njih sam napravio sistem u kom AI agent u realnom vremenu preuzima sve poruke sa Vaših digitalnih kanala — Instagram, Facebook, WhatsApp i sajt — odgovara, prodaje, kvalifikuje pacijente i zakazuje termine.\nSve evidentirano u jednom CRM-u, 24 sata dnevno, **za delić cene jednog radnika**.\nNiko ne čeka. Niko ne propada. Sve pod Vašom kontrolom.\n\nVidim sa Vašeg sajta da je fokus **Crowndental** na implantologiji i estetskoj stomatologiji, sa garancijom na rad.\nSistem je izgrađen po meri ordinacije kao što je Vaša — sa Vašim uslugama, cenama, procedurama i tonom komunikacije.\nA kada razgovor zahteva ljudski pristup tima, sistem to signalizira — ništa ne prolazi nezabeleženo.\n\nPodaci koje sistem prikuplja pokazuju Vam tačno najčešće zakazivane tretmane, najtraženije termine, najčešća pitanja pacijenata pre rezervacije, i šta sprečava one koji se predomisle — sve na jednom mestu, odakle možete donositi konkretne biznis odluke (od marketing kampanja do organizacije rada).\n\nZa **Crowndental** sam već postavio radnu verziju ovog sistema — sa Vašim uslugama i primerima razgovora koji u njoj već žive.\nLogin podaci su ispod, pogledajte par minuta pa mi javite šta mislite.\n\nVeliki pozdrav,\nNikola Guteša\nSmartflow | Smartflow.rs | +381 64 118 2200"
+  "subject": "Crowndental — Vaš sistem je živ, pogledajte šta već radi",
+  "body": "Dobar dan,\n\nRadim sa stomatološkim ordinacijama koje su shvatile da Instagram inbox, WhatsApp poruke i sajt chat više nisu sporedna stvar, već glavna prodajna linija.\nZa njih sam napravio sistem u kom AI agent u realnom vremenu preuzima sve poruke sa Vaših digitalnih kanala — Instagram, Facebook, WhatsApp i sajt — odgovara, prodaje, kvalifikuje pacijente i zakazuje termine.\nSve evidentirano u jednom CRM-u, 24 sata dnevno, **za delić cene jednog radnika**.\nNiko ne čeka. Niko ne propada. Sve pod Vašom kontrolom.\n\nVidim sa Vašeg sajta da je fokus **Crowndental** na implantologiji i estetskoj stomatologiji, sa garancijom na rad.\nSistem je izgrađen po meri ordinacije kao što je Vaša — sa Vašim uslugama, cenama, procedurama i tonom komunikacije.\nA kada razgovor zahteva ljudski pristup tima, sistem to signalizira — ništa ne prolazi nezabeleženo.\n\nPodaci koje sistem prikuplja pokazuju Vam tačno najčešće zakazivane tretmane, najtraženije termine, najčešća pitanja pacijenata pre rezervacije, i šta sprečava one koji se predomisle — sve na jednom mestu, odakle možete donositi konkretne biznis odluke (od organizacije rada do marketinških prioriteta).\n\nZa **Crowndental** sam već postavio radnu verziju ovog sistema — AI Inbox pokazuje 6 razgovora (WhatsApp / Instagram / Facebook) sa primerom kada sistem prebacuje razgovor na Vaš tim, 14 kontakata u Pacijenti CRM-u, 8 stomatoloških usluga u Tretmani katalogu, i 17 zakazanih termina u Termini kalendaru za sledećih 14 dana.\nLogin podaci su ispod, pogledajte par minuta pa mi javite šta mislite.\n\nVeliki pozdrav,\nNikola Guteša\nSmartflow | Smartflow.rs | +381 64 118 2200"
 }
 ```
 
@@ -365,6 +386,8 @@ Before returning the JSON, verify:
 - [ ] **MANDATORY CHECK:** if the business is e-commerce / furniture / real estate / food / travel / auto / fashion / beauty / electronics — P3 MUST include the Vision AI sentence ("Agent razume slike i video..."). If you skipped it, regenerate P3 with it included.
 - [ ] P3 patterns are 3-4, niche-appropriate, fresh language (not copied from samples), end with a blocker pattern
 - [ ] P4 starts with "Za [Company] sam već postavio radnu verziju ovog sistema..."
+- [ ] If `demo_stats` is non-null: P4 references actual count(s) from demo_stats (conversations, CRM contacts, services, or appointments)
+- [ ] If `subject_variant` is 3: subject uses "Vaš sistem je živ" formulation and `demo_stats` is non-null
 - [ ] No banned words anywhere (automatizacija, chatbot, bot, leadovi, scenario, hollow stats, Meta App Review, etc.)
 - [ ] All Vaš/Vaše/Vaši/Vam/Vi → capital V
 - [ ] Signature is verbatim

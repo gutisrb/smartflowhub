@@ -7,6 +7,7 @@ import {
   MessageCircle,
   BarChart2,
   Kanban,
+  CalendarDays,
 } from "lucide-react"
 import { DashboardModule, ModuleKey } from "./types"
 
@@ -73,6 +74,13 @@ export const MODULE_REGISTRY: Record<ModuleKey, DashboardModule> = {
     icon: BarChart2,
     category: 'analytics',
     description: 'Statistike četbota: popularni poslovi, pitanja, kanali, zastoji',
+  },
+  'calendar': {
+    key: 'calendar',
+    label: 'Termini',
+    icon: CalendarDays,
+    category: 'fulfillment',
+    description: 'Pregled zakazanih termina i rezervacija',
   },
 }
 

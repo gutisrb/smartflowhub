@@ -99,7 +99,7 @@ export function useUnifiedModules(clientId: string | null) {
         {
           id: "fb1",
           client_id: clientId as string,
-          module_key: "business-crm",
+          module_key: "growth-engine",
           is_enabled: true,
           display_name: "Selekcija",
           sort_order: 1,

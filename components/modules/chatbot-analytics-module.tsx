@@ -11,10 +11,12 @@ import {
 import { TrendingUp, MessageSquare, Users, Zap, Activity, BookOpen, Tag, ShoppingBag, } from "lucide-react"
 import { getBookStoreConfig, BookStoreConfig, BOOK_STORE_CLIENTS } from "@/lib/brand-configs"
 import { getCrmHarmonijaByClientId, getCrmPublikByClientId, getCrmStelaByClientId, getCrmAleksandarMNByClientId, getCrmMagunaByClientId } from "@/lib/supabase/queries"
+import { createClient as createSupabaseClient } from "@/lib/supabase/client"
 
 interface ChatbotAnalyticsModuleProps {
     clientId: string
     selectedBrandIds?: string[]   // Multi-brand: merge analytics from all selected brands
+    demoNiche?: string | null     // When set, render demo analytics from demo_crm table
 }
 
 // ── Animation variants ─────────────────────────────────────────────────────────
@@ -1071,12 +1073,371 @@ function RecruitmentAnalytics() {
 }
 
 // ═════════════════════════════════════════════════════════════════════════════
-export function ChatbotAnalyticsModule({ clientId, selectedBrandIds }: ChatbotAnalyticsModuleProps) {
+export function ChatbotAnalyticsModule({ clientId, selectedBrandIds, demoNiche }: ChatbotAnalyticsModuleProps) {
     const bookStoreConfig = getBookStoreConfig(clientId)
 
     if (bookStoreConfig) {
         return <BookstoreAnalytics clientId={clientId} config={bookStoreConfig} selectedBrandIds={selectedBrandIds} />
     }
 
+    if (demoNiche) {
+        return <DemoAnalytics clientId={clientId} demoNiche={demoNiche} />
+    }
+
     return <RecruitmentAnalytics />
+}
+
+// ── Demo analytics — reads from demo_crm + razgovori ──────────────────────
+
+const PLATFORM_LABELS_DEMO: Record<string, string> = {
+    instagram: "Instagram", whatsapp: "WhatsApp", facebook: "Facebook",
+    website: "Website", web: "Website", viber: "Viber",
+}
+const CHANNEL_COLORS_DEMO: Record<string, string> = {
+    Instagram: "#ec4899", WhatsApp: "#10b981", Facebook: "#3b82f6",
+    Website: "#8b5cf6", Viber: "#7c3aed",
+}
+const STATUS_COLORS_MAP_DEMO: Record<string, string> = {
+    Novi: "#0ea5e9", Zainteresovan: "#f59e0b",
+    Naručio: "#10b981", Isporučeno: "#8b5cf6",
+    Zakazano: "#10b981", Završeno: "#6366f1",
+    Reklamacija: "#f97316", Intervencija: "#ef4444",
+}
+
+function DemoAnalytics({ clientId, demoNiche }: { clientId: string; demoNiche: string }) {
+    const [crmRows, setCrmRows] = useState<any[]>([])
+    const [razgovori, setRazgovori] = useState<any[]>([])
+    const [loading, setLoading] = useState(true)
+    const [period, setPeriod] = useState<'danas' | 'sedmica' | 'mesec'>('mesec')
+
+    useEffect(() => {
+        const sb = createSupabaseClient()
+        Promise.all([
+            sb.from('demo_crm').select('*').eq('client_id', clientId),
+            sb.from('razgovori').select('platform, id_razgovora, created_at').eq('client_id', clientId),
+        ]).then(([crm, razg]) => {
+            setCrmRows(crm.data ?? [])
+            setRazgovori(razg.data ?? [])
+            setLoading(false)
+        })
+    }, [clientId])
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center h-64">
+                <div className="w-8 h-8 border-2 border-emerald-500/30 border-t-emerald-400 rounded-full animate-spin" />
+            </div>
+        )
+    }
+
+    const today = startOfDay(new Date())
+    const todayStr = today.toDateString()
+    const weekAgo = subDays(today, 7)
+    const monthAgo = subDays(today, 30)
+
+    const inPeriod = (dateStr: string) => {
+        const d = new Date(dateStr)
+        if (period === 'danas') return d.toDateString() === todayStr
+        if (period === 'sedmica') return d >= weekAgo
+        return d >= monthAgo
+    }
+
+    const filteredRazg = razgovori.filter(r => inPeriod(r.created_at))
+    const distinctConversations = new Set(filteredRazg.map(r => r.id_razgovora)).size
+
+    const total = crmRows.length
+    const narucilo = crmRows.filter(r => ['Naručio', 'Zakazano'].includes(r.status)).length
+    const isporuceno = crmRows.filter(r => ['Isporučeno', 'Završeno'].includes(r.status)).length
+    const zainteresovano = crmRows.filter(r => r.status === 'Zainteresovan').length
+    const intervencija = crmRows.filter(r => r.status === 'Intervencija').length
+    const konverzija = total > 0 ? Math.round((narucilo / total) * 100) : 0
+
+    // Top products
+    const productCounts: Record<string, number> = {}
+    crmRows.forEach(r => { if (r.proizvod) productCounts[r.proizvod] = (productCounts[r.proizvod] ?? 0) + 1 })
+    const topProducts = Object.entries(productCounts).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([name, count]) => ({ name, count }))
+    const maxProduct = topProducts[0]?.count ?? 1
+
+    // Category breakdown
+    const categoryCounts: Record<string, number> = {}
+    crmRows.forEach(r => { if (r.kategorija) categoryCounts[r.kategorija] = (categoryCounts[r.kategorija] ?? 0) + 1 })
+    const categoryData = Object.entries(categoryCounts).sort((a, b) => b[1] - a[1]).map(([name, count]) => ({ name, count }))
+    const maxCat = categoryData[0]?.count ?? 1
+
+    // Channel distribution (deduplicated, period-filtered)
+    const seenConvPlatform = new Map<string, string>()
+    filteredRazg.forEach(r => {
+        if (r.id_razgovora && !seenConvPlatform.has(r.id_razgovora))
+            seenConvPlatform.set(r.id_razgovora, r.platform ?? '')
+    })
+    const channelCounts: Record<string, number> = {}
+    seenConvPlatform.forEach(platform => {
+        const label = PLATFORM_LABELS_DEMO[platform.toLowerCase()] ?? platform
+        channelCounts[label] = (channelCounts[label] ?? 0) + 1
+    })
+    const channelData = Object.entries(channelCounts).map(([name, value]) => ({ name, value }))
+    const totalChannels = channelData.reduce((s, c) => s + c.value, 0)
+
+    // Daily trend (14 days, unfiltered for full picture)
+    const dailyData = Array.from({ length: 14 }, (_, i) => {
+        const day = subDays(today, 13 - i)
+        const convIds = new Set<string>()
+        razgovori.forEach(r => {
+            const d = startOfDay(new Date(r.created_at))
+            if (d.getTime() === day.getTime() && r.id_razgovora) convIds.add(r.id_razgovora)
+        })
+        return { day: format(day, "d.M"), count: convIds.size }
+    })
+
+    // Status distribution
+    const statusCounts: Record<string, number> = {}
+    crmRows.forEach(r => { statusCounts[r.status] = (statusCounts[r.status] ?? 0) + 1 })
+
+    const PERIODS = [
+        { key: 'danas' as const, label: 'Danas' },
+        { key: 'sedmica' as const, label: '7 dana' },
+        { key: 'mesec' as const, label: '30 dana' },
+    ]
+    const PRODUCT_COLORS = ['#06b6d4', '#8b5cf6', '#f59e0b', '#10b981', '#ec4899']
+    const CAT_COLORS = ['#f59e0b', '#10b981', '#ec4899', '#8b5cf6', '#06b6d4']
+    const MEDALS = ['🥇', '🥈', '🥉']
+
+    return (
+        <motion.div variants={container} initial="hidden" animate="show" className="space-y-5 pb-16 p-6">
+            {/* Header */}
+            <motion.div variants={fadeUp} className="flex items-center justify-between flex-wrap gap-3">
+                <div>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-emerald-500 mb-1">AI Growth Intelligence</p>
+                    <h2 className="text-3xl font-black text-white">Agent <span className="text-emerald-400">Analitika</span></h2>
+                </div>
+                <div className="flex items-center gap-1 p-1 rounded-xl glass-card">
+                    {PERIODS.map(p => (
+                        <button key={p.key} onClick={() => setPeriod(p.key)}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold uppercase tracking-widest transition-all ${period === p.key ? 'bg-emerald-500/20 text-emerald-400' : 'text-zinc-600 hover:text-zinc-400'}`}>
+                            {p.label}
+                        </button>
+                    ))}
+                </div>
+            </motion.div>
+
+            {/* Key metrics */}
+            <motion.div variants={fadeUp} className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {[
+                    { label: "Razgovora", value: distinctConversations, color: "#10b981", Icon: MessageSquare },
+                    { label: "Naručilo", value: narucilo, color: "#06b6d4", Icon: ShoppingBag },
+                    { label: "Isporučeno", value: isporuceno, color: "#8b5cf6", Icon: Users },
+                    { label: "Konverzija", value: `${konverzija}%`, color: "#f59e0b", Icon: TrendingUp },
+                ].map(m => (
+                    <div key={m.label} className="glass-card rounded-2xl p-5 relative overflow-hidden">
+                        <m.Icon className="absolute top-3 right-3 w-8 h-8 opacity-[0.07]" style={{ color: m.color }} />
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-2">{m.label}</p>
+                        <p className="text-4xl font-black" style={{ color: m.color }}>{m.value}</p>
+                    </div>
+                ))}
+            </motion.div>
+
+            {/* Trend + Channels */}
+            <div className="grid grid-cols-12 gap-4">
+                <motion.div variants={fadeUp} className="col-span-12 lg:col-span-8 glass-card rounded-2xl p-6">
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-1">Aktivnost</p>
+                    <p className="text-sm font-semibold text-white mb-4">Razgovori po danu — poslednje 2 nedelje</p>
+                    <ResponsiveContainer width="100%" height={150}>
+                        <AreaChart data={dailyData} margin={{ left: -16, right: 4, top: 4, bottom: 0 }}>
+                            <defs>
+                                <linearGradient id="demoGrad" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
+                                    <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                                </linearGradient>
+                            </defs>
+                            <CartesianGrid vertical={false} stroke="rgba(255,255,255,0.03)" />
+                            <XAxis dataKey="day" tick={{ fill: "#52525b", fontSize: 10 }} axisLine={false} tickLine={false} />
+                            <Tooltip content={<PremiumTooltip unit="razgovora" />} />
+                            <Area type="monotone" dataKey="count" stroke="#10b981" strokeWidth={2} fill="url(#demoGrad)" dot={false} />
+                        </AreaChart>
+                    </ResponsiveContainer>
+                </motion.div>
+
+                <motion.div variants={fadeUp} className="col-span-12 lg:col-span-4 glass-card rounded-2xl p-6 flex flex-col">
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-1">Kanali</p>
+                    <p className="text-sm font-semibold text-white mb-4">Odakle dolaze kupci</p>
+                    {channelData.length === 0 ? (
+                        <p className="text-sm text-zinc-600 italic">Nema podataka za izabrani period</p>
+                    ) : (
+                        <>
+                            <div className="flex justify-center mb-4">
+                                <div className="relative">
+                                    <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-10">
+                                        <p className="text-2xl font-black text-white leading-none">{totalChannels}</p>
+                                        <p className="text-[9px] uppercase tracking-widest mt-0.5 text-zinc-600">razgovora</p>
+                                    </div>
+                                    <ResponsiveContainer width={120} height={120}>
+                                        <PieChart>
+                                            <Pie data={channelData} cx="50%" cy="50%" innerRadius={36} outerRadius={56} dataKey="value" strokeWidth={0} paddingAngle={3}>
+                                                {channelData.map((c, i) => {
+                                                    const color = CHANNEL_COLORS_DEMO[c.name] ?? '#6366f1'
+                                                    return <Cell key={i} fill={color} style={{ filter: `drop-shadow(0 0 6px ${color}50)` }} />
+                                                })}
+                                            </Pie>
+                                        </PieChart>
+                                    </ResponsiveContainer>
+                                </div>
+                            </div>
+                            <div className="space-y-2.5">
+                                {channelData.map((c, i) => {
+                                    const color = CHANNEL_COLORS_DEMO[c.name] ?? '#6366f1'
+                                    const pct = totalChannels > 0 ? Math.round(c.value / totalChannels * 100) : 0
+                                    return (
+                                        <div key={i} className="flex items-center gap-2.5">
+                                            <div className="w-2 h-2 rounded-full shrink-0" style={{ background: color }} />
+                                            <span className="text-xs flex-1 font-medium text-zinc-400">{c.name}</span>
+                                            <div className="w-14 h-[3px] rounded-full overflow-hidden bg-white/5">
+                                                <div className="h-full rounded-full" style={{ background: color, width: `${pct}%` }} />
+                                            </div>
+                                            <span className="text-xs font-bold w-5 text-right text-white">{c.value}</span>
+                                        </div>
+                                    )
+                                })}
+                            </div>
+                        </>
+                    )}
+                </motion.div>
+            </div>
+
+            {/* Conversion funnel */}
+            <motion.div variants={fadeUp} className="glass-card rounded-2xl p-6">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-1">Konverzija</p>
+                <p className="text-sm font-semibold text-white mb-6">Put do narudžbine</p>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                    {[
+                        { label: 'Razgovarali',    count: total,           pct: 100,                                                              color: '#10b981' },
+                        { label: 'Zainteresovani', count: zainteresovano,  pct: total > 0 ? Math.round(zainteresovano / total * 100) : 0,         color: '#f59e0b' },
+                        { label: 'Naručili',       count: narucilo,        pct: total > 0 ? Math.round(narucilo / total * 100) : 0,               color: '#06b6d4' },
+                        { label: 'Isporučeno',     count: isporuceno,      pct: total > 0 ? Math.round(isporuceno / total * 100) : 0,             color: '#8b5cf6' },
+                    ].map((s, i) => (
+                        <div key={i} className="relative flex flex-col gap-3">
+                            {i < 3 && (
+                                <div className="absolute -right-4 top-4 pointer-events-none hidden md:block">
+                                    <svg width="8" height="14" viewBox="0 0 8 14" fill="none">
+                                        <path d="M1 1l6 6-6 6" stroke="rgba(255,255,255,0.12)" strokeWidth="1.5" strokeLinecap="round"/>
+                                    </svg>
+                                </div>
+                            )}
+                            <div className="h-1.5 rounded-full overflow-hidden bg-white/5">
+                                <motion.div initial={{ width: 0 }} animate={{ width: `${s.pct}%` }}
+                                    transition={{ duration: 1.2, delay: 0.2 + i * 0.2, ease: 'easeOut' }}
+                                    className="h-full rounded-full"
+                                    style={{ background: s.color, boxShadow: `0 0 8px ${s.color}60` }} />
+                            </div>
+                            <div>
+                                <p className="text-3xl font-black leading-none" style={{ color: s.color }}>{s.count}</p>
+                                <p className="text-xs font-medium text-white/60 mt-1">{s.label}</p>
+                                <p className="text-[10px] font-bold mt-0.5" style={{ color: s.color }}>{s.pct}%</p>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+                <div className="mt-5 px-4 py-3 rounded-xl flex items-center gap-4"
+                    style={{ background: "rgba(16,185,129,0.06)", border: "1px solid rgba(16,185,129,0.12)" }}>
+                    <p className="text-3xl font-black text-white">{konverzija}<span className="text-sm font-medium text-zinc-500">%</span></p>
+                    <div className="h-8 w-px bg-white/5" />
+                    <p className="text-xs leading-snug text-zinc-500">od svih razgovora završilo narudžbinom · {total - narucilo} kupaca otišlo bez narudžbine</p>
+                </div>
+            </motion.div>
+
+            {/* Top products + Category breakdown */}
+            <div className="grid grid-cols-12 gap-4">
+                <motion.div variants={fadeUp} className="col-span-12 lg:col-span-7 glass-card rounded-2xl p-6">
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-1">Potražnja</p>
+                    <p className="text-sm font-semibold text-white mb-5">Najtraženiji proizvodi</p>
+                    {topProducts.length === 0 ? (
+                        <p className="text-xs italic text-zinc-600">Nema dovoljno podataka</p>
+                    ) : (
+                        <div className="space-y-3.5">
+                            {topProducts.map((p, i) => {
+                                const pct = Math.round(p.count / maxProduct * 100)
+                                const color = PRODUCT_COLORS[i] ?? '#52525b'
+                                return (
+                                    <div key={p.name} className="flex items-center gap-3">
+                                        <span className="text-sm w-5 shrink-0 text-center">{MEDALS[i] ?? `${i + 1}`}</span>
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex items-center justify-between mb-1">
+                                                <span className="text-xs font-medium text-zinc-300 truncate pr-2">{p.name}</span>
+                                                <span className="text-xs font-black shrink-0" style={{ color }}>{p.count}</span>
+                                            </div>
+                                            <div className="h-1.5 rounded-full overflow-hidden bg-white/5">
+                                                <motion.div initial={{ width: 0 }} animate={{ width: `${pct}%` }}
+                                                    transition={{ duration: 1, delay: 0.3 + i * 0.1, ease: 'easeOut' }}
+                                                    className="h-full rounded-full" style={{ background: color }} />
+                                            </div>
+                                        </div>
+                                    </div>
+                                )
+                            })}
+                        </div>
+                    )}
+                </motion.div>
+
+                <motion.div variants={fadeUp} className="col-span-12 lg:col-span-5 glass-card rounded-2xl p-6">
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-1">Kategorije</p>
+                    <p className="text-sm font-semibold text-white mb-5">Raspodela po tipu</p>
+                    <div className="space-y-2.5">
+                        {categoryData.map((c, i) => {
+                            const pct = Math.round(c.count / maxCat * 100)
+                            const color = CAT_COLORS[i] ?? '#52525b'
+                            return (
+                                <div key={c.name} className="relative rounded-xl px-3 py-2.5 overflow-hidden"
+                                    style={{ background: `linear-gradient(135deg,${color}14,${color}06)`, border: `1px solid ${color}28` }}>
+                                    <div className="flex items-center justify-between mb-1.5">
+                                        <span className="text-xs font-semibold" style={{ color: '#e4e4e7' }}>{c.name}</span>
+                                        <span className="text-xs font-black" style={{ color }}>{c.count}</span>
+                                    </div>
+                                    <div className="h-[3px] rounded-full overflow-hidden bg-white/5">
+                                        <motion.div initial={{ width: 0 }} animate={{ width: `${pct}%` }}
+                                            transition={{ duration: 1, delay: 0.3 + i * 0.06, ease: 'easeOut' }}
+                                            className="h-full rounded-full" style={{ background: color }} />
+                                    </div>
+                                    <p className="text-[9px] mt-1 font-bold" style={{ color: `${color}90` }}>
+                                        {total > 0 ? Math.round(c.count / total * 100) : 0}% kupaca
+                                    </p>
+                                </div>
+                            )
+                        })}
+                    </div>
+                </motion.div>
+            </div>
+
+            {/* Status distribution */}
+            <motion.div variants={fadeUp} className="glass-card rounded-2xl p-6">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-1">CRM pregled</p>
+                <p className="text-sm font-semibold text-white mb-4">Status kupaca</p>
+                {intervencija > 0 && (
+                    <div className="mb-4 px-3 py-2 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-red-400 animate-pulse" />
+                        <p className="text-xs text-red-300">{intervencija} intervencija čeka odgovor</p>
+                    </div>
+                )}
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                    {Object.entries(statusCounts).sort((a, b) => b[1] - a[1]).map(([status, count]) => {
+                        const color = STATUS_COLORS_MAP_DEMO[status] ?? '#6366f1'
+                        const pct = total > 0 ? Math.round((count / total) * 100) : 0
+                        return (
+                            <div key={status} className="rounded-xl p-3"
+                                style={{ background: `${color}10`, border: `1px solid ${color}25` }}>
+                                <div className="flex items-center justify-between mb-2">
+                                    <span className="text-xs font-medium" style={{ color }}>{status}</span>
+                                    <span className="text-lg font-black text-white">{count}</span>
+                                </div>
+                                <div className="h-1 rounded-full overflow-hidden bg-white/5">
+                                    <motion.div initial={{ width: 0 }} animate={{ width: `${pct}%` }}
+                                        transition={{ duration: 0.9, ease: 'easeOut' }}
+                                        className="h-full rounded-full" style={{ backgroundColor: color }} />
+                                </div>
+                                <p className="text-[10px] mt-1 font-mono text-zinc-600">{pct}%</p>
+                            </div>
+                        )
+                    })}
+                </div>
+            </motion.div>
+        </motion.div>
+    )
 }

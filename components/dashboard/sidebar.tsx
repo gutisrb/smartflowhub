@@ -146,10 +146,10 @@ export function Sidebar({
               </div>
               <div className="flex flex-col">
                 <span className="text-xs font-bold text-emerald uppercase tracking-[0.2em] leading-none mb-1">
-                  {bookStoreConfig ? "Powered by" : "Smartflow"}
+                  {bookStoreConfig ? "Powered by" : "Powered by"}
                 </span>
                 <span className="text-lg md:text-xl font-outfit font-medium text-silver tracking-tight leading-none group-hover:text-white transition-colors">
-                  {bookStoreConfig ? bookStoreConfig.brandName : "Dashboard"}
+                  {bookStoreConfig ? bookStoreConfig.brandName : (clientName || "Dashboard")}
                 </span>
               </div>
             </div>

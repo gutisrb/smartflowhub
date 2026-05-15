@@ -21,6 +21,9 @@ import { WebsiteChatbotModule } from "@/components/modules/website-chatbot-modul
 import { AgentDatabaseModule } from "@/components/modules/agent-database-module"
 import { AgentLeadsModule } from "@/components/modules/agent-leads-module"
 import { ChatbotAnalyticsModule } from "@/components/modules/chatbot-analytics-module"
+import { DemoCrmModule } from "@/components/modules/demo-crm-module"
+import { CalendarModule } from "@/components/modules/calendar-module"
+import { inferNicheKey, NICHE_CONFIGS } from "@/lib/niche-config"
 
 export default function DashboardPage() {
   const [activeModule, setActiveModule] = useState<ModuleKey>('pipeline')
@@ -28,6 +31,7 @@ export default function DashboardPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [clientName, setClientName] = useState("")
   const [userEmail, setUserEmail] = useState<string | null>(null)
+  const [demoNiche, setDemoNiche] = useState<string | null>(null)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   // For group clients: selected brand IDs (multi-select). Default = first brand only.
   const [selectedBrandIds, setSelectedBrandIds] = useState<string[]>([])
@@ -55,13 +59,14 @@ export default function DashboardPage() {
       if (session.user.email) {
         const { data } = await supabase
           .from('clients')
-          .select('id, name')
+          .select('id, name, demo_niche')
           .eq('email', session.user.email)
           .single()
 
         if (data) {
           setClientId(data.id)
           setClientName(data.name)
+          setDemoNiche((data as any).demo_niche ?? null)
         }
       }
     }
@@ -200,27 +205,44 @@ export default function DashboardPage() {
       case 'pipeline':
         return <PipelineModule clientId={effectiveClientId} />
       case 'growth-engine':
-      case 'business-crm':
         return <GrowthEngineModule
           clientId={effectiveClientId}
           tableName="kontakti"
           statuses={settings.statuses || ['Novi Lead', 'enriched', 'Kontaktiran', 'Meeting Booked', 'Closed', 'Lost', 'Sent']}
         />
+      case 'business-crm':
+        if (demoNiche) return <DemoCrmModule clientId={effectiveClientId} nicheKey={inferNicheKey(demoNiche)} />
+        return <GrowthEngineModule
+          clientId={effectiveClientId}
+          tableName="kontakti"
+          statuses={settings.statuses || ['Novi Lead', 'enriched', 'Kontaktiran', 'Meeting Booked', 'Closed', 'Lost', 'Sent']}
+        />
+      case 'calendar':
+        return <CalendarModule clientId={effectiveClientId} nicheKey={inferNicheKey(demoNiche)} />
       case 'email-outreach':
         return <EmailOutreachModule
           clientId={effectiveClientId}
           tableName="kontakti"
         />
-      case 'agent-database':
-        return <AgentDatabaseModule clientId={effectiveClientId} terminology={terminology} selectedBrandIds={isBookStoreClient && selectedBrandIds.length > 1 ? selectedBrandIds : undefined} />
+      case 'agent-database': {
+        const nicheKey = inferNicheKey(demoNiche)
+        const nicheCatalogLabel = demoNiche ? (NICHE_CONFIGS[nicheKey]?.catalogLabel ?? 'Usluge') : 'Usluge'
+        return <AgentDatabaseModule
+          clientId={effectiveClientId}
+          terminology={terminology}
+          selectedBrandIds={isBookStoreClient && selectedBrandIds.length > 1 ? selectedBrandIds : undefined}
+          demoMode={!!demoNiche && !isBookStoreClient}
+          demoLabel={nicheCatalogLabel}
+        />
+      }
       case 'agent-leads':
         return <AgentLeadsModule clientId={effectiveClientId} terminology={terminology} selectedBrandIds={isBookStoreClient && selectedBrandIds.length > 1 ? selectedBrandIds : undefined} />
       case 'social-chatbot':
-        return <SocialChatbotModule clientId={effectiveClientId} selectedBrandIds={isBookStoreClient && selectedBrandIds.length > 0 ? selectedBrandIds : undefined} />
+        return <SocialChatbotModule clientId={effectiveClientId} selectedBrandIds={isBookStoreClient && selectedBrandIds.length > 0 ? selectedBrandIds : undefined} clientName={clientName} />
       case 'website-chatbot':
         return <WebsiteChatbotModule clientId={effectiveClientId} />
       case 'chatbot-analytics':
-        return <ChatbotAnalyticsModule clientId={effectiveClientId} selectedBrandIds={isBookStoreClient && selectedBrandIds.length > 1 ? selectedBrandIds : undefined} />
+        return <ChatbotAnalyticsModule clientId={effectiveClientId} selectedBrandIds={isBookStoreClient && selectedBrandIds.length > 1 ? selectedBrandIds : undefined} demoNiche={demoNiche} />
       default:
         return <div className="p-8 text-center glass-card rounded-2xl">Module node offline or restricted</div>
     }
@@ -303,7 +325,7 @@ export default function DashboardPage() {
               )}
 
               <h1 className="text-base md:text-2xl font-outfit font-light text-silver tracking-tight truncate">
-                {getModuleLabel()} <span className="text-[10px] opacity-20">V2</span>
+                {getModuleLabel()}
               </h1>
             </div>
 

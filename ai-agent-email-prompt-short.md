@@ -40,6 +40,7 @@ Pick variant based on `subject_variant`:
 - **Variant 0 (default):** `Sve poruke, svi kanali, jedan sistem — za delić cene radnika`
 - **Variant 1 (decision-maker only):** `[FirstName] — sistem koji 24/7 obrađuje sve digitalne kanale [Company]`
 - **Variant 2:** `[Company] — već postavljen sistem za sve Vaše digitalne upite`
+- **Variant 3:** `[Company] — Vaš sistem je živ, pogledajte šta već radi` — use ONLY when `demo_stats` is non-null. Falls back to Variant 0 if null.
 
 The subject must NOT contain: `automatizacija`, `optimizuj`, `chatbot`, `bot`, emoji.
 
@@ -83,9 +84,14 @@ Sistem je izgrađen po meri biznisa kao što je Vaš — sa Vašim uslugama, cen
 
 ### Sentence 3 — Demo + login pointer
 
-References the already-built tenant.
+References the already-built tenant. When `demo_stats` is non-null, mention one or two concrete counts to show the demo is already populated.
 
-**Structure:**
+**Structure with `demo_stats`:**
+```
+Za **[Company]** sam već postavio radnu verziju — AI Inbox ima [conversations_count] razgovora, [crm_count] kontakata u CRM-u[, [appointments_count] zakazanih termina] — login podaci su ispod, pogledajte par minuta pa mi javite šta mislite.
+```
+
+**Structure without `demo_stats` (fallback):**
 ```
 Za **[Company]** sam već postavio radnu verziju ovog sistema sa Vašim [uslugama / proizvodima / programom] i primerima razgovora — login podaci su ispod, pogledajte par minuta pa mi javite šta mislite.
 ```

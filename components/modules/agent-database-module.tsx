@@ -28,7 +28,7 @@ import {
     Package,
     Tag
 } from "lucide-react"
-import { getJobsByClientId, createJob, updateJob, deleteJob, getKnjigeByClientId, getProizvodiByClientId } from "@/lib/supabase/queries"
+import { getJobsByClientId, createJob, updateJob, deleteJob, getKnjigeByClientId, getProizvodiByClientId, getServicesCatalogByClientId } from "@/lib/supabase/queries"
 import { getBookStoreConfig, BOOK_STORE_CLIENTS } from "@/lib/brand-configs"
 import {
     Dialog,
@@ -49,6 +49,8 @@ import { toast } from "sonner"
 interface AgentDatabaseModuleProps {
     clientId: string
     selectedBrandIds?: string[]   // Multi-brand: show combined catalog from all selected brands
+    demoMode?: boolean            // When true, fetch from services_catalog (generic demo tenants)
+    demoLabel?: string            // Tab label override when in demo mode (e.g. "Tretmani", "Meni")
     terminology?: {
         title: string
         highlight: string
@@ -65,6 +67,8 @@ interface AgentDatabaseModuleProps {
 export function AgentDatabaseModule({
     clientId,
     selectedBrandIds,
+    demoMode = false,
+    demoLabel = 'Usluge',
     terminology = {
         title: "Growth",
         highlight: "Engine",
@@ -152,6 +156,12 @@ export function AgentDatabaseModule({
         if (!clientId) return
         setLoading(true)
         try {
+            if (demoMode) {
+                const data = await getServicesCatalogByClientId(clientId)
+                setItems(data)
+                setLoading(false)
+                return
+            }
             if (isHarmonija && selectedBrandIds && selectedBrandIds.length > 1) {
                 // Multi-brand: fetch katalog for each selected brand and merge
                 const results = await Promise.all(
@@ -319,6 +329,10 @@ export function AgentDatabaseModule({
             icon: terminology.title === "Recruitment" || terminology.entity === "Candidate" ? Briefcase : Database
         }
     }, [terminology])
+
+    if (demoMode) {
+        return <ServicesCatalogView items={items} loading={loading} label={demoLabel} onRefresh={handleRefresh} />
+    }
 
     return (
         <div className="space-y-10 pb-20 animate-in fade-in slide-in-from-bottom-4 duration-1000">
@@ -923,6 +937,202 @@ export function AgentDatabaseModule({
                 </Table>
             </GlassCard>
 
+        </div>
+    )
+}
+
+// ── Services Catalog view for generic demo tenants ──────────────────────────
+
+interface ServiceItem {
+    id: string
+    name: string
+    category: string | null
+    description: string | null
+    price_min: number | null
+    price_max: number | null
+    duration_minutes: number | null
+    image_url: string | null
+    color_hex: string
+    is_featured: boolean
+    sort_order: number
+}
+
+function ServicesCatalogView({ items, loading, label, onRefresh }: { items: ServiceItem[]; loading: boolean; label: string; onRefresh: () => void }) {
+    const [search, setSearch] = useState("")
+    const [selectedCategory, setSelectedCategory] = useState<string>("all")
+    const [selected, setSelected] = useState<ServiceItem | null>(null)
+
+    const categories = Array.from(new Set(items.map(i => i.category).filter(Boolean))) as string[]
+    const hasImages = items.some(i => i.image_url)
+
+    const filtered = items.filter(i => {
+        const matchSearch = !search || i.name.toLowerCase().includes(search.toLowerCase()) || i.category?.toLowerCase().includes(search.toLowerCase())
+        const matchCat = selectedCategory === "all" || i.category === selectedCategory
+        return matchSearch && matchCat
+    })
+    const featured = filtered.filter(i => i.is_featured)
+    const rest = filtered.filter(i => !i.is_featured)
+
+    function formatPrice(min: number | null, max: number | null) {
+        if (!min && !max) return null
+        if (min && max && min !== max) return `${min.toLocaleString('sr')}–${max.toLocaleString('sr')} RSD`
+        return `${(min ?? max)!.toLocaleString('sr')} RSD`
+    }
+
+    return (
+        <div className="p-6 space-y-6">
+            <div className="flex items-center justify-between">
+                <div>
+                    <h2 className="text-xl font-outfit font-semibold text-white">{label}</h2>
+                    <p className="text-sm text-slate-400 mt-0.5">{items.length} stavki u katalogu</p>
+                </div>
+                <button onClick={onRefresh} className="p-2 rounded-lg glass-card hover:bg-white/10 transition-colors">
+                    <RefreshCw className="w-4 h-4 text-slate-400" />
+                </button>
+            </div>
+
+            {/* Filters */}
+            <div className="flex flex-col sm:flex-row gap-3">
+                <div className="relative flex-1">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                    <input
+                        type="text"
+                        placeholder="Pretraži katalog..."
+                        value={search}
+                        onChange={e => setSearch(e.target.value)}
+                        className="w-full pl-9 pr-4 py-2 rounded-xl glass-card text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-white/20"
+                    />
+                </div>
+                {categories.length > 1 && (
+                    <div className="flex gap-2 flex-wrap">
+                        <button
+                            onClick={() => setSelectedCategory("all")}
+                            className={cn("px-3 py-1.5 rounded-lg text-sm transition-colors", selectedCategory === "all" ? "bg-white/15 text-white" : "text-slate-400 hover:text-white")}
+                        >
+                            Sve
+                        </button>
+                        {categories.map(cat => (
+                            <button
+                                key={cat}
+                                onClick={() => setSelectedCategory(cat)}
+                                className={cn("px-3 py-1.5 rounded-lg text-sm transition-colors", selectedCategory === cat ? "bg-white/15 text-white" : "text-slate-400 hover:text-white")}
+                            >
+                                {cat}
+                            </button>
+                        ))}
+                    </div>
+                )}
+            </div>
+
+            {loading ? (
+                <div className="flex items-center justify-center h-48">
+                    <div className="w-6 h-6 border-2 border-white/20 border-t-white/60 rounded-full animate-spin" />
+                </div>
+            ) : filtered.length === 0 ? (
+                <div className="glass-card rounded-2xl p-12 text-center">
+                    <Package className="w-10 h-10 text-slate-600 mx-auto mb-3" />
+                    <p className="text-slate-400">{items.length === 0 ? "Katalog je prazan" : "Nema rezultata"}</p>
+                </div>
+            ) : hasImages ? (
+                /* Image grid for visual niches */
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    {[...featured, ...rest].map(item => (
+                        <button
+                            key={item.id}
+                            onClick={() => setSelected(item)}
+                            className="glass-card rounded-2xl overflow-hidden text-left hover:scale-[1.02] transition-transform"
+                        >
+                            {item.image_url ? (
+                                <img src={item.image_url} alt={item.name} className="w-full h-40 object-cover" />
+                            ) : (
+                                <div className="w-full h-40 flex items-center justify-center" style={{ backgroundColor: `${item.color_hex}20` }}>
+                                    <Package className="w-10 h-10" style={{ color: item.color_hex }} />
+                                </div>
+                            )}
+                            <div className="p-3">
+                                {item.is_featured && <span className="text-[10px] font-medium text-amber-400 uppercase tracking-wider">Istaknuto</span>}
+                                <p className="text-sm font-medium text-white mt-0.5 line-clamp-2">{item.name}</p>
+                                {item.category && <p className="text-xs text-slate-500 mt-0.5">{item.category}</p>}
+                                {formatPrice(item.price_min, item.price_max) && (
+                                    <p className="text-sm font-semibold mt-1" style={{ color: item.color_hex }}>{formatPrice(item.price_min, item.price_max)}</p>
+                                )}
+                                {item.duration_minutes && (
+                                    <p className="text-xs text-slate-500 mt-0.5 flex items-center gap-1">
+                                        <Clock className="w-3 h-3" /> {item.duration_minutes} min
+                                    </p>
+                                )}
+                            </div>
+                        </button>
+                    ))}
+                </div>
+            ) : (
+                /* List layout for service niches */
+                <div className="glass-card rounded-2xl divide-y divide-white/[0.04]">
+                    {[...featured, ...rest].map(item => (
+                        <button
+                            key={item.id}
+                            onClick={() => setSelected(item)}
+                            className="w-full text-left flex items-center gap-4 px-5 py-4 hover:bg-white/[0.03] transition-colors"
+                        >
+                            <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: `${item.color_hex}20` }}>
+                                <Tag className="w-4 h-4" style={{ color: item.color_hex }} />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2">
+                                    <p className="text-sm font-medium text-white">{item.name}</p>
+                                    {item.is_featured && <span className="text-[10px] text-amber-400 bg-amber-400/10 px-1.5 py-0.5 rounded-full">Istaknuto</span>}
+                                </div>
+                                {item.category && <p className="text-xs text-slate-500 mt-0.5">{item.category}</p>}
+                                {item.description && <p className="text-xs text-slate-400 mt-0.5 line-clamp-1">{item.description}</p>}
+                            </div>
+                            <div className="text-right shrink-0">
+                                {formatPrice(item.price_min, item.price_max) && (
+                                    <p className="text-sm font-semibold" style={{ color: item.color_hex }}>{formatPrice(item.price_min, item.price_max)}</p>
+                                )}
+                                {item.duration_minutes && (
+                                    <p className="text-xs text-slate-500 flex items-center gap-1 justify-end mt-0.5">
+                                        <Clock className="w-3 h-3" /> {item.duration_minutes} min
+                                    </p>
+                                )}
+                            </div>
+                        </button>
+                    ))}
+                </div>
+            )}
+
+            {/* Detail panel */}
+            {selected && (
+                <div
+                    className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+                    onClick={() => setSelected(null)}
+                >
+                    <div className="glass-card rounded-2xl p-6 w-full max-w-md space-y-4" onClick={e => e.stopPropagation()}>
+                        {selected.image_url && <img src={selected.image_url} alt={selected.name} className="w-full h-48 object-cover rounded-xl" />}
+                        <div>
+                            <p className="text-xs text-slate-500">{selected.category}</p>
+                            <h3 className="text-lg font-semibold text-white mt-1">{selected.name}</h3>
+                        </div>
+                        {selected.description && <p className="text-sm text-slate-300">{selected.description}</p>}
+                        <div className="flex gap-4">
+                            {formatPrice(selected.price_min, selected.price_max) && (
+                                <div>
+                                    <p className="text-xs text-slate-500">Cena</p>
+                                    <p className="text-base font-bold" style={{ color: selected.color_hex }}>{formatPrice(selected.price_min, selected.price_max)}</p>
+                                </div>
+                            )}
+                            {selected.duration_minutes && (
+                                <div>
+                                    <p className="text-xs text-slate-500">Trajanje</p>
+                                    <p className="text-base font-bold text-white">{selected.duration_minutes} min</p>
+                                </div>
+                            )}
+                        </div>
+                        <button onClick={() => setSelected(null)} className="w-full py-2 rounded-xl bg-white/10 text-white text-sm hover:bg-white/15 transition-colors">
+                            Zatvori
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     )
 }

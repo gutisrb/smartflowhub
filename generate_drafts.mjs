@@ -165,8 +165,36 @@ function inferBusinessTypeFromContext(niche, bio, companyName) {
   return 'service';
 }
 
+/** Fetch seeded demo stats for a lead's demo client (for E1 P4 specificity) */
+async function fetchDemoStats(sb, demoClientId) {
+  if (!demoClientId) return null;
+  try {
+    const [appt, crm, svc, razg] = await Promise.all([
+      sb.from('appointments').select('id', { count: 'exact', head: true }).eq('client_id', demoClientId),
+      sb.from('demo_crm').select('id', { count: 'exact', head: true }).eq('client_id', demoClientId),
+      sb.from('services_catalog').select('id', { count: 'exact', head: true }).eq('client_id', demoClientId),
+      sb.from('razgovori').select('platform, id_razgovora').eq('client_id', demoClientId),
+    ]);
+    const distinctConvs = new Set((razg.data || []).map(r => r.id_razgovora)).size;
+    const platformSet = new Set((razg.data || []).map(r => r.platform).filter(Boolean));
+    const PLATFORM_LABELS = { instagram: 'Instagram', whatsapp: 'WhatsApp', facebook: 'Facebook', web: 'Web' };
+    const channels = [...platformSet].map(p => PLATFORM_LABELS[p.toLowerCase()] ?? p);
+    return {
+      conversations_count: distinctConvs,
+      conversations_channels: channels,
+      crm_count: crm.count ?? 0,
+      services_count: svc.count ?? 0,
+      appointments_count: appt.count ?? 0,
+      has_calendar: (appt.count ?? 0) > 0,
+      has_catalog: (svc.count ?? 0) > 0,
+    };
+  } catch {
+    return null;
+  }
+}
+
 /** Build the lead intel object for Gemini */
-function buildLeadIntel(lead, emailType) {
+function buildLeadIntel(lead, emailType, demoStats = null) {
   const enrichment = lead.intake_data?.enrichment || {};
   const igProfile  = enrichment.instagram_profile || {};
   const igReels    = enrichment.instagram_reels || [];
@@ -212,7 +240,8 @@ function buildLeadIntel(lead, emailType) {
     instagram_reels: reelSamples,
     ad_copies: adCopies,
     website_summary: enrichment.website_summary || null,
-    subject_variant: subjectVariant(lead.company_name || lead.ime || ''),
+    subject_variant: demoStats ? 3 : subjectVariant(lead.company_name || lead.ime || ''),
+    demo_stats: demoStats,
   };
 }
 
@@ -383,7 +412,10 @@ async function main() {
                     : assignFramework(lead.id);
     const systemPrompt = promptCache[framework];
 
-    const intel = buildLeadIntel(lead, emailType);
+    const demoStats = (!isFollowUp && lead.demo_client_id)
+      ? await fetchDemoStats(sb, lead.demo_client_id)
+      : null;
+    const intel = buildLeadIntel(lead, emailType, demoStats);
 
     // Personalization-context guard (T4.2): if we have NO ad copy AND NO reel content
     // AND no website summary, the LLM has nothing concrete to anchor a hook to and
