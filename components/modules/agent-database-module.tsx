@@ -51,6 +51,7 @@ interface AgentDatabaseModuleProps {
     selectedBrandIds?: string[]   // Multi-brand: show combined catalog from all selected brands
     demoMode?: boolean            // When true, fetch from services_catalog (generic demo tenants)
     demoLabel?: string            // Tab label override when in demo mode (e.g. "Tretmani", "Meni")
+    nicheKey?: string             // Demo niche key — ecommerce niches use proizvodi table instead of services_catalog
     terminology?: {
         title: string
         highlight: string
@@ -69,6 +70,7 @@ export function AgentDatabaseModule({
     selectedBrandIds,
     demoMode = false,
     demoLabel = 'Usluge',
+    nicheKey,
     terminology = {
         title: "Growth",
         highlight: "Engine",
@@ -157,8 +159,24 @@ export function AgentDatabaseModule({
         setLoading(true)
         try {
             if (demoMode) {
-                const data = await getServicesCatalogByClientId(clientId)
-                setItems(data)
+                const ecommerceNiches = ['ecommerce', 'fashion', 'furniture', 'auto', 'real-estate']
+                if (nicheKey && ecommerceNiches.includes(nicheKey)) {
+                    const raw = await getProizvodiByClientId(clientId)
+                    const mapped = (raw ?? []).map((p: any) => ({
+                        name: p.naziv,
+                        category: p.kategorija,
+                        description: p.opis,
+                        price_min: p.cena,
+                        price_max: p.cena,
+                        image_url: p.url,
+                        color_hex: '#6366f1',
+                        is_featured: false,
+                    }))
+                    setItems(mapped)
+                } else {
+                    const data = await getServicesCatalogByClientId(clientId)
+                    setItems(data)
+                }
                 setLoading(false)
                 return
             }

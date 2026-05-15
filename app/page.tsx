@@ -233,6 +233,7 @@ export default function DashboardPage() {
           selectedBrandIds={isBookStoreClient && selectedBrandIds.length > 1 ? selectedBrandIds : undefined}
           demoMode={!!demoNiche && !isBookStoreClient}
           demoLabel={nicheCatalogLabel}
+          nicheKey={nicheKey}
         />
       }
       case 'agent-leads':

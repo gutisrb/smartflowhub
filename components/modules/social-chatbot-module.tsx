@@ -494,7 +494,7 @@ export function SocialChatbotModule({ clientId, selectedBrandIds, clientName }: 
     useEffect(() => {
         if (bookStoreConfig || DEMO_MODE) return
         supabase.from('demo_crm').select('full_name, status, proizvod, kategorija, telefon, izvor').eq('client_id', clientId)
-            .then(({ data }) => { if (data) setCrmRows(data) })
+            .then(({ data }: { data: any[] | null }) => { if (data) setCrmRows(data) })
     }, [clientId]) // eslint-disable-line react-hooks/exhaustive-deps
 
     // Reset selection when brand set changes so we don't show a conversation from a hidden brand
