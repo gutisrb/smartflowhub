@@ -370,3 +370,40 @@ export async function updateServicePrice(id: string, priceMin: number, priceMax:
     const { error } = await supabase.from('services_catalog').update({ price_min: priceMin, price_max: priceMax }).eq('id', id)
     if (error) throw error
 }
+
+export interface AppointmentInput {
+    client_id: string
+    customer_name: string
+    customer_phone?: string
+    service_id?: string | null
+    service_name: string
+    service_color?: string
+    starts_at: string
+    ends_at: string
+    status?: 'confirmed' | 'cancelled' | 'completed' | 'no_show'
+    source?: string
+    notes?: string
+}
+
+export async function insertAppointment(input: AppointmentInput) {
+    const supabase = createClient()
+    const { data, error } = await supabase
+        .from('appointments')
+        .insert([{ ...input, status: input.status ?? 'confirmed' }])
+        .select()
+        .single()
+    if (error) throw error
+    return data
+}
+
+export async function updateAppointmentFull(id: string, input: Omit<AppointmentInput, 'client_id'>) {
+    const supabase = createClient()
+    const { error } = await supabase.from('appointments').update(input).eq('id', id)
+    if (error) throw error
+}
+
+export async function deleteAppointment(id: string) {
+    const supabase = createClient()
+    const { error } = await supabase.from('appointments').delete().eq('id', id)
+    if (error) throw error
+}

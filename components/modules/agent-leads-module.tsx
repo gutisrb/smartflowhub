@@ -295,11 +295,37 @@ export function AgentLeadsModule({ clientId, selectedBrandIds, terminology: prop
 
     const getKanal = (lead: any) => {
         const iz = (lead.izvor || '').toLowerCase()
-        if (iz.includes('instagram')) return { label: 'Instagram', dot: 'bg-pink-400' }
-        if (iz.includes('whatsapp'))  return { label: 'WhatsApp',  dot: 'bg-emerald' }
-        if (iz.includes('facebook'))  return { label: 'Facebook',  dot: 'bg-blue-400' }
-        if (iz.includes('landing') || iz.includes('website')) return { label: 'Website', dot: 'bg-violet-400' }
-        return { label: lead.izvor || 'Chatbot', dot: 'bg-zinc-500' }
+        if (iz.includes('instagram')) return { label: 'Instagram', color: '#e1306c', icon: 'instagram' as const }
+        if (iz.includes('whatsapp'))  return { label: 'WhatsApp',  color: '#25d366', icon: 'whatsapp' as const }
+        if (iz.includes('facebook'))  return { label: 'Facebook',  color: '#1877f2', icon: 'facebook' as const }
+        if (iz.includes('landing') || iz.includes('website')) return { label: 'Website', color: '#8b5cf6', icon: 'globe' as const }
+        return { label: lead.izvor || 'Chatbot', color: '#71717a', icon: 'globe' as const }
+    }
+
+    const KanalIcon = ({ type, color }: { type: 'instagram' | 'facebook' | 'whatsapp' | 'globe'; color: string }) => {
+        if (type === 'instagram') return (
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style={{ color }}>
+                <rect x="2" y="2" width="20" height="20" rx="5" ry="5" stroke="currentColor" strokeWidth="2" fill="none"/>
+                <circle cx="12" cy="12" r="4" stroke="currentColor" strokeWidth="2" fill="none"/>
+                <circle cx="17.5" cy="6.5" r="1.2" fill="currentColor"/>
+            </svg>
+        )
+        if (type === 'facebook') return (
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style={{ color }}>
+                <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
+            </svg>
+        )
+        if (type === 'whatsapp') return (
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style={{ color }}>
+                <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+            </svg>
+        )
+        return (
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ color }}>
+                <circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/>
+                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+            </svg>
+        )
     }
 
     const formatRelativeTime = (iso: string) => {
@@ -493,8 +519,8 @@ export function AgentLeadsModule({ clientId, selectedBrandIds, terminology: prop
                                                     </td>
                                                     <td className="p-4">
                                                         <div className="flex items-center gap-2">
-                                                            <div className={cn("w-1.5 h-1.5 rounded-full", kanal.dot)} />
-                                                            <span className="text-[10px] text-zinc-400 uppercase tracking-widest font-bold font-outfit">{kanal.label}</span>
+                                                            <KanalIcon type={kanal.icon} color={kanal.color} />
+                                                            <span className="text-[10px] uppercase tracking-widest font-bold font-outfit" style={{ color: kanal.color }}>{kanal.label}</span>
                                                         </div>
                                                     </td>
                                                     <td className="p-4 text-right pr-6">
@@ -703,8 +729,18 @@ export function AgentLeadsModule({ clientId, selectedBrandIds, terminology: prop
                                         const prijavljen = lead.status?.toLowerCase() !== 'novi'
                                         const isIntervencija = lead.status?.toLowerCase() === 'intervencija'
                                         const isPorucio = lead.status?.toLowerCase() === 'poručio'
+                                        const isZainteresovan = lead.status?.toLowerCase() === 'zainteresovan'
                                         const temaValue = isCatalogProducts ? lead.zdravstveni_cilj : lead.tema
                                         const proizvodValue = isCatalogProducts ? lead.proizvod : lead.knjiga
+
+                                        const rowBorderColor = isIntervencija ? 'rgba(239,68,68,0.55)'
+                                            : isPorucio ? 'rgba(16,185,129,0.45)'
+                                            : isZainteresovan ? 'rgba(245,158,11,0.40)'
+                                            : 'transparent'
+                                        const rowBgColor = isIntervencija ? 'rgba(239,68,68,0.035)'
+                                            : isPorucio ? 'rgba(16,185,129,0.025)'
+                                            : undefined
+
                                         return (
                                             <motion.tr
                                                 key={lead.id}
@@ -713,11 +749,11 @@ export function AgentLeadsModule({ clientId, selectedBrandIds, terminology: prop
                                                 transition={{ delay: idx * 0.03, duration: 0.4 }}
                                                 className="group border-b border-white/[0.03] transition-all duration-300 relative"
                                                 style={{
-                                                    borderLeft: isIntervencija ? `3px solid ${bsColor === '#f97316' ? '#f97316' : '#ef4444'}88` : '3px solid transparent',
-                                                    backgroundColor: isIntervencija ? 'rgba(239,68,68,0.04)' : isPorucio ? 'rgba(16,185,129,0.02)' : undefined,
+                                                    borderLeft: `3px solid ${rowBorderColor}`,
+                                                    backgroundColor: rowBgColor,
                                                 }}
                                                 onMouseEnter={e => { if (!isIntervencija && !isPorucio) e.currentTarget.style.backgroundColor = `${bsColor}06` }}
-                                                onMouseLeave={e => { if (!isIntervencija && !isPorucio) e.currentTarget.style.backgroundColor = '' }}
+                                                onMouseLeave={e => { if (!isIntervencija && !isPorucio) e.currentTarget.style.backgroundColor = rowBgColor ?? '' }}
                                             >
                                                 {/* Kupac */}
                                                 <td className="p-4">
@@ -813,7 +849,7 @@ export function AgentLeadsModule({ clientId, selectedBrandIds, terminology: prop
                                                             editingRazlogId === lead.id ? (
                                                                 <select
                                                                     autoFocus
-                                                                    defaultValue={lead.razlog || ''}
+                                                                    defaultValue={(lead.razlog ?? lead.komentar) || ''}
                                                                     onBlur={() => setEditingRazlogId(null)}
                                                                     onChange={e => handleRazlogChange(lead.id, e.target.value)}
                                                                     className="bg-black/60 border border-amber-500/30 text-white text-[10px] rounded-lg px-2 py-1 outline-none w-fit"
@@ -829,12 +865,12 @@ export function AgentLeadsModule({ clientId, selectedBrandIds, terminology: prop
                                                                     title="Zašto nije naručio? Klikni za izmenu"
                                                                     className={cn(
                                                                         "text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border cursor-pointer hover:brightness-125 transition-all w-fit block",
-                                                                        lead.razlog
+                                                                        (lead.razlog ?? lead.komentar)
                                                                             ? "bg-amber-500/10 text-amber-400 border-amber-500/20"
                                                                             : "text-zinc-600 border-white/5 bg-white/[0.02] border-dashed"
                                                                     )}
                                                                 >
-                                                                    {lead.razlog || '+ razlog'}
+                                                                    {(lead.razlog ?? lead.komentar) || '+ razlog'}
                                                                 </span>
                                                             )
                                                         )}
@@ -896,8 +932,8 @@ export function AgentLeadsModule({ clientId, selectedBrandIds, terminology: prop
                                                 {/* Kanal */}
                                                 <td className="p-4">
                                                     <div className="flex items-center gap-2">
-                                                        <div className={cn("w-1.5 h-1.5 rounded-full", kanal.dot)} />
-                                                        <span className="text-[10px] text-zinc-400 uppercase tracking-widest font-bold font-outfit">
+                                                        <KanalIcon type={kanal.icon} color={kanal.color} />
+                                                        <span className="text-[10px] uppercase tracking-widest font-bold font-outfit" style={{ color: kanal.color }}>
                                                             {kanal.label}
                                                         </span>
                                                     </div>

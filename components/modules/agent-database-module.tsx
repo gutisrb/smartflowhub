@@ -790,7 +790,15 @@ export function AgentDatabaseModule({
                                                 {/* Naslov + Autor */}
                                                 <TableCell className="py-5">
                                                     <div>
-                                                        <span className="text-silver font-bold font-outfit text-sm group-hover:text-white transition-colors leading-snug block">{item.naslov}</span>
+                                                        <div className="flex items-center gap-2 flex-wrap">
+                                                            <span className="text-silver font-bold font-outfit text-sm group-hover:text-white transition-colors leading-snug">{item.naslov}</span>
+                                                            {['Atomske navike', 'Moć sadašnjeg trenutka', 'Mit o normalnom'].includes(item.naslov) && (
+                                                                <span className="text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded"
+                                                                    style={{ background: `${bsColor}18`, color: bsColor, border: `1px solid ${bsColor}30` }}>
+                                                                    ★ Preporučeno
+                                                                </span>
+                                                            )}
+                                                        </div>
                                                         <span className="text-zinc-500 text-xs font-outfit mt-0.5 block italic">{item.autor || '—'}</span>
                                                     </div>
                                                 </TableCell>
@@ -985,7 +993,7 @@ function ServicesCatalogView({ items, loading, label, onRefresh }: { items: Serv
     const [selected, setSelected] = useState<ServiceItem | null>(null)
     const [localItems, setLocalItems] = useState<ServiceItem[]>(items)
     const [savingId, setSavingId] = useState<string | null>(null)
-    const [editingPrice, setEditingPrice] = useState<{ id: string; min: string; max: string } | null>(null)
+    const [editingPrice, setEditingPrice] = useState<{ id: string; value: string } | null>(null)
 
     useEffect(() => { setLocalItems(items) }, [items])
 
@@ -1001,9 +1009,9 @@ function ServicesCatalogView({ items, loading, label, onRefresh }: { items: Serv
     const rest = filtered.filter(i => !i.is_featured)
 
     function formatPrice(min: number | null, max: number | null) {
-        if (!min && !max) return null
-        if (min && max && min !== max) return `${min.toLocaleString('sr')}–${max.toLocaleString('sr')} RSD`
-        return `${(min ?? max)!.toLocaleString('sr')} RSD`
+        const price = min ?? max
+        if (!price) return null
+        return `${price.toLocaleString('sr')} RSD`
     }
 
     const patchLocal = (id: string, patch: Partial<ServiceItem>) => {
@@ -1023,14 +1031,13 @@ function ServicesCatalogView({ items, loading, label, onRefresh }: { items: Serv
         setSavingId(null)
     }
 
-    const handleSavePrice = async (id: string, minStr: string, maxStr: string) => {
-        const min = parseFloat(minStr) || 0
-        const max = parseFloat(maxStr) || min
-        patchLocal(id, { price_min: min, price_max: max })
+    const handleSavePrice = async (id: string, valueStr: string) => {
+        const price = parseFloat(valueStr) || 0
+        patchLocal(id, { price_min: price, price_max: price })
         setEditingPrice(null)
         setSavingId(id)
         try {
-            await updateServicePrice(id, min, max)
+            await updateServicePrice(id, price, price)
         } catch {
             // next refresh will restore from DB
         }
@@ -1165,13 +1172,16 @@ function ServicesCatalogView({ items, loading, label, onRefresh }: { items: Serv
             {/* Detail panel */}
             {selected && (
                 <div
-                    className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+                    className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
                     onClick={() => setSelected(null)}
                 >
-                    <div className="glass-card rounded-2xl p-6 w-full max-w-md space-y-4" onClick={e => e.stopPropagation()}>
+                    <div className="w-full max-w-md rounded-2xl overflow-hidden shadow-2xl shadow-black/90 border border-white/[0.08]" onClick={e => e.stopPropagation()}>
+                        {/* Service color accent bar */}
+                        <div className="h-1" style={{ backgroundColor: selected.color_hex ?? '#10b981' }} />
+                        <div className="bg-[#0a0f1a] p-6 space-y-4">
                         {selected.image_url && <img src={selected.image_url} alt={selected.name} className="w-full h-48 object-cover rounded-xl" />}
                         <div>
-                            <p className="text-xs text-slate-500">{selected.category}</p>
+                            <p className="text-xs text-slate-500 uppercase tracking-wider">{selected.category}</p>
                             <h3 className="text-lg font-semibold text-white mt-1">{selected.name}</h3>
                         </div>
                         {selected.description && <p className="text-sm text-slate-300">{selected.description}</p>}
@@ -1184,20 +1194,13 @@ function ServicesCatalogView({ items, loading, label, onRefresh }: { items: Serv
                                     <div className="flex items-center gap-1.5">
                                         <input
                                             type="number"
-                                            value={editingPrice.min}
-                                            onChange={e => setEditingPrice(p => p ? { ...p, min: e.target.value } : null)}
-                                            placeholder="od"
-                                            className="w-20 bg-white/5 border border-white/10 rounded-lg px-2 py-1 text-sm text-white focus:border-emerald-500/50 focus:outline-none"
+                                            value={editingPrice.value}
+                                            onChange={e => setEditingPrice(p => p ? { ...p, value: e.target.value } : null)}
+                                            placeholder="Cena"
+                                            className="w-28 bg-white/5 border border-white/10 rounded-lg px-2 py-1 text-sm text-white focus:border-emerald-500/50 focus:outline-none"
                                         />
-                                        <span className="text-slate-500">–</span>
-                                        <input
-                                            type="number"
-                                            value={editingPrice.max}
-                                            onChange={e => setEditingPrice(p => p ? { ...p, max: e.target.value } : null)}
-                                            placeholder="do"
-                                            className="w-20 bg-white/5 border border-white/10 rounded-lg px-2 py-1 text-sm text-white focus:border-emerald-500/50 focus:outline-none"
-                                        />
-                                        <button onClick={() => handleSavePrice(selected.id, editingPrice.min, editingPrice.max)} className="p-1 rounded-lg bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 transition-colors">
+                                        <span className="text-xs text-slate-500">RSD</span>
+                                        <button onClick={() => handleSavePrice(selected.id, editingPrice.value)} className="p-1 rounded-lg bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 transition-colors">
                                             <Check className="w-3.5 h-3.5" />
                                         </button>
                                         <button onClick={() => setEditingPrice(null)} className="p-1 rounded-lg bg-white/5 text-slate-400 hover:bg-white/10 transition-colors">
@@ -1210,7 +1213,7 @@ function ServicesCatalogView({ items, loading, label, onRefresh }: { items: Serv
                                             {formatPrice(selected.price_min, selected.price_max) ?? '—'}
                                         </p>
                                         <button
-                                            onClick={() => setEditingPrice({ id: selected.id, min: String(selected.price_min ?? ''), max: String(selected.price_max ?? '') })}
+                                            onClick={() => setEditingPrice({ id: selected.id, value: String(selected.price_min ?? selected.price_max ?? '') })}
                                             className="p-1 rounded-lg bg-white/5 text-slate-500 hover:text-white hover:bg-white/10 transition-colors"
                                         >
                                             <Pencil className="w-3 h-3" />
@@ -1251,9 +1254,10 @@ function ServicesCatalogView({ items, loading, label, onRefresh }: { items: Serv
                             </button>
                         </div>
 
-                        <button onClick={() => setSelected(null)} className="w-full py-2 rounded-xl bg-white/10 text-white text-sm hover:bg-white/15 transition-colors">
+                        <button onClick={() => setSelected(null)} className="w-full py-2 rounded-xl bg-white/[0.07] text-slate-300 text-sm hover:bg-white/[0.12] transition-colors">
                             Zatvori
                         </button>
+                        </div>
                     </div>
                 </div>
             )}

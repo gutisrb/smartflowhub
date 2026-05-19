@@ -22,6 +22,7 @@ import { AgentDatabaseModule } from "@/components/modules/agent-database-module"
 import { AgentLeadsModule } from "@/components/modules/agent-leads-module"
 import { ChatbotAnalyticsModule } from "@/components/modules/chatbot-analytics-module"
 import { CalendarModule } from "@/components/modules/calendar-module"
+import { SettingsModule } from "@/components/modules/settings-module"
 import { inferNicheKey, NICHE_CONFIGS } from "@/lib/niche-config"
 
 export default function DashboardPage() {
@@ -243,6 +244,8 @@ export default function DashboardPage() {
         return <WebsiteChatbotModule clientId={effectiveClientId} />
       case 'chatbot-analytics':
         return <ChatbotAnalyticsModule clientId={effectiveClientId} selectedBrandIds={isBookStoreClient && selectedBrandIds.length > 1 ? selectedBrandIds : undefined} demoNiche={demoNiche} />
+      case 'settings':
+        return <SettingsModule clientId={effectiveClientId} selectedBrandIds={selectedBrandIds.length > 0 ? selectedBrandIds : undefined} />
       default:
         return <div className="p-8 text-center glass-card rounded-2xl">Module node offline or restricted</div>
     }

@@ -172,6 +172,15 @@ function generateMockData() {
 const PUBLIK_ID  = "bd12eb98-e62a-4a87-b620-a9881081449b"
 const STELA_ID   = "d7337d00-db70-46c3-828b-e9ac82e21717"
 
+// Per-brand 30-day baseline stats for demo mode
+// Ratio poruke/upiti ≈ 4.1 (realistic for DM sales: question → answer → follow-up → close)
+const BRAND_DEMO_STATS: Record<string, { upiti: number; konverzije: number; poruke: number }> = {
+    "255db627-c62b-44ce-a9dc-3a7e90dd1b67": { upiti: 83,  konverzije: 24, poruke: 341 }, // Harmonija Knjige
+    "bd12eb98-e62a-4a87-b620-a9881081449b": { upiti: 61,  konverzije: 17, poruke: 247 }, // Publik Praktikum
+    "d7337d00-db70-46c3-828b-e9ac82e21717": { upiti: 52,  konverzije: 15, poruke: 208 }, // Stela Knjige
+    "c29e88ad-ee07-44ae-93bb-886f850b6d02": { upiti: 196, konverzije: 56, poruke: 796 }, // Harmonija Group (svi brendovi)
+}
+
 function generateBookstoreDemoData(clientId?: string): ReturnType<typeof generateMockData> {
     const CID = "demo_bookstore"
     const ms = (id: string, role: string, text: string, ts: string, platform: string, name: string, pic: string, extra?: any) => ({
@@ -222,6 +231,31 @@ function generateBookstoreDemoData(clientId?: string): ReturnType<typeof generat
             ms("pp_web_nikola","user","nikola.rasic@gmail.com",t(0,15),"website","Nikola Rašić","https://randomuser.me/api/portraits/men/63.jpg"),
             ms("pp_web_nikola","system","[HUMAN_NEEDED]",t(0,14),"website","Nikola Rašić","https://randomuser.me/api/portraits/men/63.jpg",{ human_needed: true }),
         ]},
+        // Instagram — school reading list, 5-message back-and-forth
+        { id: "pp_ig_stefan", platform: "instagram", name: "Stefan Milošević", pic: "https://randomuser.me/api/portraits/men/34.jpg", humanNeeded: false, phone: null, msgs: [
+            ms("pp_ig_stefan","user","Zdravo, sin mi ide u 2. razred — ima li set za lektiru i nešto za uvežbavanje slova?",t(28,10),"instagram","Stefan Milošević","https://randomuser.me/api/portraits/men/34.jpg"),
+            ms("pp_ig_stefan","assistant","Zdravo Stefan! 📚 Za 2. razred, idealno: **Piši-briši: Azbuka** za slova i **Čarobna šuma** za lektiru — kratke priče baš za taj uzrast. Obe su na stanju 😊",t(28,8),"instagram","Stefan Milošević","https://randomuser.me/api/portraits/men/34.jpg"),
+            ms("pp_ig_stefan","user","Super! A imate li popularne naslove koji su na lektirama beogradskih škola?",t(28,2),"instagram","Stefan Milošević","https://randomuser.me/api/portraits/men/34.jpg"),
+            ms("pp_ig_stefan","assistant","Da! Najtraženiji za 2. razred: Deni Junak, Ježeva kućica, Plavi zec — sve imamo. Ostavite email pa vam šaljem kompletan spisak sa cenama 📚",t(27,58),"instagram","Stefan Milošević","https://randomuser.me/api/portraits/men/34.jpg"),
+            ms("pp_ig_stefan","user","stefan.milosevic@gmail.com — hvala puno!",t(27,55),"instagram","Stefan Milošević","https://randomuser.me/api/portraits/men/34.jpg"),
+            ms("pp_ig_stefan","assistant","Odlično, šaljem do sat vremena! Ugodan početak školske godine 😊",t(27,53),"instagram","Stefan Milošević","https://randomuser.me/api/portraits/men/34.jpg"),
+        ]},
+        // Facebook — twins gift, pricing calculated inline
+        { id: "pp_fb_bojana", platform: "facebook", name: "Bojana Nedić", pic: "https://randomuser.me/api/portraits/women/45.jpg", humanNeeded: false, phone: null, msgs: [
+            ms("pp_fb_bojana","user","Dobar dan! Tražim istu slikovnicu za blizance koji pune 5 godina. Ima li poklon pakovanje?",t(44,15),"facebook","Bojana Nedić","https://randomuser.me/api/portraits/women/45.jpg"),
+            ms("pp_fb_bojana","assistant","Dobar dan Bojana! 🎁 Za blizance od 5 godina, savršena je **Životinje sveta sa mapom** — bogato ilustrovana, interaktivna. Uzimate 2 primerka i možemo oba u poklon pakovanje 😊",t(44,13),"facebook","Bojana Nedić","https://randomuser.me/api/portraits/women/45.jpg"),
+            ms("pp_fb_bojana","user","Sjajno! Koliko bi sve to koštalo?",t(44,5),"facebook","Bojana Nedić","https://randomuser.me/api/portraits/women/45.jpg"),
+            ms("pp_fb_bojana","assistant","2× knjiga = 2.380 din + poklon pakovanje 2× 150 din = **2.680 din** ukupno, a dostava je **besplatna** jer prelazite limit 🎉 Naručite na publikpraktikum.rs!",t(44,3),"facebook","Bojana Nedić","https://randomuser.me/api/portraits/women/45.jpg"),
+            ms("pp_fb_bojana","user","bojana.nedic@gmail.com — savršeno, naručujem odmah!",t(43,55),"facebook","Bojana Nedić","https://randomuser.me/api/portraits/women/45.jpg"),
+            ms("pp_fb_bojana","assistant","Odlično! Stiže u roku od 2-3 dana 📦 Srećan rođendan blizancima! 🎂",t(43,53),"facebook","Bojana Nedić","https://randomuser.me/api/portraits/women/45.jpg"),
+        ]},
+        // Website — quick stock check, fast conversion
+        { id: "pp_web_nela", platform: "website", name: "Nela Jovanović", pic: "https://randomuser.me/api/portraits/women/19.jpg", humanNeeded: false, phone: null, msgs: [
+            ms("pp_web_nela","user","Je li 'Piši-briši: Azbuka' trenutno na stanju?",t(52,0),"website","Nela Jovanović","https://randomuser.me/api/portraits/women/19.jpg"),
+            ms("pp_web_nela","assistant","Zdravo! Da, na stanju — 890 din 😊 direktan link: publikpraktikum.rs/proizvod/pisi-brise-azbuka",t(51,58),"website","Nela Jovanović","https://randomuser.me/api/portraits/women/19.jpg"),
+            ms("pp_web_nela","user","Naručila sam, hvala!",t(51,45),"website","Nela Jovanović","https://randomuser.me/api/portraits/women/19.jpg"),
+            ms("pp_web_nela","assistant","Sjajno! BEX Express 2-3 radna dana 📦 Prijatno čitanje malim čitačima!",t(51,44),"website","Nela Jovanović","https://randomuser.me/api/portraits/women/19.jpg"),
+        ]},
     ]
 
     // ── Stela Knjige — adult fiction, romance, thriller ───────────────────────
@@ -262,52 +296,103 @@ function generateBookstoreDemoData(clientId?: string): ReturnType<typeof generat
             ms("sk_web_katarina","user","katarina.markovic@gmail.com",t(0,10),"website","Katarina Marković","https://randomuser.me/api/portraits/women/48.jpg"),
             ms("sk_web_katarina","system","[HUMAN_NEEDED]",t(0,9),"website","Katarina Marković","https://randomuser.me/api/portraits/women/48.jpg",{ human_needed: true }),
         ]},
+        // Instagram — Gone Girl fan → buys 2 thrillers
+        { id: "sk_ig_nikolina", platform: "instagram", name: "Nikolina Petrović", pic: "https://randomuser.me/api/portraits/women/32.jpg", humanNeeded: false, phone: null, msgs: [
+            ms("sk_ig_nikolina","user","Čitala sam Gone Girl i bila opčinjena — šta slično imate?",t(15,20),"instagram","Nikolina Petrović","https://randomuser.me/api/portraits/women/32.jpg"),
+            ms("sk_ig_nikolina","assistant","Zdravo! 🕵️ Ako te je Gone Girl uhvatila, top 2: **The Silent Patient** (Alex Michaelides) — psihološki triler sa šokantnim završetkom, i **Behind Closed Doors** — mračna tajna savršenog braka. Obje su na stanju 😊",t(15,18),"instagram","Nikolina Petrović","https://randomuser.me/api/portraits/women/32.jpg"),
+            ms("sk_ig_nikolina","user","Zvuče savršeno! Koliko koštaju?",t(15,10),"instagram","Nikolina Petrović","https://randomuser.me/api/portraits/women/32.jpg"),
+            ms("sk_ig_nikolina","assistant","The Silent Patient 1.390 din + Behind Closed Doors 1.290 din = **2.680 din** — dostava besplatna jer prelazite limit 📦",t(15,8),"instagram","Nikolina Petrović","https://randomuser.me/api/portraits/women/32.jpg"),
+            ms("sk_ig_nikolina","user","Uzimam obe! Da li ima i Tana French?",t(15,3),"instagram","Nikolina Petrović","https://randomuser.me/api/portraits/women/32.jpg"),
+            ms("sk_ig_nikolina","assistant","Da! Imamo **In the Woods** (Tana French) — 1.390 din 🕵️ Sve tri = 4.070 din, dostava besplatna. Naručite na stelaknjige.rs!",t(15,1),"instagram","Nikolina Petrović","https://randomuser.me/api/portraits/women/32.jpg"),
+        ]},
+        // Facebook — ACOTAR series inquiry, partial stock
+        { id: "sk_fb_lena", platform: "facebook", name: "Lena Filipović", pic: "https://randomuser.me/api/portraits/women/55.jpg", humanNeeded: false, phone: null, msgs: [
+            ms("sk_fb_lena","user","Imate li ACOTAR seriju od Sarah J. Maas? Zanima me ceo set",t(38,0),"facebook","Lena Filipović","https://randomuser.me/api/portraits/women/55.jpg"),
+            ms("sk_fb_lena","assistant","Zdravo Lena! 📚 Imamo prva dva dela — **A Court of Thorns and Roses** i **A Court of Mist and Fury** na stanju. Treći deo je rasprodat, čekamo dopunu za 2 nedelje 😊",t(37,58),"facebook","Lena Filipović","https://randomuser.me/api/portraits/women/55.jpg"),
+            ms("sk_fb_lena","user","Okej, uzimam prva dva za sada. Koliko košta komplet?",t(37,50),"facebook","Lena Filipović","https://randomuser.me/api/portraits/women/55.jpg"),
+            ms("sk_fb_lena","assistant","2 knjige = 2.780 din, dostava besplatna 🎉 Naručite na stelaknjige.rs ili ostavite email pa vas obavestimo kad stigne treći deo!",t(37,48),"facebook","Lena Filipović","https://randomuser.me/api/portraits/women/55.jpg"),
+            ms("sk_fb_lena","user","lena.filipovic@gmail.com — hvala, naručujem!",t(37,42),"facebook","Lena Filipović","https://randomuser.me/api/portraits/women/55.jpg"),
+        ]},
+        // WhatsApp — entry-level dark romance recommendation
+        { id: "sk_wa_jovana", platform: "whatsapp", name: "Jovana Đurić", pic: "https://randomuser.me/api/portraits/women/66.jpg", humanNeeded: false, phone: null, msgs: [
+            ms("sk_wa_jovana","user","Zdravo, tražim dark romance ali nešto za početak — nisam čitala žanr pre 🙂",t(62,5),"whatsapp","Jovana Đurić","https://randomuser.me/api/portraits/women/66.jpg"),
+            ms("sk_wa_jovana","assistant","Zdravo Jovana! 🖤 Idealan uvod: **Twisted Love** (Ana Huang) — intenzivna hemija, nije previše mračno, sjajan ritam. Ili **It Ends with Us** (Colleen Hoover) — emocionalno jak ali pristupačan. Šta biraš?",t(62,3),"whatsapp","Jovana Đurić","https://randomuser.me/api/portraits/women/66.jpg"),
+            ms("sk_wa_jovana","user","Twisted Love zvuči idealno! Ima li na stanju?",t(61,55),"whatsapp","Jovana Đurić","https://randomuser.me/api/portraits/women/66.jpg"),
+            ms("sk_wa_jovana","assistant","Da, na stanju 🖤 1.390 din — naručite na stelaknjige.rs/proizvod/twisted-love. Nadam se da će ti se svideti!",t(61,53),"whatsapp","Jovana Đurić","https://randomuser.me/api/portraits/women/66.jpg"),
+            ms("sk_wa_jovana","user","Naručila sam, hvala na preporuci! 😊",t(61,40),"whatsapp","Jovana Đurić","https://randomuser.me/api/portraits/women/66.jpg"),
+            ms("sk_wa_jovana","assistant","Uživaj! 🖤 Kad završiš, ima još dobrih nastavaka u žanru — javi se kad budeš spremna za još 😄",t(61,39),"whatsapp","Jovana Đurić","https://randomuser.me/api/portraits/women/66.jpg"),
+        ]},
     ]
 
     const convDefs = clientId === PUBLIK_ID ? publikConvDefs
         : clientId === STELA_ID ? stelaConvDefs
         : [
-        // Instagram — delivery inquiry, warm lead
+        // Instagram — book discovery + ordering question answered directly (no escalation)
         { id: "bs_ig_ana", platform: "instagram", name: "Ana Živković", pic: "https://randomuser.me/api/portraits/women/29.jpg", humanNeeded: false, phone: null, msgs: [
-            ms("bs_ig_ana","user","Zdravo 😊 Da li imate 'Moć sadašnjeg trenutka' od Ekharta Tolija na stanju?",t(2,20),"instagram","Ana Živković","https://randomuser.me/api/portraits/women/29.jpg"),
-            ms("bs_ig_ana","assistant","Zdravo Ana! Da, Moć sadašnjeg trenutka je na stanju — cena 1.490 din. Slobodna poštarina za narudžbine iznad 2.500 din. Preporučujem i 'Nova Zemlja' od istog autora kao sjajnu pratnju 🙏",t(2,18),"instagram","Ana Živković","https://randomuser.me/api/portraits/women/29.jpg"),
-            ms("bs_ig_ana","user","Super! Koliko košta dostava do Novog Sada?",t(2,5),"instagram","Ana Živković","https://randomuser.me/api/portraits/women/29.jpg"),
-            ms("bs_ig_ana","assistant","Dostava do Novog Sada je 350 din (BEX Express, 2-3 dana). Uz dve knjige prelazite limit za besplatnu dostavu 📦 Naručite na harmonijaknjige.rs ili ostavite email za direktan link.",t(2,3),"instagram","Ana Živković","https://randomuser.me/api/portraits/women/29.jpg"),
+            ms("bs_ig_ana","user","Zdravo 😊 da li imate Atomske navike na stanju?",t(2,20),"instagram","Ana Živković","https://randomuser.me/api/portraits/women/29.jpg"),
+            ms("bs_ig_ana","assistant","Zdravo! 👋 Da, Atomske navike su na stanju — 1.490 din. Jedna od naših najprodavanijih! Direktan link: harmonijaknjige.rs/proizvod/atomske-navike 📖",t(2,18),"instagram","Ana Živković","https://randomuser.me/api/portraits/women/29.jpg"),
+            ms("bs_ig_ana","user","Savršeno! Jel mogu odmah da naručim?",t(2,5),"instagram","Ana Živković","https://randomuser.me/api/portraits/women/29.jpg"),
+            ms("bs_ig_ana","assistant","Naravno! 😊 Naručite direktno na harmonijaknjige.rs — izaberete dostavu, platite online, pakuje se isti dan. BEX Express 2-3 radna dana do vas 📦",t(2,3),"instagram","Ana Živković","https://randomuser.me/api/portraits/women/29.jpg"),
         ]},
-        // Instagram — Intervencija (lost shipment, needs human)
+        // Instagram — damaged book on delivery → HUMAN_NEEDED (correct escalation)
         { id: "bs_ig_milos", platform: "instagram", name: "Miloš Jevtić", pic: "https://randomuser.me/api/portraits/men/41.jpg", humanNeeded: true, phone: null, msgs: [
-            ms("bs_ig_milos","user","Narucio sam knjigu pre 10 dana i jos nisam dobio nista. Placen post ekspres!",t(4,10),"instagram","Miloš Jevtić","https://randomuser.me/api/portraits/men/41.jpg"),
-            ms("bs_ig_milos","assistant","Miloše, razumem frustraciju — 10 dana jeste predugo. Prosleđujem vaš slučaj timu odmah. Možete li mi dati email ili broj narudžbine?",t(4,8),"instagram","Miloš Jevtić","https://randomuser.me/api/portraits/men/41.jpg"),
-            ms("bs_ig_milos","user","milos.jevtic87@gmail.com, narudžbina od 4. aprila",t(4,5),"instagram","Miloš Jevtić","https://randomuser.me/api/portraits/men/41.jpg"),
+            ms("bs_ig_milos","user","Stigla mi knjiga ali korica je pocepana sa jedne strane pri isporuci",t(4,10),"instagram","Miloš Jevtić","https://randomuser.me/api/portraits/men/41.jpg"),
+            ms("bs_ig_milos","assistant","Miloše, žao mi je — oštećena isporuka nije prihvatljiva 🙏 Prosleđujem odmah timu za reklamaciju i zamenu. Možeš li mi dati email ili broj narudžbine da ubrzamo?",t(4,8),"instagram","Miloš Jevtić","https://randomuser.me/api/portraits/men/41.jpg"),
+            ms("bs_ig_milos","user","milos.jevtic87@gmail.com, narudžbina od prošle nedelje",t(4,5),"instagram","Miloš Jevtić","https://randomuser.me/api/portraits/men/41.jpg"),
             ms("bs_ig_milos","system","[HUMAN_NEEDED]",t(4,4),"instagram","Miloš Jevtić","https://randomuser.me/api/portraits/men/41.jpg",{ human_needed: true }),
         ]},
-        // Facebook — gift recommendation flow
+        // Facebook — mindfulness gift recommendation with direct product links
         { id: "bs_fb_zorana", platform: "facebook", name: "Zorana Blagojević", pic: "https://randomuser.me/api/portraits/women/52.jpg", humanNeeded: false, phone: null, msgs: [
-            ms("bs_fb_zorana","user","Dobar dan, tražim poklon za prijatelju koja voli psihologiju i razvoj ličnosti",t(6,15),"facebook","Zorana Blagojević","https://randomuser.me/api/portraits/women/52.jpg"),
-            ms("bs_fb_zorana","assistant","Dobar dan! Odlično 🎁 Za ljubitelje psihologije, top 3 preporuke: Atomske navike (navike i produktivnost), Moć sadašnjeg trenutka (mindfulness), Mit o normalnom (trauma i telo). Koliko godina ima prijateli?",t(6,13),"facebook","Zorana Blagojević","https://randomuser.me/api/portraits/women/52.jpg"),
-            ms("bs_fb_zorana","user","35, bavi se meditacijom — hvala, uzimam Moć sadašnjeg trenutka!",t(6,5),"facebook","Zorana Blagojević","https://randomuser.me/api/portraits/women/52.jpg"),
-            ms("bs_fb_zorana","assistant","Savršen izbor za nju 🙏 Naručite na harmonijaknjige.rs ili mi ostavite email za direktan link ka knjizi.",t(6,3),"facebook","Zorana Blagojević","https://randomuser.me/api/portraits/women/52.jpg"),
+            ms("bs_fb_zorana","user","Dobar dan, tražim poklon za prijatelju koja se bavi meditacijom i duhovnim razvojem",t(6,15),"facebook","Zorana Blagojević","https://randomuser.me/api/portraits/women/52.jpg"),
+            ms("bs_fb_zorana","assistant","Dobar dan! 🙏 Za nju su idealne dve knjige Ekharta Tolija: **Moć sadašnjeg trenutka** — harmonijaknjige.rs/proizvod/moc-sadasnjeg-trenutka i **Nova Zemlja** — harmonijaknjige.rs/proizvod/nova-zemlja. Obe su na stanju 😊",t(6,13),"facebook","Zorana Blagojević","https://randomuser.me/api/portraits/women/52.jpg"),
+            ms("bs_fb_zorana","user","Savršeno! Uzimam Moć sadašnjeg trenutka. Koliko košta?",t(6,5),"facebook","Zorana Blagojević","https://randomuser.me/api/portraits/women/52.jpg"),
+            ms("bs_fb_zorana","assistant","1.490 din 🙏 Naručite direktno na harmonijaknjige.rs/proizvod/moc-sadasnjeg-trenutka — dostava BEX Express 2-3 dana. Uz dve knjige poštarina je besplatna 📦",t(6,3),"facebook","Zorana Blagojević","https://randomuser.me/api/portraits/women/52.jpg"),
         ]},
-        // WhatsApp — bulk corporate order
-        { id: "bs_wa_svetlana", platform: "whatsapp", name: "Svetlana Jović", pic: "https://randomuser.me/api/portraits/women/68.jpg", humanNeeded: false, phone: "svetlana.jovic@firma.rs", msgs: [
-            ms("bs_wa_svetlana","user","Zdravo, zanima me da naručim 8-10 knjiga za kolege kao poklon. Ima li popust za veće narudžbine?",t(8,0),"whatsapp","Svetlana Jović","https://randomuser.me/api/portraits/women/68.jpg"),
-            ms("bs_wa_svetlana","assistant","Zdravo Svetlana! Za grupne narudžbine od 8+ knjiga možemo dogovoriti popust 10-15%. Bestselleri za korporativne poklone: Atomske navike, Ikigaj, Nesavršeni roditelji. Da li biste voleli ponudu na email?",t(7,55),"whatsapp","Svetlana Jović","https://randomuser.me/api/portraits/women/68.jpg"),
-            ms("bs_wa_svetlana","user","Da, sjajno! svetlana.jovic@firma.rs",t(7,50),"whatsapp","Svetlana Jović","https://randomuser.me/api/portraits/women/68.jpg"),
-            ms("bs_wa_svetlana","assistant","Odlično, šaljemo vam detaljnu ponudu u roku od sat vremena. Hvala Svetlana! 📚",t(7,48),"whatsapp","Svetlana Jović","https://randomuser.me/api/portraits/women/68.jpg"),
+        // WhatsApp — delivery time + price question answered directly (no escalation)
+        { id: "bs_wa_svetlana", platform: "whatsapp", name: "Svetlana Jović", pic: "https://randomuser.me/api/portraits/women/68.jpg", humanNeeded: false, phone: null, msgs: [
+            ms("bs_wa_svetlana","user","Zdravo! Koliko dugo traje dostava do Novog Sada?",t(8,0),"whatsapp","Svetlana Jović","https://randomuser.me/api/portraits/women/68.jpg"),
+            ms("bs_wa_svetlana","assistant","Zdravo! 📦 Do Novog Sada BEX Express isporučuje za 2-3 radna dana. Za narudžbine do 14h danas — možete računati na prekosutra ili utorak 😊",t(7,55),"whatsapp","Svetlana Jović","https://randomuser.me/api/portraits/women/68.jpg"),
+            ms("bs_wa_svetlana","user","Super! A koliko košta dostava?",t(7,50),"whatsapp","Svetlana Jović","https://randomuser.me/api/portraits/women/68.jpg"),
+            ms("bs_wa_svetlana","assistant","Dostava je 350 din, ali je **besplatna za narudžbine iznad 2.500 din** 🎉 Uz dve-tri knjige lako prelazite limit. Šta vas zanima iz kataloga?",t(7,48),"whatsapp","Svetlana Jović","https://randomuser.me/api/portraits/women/68.jpg"),
         ]},
-        // Website — delivery/pricing question, resolved
+        // Website — self-help discovery + book recommendation with prices and direct links
         { id: "bs_web_petra", platform: "website", name: "Petra Stojanović", pic: "https://randomuser.me/api/portraits/women/77.jpg", humanNeeded: false, phone: null, msgs: [
-            ms("bs_web_petra","user","Zdravo, cena na sajtu za 'Budite oslonac svojoj deci' — je li to sa ili bez dostave?",t(1,30),"website","Petra Stojanović","https://randomuser.me/api/portraits/women/77.jpg"),
-            ms("bs_web_petra","assistant","Zdravo Petra! Cena od 1.590 din je bez dostave. Dostava je 350 din, ali je besplatna za narudžbine iznad 2.500 din 😊 Uz ovu knjigu dodajte još jednu i dostava je gratis.",t(1,28),"website","Petra Stojanović","https://randomuser.me/api/portraits/women/77.jpg"),
-            ms("bs_web_petra","user","I da li šaljete subotom?",t(1,20),"website","Petra Stojanović","https://randomuser.me/api/portraits/women/77.jpg"),
-            ms("bs_web_petra","assistant","Da, slažemo subotom za narudžbine do petka u 13h. BEX Express — 1-2 dana za Beograd, 2-3 za ostatak Srbije 📦 Naručite danas i možete očekivati dostavu u utorak.",t(1,18),"website","Petra Stojanović","https://randomuser.me/api/portraits/women/77.jpg"),
+            ms("bs_web_petra","user","Zdravo, tražim nešto za ličnu transformaciju — šta biste preporučili?",t(1,30),"website","Petra Stojanović","https://randomuser.me/api/portraits/women/77.jpg"),
+            ms("bs_web_petra","assistant","Zdravo! 😊 Top tri za ličnu transformaciju: **Atomske navike** (1.490 din) — harmonijaknjige.rs/proizvod/atomske-navike, **Mit o normalnom** Gabora Matea (1.590 din) — harmonijaknjige.rs/proizvod/mit-o-normalnom, **Ikigaj** (1.290 din) — harmonijaknjige.rs/proizvod/ikigaj 📚 Koji vam pristup više odgovara?",t(1,28),"website","Petra Stojanović","https://randomuser.me/api/portraits/women/77.jpg"),
+            ms("bs_web_petra","user","Mit o normalnom me zanima — da li je na stanju?",t(1,20),"website","Petra Stojanović","https://randomuser.me/api/portraits/women/77.jpg"),
+            ms("bs_web_petra","assistant","Da, na stanju je! 😊 Cena 1.590 din, naručite direktno na harmonijaknjige.rs/proizvod/mit-o-normalnom 🙏 Uz ovu i još jednu knjigu dostava je besplatna.",t(1,18),"website","Petra Stojanović","https://randomuser.me/api/portraits/women/77.jpg"),
         ]},
-        // Website — address correction, needs human
+        // Website — address correction needs human (legitimate service escalation)
         { id: "bs_web_dragan", platform: "website", name: "Dragan Nikolić", pic: "https://randomuser.me/api/portraits/men/72.jpg", humanNeeded: true, phone: null, msgs: [
             ms("bs_web_dragan","user","Naručio sam knjigu i sad vidim da sam upisao pogrešnu adresu. Mogu li da promenim?",t(0,30),"website","Dragan Nikolić","https://randomuser.me/api/portraits/men/72.jpg"),
-            ms("bs_web_dragan","assistant","Dragan, rešivemo odmah! Ako narudžbina još nije otpremljena, adresa može da se koriguje. Daj mi email ili broj narudžbine da proverim status.",t(0,28),"website","Dragan Nikolić","https://randomuser.me/api/portraits/men/72.jpg"),
+            ms("bs_web_dragan","assistant","Dragan, rešavamo odmah! Ako narudžbina još nije otpremljena, adresa može da se koriguje. Daj mi email ili broj narudžbine da proverim status 📦",t(0,28),"website","Dragan Nikolić","https://randomuser.me/api/portraits/men/72.jpg"),
             ms("bs_web_dragan","user","dragan.nikolic@gmail.com",t(0,25),"website","Dragan Nikolić","https://randomuser.me/api/portraits/men/72.jpg"),
             ms("bs_web_dragan","system","[HUMAN_NEEDED]",t(0,24),"website","Dragan Nikolić","https://randomuser.me/api/portraits/men/72.jpg",{ human_needed: true }),
+        ]},
+        // Instagram — first self-help buyer, 5-turn conversion
+        { id: "bs_ig_milica", platform: "instagram", name: "Milica Stanković", pic: "https://randomuser.me/api/portraits/women/36.jpg", humanNeeded: false, phone: null, msgs: [
+            ms("bs_ig_milica","user","Zdravo 😊 šta biste preporučili nekome ko nikad nije čitao self-help?",t(26,10),"instagram","Milica Stanković","https://randomuser.me/api/portraits/women/36.jpg"),
+            ms("bs_ig_milica","assistant","Zdravo! 👋 Za uvod u self-help, dva idealna starta: **Atomske navike** (praktično, odmah primenljivo) ili **Ikigaj** (lagana, filozofska, lako se čita). Koji stil ti više odgovara?",t(26,8),"instagram","Milica Stanković","https://randomuser.me/api/portraits/women/36.jpg"),
+            ms("bs_ig_milica","user","Praktično zvuči bolje. Je li ta knjiga baš toliko dobra?",t(26,3),"instagram","Milica Stanković","https://randomuser.me/api/portraits/women/36.jpg"),
+            ms("bs_ig_milica","assistant","Jedna od najprodavanijih knjiga svih vremena — s razlogom 😊 Govori o sitnim navikama koje se akumuliraju tokom vremena. Čitljiva za vikend, efekti traju godinama. Direktan link: harmonijaknjige.rs/proizvod/atomske-navike — 1.490 din, na stanju.",t(26,1),"instagram","Milica Stanković","https://randomuser.me/api/portraits/women/36.jpg"),
+            ms("bs_ig_milica","user","Okej, uzimam! Kako naručujem?",t(25,55),"instagram","Milica Stanković","https://randomuser.me/api/portraits/women/36.jpg"),
+            ms("bs_ig_milica","assistant","Naručite direktno na harmonijaknjige.rs/proizvod/atomske-navike — kartica ili pouzeće, BEX Express 2-3 radna dana 📦 Prijatno čitanje!",t(25,53),"instagram","Milica Stanković","https://randomuser.me/api/portraits/women/36.jpg"),
+        ]},
+        // Facebook — Gabor Maté inquiry with book details
+        { id: "bs_fb_nemanja", platform: "facebook", name: "Nemanja Đorđević", pic: "https://randomuser.me/api/portraits/men/38.jpg", humanNeeded: false, phone: null, msgs: [
+            ms("bs_fb_nemanja","user","Zanima me Gabor Mate — koji naslov da počnem?",t(32,0),"facebook","Nemanja Đorđević","https://randomuser.me/api/portraits/men/38.jpg"),
+            ms("bs_fb_nemanja","assistant","Zdravo! 🙏 Idealan uvod je **Mit o normalnom** — veza između traume, zdravlja i modernog društva. Direktan link: harmonijaknjige.rs/proizvod/mit-o-normalnom (1.590 din). Ako si spreman za dublje — 'U svetu gladnih duhova' je intenzivnije.",t(31,58),"facebook","Nemanja Đorđević","https://randomuser.me/api/portraits/men/38.jpg"),
+            ms("bs_fb_nemanja","user","Koliko stranica ima Mit o normalnom?",t(31,50),"facebook","Nemanja Đorđević","https://randomuser.me/api/portraits/men/38.jpg"),
+            ms("bs_fb_nemanja","assistant","Oko 560 stranica — detaljna knjiga ali dobro organizovana. Gabor Maté piše toplo i lično, ne akademski 📚 Lako se čita postepeno.",t(31,48),"facebook","Nemanja Đorđević","https://randomuser.me/api/portraits/men/38.jpg"),
+            ms("bs_fb_nemanja","user","Uzimam. Ima li besplatna dostava?",t(31,40),"facebook","Nemanja Đorđević","https://randomuser.me/api/portraits/men/38.jpg"),
+            ms("bs_fb_nemanja","assistant","Za narudžbine iznad 2.500 din dostava je besplatna 😊 Uz još jednu knjigu lako dolazite do limita. Naručite na harmonijaknjige.rs!",t(31,38),"facebook","Nemanja Đorđević","https://randomuser.me/api/portraits/men/38.jpg"),
+        ]},
+        // WhatsApp — returning customer wants next Tolle book
+        { id: "bs_wa_tijana", platform: "whatsapp", name: "Tijana Nikolić", pic: "https://randomuser.me/api/portraits/women/42.jpg", humanNeeded: false, phone: null, msgs: [
+            ms("bs_wa_tijana","user","Prečitala sam Moć sadašnjeg trenutka i bila sam oduševljena. Šta je sledeće od Ekharta Tolija?",t(68,5),"whatsapp","Tijana Nikolić","https://randomuser.me/api/portraits/women/42.jpg"),
+            ms("bs_wa_tijana","assistant","Zdravo Tijana! 🙏 Sledeći je **Nova Zemlja** — mnogi kažu da je dublja od Moći sadašnjeg trenutka. Govori o egu i unutrašnjoj transformaciji. Direktan link: harmonijaknjige.rs/proizvod/nova-zemlja (1.390 din)",t(68,3),"whatsapp","Tijana Nikolić","https://randomuser.me/api/portraits/women/42.jpg"),
+            ms("bs_wa_tijana","user","Savršeno, hvala! Naručujem odmah 😊",t(67,55),"whatsapp","Tijana Nikolić","https://randomuser.me/api/portraits/women/42.jpg"),
+            ms("bs_wa_tijana","assistant","Uživaj! 🙏 Kad završiš Novu Zemlju, preporučujem i **Praktikovati moć sadašnjeg trenutka** — Tolleova vodilica za svakodnevni rad sa svešću 📚",t(67,53),"whatsapp","Tijana Nikolić","https://randomuser.me/api/portraits/women/42.jpg"),
         ]},
     ]
     const allMessages: any[] = []
@@ -547,18 +632,33 @@ export function SocialChatbotModule({ clientId, selectedBrandIds, clientName, ni
         ? (NICHE_CONFIGS[nicheKey]?.terminology.plural ?? 'Korisnici')
         : isCatalogProducts ? 'Zainteresovani' : 'Prijave'
 
-    const _baseUpiti = DEMO_MODE ? 524 : conversations.length
+    // Resolve per-brand demo stats: sum across all active brandIds, fall back to clientId
+    const _demoStats = (() => {
+        const acc = { upiti: 0, konverzije: 0, poruke: 0 }
+        let found = false
+        for (const bid of brandIds) {
+            const s = BRAND_DEMO_STATS[bid]
+            if (s) { acc.upiti += s.upiti; acc.konverzije += s.konverzije; acc.poruke += s.poruke; found = true }
+        }
+        if (!found) {
+            const s = BRAND_DEMO_STATS[clientId]
+            if (s) { acc.upiti = s.upiti; acc.konverzije = s.konverzije; acc.poruke = s.poruke; found = true }
+        }
+        return found ? acc : null
+    })()
+
+    const _baseUpiti = _demoStats ? _demoStats.upiti : (DEMO_MODE ? 524 : conversations.length)
     const upitiPeriod = msgPeriod === "danas" ? Math.round(_baseUpiti / 30) : msgPeriod === "sedmica" ? Math.round(_baseUpiti / 4 * 1.2) : _baseUpiti
 
-    const _baseKonverzije = DEMO_MODE ? 142 : allMessages.filter(m =>
+    const _baseKonverzije = _demoStats ? _demoStats.konverzije : (DEMO_MODE ? 142 : allMessages.filter(m =>
         m.role === "user" && (isCatalogProducts
             ? ["cena", "kupim", "narudžbin", "naruč", "dostav", "plaćan"].some(kw => m.message?.toLowerCase().includes(kw))
             : ["prijavim", "prijaviti", "prijavl", "zainteresova"].some(kw => m.message?.toLowerCase().includes(kw))
         )
-    ).length
+    ).length)
     const prijavePeriod = msgPeriod === "danas" ? Math.round(_baseKonverzije / 30) : msgPeriod === "sedmica" ? Math.round(_baseKonverzije / 4 * 1.5) : _baseKonverzije
 
-    const _baseMsgs = DEMO_MODE ? 1340 : allMessages.filter(m => m.role !== "system").length
+    const _baseMsgs = _demoStats ? _demoStats.poruke : (DEMO_MODE ? 1340 : allMessages.filter(m => m.role !== "system").length)
     const msgCount = msgPeriod === "danas" ? Math.round(_baseMsgs / 30 * 1.2) : msgPeriod === "sedmica" ? Math.round(_baseMsgs / 4 * 1.1) : _baseMsgs
 
     const intervencije = conversations.filter((c: any) => c.humanNeeded).length

@@ -3,12 +3,18 @@
 import { useState, useEffect, useCallback } from "react"
 import { createClient } from "@/lib/supabase/client"
 import {
-  CalendarDays, Clock, AlertTriangle, CheckCircle, XCircle,
-  ChevronLeft, ChevronRight, Sparkles, UserX
+  CalendarDays, Clock, CheckCircle, XCircle,
+  ChevronLeft, ChevronRight, Sparkles, UserX, Plus, Pencil, Trash2
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { NicheKey, NICHE_CONFIGS } from "@/lib/niche-config"
-import { updateAppointmentStatus } from "@/lib/supabase/queries"
+import {
+  updateAppointmentStatus,
+  insertAppointment,
+  updateAppointmentFull,
+  deleteAppointment,
+  AppointmentInput,
+} from "@/lib/supabase/queries"
 
 interface Appointment {
   id: string
@@ -25,6 +31,14 @@ interface Appointment {
   urgency_reason: string | null
   source: string | null
   notes: string | null
+}
+
+interface CatalogService {
+  id: string
+  name: string
+  color_hex: string
+  duration_minutes: number | null
+  is_active: boolean
 }
 
 const STATUS_LABELS: Record<string, string> = {
@@ -55,6 +69,62 @@ function isSameDay(a: Date, b: Date) {
   return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate()
 }
 
+// Greedy interval scheduling: assign non-overlapping column indices so appointments
+// in the same time slot are rendered side-by-side instead of stacked on top of each other.
+function computeApptLayout(appts: Appointment[]): Map<string, { col: number; totalCols: number }> {
+  const layout = new Map<string, { col: number; totalCols: number }>()
+  if (appts.length === 0) return layout
+
+  const sorted = [...appts].sort((a, b) => new Date(a.starts_at).getTime() - new Date(b.starts_at).getTime())
+
+  // Build overlapping clusters
+  const clusters: Appointment[][] = []
+  let current: Appointment[] = []
+  let clusterEnd = new Date(0)
+
+  for (const appt of sorted) {
+    const start = new Date(appt.starts_at)
+    const end = new Date(appt.ends_at)
+    if (start < clusterEnd) {
+      current.push(appt)
+      if (end > clusterEnd) clusterEnd = end
+    } else {
+      if (current.length) clusters.push(current)
+      current = [appt]
+      clusterEnd = end
+    }
+  }
+  if (current.length) clusters.push(current)
+
+  for (const cluster of clusters) {
+    const cols: Appointment[][] = []
+    for (const appt of cluster) {
+      const start = new Date(appt.starts_at)
+      let placed = false
+      for (let c = 0; c < cols.length; c++) {
+        const last = cols[c][cols[c].length - 1]
+        if (new Date(last.ends_at) <= start) {
+          cols[c].push(appt)
+          layout.set(appt.id, { col: c, totalCols: 0 })
+          placed = true
+          break
+        }
+      }
+      if (!placed) {
+        layout.set(appt.id, { col: cols.length, totalCols: 0 })
+        cols.push([appt])
+      }
+    }
+    const total = cols.length
+    for (const appt of cluster) {
+      const e = layout.get(appt.id)!
+      layout.set(appt.id, { col: e.col, totalCols: total })
+    }
+  }
+
+  return layout
+}
+
 interface Props {
   clientId: string
   nicheKey?: NicheKey
@@ -62,6 +132,7 @@ interface Props {
 
 export function CalendarModule({ clientId, nicheKey = 'generic' }: Props) {
   const [appointments, setAppointments] = useState<Appointment[]>([])
+  const [services, setServices] = useState<CatalogService[]>([])
   const [loading, setLoading] = useState(true)
   const [view, setView] = useState<'week' | 'month'>('week')
   const [weekStart, setWeekStart] = useState<Date>(() => {
@@ -73,6 +144,9 @@ export function CalendarModule({ clientId, nicheKey = 'generic' }: Props) {
     return d
   })
   const [selectedAppt, setSelectedAppt] = useState<Appointment | null>(null)
+  const [showForm, setShowForm] = useState(false)
+  const [formAppt, setFormAppt] = useState<Appointment | null>(null)
+  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
   const supabase = createClient()
 
   const config = NICHE_CONFIGS[nicheKey] ?? NICHE_CONFIGS.generic
@@ -96,7 +170,18 @@ export function CalendarModule({ clientId, nicheKey = 'generic' }: Props) {
     setLoading(false)
   }, [clientId])
 
+  const fetchServices = useCallback(async () => {
+    const { data } = await supabase
+      .from('services_catalog')
+      .select('id, name, color_hex, duration_minutes, is_active')
+      .eq('client_id', clientId)
+      .eq('is_active', true)
+      .order('sort_order', { ascending: true })
+    setServices((data as CatalogService[]) ?? [])
+  }, [clientId])
+
   useEffect(() => { fetchAppointments() }, [fetchAppointments])
+  useEffect(() => { fetchServices() }, [fetchServices])
 
   const handleApptStatus = async (id: string, newStatus: Appointment['status']) => {
     setAppointments(prev => prev.map(a => a.id === id ? { ...a, status: newStatus } : a))
@@ -108,6 +193,31 @@ export function CalendarModule({ clientId, nicheKey = 'generic' }: Props) {
     }
   }
 
+  const handleFormSave = async (input: AppointmentInput, id?: string) => {
+    if (id) {
+      const { client_id: _cid, ...rest } = input
+      await updateAppointmentFull(id, rest)
+      setAppointments(prev => prev.map(a => a.id === id ? { ...a, ...rest } : a))
+      if (selectedAppt?.id === id) setSelectedAppt(prev => prev ? { ...prev, ...rest } as Appointment : null)
+    } else {
+      const newAppt = await insertAppointment(input)
+      if (newAppt) setAppointments(prev => [...prev, newAppt as Appointment])
+    }
+    setShowForm(false)
+    setFormAppt(null)
+  }
+
+  const handleDeleteConfirm = async (id: string) => {
+    try {
+      await deleteAppointment(id)
+      setAppointments(prev => prev.filter(a => a.id !== id))
+      setSelectedAppt(null)
+    } catch {
+      // silently ignore
+    }
+    setDeleteConfirm(null)
+  }
+
   useEffect(() => {
     const channel = supabase
       .channel(`appointments:${clientId}`)
@@ -116,7 +226,6 @@ export function CalendarModule({ clientId, nicheKey = 'generic' }: Props) {
     return () => { channel.unsubscribe() }
   }, [clientId, fetchAppointments])
 
-  // Week days
   const weekDays = Array.from({ length: 7 }, (_, i) => {
     const d = new Date(weekStart)
     d.setDate(d.getDate() + i)
@@ -128,7 +237,6 @@ export function CalendarModule({ clientId, nicheKey = 'generic' }: Props) {
 
   const apptsByDay = (day: Date) => appointments.filter(a => isSameDay(new Date(a.starts_at), day))
 
-  // Metrics
   const now = new Date()
   const next24h = appointments.filter(a => {
     const s = new Date(a.starts_at)
@@ -150,24 +258,32 @@ export function CalendarModule({ clientId, nicheKey = 'generic' }: Props) {
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-3 flex-wrap">
         <div>
           <h2 className="text-xl font-outfit font-semibold text-white">{config.calendarLabel}</h2>
           <p className="text-sm text-slate-400 mt-0.5">Pregled zakazanih termina</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <button
-            onClick={() => setView('week')}
-            className={cn('px-3 py-1.5 rounded-lg text-sm transition-colors', view === 'week' ? 'bg-white/15 text-white' : 'text-slate-400 hover:text-white')}
+            onClick={() => { setFormAppt(null); setShowForm(true) }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/15 text-emerald-400 border border-emerald-500/20 text-sm font-medium hover:bg-emerald-500/25 transition-colors"
           >
-            Nedelja
+            <Plus className="w-4 h-4" /> Dodaj termin
           </button>
-          <button
-            onClick={() => setView('month')}
-            className={cn('px-3 py-1.5 rounded-lg text-sm transition-colors', view === 'month' ? 'bg-white/15 text-white' : 'text-slate-400 hover:text-white')}
-          >
-            Mesec
-          </button>
+          <div className="flex items-center gap-1 bg-white/5 rounded-lg p-0.5">
+            <button
+              onClick={() => setView('week')}
+              className={cn('px-3 py-1.5 rounded-md text-sm transition-colors', view === 'week' ? 'bg-white/15 text-white' : 'text-slate-400 hover:text-white')}
+            >
+              Nedelja
+            </button>
+            <button
+              onClick={() => setView('month')}
+              className={cn('px-3 py-1.5 rounded-md text-sm transition-colors', view === 'month' ? 'bg-white/15 text-white' : 'text-slate-400 hover:text-white')}
+            >
+              Mesec
+            </button>
+          </div>
         </div>
       </div>
 
@@ -241,32 +357,45 @@ export function CalendarModule({ clientId, nicheKey = 'generic' }: Props) {
                         {HOURS.map(h => (
                           <div key={h} className="h-14 border-t border-white/[0.04]" />
                         ))}
-                        {/* Appointments — positioned by time */}
-                        {dayAppts.map(a => {
-                          const start = new Date(a.starts_at)
-                          const end = new Date(a.ends_at)
-                          const startH = start.getHours() + start.getMinutes() / 60
-                          const endH = end.getHours() + end.getMinutes() / 60
-                          const top = Math.max(0, (startH - 8) * 56)
-                          const height = Math.max(24, (endH - startH) * 56)
-                          return (
-                            <button
-                              key={a.id}
-                              onClick={() => setSelectedAppt(a)}
-                              className={cn(
-                                'absolute left-0.5 right-0.5 rounded-md border overflow-hidden transition-all hover:z-10 hover:scale-[1.03] text-left px-1.5 py-1',
-                                STATUS_COLORS[a.status]
-                              )}
-                              style={{ top, height, borderLeftColor: a.service_color, borderLeftWidth: 3 }}
-                            >
-                              <p className="text-[10px] font-medium text-white truncate leading-tight">{a.customer_name}</p>
-                              {height > 32 && <p className="text-[9px] text-slate-400 leading-tight">{formatTime(a.starts_at)}</p>}
-                              {height > 48 && a.urgency === 'high' && (
-                                <Sparkles className="w-2.5 h-2.5 text-amber-400 mt-0.5" />
-                              )}
-                            </button>
-                          )
-                        })}
+                        {/* Appointments — positioned by time, side-by-side when overlapping */}
+                        {(() => {
+                          const layoutMap = computeApptLayout(dayAppts)
+                          return dayAppts.map(a => {
+                            const start = new Date(a.starts_at)
+                            const end = new Date(a.ends_at)
+                            const startH = start.getHours() + start.getMinutes() / 60
+                            const endH = end.getHours() + end.getMinutes() / 60
+                            const top = Math.max(0, (startH - 8) * 56)
+                            const height = Math.max(24, (endH - startH) * 56)
+                            const { col, totalCols } = layoutMap.get(a.id) ?? { col: 0, totalCols: 1 }
+                            const leftPct = (col / totalCols) * 100
+                            const widthPct = (1 / totalCols) * 100
+                            return (
+                              <button
+                                key={a.id}
+                                onClick={() => { setSelectedAppt(a); setDeleteConfirm(null) }}
+                                className={cn(
+                                  'absolute rounded-md border overflow-hidden transition-all hover:z-10 hover:brightness-110 text-left px-1.5 py-1',
+                                  STATUS_COLORS[a.status]
+                                )}
+                                style={{
+                                  top,
+                                  height,
+                                  left: `calc(${leftPct}% + 1px)`,
+                                  width: `calc(${widthPct}% - 2px)`,
+                                  borderLeftColor: a.service_color,
+                                  borderLeftWidth: 3,
+                                }}
+                              >
+                                <p className="text-[10px] font-medium text-white truncate leading-tight">{a.customer_name}</p>
+                                {height > 32 && <p className="text-[9px] text-slate-400 leading-tight">{formatTime(a.starts_at)}</p>}
+                                {height > 48 && a.urgency === 'high' && (
+                                  <Sparkles className="w-2.5 h-2.5 text-amber-400 mt-0.5" />
+                                )}
+                              </button>
+                            )
+                          })
+                        })()}
                       </div>
                     )
                   })}
@@ -274,10 +403,9 @@ export function CalendarModule({ clientId, nicheKey = 'generic' }: Props) {
               </div>
             </div>
           ) : (
-            /* Month view — compact dot grid */
             <MonthView
               appointments={appointments}
-              onSelect={setSelectedAppt}
+              onSelect={a => { setSelectedAppt(a); setDeleteConfirm(null) }}
             />
           )}
         </div>
@@ -295,7 +423,7 @@ export function CalendarModule({ clientId, nicheKey = 'generic' }: Props) {
           ) : next24h.map(a => (
             <button
               key={a.id}
-              onClick={() => setSelectedAppt(a)}
+              onClick={() => { setSelectedAppt(a); setDeleteConfirm(null) }}
               className={cn(
                 'w-full text-left rounded-xl border p-3 transition-all hover:scale-[1.01]',
                 a.status === 'cancelled' ? 'border-red-500/30 bg-red-500/5 line-through opacity-60' : 'border-white/10 bg-white/[0.04]'
@@ -339,19 +467,25 @@ export function CalendarModule({ clientId, nicheKey = 'generic' }: Props) {
       {/* Detail drawer */}
       {selectedAppt && (
         <div
-          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
-          onClick={() => setSelectedAppt(null)}
+          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
+          onClick={() => { setSelectedAppt(null); setDeleteConfirm(null) }}
         >
           <div
-            className="glass-card rounded-2xl p-6 w-full max-w-md space-y-4"
+            className="w-full max-w-md rounded-2xl overflow-hidden shadow-2xl shadow-black/90 border border-white/[0.08]"
             onClick={e => e.stopPropagation()}
           >
+            {/* Service color accent bar */}
+            <div className="h-1" style={{ backgroundColor: selectedAppt.service_color ?? '#10b981' }} />
+            <div className="bg-[#0a0f1a] p-6 space-y-4">
             <div className="flex items-start justify-between">
-              <div>
-                <h3 className="text-lg font-semibold text-white">{selectedAppt.customer_name}</h3>
-                <p className="text-sm text-slate-400">{selectedAppt.service_name}</p>
+              <div className="min-w-0 flex-1 pr-3">
+                <h3 className="text-lg font-semibold text-white truncate">{selectedAppt.customer_name}</h3>
+                <div className="flex items-center gap-2 mt-0.5">
+                  <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: selectedAppt.service_color ?? '#10b981' }} />
+                  <p className="text-sm text-slate-400 truncate">{selectedAppt.service_name}</p>
+                </div>
               </div>
-              <span className={cn('px-2.5 py-1 rounded-full text-xs font-medium', STATUS_COLORS[selectedAppt.status])}>
+              <span className={cn('shrink-0 px-2.5 py-1 rounded-full text-xs font-medium border', STATUS_COLORS[selectedAppt.status])}>
                 {STATUS_LABELS[selectedAppt.status]}
               </span>
             </div>
@@ -425,18 +559,347 @@ export function CalendarModule({ clientId, nicheKey = 'generic' }: Props) {
               )}
             </div>
 
+            {/* Edit / Delete row */}
+            <div className="flex gap-2 pt-1 border-t border-white/[0.06]">
+              <button
+                onClick={() => { setFormAppt(selectedAppt); setShowForm(true); setSelectedAppt(null) }}
+                className="flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 text-slate-300 border border-white/10 text-xs font-medium hover:bg-white/10 transition-colors"
+              >
+                <Pencil className="w-3.5 h-3.5" /> Uredi
+              </button>
+              {deleteConfirm === selectedAppt.id ? (
+                <div className="flex-1 flex gap-1.5">
+                  <button
+                    onClick={() => handleDeleteConfirm(selectedAppt.id)}
+                    className="flex-1 py-1.5 rounded-lg bg-red-500/20 text-red-400 border border-red-500/30 text-xs font-medium hover:bg-red-500/30 transition-colors"
+                  >
+                    Potvrdi brisanje
+                  </button>
+                  <button
+                    onClick={() => setDeleteConfirm(null)}
+                    className="px-3 py-1.5 rounded-lg bg-white/5 text-slate-400 text-xs hover:bg-white/10 transition-colors"
+                  >
+                    Ne
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => setDeleteConfirm(selectedAppt.id)}
+                  className="flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-500/10 text-red-400 border border-red-500/20 text-xs font-medium hover:bg-red-500/20 transition-colors"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
+
             <button
-              onClick={() => setSelectedAppt(null)}
-              className="w-full py-2 rounded-xl bg-white/10 text-white text-sm hover:bg-white/15 transition-colors"
+              onClick={() => { setSelectedAppt(null); setDeleteConfirm(null) }}
+              className="w-full py-2 rounded-xl bg-white/[0.07] text-slate-300 text-sm hover:bg-white/[0.12] transition-colors"
             >
               Zatvori
             </button>
+            </div>
           </div>
         </div>
+      )}
+
+      {/* Appointment form modal */}
+      {showForm && (
+        <AppointmentFormModal
+          clientId={clientId}
+          services={services}
+          initial={formAppt}
+          onClose={() => { setShowForm(false); setFormAppt(null) }}
+          onSave={handleFormSave}
+        />
       )}
     </div>
   )
 }
+
+// ── Appointment Form Modal ──────────────────────────────────────────────────
+
+interface FormValues {
+  customer_name: string
+  customer_phone: string
+  service_id: string
+  service_name: string
+  service_color: string
+  date: string
+  time: string
+  duration: string
+  source: string
+  notes: string
+}
+
+function AppointmentFormModal({
+  clientId,
+  services,
+  initial,
+  onClose,
+  onSave,
+}: {
+  clientId: string
+  services: CatalogService[]
+  initial?: Appointment | null
+  onClose: () => void
+  onSave: (input: AppointmentInput, id?: string) => Promise<void>
+}) {
+  const startsAt = initial ? new Date(initial.starts_at) : null
+  const endsAt = initial ? new Date(initial.ends_at) : null
+  const durationMins = startsAt && endsAt
+    ? Math.round((endsAt.getTime() - startsAt.getTime()) / 60000)
+    : 60
+
+  const pad = (n: number) => String(n).padStart(2, '0')
+  const todayStr = new Date().toISOString().slice(0, 10)
+
+  const [values, setValues] = useState<FormValues>({
+    customer_name: initial?.customer_name ?? '',
+    customer_phone: initial?.customer_phone ?? '',
+    service_id: initial?.service_id ?? '',
+    service_name: initial?.service_name ?? '',
+    service_color: initial?.service_color ?? '#6366f1',
+    date: startsAt ? startsAt.toISOString().slice(0, 10) : todayStr,
+    time: startsAt ? `${pad(startsAt.getHours())}:${pad(startsAt.getMinutes())}` : '10:00',
+    duration: String(durationMins),
+    source: initial?.source ?? '',
+    notes: initial?.notes ?? '',
+  })
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const set = (k: keyof FormValues, v: string) => setValues(prev => ({ ...prev, [k]: v }))
+
+  const handleServiceSelect = (serviceId: string) => {
+    if (serviceId === '__custom') {
+      setValues(prev => ({ ...prev, service_id: '__custom', service_name: '', service_color: '#6366f1' }))
+      return
+    }
+    const s = services.find(s => s.id === serviceId)
+    if (!s) {
+      setValues(prev => ({ ...prev, service_id: '' }))
+      return
+    }
+    setValues(prev => ({
+      ...prev,
+      service_id: s.id,
+      service_name: s.name,
+      service_color: s.color_hex,
+      duration: String(s.duration_minutes ?? prev.duration),
+    }))
+  }
+
+  const handleSubmit = async () => {
+    if (!values.customer_name.trim()) { setError('Ime pacijenta je obavezno'); return }
+    const effectiveServiceName = values.service_id === '__custom' ? values.service_name : values.service_name
+    if (!effectiveServiceName.trim() && services.length > 0 && !values.service_id) {
+      setError('Izaberite uslugu'); return
+    }
+
+    setError(null)
+    setSaving(true)
+
+    try {
+      const [y, m, d] = values.date.split('-').map(Number)
+      const [h, min] = values.time.split(':').map(Number)
+      const starts = new Date(y, m - 1, d, h, min, 0)
+      const ends = new Date(starts.getTime() + (parseInt(values.duration) || 60) * 60000)
+
+      const input: AppointmentInput = {
+        client_id: clientId,
+        customer_name: values.customer_name.trim(),
+        customer_phone: values.customer_phone.trim() || undefined,
+        service_id: (values.service_id && values.service_id !== '__custom') ? values.service_id : null,
+        service_name: values.service_name.trim() || 'Termin',
+        service_color: values.service_color,
+        starts_at: starts.toISOString(),
+        ends_at: ends.toISOString(),
+        source: values.source || undefined,
+        notes: values.notes.trim() || undefined,
+      }
+
+      await onSave(input, initial?.id)
+    } catch {
+      setError('Greška pri čuvanju. Pokušajte ponovo.')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const SOURCES = ['Poziv', 'WhatsApp', 'Instagram', 'Facebook', 'Aplikacija', 'Lično']
+  const inputCls = "w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm text-white placeholder-slate-600 focus:border-emerald-500/40 focus:outline-none"
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
+      onClick={onClose}
+    >
+      <div
+        className="bg-[#0a0f1a] border border-white/[0.08] rounded-2xl w-full max-w-md shadow-2xl shadow-black/90 max-h-[90vh] overflow-y-auto"
+        onClick={e => e.stopPropagation()}
+      >
+        {/* Header accent */}
+        <div className="h-0.5 bg-gradient-to-r from-emerald-500/60 via-emerald-400/40 to-transparent" />
+        <div className="p-6 space-y-4">
+        <div className="flex items-center justify-between">
+          <h3 className="text-lg font-semibold text-white">{initial ? 'Uredi termin' : 'Novi termin'}</h3>
+          <button onClick={onClose} className="p-1.5 hover:bg-white/10 rounded-lg transition-colors text-slate-400 hover:text-white">
+            ✕
+          </button>
+        </div>
+
+        <div className="space-y-3">
+          {/* Customer name */}
+          <div>
+            <label className="text-xs text-slate-500 mb-1 block">Ime i prezime *</label>
+            <input
+              type="text"
+              value={values.customer_name}
+              onChange={e => set('customer_name', e.target.value)}
+              placeholder="Ime pacijenta"
+              className={inputCls}
+              autoFocus
+            />
+          </div>
+
+          {/* Phone */}
+          <div>
+            <label className="text-xs text-slate-500 mb-1 block">Telefon</label>
+            <input
+              type="tel"
+              value={values.customer_phone}
+              onChange={e => set('customer_phone', e.target.value)}
+              placeholder="+381 ..."
+              className={inputCls}
+            />
+          </div>
+
+          {/* Service */}
+          {services.length > 0 ? (
+            <div>
+              <label className="text-xs text-slate-500 mb-1 block">Usluga *</label>
+              <select
+                value={values.service_id}
+                onChange={e => handleServiceSelect(e.target.value)}
+                className={cn(inputCls, "appearance-none cursor-pointer")}
+                style={{ backgroundImage: 'none' }}
+              >
+                <option value="">Izaberite uslugu...</option>
+                {services.map(s => (
+                  <option key={s.id} value={s.id}>{s.name}</option>
+                ))}
+                <option value="__custom">Drugo (unesi ručno)</option>
+              </select>
+              {values.service_id === '__custom' && (
+                <input
+                  type="text"
+                  value={values.service_name}
+                  onChange={e => set('service_name', e.target.value)}
+                  placeholder="Naziv usluge"
+                  className={cn(inputCls, "mt-2")}
+                />
+              )}
+            </div>
+          ) : (
+            <div>
+              <label className="text-xs text-slate-500 mb-1 block">Usluga / razlog posete</label>
+              <input
+                type="text"
+                value={values.service_name}
+                onChange={e => set('service_name', e.target.value)}
+                placeholder="Npr. Pregled, Konsultacija..."
+                className={inputCls}
+              />
+            </div>
+          )}
+
+          {/* Date + Time */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs text-slate-500 mb-1 block">Datum *</label>
+              <input
+                type="date"
+                value={values.date}
+                onChange={e => set('date', e.target.value)}
+                className={inputCls}
+              />
+            </div>
+            <div>
+              <label className="text-xs text-slate-500 mb-1 block">Vreme *</label>
+              <input
+                type="time"
+                value={values.time}
+                onChange={e => set('time', e.target.value)}
+                className={inputCls}
+              />
+            </div>
+          </div>
+
+          {/* Duration */}
+          <div>
+            <label className="text-xs text-slate-500 mb-1 block">Trajanje (minuta)</label>
+            <input
+              type="number"
+              value={values.duration}
+              onChange={e => set('duration', e.target.value)}
+              min="5"
+              step="5"
+              className={inputCls}
+            />
+          </div>
+
+          {/* Source */}
+          <div>
+            <label className="text-xs text-slate-500 mb-1 block">Izvor zakazivanja</label>
+            <select
+              value={values.source}
+              onChange={e => set('source', e.target.value)}
+              className={cn(inputCls, "appearance-none cursor-pointer")}
+              style={{ backgroundImage: 'none' }}
+            >
+              <option value="">—</option>
+              {SOURCES.map(s => <option key={s} value={s}>{s}</option>)}
+            </select>
+          </div>
+
+          {/* Notes */}
+          <div>
+            <label className="text-xs text-slate-500 mb-1 block">Napomena</label>
+            <textarea
+              value={values.notes}
+              onChange={e => set('notes', e.target.value)}
+              rows={2}
+              placeholder="Opciona napomena..."
+              className={cn(inputCls, "resize-none")}
+            />
+          </div>
+        </div>
+
+        {error && <p className="text-sm text-red-400 bg-red-500/10 rounded-lg px-3 py-2">{error}</p>}
+
+        <div className="flex gap-2 pt-1">
+          <button
+            onClick={onClose}
+            className="flex-1 py-2.5 rounded-xl bg-white/5 text-slate-300 text-sm hover:bg-white/10 transition-colors"
+          >
+            Otkaži
+          </button>
+          <button
+            onClick={handleSubmit}
+            disabled={saving}
+            className="flex-1 py-2.5 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-sm font-medium hover:bg-emerald-500/30 transition-colors disabled:opacity-50"
+          >
+            {saving ? 'Čuvanje...' : (initial ? 'Sačuvaj izmene' : 'Zakaži termin')}
+          </button>
+        </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ── Month View ──────────────────────────────────────────────────────────────
 
 function MonthView({ appointments, onSelect }: { appointments: Appointment[]; onSelect: (a: Appointment) => void }) {
   const [month, setMonth] = useState(() => { const d = new Date(); d.setDate(1); d.setHours(0,0,0,0); return d })

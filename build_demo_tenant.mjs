@@ -218,7 +218,7 @@ ${products || '(infer from industry)'}
 
 ${businessIntel.business_summary ? `Business: ${businessIntel.business_summary}` : ''}
 
-Generate 6 conversations. Return ONLY raw JSON:
+Generate 18 conversations spread across the last 30 days. Return ONLY raw JSON:
 {
   "conversations": [
     {
@@ -234,16 +234,18 @@ Generate 6 conversations. Return ONLY raw JSON:
 }
 
 REQUIREMENTS:
-1. At least 1 conversation must use platform "WhatsApp"
-2. At least 1 must use "Instagram", 1 "Facebook", 1 "Web"
-3. Conversations: 3-7 messages each
+1. At least 4 conversations must use platform "WhatsApp"
+2. At least 6 must use "Instagram", 2 "Facebook", 2 "Web"
+3. Conversations: 2-6 messages each (vary the length — some short, some longer)
 4. The LAST message in exactly ONE conversation must be: { "role": "system", "text": "[HUMAN_NEEDED]" }
    (This shows human escalation — customer is upset, asks for manager, or has a complex issue)
 5. ALL text in Serbian (Latin script). Names: common Serbian first+last names.
 6. Reference REAL products/services from the list above.
-7. Include at least 1 returning customer (references previous purchase).
+7. Include at least 3 returning customers (reference a previous visit/purchase).
 8. AI responses are specific, helpful, reference real products/prices.
-9. One conversation should be a complaint or difficult situation.`
+9. Include at least 2 complaints or difficult situations (urgent, frustrated customer tone).
+10. Include at least 2 short conversations (just 2 messages — customer asks quick question, AI answers).
+11. Vary the conversation types: price inquiry, booking request, service question, follow-up, complaint, gift idea, group inquiry, returning client.`
 
   const resp = await openai.chat.completions.create({
     model: OPENAI_MODEL,
@@ -409,7 +411,7 @@ ALL text in Serbian.`
 function validateConversations(conversations, nicheConfig) {
   const errors = []
 
-  if (conversations.length < 4) errors.push('Too few conversations (need ≥4)')
+  if (conversations.length < 8) errors.push('Too few conversations (need ≥8)')
 
   const hasHumanNeeded = conversations.some(c =>
     (c.messages || []).some(m => m.text === '[HUMAN_NEEDED]')
@@ -526,12 +528,18 @@ function pickPic(name, idx) {
 
 const VALID_PLATFORMS = new Set(['instagram', 'facebook', 'website', 'whatsapp'])
 
+// Distribute conversations across 30 days — weighted toward recent (more activity = more convincing demo)
+const CONV_SPREAD_HOURS = [
+  1, 4, 11, 20, 32, 47, 66, 90, 120, 156,
+  200, 252, 312, 380, 456, 528, 600, 648, 696, 720,
+]
+
 async function seedRazgovori(sb, clientId, conversations) {
   const msgs = []
   conversations.forEach((conv, convIdx) => {
     const convId   = `demo_${clientId.slice(0, 8)}_${conv.id || convIdx + 1}`
     const pic      = pickPic(conv.customer_name, convIdx)
-    const baseH    = (convIdx + 1) * 9 + (convIdx % 3) * 7
+    const baseH    = CONV_SPREAD_HOURS[convIdx] ?? (720 + convIdx * 24)
     const platform = VALID_PLATFORMS.has((conv.platform || '').toLowerCase())
       ? conv.platform.toLowerCase() : 'instagram'
 

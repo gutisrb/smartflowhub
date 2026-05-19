@@ -8,6 +8,7 @@ import {
   BarChart2,
   Kanban,
   CalendarDays,
+  Settings,
 } from "lucide-react"
 import { DashboardModule, ModuleKey } from "./types"
 
@@ -81,6 +82,13 @@ export const MODULE_REGISTRY: Record<ModuleKey, DashboardModule> = {
     icon: CalendarDays,
     category: 'fulfillment',
     description: 'Pregled zakazanih termina i rezervacija',
+  },
+  'settings': {
+    key: 'settings',
+    label: 'Podešavanja',
+    icon: Settings,
+    category: 'settings',
+    description: 'Podešavanja naloga, brendova i obaveštenja',
   },
 }
 
