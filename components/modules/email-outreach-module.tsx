@@ -61,6 +61,10 @@ interface Lead {
   bounced_at?: string
   niche_v2?: string
   subject_variant?: number
+  demo_tenant_url?: string
+  demo_tenant_email?: string
+  demo_tenant_password?: string
+  demo_built_at?: string
   intake_data?: {
     active_ads_count?: number
     enrichment?: {
@@ -190,6 +194,7 @@ export function EmailOutreachModule({
   }, [leads, statusFilter])
 
   const PIPELINE_STATUS_PILLS = [
+    { status: 'Demo Izgrađen', label: 'demo izgrađen' },
     { status: 'Follow Up', label: 'follow up' },
     { status: 'enriched',  label: 'enriched'  },
     { status: 'No Draft',  label: 'no draft'  },
@@ -678,6 +683,7 @@ export function EmailOutreachModule({
                                 <div className={cn(
                                   "w-2 h-2 rounded-full",
                                   lead.status === 'enriched' || lead.status === 'Enriched' ? 'bg-emerald shadow-[0_0_8px_rgba(16,185,129,0.5)]' :
+                                  lead.status === 'Demo Izgrađen' ? 'bg-cyan-400 shadow-[0_0_6px_rgba(34,211,238,0.5)]' :
                                   lead.status === 'Kontaktiran' ? 'bg-blue-400 shadow-[0_0_6px_rgba(96,165,250,0.4)]' :
                                   lead.status === 'Odgovorio' ? 'bg-purple-400 shadow-[0_0_6px_rgba(192,132,252,0.4)]' :
                                   lead.status === 'Meeting Booked' || lead.status === 'Zakazan Sastanak' ? 'bg-amber-400 shadow-[0_0_6px_rgba(251,191,36,0.4)]' :

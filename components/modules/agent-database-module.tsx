@@ -30,6 +30,8 @@ import {
     Check,
     X,
     Power,
+    LayoutGrid,
+    List,
 } from "lucide-react"
 import { getJobsByClientId, createJob, updateJob, deleteJob, getKnjigeByClientId, getProizvodiByClientId, getServicesCatalogByClientId, updateServiceAvailability, updateServicePrice } from "@/lib/supabase/queries"
 import { getBookStoreConfig, BOOK_STORE_CLIENTS } from "@/lib/brand-configs"
@@ -162,24 +164,9 @@ export function AgentDatabaseModule({
         setLoading(true)
         try {
             if (demoMode) {
-                const ecommerceNiches = ['ecommerce', 'fashion', 'furniture', 'auto', 'real-estate']
-                if (nicheKey && ecommerceNiches.includes(nicheKey)) {
-                    const raw = await getProizvodiByClientId(clientId)
-                    const mapped = (raw ?? []).map((p: any) => ({
-                        name: p.naziv,
-                        category: p.kategorija,
-                        description: p.opis,
-                        price_min: p.cena,
-                        price_max: p.cena,
-                        image_url: p.url,
-                        color_hex: '#6366f1',
-                        is_featured: false,
-                    }))
-                    setItems(mapped)
-                } else {
-                    const data = await getServicesCatalogByClientId(clientId)
-                    setItems(data)
-                }
+                // All auto-generated demo tenants seed into services_catalog regardless of niche
+                const data = await getServicesCatalogByClientId(clientId)
+                setItems(data)
                 setLoading(false)
                 return
             }
@@ -987,6 +974,14 @@ interface ServiceItem {
     sort_order: number
 }
 
+function getStockStatus(item: ServiceItem): { label: string; color: string } | null {
+    if (!item.is_active) return null
+    const hash = (item.id + item.name).split('').reduce((a, c) => a + c.charCodeAt(0), 0)
+    return hash % 5 === 0
+        ? { label: 'Malo na stanju', color: 'text-amber-400 bg-amber-400/10 border-amber-400/20' }
+        : { label: 'Na stanju', color: 'text-emerald-400 bg-emerald-400/10 border-emerald-400/20' }
+}
+
 function ServicesCatalogView({ items, loading, label, onRefresh }: { items: ServiceItem[]; loading: boolean; label: string; onRefresh: () => void }) {
     const [search, setSearch] = useState("")
     const [selectedCategory, setSelectedCategory] = useState<string>("all")
@@ -994,6 +989,8 @@ function ServicesCatalogView({ items, loading, label, onRefresh }: { items: Serv
     const [localItems, setLocalItems] = useState<ServiceItem[]>(items)
     const [savingId, setSavingId] = useState<string | null>(null)
     const [editingPrice, setEditingPrice] = useState<{ id: string; value: string } | null>(null)
+    const isProductNiche = label === 'Proizvodi' || label === 'Kolekcija' || label === 'Vozila' || label === 'Nekretnine' || label === 'Meni' || label === 'Paketi'
+    const [viewMode, setViewMode] = useState<'grid' | 'list'>(isProductNiche ? 'grid' : 'list')
 
     useEffect(() => { setLocalItems(items) }, [items])
 
@@ -1051,9 +1048,27 @@ function ServicesCatalogView({ items, loading, label, onRefresh }: { items: Serv
                     <h2 className="text-xl font-outfit font-semibold text-white">{label}</h2>
                     <p className="text-sm text-slate-400 mt-0.5">{localItems.length} stavki · {localItems.filter(i => i.is_active).length} dostupno</p>
                 </div>
-                <button onClick={onRefresh} className="p-2 rounded-lg glass-card hover:bg-white/10 transition-colors">
-                    <RefreshCw className="w-4 h-4 text-slate-400" />
-                </button>
+                <div className="flex items-center gap-2">
+                    <div className="flex items-center rounded-xl glass-card overflow-hidden">
+                        <button
+                            onClick={() => setViewMode('grid')}
+                            className={cn("p-2 transition-colors", viewMode === 'grid' ? "bg-white/15 text-white" : "text-slate-500 hover:text-slate-300")}
+                            title="Grid prikaz"
+                        >
+                            <LayoutGrid className="w-4 h-4" />
+                        </button>
+                        <button
+                            onClick={() => setViewMode('list')}
+                            className={cn("p-2 transition-colors", viewMode === 'list' ? "bg-white/15 text-white" : "text-slate-500 hover:text-slate-300")}
+                            title="Lista"
+                        >
+                            <List className="w-4 h-4" />
+                        </button>
+                    </div>
+                    <button onClick={onRefresh} className="p-2 rounded-lg glass-card hover:bg-white/10 transition-colors">
+                        <RefreshCw className="w-4 h-4 text-slate-400" />
+                    </button>
+                </div>
             </div>
 
             {/* Filters */}
@@ -1098,74 +1113,116 @@ function ServicesCatalogView({ items, loading, label, onRefresh }: { items: Serv
                     <Package className="w-10 h-10 text-slate-600 mx-auto mb-3" />
                     <p className="text-slate-400">{localItems.length === 0 ? "Katalog je prazan" : "Nema rezultata"}</p>
                 </div>
-            ) : hasImages ? (
-                /* Image grid for visual niches */
+            ) : viewMode === 'grid' ? (
+                /* Grid view — visual ecommerce style */
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                    {[...featured, ...rest].map(item => (
-                        <button
-                            key={item.id}
-                            onClick={() => setSelected(item)}
-                            className={cn("glass-card rounded-2xl overflow-hidden text-left hover:scale-[1.02] transition-all", !item.is_active && "opacity-50")}
-                        >
-                            {item.image_url ? (
-                                <img src={item.image_url} alt={item.name} className="w-full h-40 object-cover" />
-                            ) : (
-                                <div className="w-full h-40 flex items-center justify-center" style={{ backgroundColor: `${item.color_hex}20` }}>
-                                    <Package className="w-10 h-10" style={{ color: item.color_hex }} />
-                                </div>
-                            )}
-                            <div className="p-3">
-                                <div className="flex items-center gap-1.5 flex-wrap">
-                                    {item.is_featured && <span className="text-[10px] font-medium text-amber-400 uppercase tracking-wider">Istaknuto</span>}
-                                    {!item.is_active && <span className="text-[10px] font-medium text-red-400 uppercase tracking-wider">Nedostupno</span>}
-                                </div>
-                                <p className="text-sm font-medium text-white mt-0.5 line-clamp-2">{item.name}</p>
-                                {item.category && <p className="text-xs text-slate-500 mt-0.5">{item.category}</p>}
-                                {formatPrice(item.price_min, item.price_max) && (
-                                    <p className={cn("text-sm font-semibold mt-1", !item.is_active && "line-through text-slate-500")} style={item.is_active ? { color: item.color_hex } : {}}>{formatPrice(item.price_min, item.price_max)}</p>
+                    {[...featured, ...rest].map(item => {
+                        const stock = getStockStatus(item)
+                        return (
+                            <button
+                                key={item.id}
+                                onClick={() => setSelected(item)}
+                                className={cn(
+                                    "glass-card rounded-2xl overflow-hidden text-left group transition-all hover:ring-1 hover:ring-white/15",
+                                    !item.is_active && "opacity-50"
                                 )}
-                                {item.duration_minutes && (
-                                    <p className="text-xs text-slate-500 mt-0.5 flex items-center gap-1">
-                                        <Clock className="w-3 h-3" /> {item.duration_minutes} min
-                                    </p>
-                                )}
-                            </div>
-                        </button>
-                    ))}
+                            >
+                                <div className="relative">
+                                    {item.image_url ? (
+                                        <img src={item.image_url} alt={item.name} className="w-full h-44 object-cover group-hover:scale-[1.03] transition-transform duration-300" />
+                                    ) : (
+                                        <div className="w-full h-44 flex items-center justify-center" style={{ backgroundColor: `${item.color_hex}18` }}>
+                                            <Package className="w-10 h-10 opacity-30" style={{ color: item.color_hex }} />
+                                        </div>
+                                    )}
+                                    {item.is_featured && (
+                                        <span className="absolute top-2 left-2 text-[10px] font-bold text-amber-300 bg-black/60 backdrop-blur-sm px-2 py-0.5 rounded-full uppercase tracking-wider">
+                                            ★ Istaknuto
+                                        </span>
+                                    )}
+                                    {!item.is_active && (
+                                        <span className="absolute top-2 right-2 text-[10px] font-bold text-red-400 bg-black/60 backdrop-blur-sm px-2 py-0.5 rounded-full uppercase tracking-wider">
+                                            Nedostupno
+                                        </span>
+                                    )}
+                                </div>
+                                <div className="p-3.5">
+                                    {item.category && <p className="text-[10px] text-slate-500 uppercase tracking-widest mb-1">{item.category}</p>}
+                                    <p className="text-sm font-semibold text-white line-clamp-2 leading-snug">{item.name}</p>
+                                    {isProductNiche && item.description && (
+                                        <p className="text-[10px] text-slate-500 mt-1 line-clamp-1 leading-relaxed">{item.description}</p>
+                                    )}
+                                    <div className="flex items-center justify-between mt-2.5">
+                                        {formatPrice(item.price_min, item.price_max) ? (
+                                            <p className={cn("text-sm font-bold", !item.is_active && "line-through text-slate-500")} style={item.is_active ? { color: item.color_hex } : {}}>{formatPrice(item.price_min, item.price_max)}</p>
+                                        ) : <span />}
+                                        {isProductNiche ? (
+                                            stock && (
+                                                <span className={cn("text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full border", stock.color)}>
+                                                    {stock.label}
+                                                </span>
+                                            )
+                                        ) : (
+                                            item.duration_minutes && (
+                                                <p className="text-[10px] text-slate-500 flex items-center gap-1">
+                                                    <Clock className="w-3 h-3" /> {item.duration_minutes} min
+                                                </p>
+                                            )
+                                        )}
+                                    </div>
+                                </div>
+                            </button>
+                        )
+                    })}
                 </div>
             ) : (
-                /* List layout for service niches */
+                /* List layout */
                 <div className="glass-card rounded-2xl divide-y divide-white/[0.04]">
-                    {[...featured, ...rest].map(item => (
-                        <button
-                            key={item.id}
-                            onClick={() => setSelected(item)}
-                            className={cn("w-full text-left flex items-center gap-4 px-5 py-4 hover:bg-white/[0.03] transition-colors", !item.is_active && "opacity-50")}
-                        >
-                            <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: `${item.color_hex}20` }}>
-                                <Tag className="w-4 h-4" style={{ color: item.is_active ? item.color_hex : '#64748b' }} />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-2">
-                                    <p className={cn("text-sm font-medium", item.is_active ? "text-white" : "text-slate-500 line-through")}>{item.name}</p>
-                                    {item.is_featured && <span className="text-[10px] text-amber-400 bg-amber-400/10 px-1.5 py-0.5 rounded-full">Istaknuto</span>}
-                                    {!item.is_active && <span className="text-[10px] text-red-400 bg-red-400/10 px-1.5 py-0.5 rounded-full">Nedostupno</span>}
+                    {[...featured, ...rest].map(item => {
+                        const stock = getStockStatus(item)
+                        return (
+                            <button
+                                key={item.id}
+                                onClick={() => setSelected(item)}
+                                className={cn("w-full text-left flex items-center gap-4 px-5 py-4 hover:bg-white/[0.03] transition-colors", !item.is_active && "opacity-50")}
+                            >
+                                {item.image_url ? (
+                                    <img src={item.image_url} alt={item.name} className="w-14 h-14 rounded-xl object-cover shrink-0" />
+                                ) : (
+                                    <div className="w-14 h-14 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: `${item.color_hex}20` }}>
+                                        <Tag className="w-5 h-5" style={{ color: item.is_active ? item.color_hex : '#64748b' }} />
+                                    </div>
+                                )}
+                                <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-2 flex-wrap">
+                                        <p className={cn("text-sm font-semibold", item.is_active ? "text-white" : "text-slate-500 line-through")}>{item.name}</p>
+                                        {item.is_featured && <span className="text-[10px] text-amber-400 bg-amber-400/10 px-1.5 py-0.5 rounded-full">★ Istaknuto</span>}
+                                        {!item.is_active && <span className="text-[10px] text-red-400 bg-red-400/10 px-1.5 py-0.5 rounded-full">Nedostupno</span>}
+                                    </div>
+                                    {item.category && <p className="text-[10px] text-slate-500 uppercase tracking-widest mt-0.5">{item.category}</p>}
+                                    {item.description && <p className="text-xs text-slate-400 mt-1 line-clamp-2 leading-relaxed">{item.description}</p>}
                                 </div>
-                                {item.category && <p className="text-xs text-slate-500 mt-0.5">{item.category}</p>}
-                                {item.description && <p className="text-xs text-slate-400 mt-0.5 line-clamp-1">{item.description}</p>}
-                            </div>
-                            <div className="text-right shrink-0">
-                                {formatPrice(item.price_min, item.price_max) && (
-                                    <p className={cn("text-sm font-semibold", !item.is_active && "line-through text-slate-500")} style={item.is_active ? { color: item.color_hex } : {}}>{formatPrice(item.price_min, item.price_max)}</p>
-                                )}
-                                {item.duration_minutes && (
-                                    <p className="text-xs text-slate-500 flex items-center gap-1 justify-end mt-0.5">
-                                        <Clock className="w-3 h-3" /> {item.duration_minutes} min
-                                    </p>
-                                )}
-                            </div>
-                        </button>
-                    ))}
+                                <div className="text-right shrink-0 space-y-1.5 min-w-[90px]">
+                                    {formatPrice(item.price_min, item.price_max) && (
+                                        <p className={cn("text-sm font-bold", !item.is_active && "line-through text-slate-500")} style={item.is_active ? { color: item.color_hex } : {}}>{formatPrice(item.price_min, item.price_max)}</p>
+                                    )}
+                                    {isProductNiche ? (
+                                        stock && (
+                                            <span className={cn("text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full border block text-center", stock.color)}>
+                                                {stock.label}
+                                            </span>
+                                        )
+                                    ) : (
+                                        item.duration_minutes && (
+                                            <p className="text-xs text-slate-500 flex items-center gap-1 justify-end">
+                                                <Clock className="w-3 h-3" /> {item.duration_minutes} min
+                                            </p>
+                                        )
+                                    )}
+                                </div>
+                            </button>
+                        )
+                    })}
                 </div>
             )}
 

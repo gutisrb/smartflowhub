@@ -167,8 +167,8 @@ export const NICHE_CONFIGS: Record<NicheKey, NicheConfig> = {
     terminology: {
       singular: 'Kupac',
       plural: 'Kupci',
-      statusLabel: 'Status',
-      statuses: ['Novi', 'Zainteresovan', 'Zakazano', 'Završeno', 'Reklamacija', 'Intervencija'],
+      statusLabel: 'Status narudžbine',
+      statuses: ['Novi', 'Zainteresovan', 'Naručio', 'Isporučeno', 'Reklamacija', 'Intervencija'],
     },
   },
   fashion: {
@@ -187,7 +187,7 @@ export const NICHE_CONFIGS: Record<NicheKey, NicheConfig> = {
       singular: 'Kupac',
       plural: 'Kupci',
       statusLabel: 'Status narudžbine',
-      statuses: ['Novi', 'Zainteresovan', 'Zakazano', 'Završeno', 'Reklamacija', 'Intervencija'],
+      statuses: ['Novi', 'Zainteresovan', 'Naručio', 'Isporučeno', 'Reklamacija', 'Intervencija'],
     },
   },
   food: {

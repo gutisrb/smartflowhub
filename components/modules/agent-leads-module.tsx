@@ -295,10 +295,13 @@ export function AgentLeadsModule({ clientId, selectedBrandIds, terminology: prop
 
     const getKanal = (lead: any) => {
         const iz = (lead.izvor || '').toLowerCase()
-        if (iz.includes('instagram')) return { label: 'Instagram', color: '#e1306c', icon: 'instagram' as const }
-        if (iz.includes('whatsapp'))  return { label: 'WhatsApp',  color: '#25d366', icon: 'whatsapp' as const }
-        if (iz.includes('facebook'))  return { label: 'Facebook',  color: '#1877f2', icon: 'facebook' as const }
-        if (iz.includes('landing') || iz.includes('website')) return { label: 'Website', color: '#8b5cf6', icon: 'globe' as const }
+        if (iz.includes('instagram'))                          return { label: 'Instagram',  color: '#e1306c', icon: 'instagram' as const }
+        if (iz.includes('whatsapp'))                           return { label: 'WhatsApp',   color: '#25d366', icon: 'whatsapp' as const }
+        if (iz.includes('facebook'))                           return { label: 'Facebook',   color: '#1877f2', icon: 'facebook' as const }
+        if (iz.includes('landing') || iz.includes('website')) return { label: 'Website',    color: '#8b5cf6', icon: 'globe' as const }
+        if (iz.includes('preporuka') || iz.includes('referral') || iz.includes('prijatelj')) return { label: 'Preporuka', color: '#f59e0b', icon: 'globe' as const }
+        if (iz.includes('telefon') || iz.includes('phone') || iz.includes('poziv')) return { label: 'Telefon', color: '#06b6d4', icon: 'globe' as const }
+        if (iz.includes('web'))                                return { label: 'Web',        color: '#8b5cf6', icon: 'globe' as const }
         return { label: lead.izvor || 'Chatbot', color: '#71717a', icon: 'globe' as const }
     }
 

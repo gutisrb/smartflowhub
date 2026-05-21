@@ -53,27 +53,28 @@ const openai = new OpenAI({ apiKey: OPENAI_KEY })
 const NICHE_CONFIGS = JSON.parse(readFileSync(resolve(__dirname, 'lib/niche-config.json'), 'utf8'))
 
 const NICHE_KEYWORDS = [
-  { pattern: /dental|stomato|zub|ortodon|implant/i,                     key: 'dental' },
-  { pattern: /klinik|medic|hospital|ordinacij|doktor|lekari/i,          key: 'medical' },
-  { pattern: /fitnes|teretana|gym|wellness|sport|trening|pilates|yoga/i, key: 'fitness' },
-  { pattern: /estetik|lepot|kozmetik|beauty|spa|nokat|trepavic|frizeri/i,key: 'beauty' },
-  { pattern: /nekretnin|real.?estat|apartman|stan|agencija za nekret/i,  key: 'real-estate' },
-  { pattern: /restoran|kafana|pica|burger|catering|ugostiteljst/i,       key: 'food' },
-  { pattern: /turizm|putovanj|travel|hotel|smestaj|odmor|letovanj/i,     key: 'travel' },
-  { pattern: /namestaj|nameštaj|enterijer|interior|sofa|garnitur|krevet/i,key: 'furniture' },
-  { pattern: /moda|fashion|odjeć|odeca|majic|pantalo|haljin|odeća/i,     key: 'fashion' },
-  { pattern: /auto|vozil|automobil|motocikl|polovn/i,                    key: 'auto' },
-  { pattern: /prodavnic|webshop|shop|e.?commerc|online prodaj/i,         key: 'ecommerce' },
-  { pattern: /konsalting|konsultant|agencij|b2b|uslug|servis/i,          key: 'services' },
+  { pattern: /dental|stomato|zub|ortodon|implant/i,                               key: 'dental' },
+  { pattern: /klinik|medic|hospital|ordinacij|doktor|lekar(?!s)/i,                key: 'medical' },
+  { pattern: /fitnes|teretana|gym|sport(?!s?\s*shop)|trening|pilates|yoga/i,      key: 'fitness' },
+  // ecommerce/shop BEFORE beauty — "Beauty Store" should hit ecommerce, not beauty
+  { pattern: /prodavnic|webshop|online\s*shop|e.?commerc|online\s*prodaj|web\s*shop|shop\b|store\b|dodaj u korpu|add to cart|košaric|naruči|poruči online/i, key: 'ecommerce' },
+  { pattern: /estetik|lepot|kozmetik|beauty|nokat|trepavic|frizeri|salon|studio|tretman/i, key: 'beauty' },
+  { pattern: /klinika_wellness|wellness\s*centar|spa\s*centar/i,                  key: 'beauty' },
+  { pattern: /nekretnin|real.?estat|apartman|stan|agencija za nekret/i,           key: 'real-estate' },
+  { pattern: /restoran|kafana|pica|burger|catering|ugostiteljst/i,                key: 'food' },
+  { pattern: /turizm|putovanj|travel|hotel|smestaj|odmor|letovanj/i,              key: 'travel' },
+  { pattern: /namestaj|nameštaj|enterijer|interior|sofa|garnitur|krevet/i,        key: 'furniture' },
+  { pattern: /moda|fashion|odjeć|odeca|majic|pantalo|haljin|odeća/i,              key: 'fashion' },
+  { pattern: /auto|vozil|automobil|motocikl|polovn/i,                             key: 'auto' },
+  { pattern: /konsalting|konsultant|agencij|b2b|uslug|servis/i,                   key: 'services' },
 ]
 
 const KNOWN_NICHE_KEYS = new Set(['dental','medical','fitness','beauty','real-estate','food','travel','furniture','fashion','auto','ecommerce','services','generic'])
 
-function inferNicheKey(rawNiche, websiteSummary = '') {
-  // If the stored niche exactly matches a known key, trust it over website content
+function inferNicheKey(rawNiche, websiteSummary = '', companyName = '') {
   const trimmed = (rawNiche || '').trim().toLowerCase()
   if (KNOWN_NICHE_KEYS.has(trimmed)) return trimmed
-  const text = `${rawNiche || ''} ${websiteSummary || ''}`.toLowerCase()
+  const text = `${rawNiche || ''} ${companyName || ''} ${websiteSummary || ''}`.toLowerCase()
   if (!text.trim()) return 'generic'
   for (const { pattern, key } of NICHE_KEYWORDS) {
     if (pattern.test(text)) return key
@@ -269,6 +270,15 @@ async function generateDemoCrm(companyName, nicheKey, businessIntel, nicheConfig
   const singular = nicheConfig.terminology?.singular || 'Klijent'
   const products = (businessIntel.products_services || []).slice(0, 5).map(p => p.name).join(', ')
 
+  // Build a niche-appropriate status distribution hint
+  const isOrderNiche = ['ecommerce', 'furniture', 'fashion', 'supplements'].includes(nicheKey)
+  const isApptNiche  = ['dental', 'medical', 'beauty', 'fitness', 'services', 'wellness'].includes(nicheKey)
+  const distHint = isOrderNiche
+    ? '~25% Novi, ~20% Zainteresovan, ~30% Naručio, ~10% Isporučeno, ~10% Reklamacija, ~5% Intervencija'
+    : isApptNiche
+      ? '~25% Novi, ~20% Zainteresovan, ~25% Zakazano, ~15% Završeno, ~10% Reklamacija, ~5% Intervencija'
+      : '~30% Novi, ~25% Zainteresovan, ~20% ' + statuses[2] + ', ~15% ' + statuses[3] + ', ~8% Reklamacija, ~2% Intervencija'
+
   const prompt = `Generate CRM contacts for a Serbian business demo dashboard.
 
 Company: ${companyName}
@@ -283,23 +293,25 @@ Return ONLY raw JSON:
       "id_razgovora": "conv_1 or null",
       "full_name": "Serbian full name",
       "telefon": "+381 6x xxx xxxx",
-      "kategorija": "category/topic",
+      "kategorija": "category/topic relevant to this business",
       "proizvod": "specific product/service they inquired about",
-      "status": "one of: ${statuses.join('|')}",
-      "razlog": "reason for status (e.g. why complaint, why interested)",
-      "izvor": "Instagram|WhatsApp|Facebook|Web|Preporuka"
+      "status": "MUST be one of EXACTLY: ${statuses.join('|')}",
+      "razlog": "reason for Zainteresovan or Reklamacija status, null otherwise",
+      "izvor": "Instagram|WhatsApp|Facebook|Web|Preporuka|Telefon"
     }
   ]
 }
 
 Rules:
 - Generate 14-16 contacts
-- Status distribution: ~25% Novi, ~20% Zainteresovan, ~25% Zakazano, ~15% Završeno, ~10% Reklamacija, ~5% Intervencija
+- Status distribution: ${distHint}
+- CRITICAL: Use ONLY the exact status values listed above — no other values allowed
 - Link first 5-6 contacts to conversation IDs (others have null id_razgovora)
 - ALL names in Serbian. Telefon format: +381 6x xxx xxxx
 - Proizvod must reference real products/services from the business
 - Include 2 Reklamacija contacts with specific razlog
-- Include 1 Intervencija contact (urgent issue)`
+- Include 1 Intervencija contact (urgent issue)
+- razlog is useful for Zainteresovan (why they haven't ordered) and Reklamacija (what's wrong)`
 
   const resp = await openai.chat.completions.create({
     model: OPENAI_MODEL,
@@ -564,14 +576,19 @@ async function seedRazgovori(sb, clientId, conversations) {
   console.log(`  Inbox: ${msgs.length} messages across ${conversations.length} conversations`)
 }
 
-async function seedDemoCrm(sb, clientId, contacts, conversations) {
+async function seedDemoCrm(sb, clientId, contacts, conversations, nicheConfig) {
   // Build conv ID map so we can properly link
   const convIdMap = {}
   conversations.forEach((c, i) => {
     convIdMap[c.id || `conv_${i + 1}`] = `demo_${clientId.slice(0, 8)}_${c.id || i + 1}`
   })
 
-  const VALID_STATUSES = new Set(['Novi', 'Zainteresovan', 'Zakazano', 'Završeno', 'Reklamacija', 'Intervencija'])
+  // Accept statuses from the niche config — never hardcode appointment statuses for product niches
+  const nicheStatuses = nicheConfig?.terminology?.statuses || []
+  const VALID_STATUSES = new Set([
+    ...nicheStatuses,
+    'Novi', 'Zainteresovan', 'Reklamacija', 'Intervencija', // always valid
+  ])
   const VALID_IZVORI   = new Set(['Instagram', 'WhatsApp', 'Facebook', 'Web', 'Preporuka', 'Telefon'])
 
   const rows = contacts.map((c, i) => ({
@@ -714,7 +731,8 @@ async function buildDemoForLead(sb, lead) {
   }
 
   if (isDryRun) {
-    const nicheKey = inferNicheKey(lead.niche || lead.niche_v2, '')
+    const igCategory = lead.intake_data?.enrichment?.instagram_profile?.business_category || ''
+    const nicheKey = inferNicheKey(lead.niche || lead.niche_v2, igCategory, lead.company_name || '')
     console.log(`│  ✓ [DRY RUN] niche=${nicheKey}, modules=${NICHE_CONFIGS[nicheKey]?.modules?.join(',')}`)
     console.log(`└─────`)
     return { dryRun: true }
@@ -732,7 +750,8 @@ async function buildDemoForLead(sb, lead) {
 
   // Determine niche
   const rawNiche = lead.niche_v2 || lead.niche || ''
-  const nicheKey = inferNicheKey(rawNiche, websiteContent.slice(0, 500))
+  const igCategory = lead.intake_data?.enrichment?.instagram_profile?.business_category || ''
+  const nicheKey = inferNicheKey(rawNiche, `${igCategory} ${websiteContent.slice(0, 800)}`, lead.company_name || '')
   const nicheConfig = NICHE_CONFIGS[nicheKey] || NICHE_CONFIGS.generic
   console.log(`│  Niche: ${nicheKey} (from "${rawNiche || 'unknown'}")`)
 
@@ -806,7 +825,7 @@ async function buildDemoForLead(sb, lead) {
   // Step 5: Seed all tables
   console.log(`│  [5/5] Seeding data...`)
   await seedRazgovori(sb, clientId, conversations)
-  await seedDemoCrm(sb, clientId, crmContacts, conversations)
+  await seedDemoCrm(sb, clientId, crmContacts, conversations, nicheConfig)
   if (nicheConfig.useCatalog && services.length) await seedServicesCatalog(sb, clientId, services)
   if (nicheConfig.useCalendar && appointments.length) await seedAppointments(sb, clientId, appointments, services)
 
