@@ -24,6 +24,8 @@ import { ChatbotAnalyticsModule } from "@/components/modules/chatbot-analytics-m
 import { CalendarModule } from "@/components/modules/calendar-module"
 import { SettingsModule } from "@/components/modules/settings-module"
 import { inferNicheKey, NICHE_CONFIGS } from "@/lib/niche-config"
+import { OnboardingTour } from "@/components/onboarding/onboarding-tour"
+import type { OnboardingCopy } from "@/lib/onboarding/types"
 
 export default function DashboardPage() {
   const [activeModule, setActiveModule] = useState<ModuleKey>('pipeline')
@@ -38,6 +40,9 @@ export default function DashboardPage() {
   // Intervencija notifications
   const [intervencijaToasts, setIntervencijaToasts] = useState<{ id: string; brandName: string; color: string }[]>([])
   const [unreadBellCount, setUnreadBellCount] = useState(0)
+  const [onboardedAt, setOnboardedAt] = useState<string | null>(null)
+  const [onboardingCopy, setOnboardingCopy] = useState<OnboardingCopy | null>(null)
+  const [showOnboarding, setShowOnboarding] = useState(false)
 
   // Primary effective clientId — first selected brand (used by AI Agent, module loading, etc.)
   const effectiveClientId = useMemo(() => {
@@ -67,6 +72,19 @@ export default function DashboardPage() {
           setClientId(data.id)
           setClientName(data.name)
           setDemoNiche((data as any).demo_niche ?? null)
+          // Onboarding gating fields — guarded so a pre-migration schema
+          // (columns absent) never breaks login; on error treat as onboarded.
+          const { data: ob, error: obErr } = await supabase
+            .from('clients')
+            .select('onboarded_at, onboarding_copy')
+            .eq('id', data.id)
+            .maybeSingle()
+          if (obErr) {
+            setOnboardedAt(new Date().toISOString())
+          } else {
+            setOnboardedAt((ob as any)?.onboarded_at ?? null)
+            setOnboardingCopy((ob as any)?.onboarding_copy ?? null)
+          }
         }
       }
     }
@@ -84,6 +102,15 @@ export default function DashboardPage() {
       }
     }
   }, [availableModules, isLoading, activeModule])
+
+  // Show onboarding once, after modules are ready, if not yet onboarded
+  useEffect(() => {
+    if (isLoading || !clientId || availableModules.length === 0) return
+    if (onboardedAt) return
+    if (typeof window !== "undefined" && localStorage.getItem(`sf_onboarded_${clientId}`)) return
+    setShowOnboarding(true)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoading, clientId, onboardedAt, availableModules.length])
 
   // ── Intervencija realtime notifications ──────────────────────────────────
   useEffect(() => {
@@ -135,6 +162,13 @@ export default function DashboardPage() {
     setUserEmail(null)
     setActiveModule('pipeline')
   }
+
+  const markOnboarded = useCallback(async () => {
+    setShowOnboarding(false)
+    if (!clientId) return
+    if (typeof window !== "undefined") localStorage.setItem(`sf_onboarded_${clientId}`, "1")
+    await supabase.from('clients').update({ onboarded_at: new Date().toISOString() }).eq('id', clientId)
+  }, [clientId, supabase])
 
   const terminology = useMemo(() => {
     const isRecruitment =
@@ -378,7 +412,7 @@ export default function DashboardPage() {
 
           {/* Content */}
           <div className="flex-1 overflow-y-auto p-3 md:p-10 scrollbar-none custom-scrollbar pb-24 md:pb-32">
-            <div className="max-w-[1600px] mx-auto">
+            <div className="max-w-[1600px] mx-auto" data-tour="module-content">
               {isLoading ? (
                 <div className="flex h-[60vh] items-center justify-center">
                   <div className="flex flex-col items-center gap-6">
@@ -478,6 +512,16 @@ export default function DashboardPage() {
           ))}
         </AnimatePresence>
       </div>
+
+      {showOnboarding && (
+        <OnboardingTour
+          modules={filteredModules}
+          clientName={clientName}
+          storedCopy={onboardingCopy}
+          onNavigate={(key) => setActiveModule(key as ModuleKey)}
+          onComplete={markOnboarded}
+        />
+      )}
     </div>
   )
 }
