@@ -7,7 +7,7 @@ import { Sidebar } from "@/components/dashboard/sidebar"
 import { useUnifiedModules } from "@/lib/modules/hooks"
 import { ModuleKey } from "@/lib/modules/types"
 import { Button } from "@/components/ui/button"
-import { LogOut, Bell, Search, Sparkles, Menu, Activity, X as XIcon } from "lucide-react"
+import { LogOut, Bell, Sparkles, Menu, Activity, X as XIcon } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { cn } from "@/lib/utils"
 import { isGroupClient, GROUP_CLIENTS, BOOK_STORE_CLIENTS, getBookStoreConfig } from "@/lib/brand-configs"
@@ -228,8 +228,8 @@ export default function DashboardPage() {
     if (!effectiveClientId) return (
       <div className="flex flex-col items-center justify-center p-20 glass-card rounded-3xl animate-in zoom-in duration-700">
         <Sparkles className="w-12 h-12 text-emerald mb-4 animate-pulse" />
-        <h2 className="text-xl font-outfit text-silver uppercase tracking-widest">Initialising Growth Engine</h2>
-        <p className="text-muted-foreground mt-2">Connecting to your obsidian data nodes...</p>
+        <h2 className="text-xl font-outfit text-silver uppercase tracking-widest">Učitavanje sistema</h2>
+        <p className="text-muted-foreground mt-2">Povezivanje sa Vašim podacima...</p>
       </div>
     )
 
@@ -281,7 +281,7 @@ export default function DashboardPage() {
       case 'settings':
         return <SettingsModule clientId={effectiveClientId} selectedBrandIds={selectedBrandIds.length > 0 ? selectedBrandIds : undefined} />
       default:
-        return <div className="p-8 text-center glass-card rounded-2xl">Module node offline or restricted</div>
+        return <div className="p-8 text-center glass-card rounded-2xl">Modul trenutno nije dostupan</div>
     }
   }
 
@@ -367,14 +367,6 @@ export default function DashboardPage() {
             </div>
 
             <div className="flex items-center gap-2 md:gap-6">
-              <div className="hidden lg:flex items-center gap-2 px-4 py-2 bg-white/5 rounded-full border border-white/5 focus-within:border-emerald/30 transition-all duration-300">
-                <Search className="w-4 h-4 text-zinc-500" />
-                <input
-                  type="text"
-                  placeholder="Universal Search..."
-                  className="bg-transparent border-none text-sm text-zinc-300 focus:outline-none w-48 placeholder:text-zinc-600 font-light"
-                />
-              </div>
 
               <div className="flex items-center gap-2 md:gap-4">
                 <button
@@ -424,8 +416,8 @@ export default function DashboardPage() {
                       </div>
                     </div>
                     <div className="flex flex-col items-center">
-                      <p className="text-silver font-outfit text-lg tracking-widest uppercase animate-pulse">Synchronizing</p>
-                      <p className="text-zinc-500 text-xs mt-1">Accessing encrypted lead nodes...</p>
+                      <p className="text-silver font-outfit text-lg tracking-widest uppercase animate-pulse">Sinhronizacija</p>
+                      <p className="text-zinc-500 text-xs mt-1">Učitavanje Vaših kontakata...</p>
                     </div>
                   </div>
                 </div>
@@ -435,7 +427,7 @@ export default function DashboardPage() {
                 </div>
               ) : (
                 <div className="flex h-full items-center justify-center glass-card p-8 rounded-3xl">
-                  <p className="text-zinc-500 italic font-light tracking-wide text-sm text-center">Awaiting secure handshake with client node...</p>
+                  <p className="text-zinc-500 italic font-light tracking-wide text-sm text-center">Povezivanje sa Vašim nalogom...</p>
                 </div>
               )}
             </div>
