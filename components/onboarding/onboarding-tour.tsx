@@ -1,12 +1,10 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
-import { resolveModuleCopy } from "@/lib/onboarding/copy"
 import type { OnboardingCopy } from "@/lib/onboarding/types"
 import type { ModuleLike } from "@/lib/onboarding/steps"
 import { Spotlight } from "./spotlight"
 import { IntroStep } from "./steps/intro-step"
-import { AgentDemoStep } from "./steps/agent-demo-step"
 import { OfferStep } from "./steps/offer-step"
 
 interface OnboardingTourProps {
@@ -21,43 +19,55 @@ interface OnboardingTourProps {
 
 const CONTENT_TARGET = '[data-tour="module-content"]'
 
-// Modules covered elsewhere in the story (the conversation = inbox, offer = ponuda)
-// or not part of the narrative — skipped in the spotlight walk.
-const SKIP_IN_WALK = new Set([
-  "social-chatbot", "chatter-assistant", "ponuda", "settings", "website-chatbot",
-])
+const SERVICE_NICHES = new Set(["dental", "medical", "beauty", "fitness", "services", "wellness", "real-estate"])
 
-// Story narration for each module — frames it as the next beat of the sale,
-// not a feature description. Falls back to the per-module default copy.
-const STORY_COPY: Record<string, string> = {
-  "business-crm": "Kupac se upravo sam upisao ovde — ime, kontakt i šta je tražio. Ništa ne kucate ručno.",
-  "agent-leads": "Kupac se upravo sam upisao ovde — ime, kontakt i šta je tražio. Ništa ne kucate ručno.",
-  "crm-kanban-board": "Svaki kupac iz razgovora sleti ovde, u Vašu bazu — spreman za sledeći korak.",
-  "agent-database": "Agent cene i podatke vuče odavde, iz Vašeg kataloga — odgovori su uvek tačni.",
-  "calendar": "Termin koji je agent zakazao sleteo je ovde, u Vaš kalendar.",
-  "chatbot-analytics": "Svaki razgovor je izmeren: šta kupci pitaju, šta prodaje i u koje vreme. Podaci su Vaši.",
-  "analytics": "Svaki razgovor je izmeren: šta kupci pitaju, šta prodaje i u koje vreme. Podaci su Vaši.",
+// Map each real module to its place in the story.
+const STORY_KEY: Record<string, "inbox" | "crm" | "calendar" | "catalog" | "analytics"> = {
+  "social-chatbot": "inbox", "chatter-assistant": "inbox",
+  "business-crm": "crm", "agent-leads": "crm", "crm-kanban-board": "crm",
+  "calendar": "calendar",
+  "agent-database": "catalog",
+  "chatbot-analytics": "analytics", "analytics": "analytics",
+}
+const STORY_ORDER = ["inbox", "crm", "calendar", "catalog", "analytics"]
+
+type Copy = { eyebrow: string; title: string; body: string }
+
+const SERVICE_COPY: Record<string, Copy> = {
+  inbox: { eyebrow: "Stiže poruka", title: "Razgovor koji agent vodi sam", body: "Marija Vam je pisala. Agent je odgovorio za par sekundi, predložio povoljniju varijantu kad je rekla da je skupo, i zakazao termin — bez Vas. Ovo je pravi razgovor iz Vašeg inboxa." },
+  crm: { eyebrow: "Kupac upisan", title: "Marija je već u bazi", body: "Ime, telefon, šta je tražila i zašto je razgovor završio — sve se upisalo samo. Tu je i Nikola, koji nije našao termin subotom: i to je zabeleženo." },
+  calendar: { eyebrow: "Termin zakazan", title: "Već u Vašem kalendaru", body: "Termin koji je agent dogovorio — Marija Jović, danas u 15h. Niste ništa kucali ni zvali." },
+  catalog: { eyebrow: "Vaš katalog", title: "Odavde agent zna cene", body: "Agent cene, usluge i dostupnost vuče odavde — zato su odgovori uvek tačni." },
+  analytics: { eyebrow: "Sve izmereno", title: "Svaki ishod, sa razlogom", body: "Šta kupci najviše pitaju, šta prodaje, i zašto razgovor stane — kao kod Nikole. Podaci su Vaši." },
+}
+const PRODUCT_COPY: Record<string, Copy> = {
+  inbox: { eyebrow: "Stiže poruka", title: "Razgovor koji agent vodi sam", body: "Stefan je poslao sliku proizvoda. Agent ga je prepoznao, ponudio zamenu za rasprodati artikal, uzeo adresu i potvrdio porudžbinu — bez Vas." },
+  crm: { eyebrow: "Kupac upisan", title: "Stefan je već u bazi", body: "Ime, telefon, adresa, šta je poručio i status porudžbine — sve se upisalo samo. Tu je i Jelena, čija je reklamacija odmah prosleđena timu." },
+  calendar: { eyebrow: "Termini", title: "Zakazivanje, ako Vam treba", body: "Ako nudite i termine, agent ih zakazuje i upisuje ovde — automatski." },
+  catalog: { eyebrow: "Vaš magacin", title: "Odavde agent zna stanje", body: "Agent proverava cene i šta je na stanju odavde — zato nikad ne proda nešto čega nema." },
+  analytics: { eyebrow: "Sve izmereno", title: "Svaki ishod, sa razlogom", body: "Šta kupci najviše traže, šta prodaje, i gde razgovor stane. Podaci su Vaši." },
 }
 
-export function OnboardingTour({ modules, clientName, storedCopy, niche, brandColor = "#10b981", onNavigate, onComplete }: OnboardingTourProps) {
-  const moduleSteps = useMemo(
-    () => modules
-      .filter((m) => !SKIP_IN_WALK.has(m.key))
-      .map((m) => ({ key: m.key, title: m.displayName, body: STORY_COPY[m.key] ?? resolveModuleCopy(storedCopy, m.key) })),
-    [modules, storedCopy],
-  )
+export function OnboardingTour({ modules, clientName, niche, brandColor = "#10b981", onNavigate, onComplete }: OnboardingTourProps) {
+  const isService = SERVICE_NICHES.has((niche || "").toLowerCase())
+  const COPY = isService ? SERVICE_COPY : PRODUCT_COPY
 
-  // Screens: [0] intro · [1] agent-demo (Inbox) · [2..] story spotlights · [last] offer
-  const firstSpotlight = 2
-  const offerIndex = firstSpotlight + moduleSteps.length
+  const steps = useMemo(() => {
+    const seen = new Set<string>()
+    return modules
+      .map((m) => ({ m, story: STORY_KEY[m.key] }))
+      .filter((x) => x.story && !seen.has(x.story) && (seen.add(x.story), true))
+      .sort((a, b) => STORY_ORDER.indexOf(a.story!) - STORY_ORDER.indexOf(b.story!))
+      .map((x) => ({ key: x.m.key, ...COPY[x.story!] }))
+  }, [modules, COPY])
+
+  // [0] intro · [1..] story spotlights (real modules) · [last] offer
+  const firstSpotlight = 1
+  const offerIndex = firstSpotlight + steps.length
   const [i, setI] = useState(0)
 
   useEffect(() => {
-    if (i === 1) {
-      onNavigate("social-chatbot") // play the conversation in the AI Inbox context
-    } else if (i >= firstSpotlight && i < offerIndex) {
-      onNavigate(moduleSteps[i - firstSpotlight].key)
-    }
+    if (i >= firstSpotlight && i < offerIndex) onNavigate(steps[i - firstSpotlight].key)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [i])
 
@@ -65,16 +75,16 @@ export function OnboardingTour({ modules, clientName, storedCopy, niche, brandCo
   const back = () => setI((n) => Math.max(0, n - 1))
 
   if (i === 0) return <IntroStep brandColor={brandColor} onNext={next} />
-  if (i === 1) return <AgentDemoStep brandName={clientName} brandColor={brandColor} niche={niche} onNext={next} />
   if (i >= firstSpotlight && i < offerIndex) {
-    const step = moduleSteps[i - firstSpotlight]
+    const s = steps[i - firstSpotlight]
     return (
       <Spotlight
         targetSelector={CONTENT_TARGET}
-        title={step.title}
-        body={step.body}
+        eyebrow={s.eyebrow}
+        title={s.title}
+        body={s.body}
         index={i - firstSpotlight}
-        total={moduleSteps.length}
+        total={steps.length}
         brandColor={brandColor}
         isLast={false}
         onNext={next}
