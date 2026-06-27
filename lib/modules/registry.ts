@@ -9,6 +9,7 @@ import {
   Kanban,
   CalendarDays,
   Settings,
+  Sparkles,
 } from "lucide-react"
 import { DashboardModule, ModuleKey } from "./types"
 
@@ -82,6 +83,13 @@ export const MODULE_REGISTRY: Record<ModuleKey, DashboardModule> = {
     icon: CalendarDays,
     category: 'fulfillment',
     description: 'Pregled zakazanih termina i rezervacija',
+  },
+  'ponuda': {
+    key: 'ponuda',
+    label: 'Ponuda',
+    icon: Sparkles,
+    category: 'settings',
+    description: 'Vaša ponuda — kako da pustimo sistem uživo',
   },
   'settings': {
     key: 'settings',

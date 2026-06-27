@@ -11,6 +11,7 @@ export type ModuleKey =
   | 'chatbot-analytics'
   | 'growth-engine'
   | 'calendar'
+  | 'ponuda'
   | 'settings'
 
 export type ModuleCategory = 'acquisition' | 'fulfillment' | 'analytics' | 'settings'

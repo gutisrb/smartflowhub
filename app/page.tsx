@@ -25,6 +25,7 @@ import { CalendarModule } from "@/components/modules/calendar-module"
 import { SettingsModule } from "@/components/modules/settings-module"
 import { inferNicheKey, NICHE_CONFIGS } from "@/lib/niche-config"
 import { OnboardingTour } from "@/components/onboarding/onboarding-tour"
+import { PonudaModule } from "@/components/modules/ponuda-module"
 import type { OnboardingCopy } from "@/lib/onboarding/types"
 
 export default function DashboardPage() {
@@ -278,6 +279,8 @@ export default function DashboardPage() {
         return <WebsiteChatbotModule clientId={effectiveClientId} />
       case 'chatbot-analytics':
         return <ChatbotAnalyticsModule clientId={effectiveClientId} selectedBrandIds={isBookStoreClient && selectedBrandIds.length > 1 ? selectedBrandIds : undefined} demoNiche={demoNiche} />
+      case 'ponuda':
+        return <PonudaModule clientName={clientName} />
       case 'settings':
         return <SettingsModule clientId={effectiveClientId} selectedBrandIds={selectedBrandIds.length > 0 ? selectedBrandIds : undefined} />
       default:

@@ -487,7 +487,9 @@ async function provisionTenant(sb, lead, brandName, password) {
 
 // ── Module provisioning ────────────────────────────────────────────────────────
 async function provisionModules(sb, clientId, nicheKey, nicheConfig) {
-  const moduleKeys = nicheConfig.modules || ['business-crm', 'social-chatbot', 'chatbot-analytics']
+  const baseKeys = nicheConfig.modules || ['business-crm', 'social-chatbot', 'chatbot-analytics']
+  // Every demo tenant also gets the persistent "Ponuda" tab (the offer).
+  const moduleKeys = [...baseKeys, 'ponuda']
 
   const LABEL_MAP = {
     'business-crm':      nicheConfig.crmLabel || 'Klijenti',
@@ -495,6 +497,7 @@ async function provisionModules(sb, clientId, nicheKey, nicheConfig) {
     'agent-database':    nicheConfig.catalogLabel || 'Usluge',
     'calendar':          nicheConfig.calendarLabel || 'Termini',
     'chatbot-analytics': 'Analitika',
+    'ponuda':            'Ponuda',
   }
 
   // Fix: analytics key must be 'chatbot-analytics', not 'analytics'
