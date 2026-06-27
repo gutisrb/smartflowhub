@@ -864,6 +864,14 @@ async function buildDemoForLead(sb, lead) {
     if (wbErr) throw new Error(`Writeback failed: ${wbErr.message}`)
   }
 
+  // Step 8: Seed the connected onboarding story (same customer across Inbox + CRM + Termini)
+  if (authEmail) {
+    try {
+      await execFileAsync('node', [resolve(__dirname, 'seed_onboarding_story.mjs'), '--email', authEmail])
+      console.log(`│  ✓ Onboarding story seeded`)
+    } catch (e) { console.warn(`│  ⚠ Story seed skipped: ${e.message}`) }
+  }
+
   console.log(`│`)
   console.log(`│  ✅ Done! Niche: ${nicheKey}`)
   console.log(`│  Login URL: ${APP_URL}`)

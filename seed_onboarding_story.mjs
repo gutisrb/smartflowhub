@@ -92,7 +92,7 @@ function productStory(nicheKey) {
       ["user", "Stefan Ilić, 063 987 6543, Kralja Petra 12, Novi Sad"],
       ["assistant", "Potvrđujem porudžbinu. Šaljem danas — broj za praćenje stiže SMS-om, stiže za dva dana 📦"],
     ],
-    crm: { full_name: "Stefan Ilić", telefon: "063 987 6543", kategorija: p.cat, proizvod: p.alt, status: "Poručio", status_porudzbine: "U pripremi", razlog: "Poručio nakon prepoznavanja proizvoda sa slike (ponuđena alternativa za rasprodati artikal).", izvor: "Instagram", komentar: "Adresa: Kralja Petra 12, Novi Sad · Pouzeće" },
+    crm: { full_name: "Stefan Ilić", telefon: "063 987 6543", kategorija: p.cat, proizvod: p.alt, status: "Naručio", status_porudzbine: "Poslato", razlog: "Naručio nakon prepoznavanja proizvoda sa slike (ponuđena alternativa za rasprodati artikal).", izvor: "Instagram", komentar: "Adresa: Kralja Petra 12, Novi Sad · Pouzeće" },
     appt: null,
   }
   const nosale = {
