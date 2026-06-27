@@ -12,9 +12,9 @@ interface WelcomeStepProps {
 export function WelcomeStep({ brandName, brandColor = "#10b981", welcomeCopy, onNext }: WelcomeStepProps) {
   const heading = welcomeCopy?.trim() || `Dobrodošli, ${brandName || "tu ste"} 👋`
   return (
-    <div className="fixed inset-0 z-[300] flex items-center justify-center px-4" style={{ background: "rgba(5,8,12,0.9)" }}>
-      <div className="fixed -top-24 -left-24 w-96 h-96 rounded-full blur-[130px] pointer-events-none" style={{ background: `${brandColor}1c` }} />
-      <div className="fixed -bottom-24 -right-24 w-96 h-96 rounded-full blur-[110px] pointer-events-none" style={{ background: `${brandColor}12` }} />
+    <div className="fixed inset-0 z-[300] flex items-center justify-center px-4 overflow-hidden" style={{ background: "#05080c" }}>
+      <div className="absolute inset-0 bg-cover bg-center opacity-70 pointer-events-none" style={{ backgroundImage: "url(/onboarding/welcome-bg.jpg)" }} />
+      <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(circle at 50% 45%, rgba(5,8,12,0.5), rgba(5,8,12,0.84))" }} />
       <motion.div
         initial={{ opacity: 0, scale: 0.96, y: 14 }} animate={{ opacity: 1, scale: 1, y: 0 }} transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
         className="relative max-w-md mx-4 rounded-3xl border border-white/10 bg-[#0e1116]/95 backdrop-blur-xl shadow-2xl p-8 md:p-10 text-center"
