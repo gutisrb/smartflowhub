@@ -510,6 +510,7 @@ export default function DashboardPage() {
           modules={filteredModules}
           clientName={clientName}
           storedCopy={onboardingCopy}
+          niche={demoNiche}
           onNavigate={(key) => setActiveModule(key as ModuleKey)}
           onComplete={markOnboarded}
         />
