@@ -829,7 +829,27 @@ async function buildDemoForLead(sb, lead) {
   if (nicheConfig.useCatalog && services.length) await seedServicesCatalog(sb, clientId, services)
   if (nicheConfig.useCalendar && appointments.length) await seedAppointments(sb, clientId, appointments, services)
 
-  // Step 6: Writeback to contacts
+  // Step 6: Generate per-brand onboarding copy and store on clients row
+  try {
+    const moduleKeys = nicheConfig.modules || ['business-crm', 'social-chatbot', 'chatbot-analytics']
+    const productSummary = businessIntel?.business_summary || ''
+    const sys = `Ti si copywriter za SmartFlow. Napiši kratak, topao onboarding tekst na srpskom za dashboard brenda "${brandName}" (delatnost: ${nicheKey}). Vrati ISKLJUČIVO JSON objekat: {"welcome": "...", "modules": { "<key>": "..." }, "finish": "..."}. "welcome": jedna rečenica dobrodošlice koja pomene brend (završava sa 👋). Za svaki ključ iz [${moduleKeys.map(k => `"${k}"`).join(', ')}] jedna rečenica šta taj modul radi baš za ovaj brend. "finish": jedna rečenica ohrabrenja. Bez emodžija osim 👋 u welcome. Kontekst: ${productSummary || 'n/a'}.`
+    const resp = await openai.chat.completions.create({
+      model: OPENAI_MODEL,
+      temperature: 0.5,
+      response_format: { type: 'json_object' },
+      messages: [{ role: 'user', content: sys }],
+    })
+    const parsed = JSON.parse(resp.choices[0].message.content || '{}')
+    if (parsed?.welcome && parsed?.modules) {
+      await sb.from('clients').update({ onboarding_copy: parsed }).eq('id', clientId)
+      console.log(`│  ✓ Onboarding copy stored`)
+    }
+  } catch (e) {
+    console.warn(`│  ⚠ Onboarding copy skipped: ${e.message}`)
+  }
+
+  // Step 7: Writeback to contacts
   if (!isReseedOnly) {
     const { error: wbErr } = await sb.from('contacts').update({
       demo_tenant_email:    authEmail,
