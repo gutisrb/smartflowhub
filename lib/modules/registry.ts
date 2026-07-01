@@ -10,10 +10,18 @@ import {
   CalendarDays,
   Settings,
   Sparkles,
+  Sunrise,
 } from "lucide-react"
 import { DashboardModule, ModuleKey } from "./types"
 
 export const MODULE_REGISTRY: Record<ModuleKey, DashboardModule> = {
+  'command-center': {
+    key: 'command-center',
+    label: 'Danas',
+    icon: Sunrise,
+    category: 'acquisition',
+    description: 'Operativna kontrolna tabla — dnevni pregled i odobravanje slanja',
+  },
   'pipeline': {
     key: 'pipeline',
     label: 'Pipeline',

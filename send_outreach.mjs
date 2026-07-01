@@ -7,6 +7,9 @@
  * Usage (from ai-growth-dashboard/):
  *   node send_outreach.mjs                                  — send up to DAILY_CAP enriched leads
  *   node send_outreach.mjs --mode followup                  — send follow-up emails (Kontaktiran leads)
+ *   node send_outreach.mjs --mode approved                  — send only leads with approved_to_send=true
+ *                                                              (operator-approved via the dashboard cockpit;
+ *                                                              clears the flag after a successful send)
  *   node send_outreach.mjs --dry-run                        — preview queue, no sends
  *   node send_outreach.mjs --test johhnylaa@gmail.com       — send first lead to test address
  *   node send_outreach.mjs --company "TRI O"                — target single company by name
@@ -53,7 +56,7 @@ const TEST_EMAIL   = testIdx !== -1 ? process.argv[testIdx + 1] : null;
 const limitIdx     = process.argv.indexOf('--limit');
 const DAILY_CAP    = limitIdx !== -1 ? parseInt(process.argv[limitIdx + 1]) : Infinity;
 const modeIdx      = process.argv.indexOf('--mode');
-const MODE         = modeIdx !== -1 ? process.argv[modeIdx + 1] : 'initial'; // 'initial' | 'followup' | 'e2' | 'e3'
+const MODE         = modeIdx !== -1 ? process.argv[modeIdx + 1] : 'initial'; // 'initial' | 'followup' | 'e2' | 'e3' | 'approved'
 const companyIdx   = process.argv.indexOf('--company');
 const COMPANY      = companyIdx !== -1 ? process.argv[companyIdx + 1] : null;
 const ALLOW_NO_DEMO = process.argv.includes('--allow-no-demo'); // skip demo requirement
@@ -174,16 +177,19 @@ async function main() {
 
   // ── Fetch sendable leads ─────────────────────────────────────────────────────
   const isE3       = MODE === 'e3';
+  const isApproved = MODE === 'approved';
   const isFollowUp = MODE === 'followup' || MODE === 'e2' || isE3;
 
   let query = sb
     .from('contacts')
-    .select('id, company_name, email, kategorija, email_draft, email_2_draft, email_3_draft, instagram_followers, comment, demo_tenant_email, demo_tenant_password, demo_tenant_url, demo_built_at')
+    .select('id, company_name, email, kategorija, email_draft, email_2_draft, email_3_draft, instagram_followers, comment, demo_tenant_email, demo_tenant_password, demo_tenant_url, demo_built_at, status, email_1_poslat, email_2_poslat, approved_to_send')
     .eq('client_id', SMARTFLOW_ID)
     .not('email', 'is', null);
 
-  // Gate: initial sends require a built demo tenant, unless --allow-no-demo
-  if (!isFollowUp && !ALLOW_NO_DEMO) {
+  // Gate: initial sends require a built demo tenant, unless --allow-no-demo.
+  // Approved mode resolves its own per-lead stage below and re-applies this
+  // gate there (some approved leads are follow-ups, which don't need it).
+  if (!isFollowUp && !isApproved && !ALLOW_NO_DEMO) {
     query = query.not('demo_built_at', 'is', null);
   }
 
@@ -200,6 +206,8 @@ async function main() {
       .eq('status', 'Kontaktiran')
       .eq('email_2_poslat', false)
       .not('email_2_draft', 'is', null);
+  } else if (isApproved) {
+    query = query.eq('approved_to_send', true);
   } else {
     query = query
       .in('status', ['enriched', 'No Draft'])
@@ -210,22 +218,55 @@ async function main() {
     query = query.ilike('company_name', `%${COMPANY}%`);
   }
 
-  const { data: leads, error } = await query;
+  const { data: fetchedLeads, error } = await query;
 
   if (error) { console.error('Supabase error:', error.message); process.exit(1); }
 
   const draftField = isE3 ? 'email_3_draft' : isFollowUp ? 'email_2_draft' : 'email_draft';
+  const claimFieldGlobal = isE3 ? 'email_3_poslat' : isFollowUp ? 'email_2_poslat' : 'email_1_poslat';
+
+  // Approved mode: each approved lead may be due for its initial send or its
+  // follow-up, depending on where it already is in the sequence — resolve
+  // that per lead instead of assuming one global stage for the whole run.
+  function resolveApprovedStage(lead) {
+    // Check follow-up first: status === 'Kontaktiran' means they were already
+    // contacted in practice, even for older rows where email_1_poslat was
+    // never backfilled to true (that flag postdates some existing leads).
+    if (lead.status === 'Kontaktiran' && !lead.email_2_poslat && lead.email_2_draft) {
+      return { draftField: 'email_2_draft', claimField: 'email_2_poslat', isFollowUp: true };
+    }
+    if (lead.status !== 'Kontaktiran' && !lead.email_1_poslat && lead.email_draft) {
+      if (!ALLOW_NO_DEMO && !lead.demo_built_at) return null; // preserve the initial-send demo gate
+      return { draftField: 'email_draft', claimField: 'email_1_poslat', isFollowUp: false };
+    }
+    return null;
+  }
+
+  let leads = fetchedLeads;
+  if (isApproved) {
+    leads = [];
+    for (const lead of fetchedLeads) {
+      const stage = resolveApprovedStage(lead);
+      if (!stage) { console.warn(`⚠  ${lead.company_name} — approved but no pending draft for its current stage, skipping`); continue; }
+      leads.push({ ...lead, _stage: stage });
+    }
+  }
+
+  const getDraftField = (l) => isApproved ? l._stage.draftField : draftField;
+  const getClaimField = (l) => isApproved ? l._stage.claimField : claimFieldGlobal;
+  const getIsFollowUp = (l) => isApproved ? l._stage.isFollowUp : isFollowUp;
 
   // Pass 1 — synchronous filters (cheap)
   const seenEmails = new Set();
   let stats = { skipNoEmailComment: 0, skipBogus: 0, skipBogusDomain: 0, skipBanned: 0, skipDup: 0, skipNoMx: 0 };
   const passSync = leads.filter(l => {
     if (SKIP_NAMES.has(l.company_name)) return false;
-    if (!l[draftField]) return false;
+    const df = getDraftField(l);
+    if (!l[df]) return false;
     // Skip leads where enrichment flagged the email as unverified
     if (l.comment && /no email found/i.test(l.comment)) { stats.skipNoEmailComment++; return false; }
     if (isBogusEmail(l.email)) { stats.skipBogus++; return false; }
-    const subject = l[draftField].split('\n')[0];
+    const subject = l[df].split('\n')[0];
     if (BANNED_SUBJECT_RX.test(subject)) { console.warn(`⚠  ${l.company_name} — banned word in subject, skipping (needs regen)`); stats.skipBanned++; return false; }
     const domain = l.email?.split('@')[1]?.toLowerCase();
     if (domain && BOGUS_DOMAINS.has(domain)) { stats.skipBogusDomain++; return false; }
@@ -264,7 +305,7 @@ async function main() {
   const queue = TEST_EMAIL ? sendable.slice(0, 1) : sendable.slice(0, DAILY_CAP);
 
   const date = new Date().toLocaleDateString('sr-RS', { day:'2-digit', month:'2-digit', year:'numeric' });
-  console.log(`\nSmartFlow Outreach — ${date}  [mode: ${isE3 ? 'E3' : isFollowUp ? 'E2' : 'initial'}]`);
+  console.log(`\nSmartFlow Outreach — ${date}  [mode: ${isApproved ? 'APPROVED' : isE3 ? 'E3' : isFollowUp ? 'E2' : 'initial'}]`);
   console.log(`Sendable leads: ${sendable.length}  |  Queue today: ${queue.length}${isDryRun ? ' [DRY RUN]' : ''}${TEST_EMAIL ? ` [TEST → ${TEST_EMAIL}]` : ''}${COMPANY ? ` [company: ${COMPANY}]` : ''}`);
   console.log(`From: ${SENDER_NAME} <${GMAIL_USER}>\n`);
 
@@ -277,8 +318,8 @@ async function main() {
 
   for (let i = 0; i < queue.length; i++) {
     const lead   = queue[i];
-    const parsed = parseDraft(lead[draftField]);
-    if (!parsed) { console.warn(`⚠  ${lead.company_name} — unparseable draft (${draftField}), skipping`); failed++; continue; }
+    const parsed = parseDraft(lead[getDraftField(lead)]);
+    if (!parsed) { console.warn(`⚠  ${lead.company_name} — unparseable draft (${getDraftField(lead)}), skipping`); failed++; continue; }
 
     const to = TEST_EMAIL || lead.email;
     console.log(`[${i + 1}/${queue.length}] ${lead.company_name}`);
@@ -290,7 +331,7 @@ async function main() {
     // Atomically claim this lead before sending — prevents double-send if two
     // script instances run concurrently (TOCTOU race on the initial bulk fetch).
     if (!TEST_EMAIL) {
-      const claimField = isE3 ? 'email_3_poslat' : isFollowUp ? 'email_2_poslat' : 'email_1_poslat';
+      const claimField = getClaimField(lead);
       const { data: claimed } = await sb
         .from('contacts')
         .update({ [claimField]: true })
@@ -309,7 +350,7 @@ async function main() {
       // ── Login block (injected when demo is available) ──────────────────────
       let loginBlockHtml = '';
       let loginBlockText = '';
-      if (!isFollowUp && lead.demo_tenant_email && lead.demo_tenant_password) {
+      if (!getIsFollowUp(lead) && lead.demo_tenant_email && lead.demo_tenant_password) {
         const loginUrl   = lead.demo_tenant_url || 'https://app.smartflow.rs';
         const loginEmail = lead.demo_tenant_email;
         const loginPass  = lead.demo_tenant_password;
@@ -355,11 +396,20 @@ ${loomHtml}`;
 
       // Update metadata after successful send (flag already set in claim step)
       if (!TEST_EMAIL) {
-        const metaPayload = isE3
-          ? { last_sent_at: new Date().toISOString() }
-          : isFollowUp
-            ? { last_sent_at: new Date().toISOString(), status: 'Follow Up' }
-            : { last_sent_at: new Date().toISOString(), status: 'Kontaktiran' };
+        let metaPayload;
+        if (isApproved) {
+          metaPayload = {
+            last_sent_at: new Date().toISOString(),
+            status: lead._stage.isFollowUp ? 'Follow Up' : 'Kontaktiran',
+            approved_to_send: false,
+          };
+        } else {
+          metaPayload = isE3
+            ? { last_sent_at: new Date().toISOString() }
+            : isFollowUp
+              ? { last_sent_at: new Date().toISOString(), status: 'Follow Up' }
+              : { last_sent_at: new Date().toISOString(), status: 'Kontaktiran' };
+        }
         await sb.from('contacts').update(metaPayload).eq('id', lead.id);
       }
 
@@ -368,8 +418,7 @@ ${loomHtml}`;
     } catch (err) {
       // Roll back the claim so the lead can be retried in the next run
       if (!TEST_EMAIL) {
-        const claimField = isE3 ? 'email_3_poslat' : isFollowUp ? 'email_2_poslat' : 'email_1_poslat';
-        await sb.from('contacts').update({ [claimField]: false }).eq('id', lead.id);
+        await sb.from('contacts').update({ [getClaimField(lead)]: false }).eq('id', lead.id);
       }
       console.error(`  ✗ Failed: ${err.message} (claim rolled back)\n`);
       failed++;

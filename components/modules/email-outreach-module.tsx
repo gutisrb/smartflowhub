@@ -65,6 +65,7 @@ interface Lead {
   demo_tenant_email?: string
   demo_tenant_password?: string
   demo_built_at?: string
+  approved_to_send?: boolean
   intake_data?: {
     active_ads_count?: number
     enrichment?: {
@@ -279,6 +280,15 @@ export function EmailOutreachModule({
     setDraftLead(prev => prev ? { ...prev, ...updatePayload } : null)
     setEditingDraft(null)
     setIsSavingDraft(false)
+  }
+
+  const handleApproveDraft = async () => {
+    if (!draftLead) return
+    const supabase = createClient()
+    const { error } = await supabase.from('contacts').update({ approved_to_send: true }).eq('id', draftLead.id)
+    if (error) { console.error(error); return }
+    setLeads(prev => prev.map(l => l.id === draftLead.id ? { ...l, approved_to_send: true } : l))
+    setDraftLead(prev => prev ? { ...prev, approved_to_send: true } : null)
   }
 
   const handleRemoveLead = async (lead: Lead) => {
@@ -1071,14 +1081,17 @@ export function EmailOutreachModule({
                 </Button>
                 {!editingDraft && (
                   <Button
-                    className="rounded-xl bg-gradient-to-r from-emerald to-emerald/80 hover:brightness-110 text-obsidian font-outfit font-bold px-10 py-6 shadow-lg shadow-emerald/10"
-                    onClick={() => {
-                      // Logic for sending will be implemented next
-                      alert('Preparing transmission... System verification required.');
-                    }}
+                    disabled={!!draftLead?.approved_to_send}
+                    className={cn(
+                      "rounded-xl font-outfit font-bold px-10 py-6 shadow-lg",
+                      draftLead?.approved_to_send
+                        ? "bg-emerald/10 text-emerald/60 shadow-none cursor-default"
+                        : "bg-gradient-to-r from-emerald to-emerald/80 hover:brightness-110 text-obsidian shadow-emerald/10"
+                    )}
+                    onClick={handleApproveDraft}
                   >
                     <Send className="w-4 h-4 mr-2" />
-                    Ready to Send
+                    {draftLead?.approved_to_send ? 'Odobreno za slanje' : 'Odobri za slanje'}
                   </Button>
                 )}
              </div>

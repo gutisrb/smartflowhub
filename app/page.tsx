@@ -28,6 +28,7 @@ import { inferNicheKey, NICHE_CONFIGS } from "@/lib/niche-config"
 import { IntroStep } from "@/components/onboarding/steps/intro-step"
 import { OnboardingTour } from "@/components/onboarding/onboarding-tour"
 import { PonudaModule } from "@/components/modules/ponuda-module"
+import { CommandCenterModule } from "@/components/modules/command-center-module"
 import type { OnboardingCopy } from "@/lib/onboarding/types"
 
 export default function DashboardPage() {
@@ -259,6 +260,8 @@ export default function DashboardPage() {
     const settings = getActiveModuleSettings()
 
     switch (activeModule) {
+      case 'command-center':
+        return <CommandCenterModule clientId={effectiveClientId} />
       case 'pipeline':
         return <PipelineModule clientId={effectiveClientId} />
       case 'growth-engine':

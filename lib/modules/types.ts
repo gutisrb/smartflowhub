@@ -12,6 +12,7 @@ export type ModuleKey =
   | 'growth-engine'
   | 'calendar'
   | 'ponuda'
+  | 'command-center'
   | 'settings'
 
 export type ModuleCategory = 'acquisition' | 'fulfillment' | 'analytics' | 'settings'
