@@ -109,6 +109,84 @@ function productStory(nicheKey) {
   return { sale, nosale }
 }
 
+// ── Background fill: many believable conversations + a full week of termini so
+// the real dashboard (inbox / analytics / scheduler) never looks empty. ──────
+const A = (name) => ({ name, profile_pic: pic(name) })
+
+function bgServiceConvos() {
+  return [
+    { name: "Ana Kovačević", ch: "instagram", st: "Zainteresovan", msgs: [["user","Dobar dan, da li radite vikendom?"],["assistant","Zdravo Ana 😊 Subotom radimo 9–14h. Da Vas zakažem?"],["user","Javiću se, hvala"]] },
+    { name: "Petar Nikolić", ch: "whatsapp", st: "Zakazano", msgs: [["user","Treba mi termin ove nedelje"],["assistant","Naravno! Slobodno u sredu 11h ili četvrtak 17h?"],["user","Sreda 11h"],["assistant","Zakazano za sredu u 11h ✅"]] },
+    { name: "Jovana Ilić", ch: "facebook", st: "Zainteresovan", msgs: [["user","Koliko traje pregled?"],["assistant","Oko 30–45 min, Jovana. Želite li termin?"],["user","Razmisliću"]] },
+    { name: "Marko Savić", ch: "website", st: "Zakazano", msgs: [["user","Mogu li danas da dođem?"],["assistant","Imam slobodno danas u 18h. Da potvrdim?"],["user","Da, može"],["assistant","Potvrđeno, vidimo se u 18h 👍"]] },
+    { name: "Tamara Đorđević", ch: "instagram", st: "Zakazano", msgs: [["user","Htela bih da pomerim termin"],["assistant","Naravno. Kada Vam odgovara?"],["user","Petak popodne"],["assistant","Prebačeno na petak u 16h ✅"]] },
+    { name: "Luka Pavlović", ch: "whatsapp", st: "Novi", msgs: [["user","Cenovnik?"],["assistant","Šaljem Vam ceo cenovnik na WhatsApp odmah 📋"]] },
+    { name: "Milica Jovanović", ch: "instagram", st: "Zakazano", msgs: [["user","Da li ima slobodno sutra?"],["assistant","Ima! Sutra 10h ili 13h?"],["user","13h"],["assistant","Zakazano sutra u 13h ✅"]] },
+    { name: "Nemanja Ristić", ch: "website", st: "Zainteresovan", msgs: [["user","Da li primate nove klijente?"],["assistant","Apsolutno, Nemanja! Recite mi šta Vam treba pa da nađemo termin."],["user","Javim se uskoro"]] },
+    { name: "Sara Marković", ch: "whatsapp", st: "Završeno", msgs: [["user","Hvala na današnjem terminu!"],["assistant","Hvala Vama, Sara! Tu smo za sve 🙏"]] },
+    { name: "Filip Stojanović", ch: "facebook", st: "Zakazano", msgs: [["user","Imate li termin u ponedeljak?"],["assistant","Imam u ponedeljak 9h ili 15h."],["user","9h"],["assistant","Zakazano ✅"]] },
+    { name: "Katarina Lukić", ch: "instagram", st: "Zainteresovan", msgs: [["user","Da li je akcija još aktuelna?"],["assistant","Jeste do kraja meseca 😊 Da Vas upišem?"],["user","Možda sledeće nedelje"]] },
+    { name: "Stefan Petrović", ch: "website", st: "Zakazano", msgs: [["user","Hoću da zakažem prvi pregled"],["assistant","Odlično! Utorak 12h ili 18h?"],["user","18h"],["assistant","Zakazano u utorak 18h ✅"]] },
+  ]
+}
+
+function bgProductConvos() {
+  return [
+    { name: "Ivana Petrović", ch: "instagram", st: "Naručio", msgs: [["user","Da li je dostupno?"],["assistant","Jeste! Da Vam kreiram porudžbinu?"],["user","Da, pouzeće"],["assistant","Porudžbina kreirana, šalje se danas 📦"]] },
+    { name: "Nikola Rašić", ch: "website", st: "Intervencija", msgs: [["user","Stigao pogrešan artikal"],["assistant","Izvinjavam se! Prosleđujem timu za zamenu odmah 🙏"]] },
+    { name: "Jelena Marinović", ch: "instagram", st: "Zainteresovan", msgs: [["user","Imate li u drugoj boji?"],["assistant","Imamo u crnoj i bež. Koju želite?"],["user","Razmisliću"]] },
+    { name: "Dragan Tomić", ch: "facebook", st: "Naručio", msgs: [["user","Hoću dva komada"],["assistant","Super! Beležim 2 kom. Adresa i telefon?"],["user","Dao sam u poruci"],["assistant","Porudžbina potvrđena 📦"]] },
+    { name: "Vesna Đorđević", ch: "whatsapp", st: "Zainteresovan", msgs: [["user","Koliko košta dostava?"],["assistant","Dostava je besplatna preko 3.000 RSD 🚚"],["user","Ok hvala"]] },
+    { name: "Miloš Jovanović", ch: "instagram", st: "Naručio", msgs: [["user","Naručujem ovo"],["assistant","Odlično! Pouzeće ili kartica?"],["user","Pouzeće"],["assistant","Porudžbina kreirana ✅"]] },
+    { name: "Tijana Kostić", ch: "website", st: "Isporučeno", msgs: [["user","Stiglo, hvala!"],["assistant","Super! Hvala na poverenju 💚"]] },
+    { name: "Bojan Lukić", ch: "facebook", st: "Zainteresovan", msgs: [["user","Imate li veći paket?"],["assistant","Imamo i duplo pakovanje sa popustom 😊"],["user","Javim se"]] },
+    { name: "Marija Stanković", ch: "whatsapp", st: "Naručio", msgs: [["user","Može jedno pakovanje"],["assistant","Beležim! Adresa za dostavu?"],["user","Poslala sam"],["assistant","Šalje se danas 📦"]] },
+    { name: "Aleksandar Mitić", ch: "instagram", st: "Novi", msgs: [["user","Da li radi pouzeće?"],["assistant","Da, plaćate kuriru pri preuzimanju 👍"]] },
+    { name: "Sofija Ilić", ch: "website", st: "Naručio", msgs: [["user","Naručila bih dva"],["assistant","Super! Kreiram porudžbinu za 2 kom 📦"],["user","Hvala"]] },
+    { name: "Vuk Pavlović", ch: "facebook", st: "Zainteresovan", msgs: [["user","Ima li garancija?"],["assistant","Da, 12 meseci garancije na sve 😊"],["user","Ok"]] },
+  ]
+}
+
+// spread appointments across the current week, varied hours, skipping today@15 (hero slot)
+function weekAppts(crmFullName) {
+  const svcPool = [
+    { s: "Konsultacije", c: "#10b981" }, { s: "Kontrola", c: "#0ea5e9" },
+    { s: "Tretman", c: "#8b5cf6" }, { s: "Prvi pregled", c: "#f59e0b" },
+  ]
+  const names = ["Petar Nikolić","Marko Savić","Tamara Đorđević","Milica Jovanović","Filip Stojanović","Stefan Petrović","Ana Kovačević","Jovana Ilić","Nemanja Ristić","Sara Marković","Luka Pavlović","Katarina Lukić"]
+  const phones = ["063 221 4567","065 884 1290","060 552 7781","064 119 3320","062 770 5512","061 443 8890","063 905 2218","065 117 6643","060 338 9921","064 552 1147","062 661 2204","060 774 9183"]
+  // anchor FORWARD from today so the calendar stays populated for ~10 days regardless
+  // of when the demo is viewed. [dayOffset, hour] — skip today@15 (Marija's hero slot).
+  const today = new Date(); today.setHours(0,0,0,0)
+  const slots = [
+    [0,9],[0,11],[0,17],[1,10],[1,14],[2,9],[2,13],[2,16],[3,11],[3,15],[4,10],[4,14],[5,12],[6,10],[7,13],[8,11],
+  ]
+  return slots.map(([d,h], i) => {
+    const start = new Date(today); start.setDate(today.getDate() + d); start.setHours(h,0,0,0)
+    const svc = svcPool[i % svcPool.length]
+    return { customer_name: names[i % names.length], customer_phone: phones[i % phones.length], service_name: svc.s, service_color: svc.c, starts_at: start.toISOString(), ends_at: new Date(start.getTime()+45*60000).toISOString(), status: "confirmed", urgency: i % 5 === 0 ? "high" : "normal", source: ["WhatsApp","Instagram","Website","Facebook"][i%4], notes: "Zakazano preko AI agenta" }
+  })
+}
+
+// short, varied conversations spread over the last 28 days — pure volume so the
+// analytics period charts and totals read like an active, successful account.
+const FN = ["Ana","Marko","Jovana","Petar","Milica","Nikola","Tamara","Luka","Sara","Filip","Katarina","Stefan","Ivana","Vuk","Sofija","Bojan","Milan","Jelena","Dragan","Vesna","Miloš","Tijana","Aleksandar","Nina","Nemanja","Teodora","Đorđe","Lana","Uroš","Maja"]
+const LN = ["Petrović","Jovanović","Nikolić","Ilić","Marković","Savić","Kovačević","Đorđević","Stojanović","Lukić","Ristić","Pavlović","Mitić","Kostić","Janković"]
+const CH4 = ["instagram","whatsapp","facebook","website"]
+function fillerConvos(isService, n, cid8) {
+  const qa = isService
+    ? [["Da li je slobodno ovih dana?","Imamo termina ove nedelje 😊 Da Vas upišem?"],["Koliko košta?","Šaljem Vam ceo cenovnik odmah 📋"],["Radite vikendom?","Subotom radimo 9–14h. Da zakažem?"],["Koliko traje pregled?","Oko 30–45 min. Želite termin?"],["Mogu li sutra?","Imam sutra 11h ili 16h — šta Vam odgovara?"],["Da li primate nove?","Naravno! Recite šta Vam treba pa da nađemo termin."]]
+    : [["Na stanju?","Jeste! Da Vam kreiram porudžbinu?"],["Koliko košta dostava?","Besplatna preko 3.000 RSD 🚚"],["Imate li u drugoj boji?","Imamo u više boja 😊 Koju želite?"],["Radi li pouzeće?","Da, plaćate kuriru pri preuzimanju 👍"],["Naručujem ovo","Super! Pouzeće ili kartica?"],["Garancija?","12 meseci garancije na sve 😊"]]
+  const out = []
+  for (let i = 0; i < n; i++) {
+    const name = `${FN[i % FN.length]} ${LN[(i * 7) % LN.length]}`
+    const [q, a] = qa[i % qa.length]
+    const minAgo = 1600 + Math.floor((i * (28 * 24 * 60)) / n) // ~28 days span, oldest first
+    out.push({ key: `demo_${cid8}_fill${i}`, name, ch: CH4[(i * 3) % 4], minAgo, msgs: [["user", q], ["assistant", a]] })
+  }
+  return out
+}
+
 async function seedTenant(client) {
   const cid = client.id
   const niche = (client.demo_niche || "generic").toLowerCase()
@@ -116,10 +194,15 @@ async function seedTenant(client) {
   const { sale, nosale } = isService ? serviceStory(niche) : productStory(niche)
   const cid8 = cid.slice(0, 8)
 
-  // wipe prior hero rows
+  // wipe prior hero + background rows
   await sb.from("razgovori").delete().eq("client_id", cid).like("id_razgovora", `%_hero%`)
+  await sb.from("razgovori").delete().eq("client_id", cid).like("id_razgovora", `%_bg%`)
+  await sb.from("razgovori").delete().eq("client_id", cid).like("id_razgovora", `%_fill%`)
   await sb.from("demo_crm").delete().eq("client_id", cid).like("id_razgovora", `%_hero%`)
-  await sb.from("appointments").delete().eq("client_id", cid).eq("notes", "Zakazano preko AI agenta")
+  await sb.from("demo_crm").delete().eq("client_id", cid).like("id_razgovora", `%_bg%`)
+  // Own the whole demo calendar: clear ALL appointments (incl. build_demo_tenant's
+  // stale May-dated set) so there's one clean, forward-dated schedule.
+  await sb.from("appointments").delete().eq("client_id", cid)
 
   const now = Date.now()
   const scenarios = [
@@ -141,6 +224,28 @@ async function seedTenant(client) {
       const start = apptStart(15)
       appts.push({ client_id: cid, customer_name: s.crm.full_name, customer_phone: s.crm.telefon, service_name: s.appt.service_name, service_color: s.appt.color, starts_at: start.toISOString(), ends_at: new Date(start.getTime() + 45 * 60000).toISOString(), status: "confirmed", urgency: "normal", source: s.channel === "whatsapp" ? "WhatsApp" : "Instagram", notes: "Zakazano preko AI agenta" })
     }
+  }
+
+  // ── background fill: authored convos (recent, populate the inbox) ─────────
+  const bg = isService ? bgServiceConvos() : bgProductConvos()
+  bg.forEach((c, idx) => {
+    const key = `demo_${cid8}_bg${idx}`
+    const baseOffsetMin = 180 + idx * 95 // last ~20h, under the hero rows
+    c.msgs.forEach(([role, text], i) => {
+      const ts = new Date(now - baseOffsetMin * 60000 + i * 40000).toISOString()
+      razgovori.push({ id_razgovora: key, role, message: text, platform: c.ch, client_id: cid, created_at: ts, metadata: { name: c.name, profile_pic: pic(c.name) } })
+    })
+  })
+  // ── filler convos spread across the last 28 days → analytics feels established
+  const FILL_N = 34
+  for (const f of fillerConvos(isService, FILL_N, cid8)) {
+    f.msgs.forEach(([role, text], i) => {
+      const ts = new Date(now - f.minAgo * 60000 + i * 40000).toISOString()
+      razgovori.push({ id_razgovora: f.key, role, message: text, platform: f.ch, client_id: cid, created_at: ts, metadata: { name: f.name, profile_pic: pic(f.name) } })
+    })
+  }
+  if (isService) {
+    for (const a of weekAppts()) appts.push({ client_id: cid, ...a })
   }
 
   const r1 = await sb.from("razgovori").insert(razgovori)

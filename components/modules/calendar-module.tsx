@@ -128,9 +128,14 @@ function computeApptLayout(appts: Appointment[]): Map<string, { col: number; tot
 interface Props {
   clientId: string
   nicheKey?: NicheKey
+  /** During onboarding tour: pulse-highlight the appointment matching this customer name */
+  tourHighlightName?: string
+  /** Demo tenants: re-anchor seeded appointment dates to "today" so the calendar
+   *  is never stale, regardless of how long ago the demo was built. */
+  demoMode?: boolean
 }
 
-export function CalendarModule({ clientId, nicheKey = 'generic' }: Props) {
+export function CalendarModule({ clientId, nicheKey = 'generic', tourHighlightName, demoMode }: Props) {
   const [appointments, setAppointments] = useState<Appointment[]>([])
   const [services, setServices] = useState<CatalogService[]>([])
   const [loading, setLoading] = useState(true)
@@ -153,22 +158,41 @@ export function CalendarModule({ clientId, nicheKey = 'generic' }: Props) {
 
   const fetchAppointments = useCallback(async () => {
     setLoading(true)
-    const from = new Date()
-    from.setDate(from.getDate() - 7)
-    const to = new Date()
-    to.setDate(to.getDate() + 30)
-
-    const { data } = await supabase
+    let query = supabase
       .from('appointments')
       .select('*')
       .eq('client_id', clientId)
-      .gte('starts_at', from.toISOString())
-      .lte('starts_at', to.toISOString())
       .order('starts_at', { ascending: true })
 
-    setAppointments((data as Appointment[]) ?? [])
+    // Real accounts: bound the window. Demo tenants: fetch all so we can re-anchor.
+    if (!demoMode) {
+      const from = new Date(); from.setDate(from.getDate() - 7)
+      const to = new Date(); to.setDate(to.getDate() + 30)
+      query = query.gte('starts_at', from.toISOString()).lte('starts_at', to.toISOString())
+    }
+
+    const { data } = await query
+    let appts = (data as Appointment[]) ?? []
+
+    // Demo: shift every appointment so the earliest one lands on today (keeps
+    // relative day spacing + exact times, e.g. the hero booking stays "danas u 15h").
+    if (demoMode && appts.length > 0) {
+      const midnight = (d: string | Date) => { const x = new Date(d); x.setHours(0, 0, 0, 0); return x.getTime() }
+      const earliest = Math.min(...appts.map(a => midnight(a.starts_at)))
+      const todayMid = midnight(new Date())
+      const delta = todayMid - earliest
+      if (delta !== 0) {
+        appts = appts.map(a => ({
+          ...a,
+          starts_at: new Date(new Date(a.starts_at).getTime() + delta).toISOString(),
+          ends_at: new Date(new Date(a.ends_at).getTime() + delta).toISOString(),
+        }))
+      }
+    }
+
+    setAppointments(appts)
     setLoading(false)
-  }, [clientId])
+  }, [clientId, demoMode])
 
   const fetchServices = useCallback(async () => {
     const { data } = await supabase
@@ -324,25 +348,31 @@ export function CalendarModule({ clientId, nicheKey = 'generic' }: Props) {
               </div>
 
               {/* Day headers */}
-              <div className="flex border-b border-white/5">
-                <div className="w-12 shrink-0" />
+              <div className="flex border-b border-white/8">
+                <div className="w-14 shrink-0" />
                 <div className="grid grid-cols-7 flex-1">
-                  {weekDays.map((day, i) => (
-                    <div key={i} className={cn('p-3 text-center border-l border-white/[0.04]', isSameDay(day, new Date()) && 'bg-white/5')}>
-                      <p className="text-xs text-slate-500">{DAYS_SR[i]}</p>
-                      <p className={cn('text-lg font-semibold', isSameDay(day, new Date()) ? 'text-sky-400' : 'text-white')}>{day.getDate()}</p>
-                    </div>
-                  ))}
+                  {weekDays.map((day, i) => {
+                    const isToday = isSameDay(day, new Date())
+                    return (
+                      <div key={i} className={cn('py-3 flex flex-col items-center gap-1.5 border-l border-white/[0.04] transition-colors', isToday && 'bg-emerald-500/[0.06]')}>
+                        <p className={cn('text-[11px] font-bold uppercase tracking-wider', isToday ? 'text-emerald-400' : 'text-slate-500')}>{DAYS_SR[i]}</p>
+                        <div className={cn('w-9 h-9 flex items-center justify-center rounded-full text-lg font-bold transition-all',
+                          isToday ? 'bg-emerald-500 text-[#05140d] shadow-[0_0_16px_-2px_rgba(16,185,129,0.6)]' : 'text-white')}>
+                          {day.getDate()}
+                        </div>
+                      </div>
+                    )
+                  })}
                 </div>
               </div>
 
               {/* Time grid */}
-              <div className="flex overflow-y-auto max-h-[520px]">
+              <div className="flex overflow-y-auto max-h-[560px]">
                 {/* Hour labels */}
-                <div className="w-12 shrink-0">
+                <div className="w-14 shrink-0">
                   {HOURS.map(h => (
-                    <div key={h} className="h-14 flex items-start justify-end pr-2 pt-1 border-t border-white/[0.04]">
-                      <span className="text-[10px] text-slate-600 font-mono leading-none">{h}:00</span>
+                    <div key={h} className="h-16 flex items-start justify-end pr-2.5 pt-1 border-t border-white/[0.04]">
+                      <span className="text-[11px] font-semibold text-slate-500 leading-none tabular-nums">{h}:00</span>
                     </div>
                   ))}
                 </div>
@@ -352,10 +382,10 @@ export function CalendarModule({ clientId, nicheKey = 'generic' }: Props) {
                   {weekDays.map((day, i) => {
                     const dayAppts = apptsByDay(day)
                     return (
-                      <div key={i} className={cn('relative border-l border-white/[0.04]', isSameDay(day, new Date()) && 'bg-white/[0.02]')}>
+                      <div key={i} className={cn('relative border-l border-white/[0.04]', isSameDay(day, new Date()) && 'bg-emerald-500/[0.04]')}>
                         {/* Hour grid lines */}
                         {HOURS.map(h => (
-                          <div key={h} className="h-14 border-t border-white/[0.04]" />
+                          <div key={h} className="h-16 border-t border-white/[0.04]" />
                         ))}
                         {/* Appointments — positioned by time, side-by-side when overlapping */}
                         {(() => {
@@ -365,30 +395,35 @@ export function CalendarModule({ clientId, nicheKey = 'generic' }: Props) {
                             const end = new Date(a.ends_at)
                             const startH = start.getHours() + start.getMinutes() / 60
                             const endH = end.getHours() + end.getMinutes() / 60
-                            const top = Math.max(0, (startH - 8) * 56)
-                            const height = Math.max(24, (endH - startH) * 56)
+                            const top = Math.max(0, (startH - 8) * 64)
+                            const height = Math.max(34, (endH - startH) * 64)
                             const { col, totalCols } = layoutMap.get(a.id) ?? { col: 0, totalCols: 1 }
                             const leftPct = (col / totalCols) * 100
                             const widthPct = (1 / totalCols) * 100
+                            const isTourHero = !!tourHighlightName && a.customer_name === tourHighlightName
+                            const cancelled = a.status === 'cancelled'
+                            const accent = isTourHero ? '#10b981' : (a.service_color || '#10b981')
                             return (
                               <button
                                 key={a.id}
                                 onClick={() => { setSelectedAppt(a); setDeleteConfirm(null) }}
                                 className={cn(
-                                  'absolute rounded-md border overflow-hidden transition-all hover:z-10 hover:brightness-110 text-left px-1.5 py-1',
-                                  STATUS_COLORS[a.status]
+                                  'absolute rounded-lg overflow-hidden transition-all hover:z-10 hover:brightness-125 text-left pl-2 pr-1.5 py-1.5',
+                                  cancelled && 'opacity-50 line-through',
+                                  isTourHero && 'animate-border-glow'
                                 )}
                                 style={{
-                                  top,
-                                  height,
-                                  left: `calc(${leftPct}% + 1px)`,
-                                  width: `calc(${widthPct}% - 2px)`,
-                                  borderLeftColor: a.service_color,
-                                  borderLeftWidth: 3,
+                                  top: top + 1,
+                                  height: height - 2,
+                                  left: `calc(${leftPct}% + 2px)`,
+                                  width: `calc(${widthPct}% - 4px)`,
+                                  borderLeft: `3px solid ${accent}`,
+                                  background: isTourHero ? 'rgba(16,185,129,0.18)' : `linear-gradient(135deg, ${accent}26, ${accent}12)`,
+                                  boxShadow: isTourHero ? '0 0 16px -2px rgba(16,185,129,0.55)' : `inset 1px 0 0 ${accent}`,
                                 }}
                               >
-                                <p className="text-[10px] font-medium text-white truncate leading-tight">{a.customer_name}</p>
-                                {height > 32 && <p className="text-[9px] text-slate-400 leading-tight">{formatTime(a.starts_at)}</p>}
+                                <p className="text-[12px] font-semibold text-white truncate leading-tight">{a.customer_name}</p>
+                                {height > 40 && <p className="text-[11px] font-medium leading-tight mt-0.5 tabular-nums" style={{ color: accent }}>{formatTime(a.starts_at)}</p>}
                                 {height > 48 && a.urgency === 'high' && (
                                   <Sparkles className="w-2.5 h-2.5 text-amber-400 mt-0.5" />
                                 )}

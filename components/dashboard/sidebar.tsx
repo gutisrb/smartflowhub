@@ -2,6 +2,7 @@
 
 import { cn } from "@/lib/utils"
 import { ChevronRight, UserCircle, Database, LayoutDashboard, Zap, BarChart3, Settings, ShieldCheck, Sparkles, X } from "lucide-react"
+import { SmartflowMark } from "@/components/dashboard/smartflow-mark"
 import { useState, useMemo } from "react"
 import { useUnifiedModules } from "@/lib/modules/hooks"
 import { EnabledModule, ModuleCategory, ModuleKey } from "@/lib/modules/types"
@@ -133,22 +134,22 @@ export function Sidebar({
           <div className="mx-4 mb-2 h-px bg-white/5" />
         </div>
       ) : (
-        <div className="p-6 md:p-8 pb-6 relative z-10">
+        <div className="px-6 md:px-7 pt-6 md:pt-7 pb-5 relative z-10">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4 group cursor-pointer">
+            <div className="flex items-center gap-3.5 group cursor-pointer">
               <div className="relative">
-                <div className="w-10 h-10 md:w-12 md:h-12 rounded-2xl bg-emerald flex items-center justify-center shadow-[0_0_20px_rgba(16,185,129,0.3)] group-hover:scale-110 transition-transform duration-500 overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-tr from-black/20 to-transparent" />
-                  <ShieldCheck className="w-5 h-5 md:w-6 md:h-6 text-obsidian relative z-10" />
-                  <div className="absolute inset-x-0 bottom-0 h-1/2 bg-white/10 blur-md translate-y-full group-hover:translate-y-0 transition-transform duration-700" />
+                <div className="w-11 h-11 rounded-2xl flex items-center justify-center shadow-[0_8px_24px_-6px_rgba(16,185,129,0.45)] group-hover:scale-105 transition-transform duration-500 overflow-hidden"
+                  style={{ background: "linear-gradient(135deg, #34d39e, #10b981)" }}>
+                  <div className="absolute inset-0 bg-gradient-to-tr from-black/15 to-transparent" />
+                  <span className="relative z-10"><SmartflowMark size={22} /></span>
                 </div>
                 <div className="absolute -top-1 -right-1 w-3 h-3 bg-emerald border-2 border-obsidian rounded-full animate-pulse" />
               </div>
-              <div className="flex flex-col">
-                <span className="text-xs font-bold text-emerald uppercase tracking-[0.2em] leading-none mb-1">
-                  {bookStoreConfig ? "Powered by" : "Powered by"}
+              <div className="flex flex-col gap-1">
+                <span className="text-[10px] font-bold text-emerald/90 uppercase tracking-[0.22em] leading-none">
+                  Powered by SmartFlow
                 </span>
-                <span className="text-lg md:text-xl font-outfit font-medium text-silver tracking-tight leading-none group-hover:text-white transition-colors">
+                <span className="text-lg font-outfit font-semibold text-silver tracking-tight leading-none group-hover:text-white transition-colors">
                   {bookStoreConfig ? bookStoreConfig.brandName : (clientName || "Dashboard")}
                 </span>
               </div>
@@ -183,7 +184,7 @@ export function Sidebar({
           </div>
         ) : (
           // Categorised nav (SmartFlow / agency clients)
-          <div className="space-y-8 py-2">
+          <div className="space-y-5 py-1">
             {CATEGORY_CONFIG.map(categoryConfig => {
               const categoryModules = modulesByCategory.get(categoryConfig.key) || []
               if (categoryModules.length === 0) return null
@@ -191,8 +192,8 @@ export function Sidebar({
               const isExpanded = expandedCategories.has(categoryConfig.key)
 
               return (
-                <div key={categoryConfig.key} className="space-y-3">
-                  <div className="flex items-center gap-2 px-4 mb-2">
+                <div key={categoryConfig.key} className="space-y-1.5">
+                  <div className="flex items-center gap-2 px-4 mb-1">
                     <categoryConfig.icon className="w-3.5 h-3.5 text-zinc-600" />
                     {categoryConfig.collapsible ? (
                       <button
@@ -232,8 +233,8 @@ export function Sidebar({
       </nav>
 
       {/* ── Profile footer ─────────────────────────────────────────────────── */}
-      <div className="p-6 relative z-10">
-        <div className="glass-card rounded-2xl p-3 border-emerald/5 hover:border-emerald/20 group/profile cursor-pointer">
+      <div className="px-4 pb-4 pt-2 relative z-10">
+        <div className="glass-card rounded-2xl p-2.5 border-emerald/5 hover:border-emerald/20 group/profile cursor-pointer">
           <div className="flex items-center gap-3">
             <div className="relative">
               <div className="w-10 h-10 rounded-xl bg-zinc-800 flex items-center justify-center text-zinc-400 group-hover/profile:text-emerald transition-colors overflow-hidden border border-white/5">

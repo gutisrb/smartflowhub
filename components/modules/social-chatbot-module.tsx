@@ -13,6 +13,7 @@ import { motion } from "framer-motion"
 import { cn } from "@/lib/utils"
 import { getBookStoreConfig } from "@/lib/brand-configs"
 import { NicheKey, NICHE_CONFIGS } from "@/lib/niche-config"
+import { ChannelGlyph } from "@/components/dashboard/channel-glyph"
 
 // ── Demo mode ────────────────────────────────────────────────────────────────
 const DEMO_MODE = false
@@ -426,6 +427,9 @@ interface SocialChatbotModuleProps {
     selectedBrandIds?: string[]
     clientName?: string
     nicheKey?: NicheKey
+    /** Onboarding: when true, the selected (hero) conversation plays in live,
+     *  message-by-message with a typing indicator, inside this real interface. */
+    demoPlayback?: boolean
 }
 
 function getPlatformMeta(platform: string) {
@@ -439,7 +443,17 @@ function getPlatformMeta(platform: string) {
 
 type Period = "danas" | "sedmica" | "mesec"
 
-export function SocialChatbotModule({ clientId, selectedBrandIds, clientName, nicheKey }: SocialChatbotModuleProps) {
+// Vivid, brand-accurate channel colors — platform is the primary visual signal in the list.
+const CHANNEL_HEX: Record<string, string> = {
+    instagram: "#E1306C",
+    whatsapp: "#25D366",
+    facebook: "#1877F2",
+    website: "#8b5cf6",
+    web: "#8b5cf6",
+}
+const channelHex = (p?: string) => CHANNEL_HEX[(p ?? "").toLowerCase()] ?? "#71717a"
+
+export function SocialChatbotModule({ clientId, selectedBrandIds, clientName, nicheKey, demoPlayback }: SocialChatbotModuleProps) {
     const bookStoreConfig = getBookStoreConfig(clientId)
     const isMultiBrand = (selectedBrandIds?.length ?? 0) > 1
     const brandIds = selectedBrandIds && selectedBrandIds.length > 0 ? selectedBrandIds : [clientId]
@@ -589,20 +603,72 @@ export function SocialChatbotModule({ clientId, selectedBrandIds, clientName, ni
         setSelectedId(null)
     }, [brandIdsKey]) // eslint-disable-line react-hooks/exhaustive-deps
 
+    // ── Detect newly-arrived conversations so they pop in + flash emerald ──────
+    const seenConvIdsRef = useRef<Set<string>>(new Set())
+    const firstConvLoadRef = useRef(true)
+    const [flashIds, setFlashIds] = useState<Set<string>>(new Set())
+    useEffect(() => {
+        if (conversations.length === 0) return
+        const current = new Set<string>(conversations.map((c: any) => c.id))
+        if (firstConvLoadRef.current) {
+            firstConvLoadRef.current = false
+            seenConvIdsRef.current = current
+            return
+        }
+        const newcomers = [...current].filter(id => !seenConvIdsRef.current.has(id))
+        seenConvIdsRef.current = current
+        if (newcomers.length > 0) {
+            setFlashIds(prev => new Set([...prev, ...newcomers]))
+            setTimeout(() => setFlashIds(prev => {
+                const n = new Set(prev); newcomers.forEach(id => n.delete(id)); return n
+            }), 2800)
+        }
+    }, [conversations])
+
     useEffect(() => {
         if (conversations.length > 0 && !selectedId) setSelectedId(conversations[0].id)
     }, [conversations, selectedId])
 
     const selected = conversations.find(c => c.id === selectedId)
-    const currentMessages = selected?.messages
+    const fullMessages = selected?.messages
         .filter((m: any) => m.role !== "system")
         .slice()
         .sort((a: any, b: any) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()) ?? []
 
+    // ── Onboarding live playback: reveal the hero thread one message at a time ──
+    const [pbCount, setPbCount] = useState(0)
+    const [pbTyping, setPbTyping] = useState(false)
+    useEffect(() => {
+        if (!demoPlayback || !selectedId || fullMessages.length === 0) { setPbCount(fullMessages.length); setPbTyping(false); return }
+        setPbCount(0); setPbTyping(false)
+        let alive = true
+        const timers: any[] = []
+        const reveal = (i: number) => {
+            if (!alive || i >= fullMessages.length) { setPbTyping(false); return }
+            const isAgent = fullMessages[i].role !== "user"
+            if (isAgent) {
+                setPbTyping(true)
+                timers.push(setTimeout(() => {
+                    if (!alive) return
+                    setPbTyping(false); setPbCount(i + 1)
+                    timers.push(setTimeout(() => reveal(i + 1), 620))
+                }, 1100))
+            } else {
+                setPbCount(i + 1)
+                timers.push(setTimeout(() => reveal(i + 1), 780))
+            }
+        }
+        timers.push(setTimeout(() => reveal(0), 600))
+        return () => { alive = false; timers.forEach(clearTimeout) }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [demoPlayback, selectedId, fullMessages.length])
+
+    const currentMessages = demoPlayback ? fullMessages.slice(0, pbCount) : fullMessages
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
-    }, [selectedId, currentMessages.length])
+    }, [selectedId, currentMessages.length, pbTyping])
 
     const getDisplayName = (conv: any) => {
         const name = nameMap[conv.id] || conv.candidateName
@@ -661,6 +727,10 @@ export function SocialChatbotModule({ clientId, selectedBrandIds, clientName, ni
     const _baseMsgs = _demoStats ? _demoStats.poruke : (DEMO_MODE ? 1340 : allMessages.filter(m => m.role !== "system").length)
     const msgCount = msgPeriod === "danas" ? Math.round(_baseMsgs / 30 * 1.2) : msgPeriod === "sedmica" ? Math.round(_baseMsgs / 4 * 1.1) : _baseMsgs
 
+    // Real, meaningful "closed by agent" count from CRM (booked / ordered / delivered)
+    const closedByAgent = crmRows.filter(r => ['Zakazano', 'Naručio', 'Isporučeno', 'Završeno'].includes(r.status)).length
+    const closedLabel = crmRows.some(r => ['Naručio', 'Isporučeno'].includes(r.status)) ? 'Naručilo' : 'Zakazano'
+
     const intervencije = conversations.filter((c: any) => c.humanNeeded).length
     const periodLabel = msgPeriod === "danas" ? "Danas" : msgPeriod === "sedmica" ? "7 dana" : "30 dana"
 
@@ -707,8 +777,8 @@ export function SocialChatbotModule({ clientId, selectedBrandIds, clientName, ni
             <div className="flex items-center justify-between shrink-0 flex-wrap gap-2">
                 <div>
                     <h2 className="text-xl md:text-3xl font-outfit font-bold tracking-tight text-white">
-                        Social{" "}
-                        <span style={{ background: "linear-gradient(120deg, #f472b6, #c084fc, #818cf8)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+                        AI{" "}
+                        <span style={{ background: "linear-gradient(120deg, #34d39e, #10b981, #06b6d4)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
                             Inbox
                         </span>
                     </h2>
@@ -765,8 +835,8 @@ export function SocialChatbotModule({ clientId, selectedBrandIds, clientName, ni
 
             {/* ── Stats ──────────────────────────────────────────────────────── */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3 shrink-0">
-                <StatCard icon={<MessageCircle className="w-4 h-4" />} label={`Upiti · ${periodLabel}`} value={upitiPeriod} variant="pink" />
-                <StatCard icon={<UserCheck className="w-4 h-4" />} label={`${leadsLabel} · ${periodLabel}`} value={prijavePeriod} variant="emerald" />
+                <StatCard icon={<MessageCircle className="w-4 h-4" />} label={`Razgovori · ${periodLabel}`} value={upitiPeriod} variant="emerald" />
+                <StatCard icon={<UserCheck className="w-4 h-4" />} label={`${closedLabel} (agent)`} value={closedByAgent} variant="emerald" />
                 <StatCard
                     icon={<AlertTriangle className="w-4 h-4" />}
                     label="Intervencije"
@@ -814,7 +884,7 @@ export function SocialChatbotModule({ clientId, selectedBrandIds, clientName, ni
                             onClick={() => setMobilePanel(tab.key)}
                             className={cn(
                                 "flex-1 py-1.5 rounded-lg text-[11px] font-mono font-bold uppercase tracking-wider transition-all",
-                                mobilePanel === tab.key ? "bg-pink-500/20 text-pink-400" : "text-zinc-600 hover:text-zinc-400"
+                                mobilePanel === tab.key ? "bg-emerald-500/20 text-emerald-400" : "text-zinc-600 hover:text-zinc-400"
                             )}
                         >
                             {tab.label}
@@ -895,64 +965,71 @@ export function SocialChatbotModule({ clientId, selectedBrandIds, clientName, ni
                                 Zainteresovan: '#f59e0b', Novi: '#0ea5e9',
                                 Reklamacija: '#f97316', Intervencija: '#ef4444',
                             }
+                            const justArrived = flashIds.has(conv.id)
+                            const statusColor = crmMatch?.status ? (STATUS_DOT[crmMatch.status] ?? '#6366f1') : null
+                            const chHex = channelHex(conv.platform)
                             return (
                                 <motion.button
                                     key={conv.id}
-                                    initial={{ opacity: 0, x: -8 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    transition={{ delay: Math.min(idx * 0.03, 0.5) }}
+                                    layout
+                                    initial={{ opacity: 0, scale: 0.92, y: -10 }}
+                                    animate={justArrived
+                                        ? { opacity: 1, scale: 1, y: 0, boxShadow: ["inset 0 0 0 0 rgba(16,185,129,0)", "inset 0 0 0 2px rgba(16,185,129,0.55), 0 0 24px -4px rgba(16,185,129,0.4)", "inset 0 0 0 0 rgba(16,185,129,0)"] }
+                                        : { opacity: 1, scale: 1, y: 0 }}
+                                    transition={justArrived
+                                        ? { duration: 0.45, ease: [0.16, 1, 0.3, 1], boxShadow: { duration: 1.4, repeat: 1 } }
+                                        : { duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
                                     onClick={() => { setSelectedId(conv.id); setMobilePanel("chat") }}
                                     className={cn(
-                                        "w-full text-left px-4 py-3.5 transition-all duration-200 relative border-l-2",
-                                        isSelected
-                                            ? "bg-pink-500/[0.08] border-l-pink-500"
-                                            : "hover:bg-white/[0.03]"
+                                        "w-full text-left pl-3 pr-4 py-3.5 transition-colors duration-200 relative",
+                                        isSelected ? "bg-emerald-500/[0.09]" : "hover:bg-white/[0.035]"
                                     )}
-                                    style={!isSelected ? { borderLeftColor: brandColor ? `${brandColor}50` : 'transparent', borderLeftWidth: '2px', borderLeftStyle: 'solid' } : undefined}
+                                    style={{ borderLeft: `3px solid ${isSelected ? '#34d39e' : chHex}` }}
                                 >
+                                    {justArrived && (
+                                        <span className="absolute top-2 right-3 text-[8px] font-extrabold uppercase tracking-wider px-1.5 py-0.5 rounded-md bg-emerald-400 text-[#05140d]">novo</span>
+                                    )}
                                     <div className="flex items-start gap-3">
-                                        {/* Avatar */}
+                                        {/* Avatar with vivid channel badge — platform is the primary signal */}
                                         <div className="relative shrink-0">
                                             <Avatar conv={conv} size="md" />
+                                            <span
+                                                className="absolute -bottom-1 -right-1 w-[22px] h-[22px] rounded-full flex items-center justify-center border-[2.5px] border-[#0e1117] shadow-lg"
+                                                style={{ background: chHex }}
+                                                title={pm.label}
+                                            >
+                                                <ChannelGlyph platform={conv.platform} className="w-[11px] h-[11px] text-white" />
+                                            </span>
                                             {conv.humanNeeded && (
-                                                <div className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-amber-400 border-2 border-[#0d0d14] flex items-center justify-center">
+                                                <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-amber-400 border-2 border-[#0e1117] flex items-center justify-center z-10">
                                                     <span className="text-[7px] font-black text-black leading-none">!</span>
                                                 </div>
                                             )}
                                         </div>
                                         <div className="flex-1 min-w-0">
-                                            <div className="flex items-baseline justify-between gap-1 mb-0.5">
-                                                <span className="text-sm font-semibold text-white truncate font-outfit">{name}</span>
-                                                <span className="text-[9px] font-mono text-zinc-600 shrink-0">
-                                                    {format(new Date(conv.lastVisibleMessage.created_at), "d.M HH:mm")}
+                                            <div className="flex items-center justify-between gap-2 mb-0.5">
+                                                <div className="flex items-center gap-2 min-w-0">
+                                                    <span className="text-[15px] font-semibold text-white truncate font-outfit">{name}</span>
+                                                    <span className="shrink-0 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded"
+                                                        style={{ color: chHex, background: `${chHex}1f` }}>
+                                                        {pm.label}
+                                                    </span>
+                                                </div>
+                                                <span className="text-[10px] text-zinc-500 shrink-0 tabular-nums">
+                                                    {format(new Date(conv.lastVisibleMessage.created_at), "HH:mm")}
                                                 </span>
                                             </div>
-                                            <div className="flex items-center gap-1.5 mb-1">
-                                                <pm.Icon className={cn("w-2.5 h-2.5", pm.color)} />
-                                                <span className={cn("text-[9px] font-mono font-bold uppercase tracking-wider", pm.color)}>{pm.label}</span>
-                                                {isMultiBrand && convBrandConfig && (
-                                                    <span
-                                                        className="text-[8px] font-mono font-bold px-1.5 py-0.5 rounded-full leading-none"
-                                                        style={{ color: convBrandConfig.color, background: `${convBrandConfig.color}15`, border: `1px solid ${convBrandConfig.color}30` }}
-                                                    >
-                                                        {convBrandConfig.brandName.split(' ').map((w: string) => w[0]).join('').slice(0, 2)}
-                                                    </span>
-                                                )}
-                                                {crmMatch?.status && (
-                                                    <span className="text-[8px] font-mono font-bold px-1.5 py-0.5 rounded-full leading-none flex items-center gap-1"
-                                                        style={{ color: STATUS_DOT[crmMatch.status] ?? '#6366f1', background: `${STATUS_DOT[crmMatch.status] ?? '#6366f1'}15`, border: `1px solid ${STATUS_DOT[crmMatch.status] ?? '#6366f1'}30` }}>
-                                                        <span className="w-1 h-1 rounded-full" style={{ background: STATUS_DOT[crmMatch.status] ?? '#6366f1' }} />
-                                                        {crmMatch.status}
-                                                    </span>
-                                                )}
-                                            </div>
-                                            {crmMatch?.proizvod ? (
-                                                <p className="text-[10px] text-zinc-600 truncate leading-relaxed font-mono">📦 {crmMatch.proizvod}</p>
-                                            ) : (
-                                                <p className="text-xs text-zinc-500 truncate leading-relaxed">
-                                                    {conv.lastVisibleMessage?.role === "assistant" ? "🤖 " : ""}
-                                                    {conv.lastVisibleMessage?.message?.substring(0, 50)}
-                                                </p>
+                                            <p className="text-[13px] text-zinc-400 truncate leading-snug">
+                                                {conv.lastVisibleMessage?.role === "assistant" && <span className="text-emerald-400/80">Vi: </span>}
+                                                {conv.lastVisibleMessage?.message?.substring(0, 48)}
+                                            </p>
+                                            {statusColor && (
+                                                <span className="inline-flex items-center gap-1.5 mt-1.5 text-[10px] font-bold px-2 py-0.5 rounded-full"
+                                                    style={{ color: statusColor, background: `${statusColor}18`, border: `1px solid ${statusColor}35` }}>
+                                                    <span className="w-1.5 h-1.5 rounded-full" style={{ background: statusColor }} />
+                                                    {crmMatch.status}
+                                                    {crmMatch?.proizvod && <span className="text-zinc-500 font-normal ml-0.5">· {crmMatch.proizvod}</span>}
+                                                </span>
                                             )}
                                         </div>
                                     </div>
@@ -1032,9 +1109,9 @@ export function SocialChatbotModule({ clientId, selectedBrandIds, clientName, ni
                                                     "max-w-[74%] rounded-2xl px-3.5 py-2.5 text-sm font-outfit",
                                                     isUser
                                                         ? "bg-[#1a1a28] text-zinc-200 rounded-tl-none border border-white/[0.07]"
-                                                        : "text-white rounded-tr-none shadow-lg"
+                                                        : "text-[#05140d] rounded-tr-none shadow-lg"
                                                 )}
-                                                style={!isUser ? { background: "linear-gradient(135deg, #7c3aed, #db2777)" } : undefined}
+                                                style={!isUser ? { background: "linear-gradient(135deg, #34d39e, #10b981)" } : undefined}
                                             >
                                                 {isStory && (
                                                     <p className="text-[9px] font-mono text-white/40 uppercase tracking-widest mb-1.5">↩ Story odgovor</p>
@@ -1052,13 +1129,23 @@ export function SocialChatbotModule({ clientId, selectedBrandIds, clientName, ni
                                                     <span className="text-[10px] font-mono uppercase tracking-widest opacity-40">📷 Slika</span>
                                                 )}
                                                 {msgText && <p className="leading-relaxed text-[13px]">{msgText}</p>}
-                                                <span className={cn("text-[10px] mt-1.5 block font-mono", isUser ? "opacity-35 text-zinc-400" : "opacity-40 text-white")}>
+                                                <span className={cn("text-[10px] mt-1.5 block font-mono", isUser ? "opacity-35 text-zinc-400" : "opacity-50 text-[#05140d]")}>
                                                     {format(new Date(msg.created_at), "HH:mm")}
                                                 </span>
                                             </div>
                                         </motion.div>
                                     )
                                 })}
+                                {demoPlayback && pbTyping && (
+                                    <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="flex justify-end">
+                                        <div className="rounded-2xl rounded-tr-none px-4 py-3 flex items-center gap-1.5" style={{ background: "linear-gradient(135deg, #34d39e, #10b981)" }}>
+                                            {[0, 1, 2].map(d => (
+                                                <motion.span key={d} className="w-1.5 h-1.5 rounded-full bg-[#05140d]"
+                                                    animate={{ opacity: [0.3, 1, 0.3], y: [0, -2, 0] }} transition={{ duration: 0.9, repeat: Infinity, delay: d * 0.15 }} />
+                                            ))}
+                                        </div>
+                                    </motion.div>
+                                )}
                                 <div ref={messagesEndRef} />
                             </div>
 
@@ -1103,15 +1190,15 @@ export function SocialChatbotModule({ clientId, selectedBrandIds, clientName, ni
                                         await fetchConversations();
                                     }}
                                 >
-                                    <input 
+                                    <input
                                         name="message"
-                                        type="text" 
-                                        placeholder="Upišite poruku..." 
-                                        className="flex-1 bg-white/[0.05] border border-white/[0.1] rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-pink-500/50"
+                                        type="text"
+                                        placeholder="Upišite poruku..."
+                                        className="flex-1 bg-white/[0.05] border border-white/[0.1] rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500/50"
                                     />
-                                    <button 
+                                    <button
                                         type="submit"
-                                        className="bg-pink-500/90 hover:bg-pink-500 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors disabled:opacity-50"
+                                        className="bg-emerald-500 hover:bg-emerald-400 text-[#05140d] px-4 py-2 rounded-lg text-sm font-bold transition-colors disabled:opacity-50"
                                     >
                                         Pošalji
                                     </button>
@@ -1120,8 +1207,8 @@ export function SocialChatbotModule({ clientId, selectedBrandIds, clientName, ni
                         </>
                     ) : (
                         <div className="flex-1 flex flex-col items-center justify-center gap-3 text-center">
-                            <div className="w-14 h-14 rounded-2xl border border-pink-500/20 bg-pink-500/[0.06] flex items-center justify-center">
-                                <Inbox className="w-6 h-6 text-pink-500/40" />
+                            <div className="w-14 h-14 rounded-2xl border border-emerald-500/20 bg-emerald-500/[0.06] flex items-center justify-center">
+                                <Inbox className="w-6 h-6 text-emerald-500/40" />
                             </div>
                             <p className="text-zinc-600 text-sm font-mono">Izaberite razgovor</p>
                         </div>
@@ -1135,36 +1222,28 @@ export function SocialChatbotModule({ clientId, selectedBrandIds, clientName, ni
                 )}>
                     {selected ? (
                         <>
-                            {/* Profile card */}
-                            <div className="rounded-2xl border border-white/[0.07] bg-white/[0.02] overflow-hidden backdrop-blur-xl shrink-0">
-                                {/* Cover */}
-                                <div
-                                    className="h-14 relative overflow-hidden"
-                                    style={{ background: `linear-gradient(135deg, ${getPlatformMeta(selected.platform).gradFrom}33, ${getPlatformMeta(selected.platform).gradTo}55)` }}
-                                >
-                                    {(() => {
-                                        const pm = getPlatformMeta(selected.platform)
-                                        return <pm.Icon className={cn("absolute right-3 bottom-2 w-5 h-5 opacity-25", pm.color)} />
-                                    })()}
-                                </div>
-                                <div className="px-4 pb-4">
-                                    {/* Avatar overlapping cover */}
-                                    <div className="-mt-5 mb-2.5">
-                                        <Avatar conv={selected} size="lg" className="border-2 border-[#111118]" />
+                            {/* Profile card — clean, centered, no colored cover bleed */}
+                            <div className="rounded-2xl border border-white/[0.07] bg-white/[0.02] backdrop-blur-xl shrink-0">
+                                <div className="px-4 pt-5 pb-4 flex flex-col items-center text-center">
+                                    <div className="relative">
+                                        <Avatar conv={selected} size="lg" className="w-16 h-16 ring-2 ring-white/10" />
+                                        <span className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center border-2 border-[#111118]"
+                                            style={{ background: channelHex(selected.platform) }}>
+                                            <ChannelGlyph platform={selected.platform} className="w-3 h-3 text-white" />
+                                        </span>
                                     </div>
-                                    <p className="font-semibold text-white text-sm font-outfit leading-tight">
+                                    <p className="font-semibold text-white text-base font-outfit leading-tight mt-3">
                                         {getFullName(selected) || getDisplayName(selected)}
                                     </p>
-                                    <p className="text-[10px] font-mono text-zinc-600 mt-0.5 truncate" title={selected.id}>
-                                        ID: {selected.id.substring(0, 14)}…
-                                    </p>
                                     {/* Badges */}
-                                    <div className="mt-3 flex flex-wrap gap-1.5">
+                                    <div className="mt-3 flex flex-wrap gap-1.5 justify-center">
                                         {(() => {
                                             const pm = getPlatformMeta(selected.platform)
+                                            const ch = channelHex(selected.platform)
                                             return (
-                                                <span className={cn("inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-mono font-bold uppercase tracking-wider border border-current/20 bg-current/5", pm.color)}>
-                                                    <pm.Icon className="w-2 h-2" />
+                                                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider"
+                                                    style={{ color: ch, background: `${ch}1f`, border: `1px solid ${ch}40` }}>
+                                                    <ChannelGlyph platform={selected.platform} className="w-2.5 h-2.5" />
                                                     {pm.label}
                                                 </span>
                                             )
@@ -1180,22 +1259,25 @@ export function SocialChatbotModule({ clientId, selectedBrandIds, clientName, ni
                             </div>
 
                             {/* Contact info */}
-                            <div className="rounded-2xl border border-white/[0.07] bg-white/[0.02] p-4 backdrop-blur-xl shrink-0">
-                                <p className="text-[9px] font-mono font-bold text-zinc-600 uppercase tracking-widest mb-3">Kontakt Info</p>
-                                <div className="space-y-3">
-                                    <InfoRow icon={<Hash />} label="Meta Sender ID" value={selected.id.substring(0, 12) + "…"} mono />
-                                    <InfoRow icon={<Instagram />} label="Platforma" value={getPlatformMeta(selected.platform).label + " DM"} />
-                                    <InfoRow icon={<Phone />} label="Telefon" value={selected.phone || "—"} />
-                                    {bookStoreConfig && (
-                                        <InfoRow
-                                            icon={<Globe />}
-                                            label="Website"
-                                            value={bookStoreConfig.websiteUrl}
-                                            link={`https://${bookStoreConfig.websiteUrl}`}
-                                        />
-                                    )}
-                                </div>
-                            </div>
+                            {(() => {
+                                const fn = getFullName(selected) || selected.candidateName
+                                const cm = crmRows.find(r => r.full_name?.toLowerCase() === fn?.toLowerCase())
+                                const phone = cm?.telefon || selected.phone
+                                const pmeta = getPlatformMeta(selected.platform)
+                                return (
+                                    <div className="rounded-2xl border border-white/[0.07] bg-white/[0.02] p-4 backdrop-blur-xl shrink-0">
+                                        <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-3">Kontakt</p>
+                                        <div className="space-y-3">
+                                            <InfoRow icon={<Phone />} label="Telefon" value={phone || "Nije ostavljen"} />
+                                            <InfoRow icon={<ChannelGlyph platform={selected.platform} />} label="Kanal" value={pmeta.label} />
+                                            <InfoRow icon={<Clock />} label="Prvi kontakt" value={format(new Date(conversations.find(c => c.id === selected.id)?.messages?.[0]?.created_at ?? selected.lastVisibleMessage.created_at), "d.MM.yyyy")} />
+                                            {bookStoreConfig && (
+                                                <InfoRow icon={<Globe />} label="Website" value={bookStoreConfig.websiteUrl} link={`https://${bookStoreConfig.websiteUrl}`} />
+                                            )}
+                                        </div>
+                                    </div>
+                                )
+                            })()}
 
                             {/* Conversation stats */}
                             <div className="rounded-2xl border border-white/[0.07] bg-white/[0.02] p-4 backdrop-blur-xl shrink-0">

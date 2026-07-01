@@ -7,7 +7,8 @@ import { Sidebar } from "@/components/dashboard/sidebar"
 import { useUnifiedModules } from "@/lib/modules/hooks"
 import { ModuleKey } from "@/lib/modules/types"
 import { Button } from "@/components/ui/button"
-import { LogOut, Bell, Sparkles, Menu, Activity, X as XIcon } from "lucide-react"
+import { LogOut, Sparkles, Menu, Activity, X as XIcon } from "lucide-react"
+import { NotificationPanel } from "@/components/dashboard/notification-panel"
 import { motion, AnimatePresence } from "framer-motion"
 import { cn } from "@/lib/utils"
 import { isGroupClient, GROUP_CLIENTS, BOOK_STORE_CLIENTS, getBookStoreConfig } from "@/lib/brand-configs"
@@ -24,6 +25,7 @@ import { ChatbotAnalyticsModule } from "@/components/modules/chatbot-analytics-m
 import { CalendarModule } from "@/components/modules/calendar-module"
 import { SettingsModule } from "@/components/modules/settings-module"
 import { inferNicheKey, NICHE_CONFIGS } from "@/lib/niche-config"
+import { IntroStep } from "@/components/onboarding/steps/intro-step"
 import { OnboardingTour } from "@/components/onboarding/onboarding-tour"
 import { PonudaModule } from "@/components/modules/ponuda-module"
 import type { OnboardingCopy } from "@/lib/onboarding/types"
@@ -40,10 +42,13 @@ export default function DashboardPage() {
   const [selectedBrandIds, setSelectedBrandIds] = useState<string[]>([])
   // Intervencija notifications
   const [intervencijaToasts, setIntervencijaToasts] = useState<{ id: string; brandName: string; color: string }[]>([])
-  const [unreadBellCount, setUnreadBellCount] = useState(0)
   const [onboardedAt, setOnboardedAt] = useState<string | null>(null)
   const [onboardingCopy, setOnboardingCopy] = useState<OnboardingCopy | null>(null)
   const [showOnboarding, setShowOnboarding] = useState(false)
+  const [onboardingPhase, setOnboardingPhase] = useState<'intro' | 'tour'>('intro')
+  const [inboxPlayback, setInboxPlayback] = useState(false)
+  const [tourSlot, setTourSlot] = useState<string | null>(null)
+  const tourHeroName = showOnboarding ? "Marija Jović" : null
 
   // Primary effective clientId — first selected brand (used by AI Agent, module loading, etc.)
   const effectiveClientId = useMemo(() => {
@@ -104,14 +109,20 @@ export default function DashboardPage() {
     }
   }, [availableModules, isLoading, activeModule])
 
-  // Show onboarding once, after modules are ready, if not yet onboarded
+  // Show onboarding after modules are ready.
+  // Demo tenants (a lead's personalized demo): replay on EVERY login — it's the sales pitch.
+  // Real/agency accounts: show once (gated by onboarded_at + localStorage).
   useEffect(() => {
     if (isLoading || !clientId || availableModules.length === 0) return
-    if (onboardedAt) return
-    if (typeof window !== "undefined" && localStorage.getItem(`sf_onboarded_${clientId}`)) return
+    const isDemoTenant = !!demoNiche
+    if (!isDemoTenant) {
+      if (onboardedAt) return
+      if (typeof window !== "undefined" && localStorage.getItem(`sf_onboarded_${clientId}`)) return
+    }
+    setOnboardingPhase('intro')
     setShowOnboarding(true)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoading, clientId, onboardedAt, availableModules.length])
+  }, [isLoading, clientId, onboardedAt, availableModules.length, demoNiche])
 
   // ── Intervencija realtime notifications ──────────────────────────────────
   useEffect(() => {
@@ -144,7 +155,6 @@ export default function DashboardPage() {
               { id: `${brandId}-${Date.now()}`, brandName: config.brandName, color: config.color ?? '#10b981' },
               ...prev.slice(0, 2),
             ])
-            setUnreadBellCount(c => c + 1)
           }
         )
         .subscribe()
@@ -166,9 +176,21 @@ export default function DashboardPage() {
 
   const markOnboarded = useCallback(async () => {
     setShowOnboarding(false)
+    setTourSlot(null)
     if (!clientId) return
     if (typeof window !== "undefined") localStorage.setItem(`sf_onboarded_${clientId}`, "1")
     await supabase.from('clients').update({ onboarded_at: new Date().toISOString() }).eq('id', clientId)
+  }, [clientId, supabase])
+
+  const replayOnboarding = useCallback(async () => {
+    if (!clientId) return
+    if (typeof window !== "undefined") localStorage.removeItem(`sf_onboarded_${clientId}`)
+    setOnboardedAt(null)
+    setOnboardingPhase('intro')
+    setTourSlot(null)
+    setInboxPlayback(false)
+    setShowOnboarding(true)
+    await supabase.from('clients').update({ onboarded_at: null }).eq('id', clientId)
   }, [clientId, supabase])
 
   const terminology = useMemo(() => {
@@ -246,14 +268,14 @@ export default function DashboardPage() {
           statuses={settings.statuses || ['Novi Lead', 'enriched', 'Kontaktiran', 'Meeting Booked', 'Closed', 'Lost', 'Sent']}
         />
       case 'business-crm':
-        if (demoNiche) return <AgentLeadsModule clientId={effectiveClientId} demoMode nicheKey={inferNicheKey(demoNiche)} />
+        if (demoNiche) return <AgentLeadsModule clientId={effectiveClientId} demoMode nicheKey={inferNicheKey(demoNiche)} tourHighlightName={tourSlot === 'crm' ? tourHeroName ?? undefined : undefined} />
         return <GrowthEngineModule
           clientId={effectiveClientId}
           tableName="kontakti"
           statuses={settings.statuses || ['Novi Lead', 'enriched', 'Kontaktiran', 'Meeting Booked', 'Closed', 'Lost', 'Sent']}
         />
       case 'calendar':
-        return <CalendarModule clientId={effectiveClientId} nicheKey={inferNicheKey(demoNiche)} />
+        return <CalendarModule clientId={effectiveClientId} nicheKey={inferNicheKey(demoNiche)} demoMode={!!demoNiche} tourHighlightName={tourSlot === 'termini' ? tourHeroName ?? undefined : undefined} />
       case 'email-outreach':
         return <EmailOutreachModule
           clientId={effectiveClientId}
@@ -274,13 +296,13 @@ export default function DashboardPage() {
       case 'agent-leads':
         return <AgentLeadsModule clientId={effectiveClientId} terminology={terminology} selectedBrandIds={isBookStoreClient && selectedBrandIds.length > 1 ? selectedBrandIds : undefined} />
       case 'social-chatbot':
-        return <SocialChatbotModule clientId={effectiveClientId} selectedBrandIds={isBookStoreClient && selectedBrandIds.length > 0 ? selectedBrandIds : undefined} clientName={clientName} nicheKey={demoNiche ? inferNicheKey(demoNiche) : undefined} />
+        return <SocialChatbotModule clientId={effectiveClientId} selectedBrandIds={isBookStoreClient && selectedBrandIds.length > 0 ? selectedBrandIds : undefined} clientName={clientName} nicheKey={demoNiche ? inferNicheKey(demoNiche) : undefined} demoPlayback={inboxPlayback} />
       case 'website-chatbot':
         return <WebsiteChatbotModule clientId={effectiveClientId} />
       case 'chatbot-analytics':
         return <ChatbotAnalyticsModule clientId={effectiveClientId} selectedBrandIds={isBookStoreClient && selectedBrandIds.length > 1 ? selectedBrandIds : undefined} demoNiche={demoNiche} />
       case 'ponuda':
-        return <PonudaModule clientName={clientName} />
+        return <PonudaModule clientName={clientName} onReplay={replayOnboarding} />
       case 'settings':
         return <SettingsModule clientId={effectiveClientId} selectedBrandIds={selectedBrandIds.length > 0 ? selectedBrandIds : undefined} />
       default:
@@ -372,19 +394,11 @@ export default function DashboardPage() {
             <div className="flex items-center gap-2 md:gap-6">
 
               <div className="flex items-center gap-2 md:gap-4">
-                <button
-                  className="p-2 md:p-2.5 rounded-xl bg-white/5 border border-white/10 text-zinc-400 hover:text-emerald hover:border-emerald/30 transition-all duration-300 relative group"
-                  onClick={() => setUnreadBellCount(0)}
-                >
-                  <Bell className="w-4 h-4 md:w-5 md:h-5" />
-                  {unreadBellCount > 0 ? (
-                    <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] bg-red-500 rounded-full text-[9px] font-black flex items-center justify-center text-white px-1 shadow-[0_0_8px_rgba(239,68,68,0.5)]">
-                      {unreadBellCount > 9 ? '9+' : unreadBellCount}
-                    </span>
-                  ) : (
-                    <span className="absolute top-2 right-2 w-1.5 h-1.5 bg-emerald rounded-full shadow-[0_0_10px_rgba(16,185,129,0.8)]" />
-                  )}
-                </button>
+                <NotificationPanel
+                  clientId={effectiveClientId}
+                  demoNiche={demoNiche}
+                  onNavigate={(key) => setActiveModule(key as ModuleKey)}
+                />
 
                 <div className="h-8 w-px bg-white/10 hidden sm:block" />
 
@@ -508,14 +522,19 @@ export default function DashboardPage() {
         </AnimatePresence>
       </div>
 
-      {showOnboarding && (
+      {showOnboarding && onboardingPhase === 'intro' && (
+        <IntroStep brandColor="#10b981" onNext={() => setOnboardingPhase('tour')} />
+      )}
+      {showOnboarding && onboardingPhase === 'tour' && (
         <OnboardingTour
           modules={filteredModules}
           clientName={clientName}
-          storedCopy={onboardingCopy}
           niche={demoNiche}
+          brandColor="#10b981"
           onNavigate={(key) => setActiveModule(key as ModuleKey)}
-          onComplete={markOnboarded}
+          onPlayback={setInboxPlayback}
+          onSlot={setTourSlot}
+          onComplete={() => { setInboxPlayback(false); markOnboarded() }}
         />
       )}
     </div>

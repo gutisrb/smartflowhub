@@ -8,7 +8,7 @@ import {
     PieChart, Pie, Cell,
     CartesianGrid,
 } from "recharts"
-import { TrendingUp, MessageSquare, Users, Zap, Activity, BookOpen, Tag, ShoppingBag, } from "lucide-react"
+import { TrendingUp, MessageSquare, Users, Zap, Activity, BookOpen, Tag, ShoppingBag, Sparkles, } from "lucide-react"
 import { getBookStoreConfig, BookStoreConfig, BOOK_STORE_CLIENTS } from "@/lib/brand-configs"
 import { getCrmHarmonijaByClientId, getCrmPublikByClientId, getCrmStelaByClientId, getCrmAleksandarMNByClientId, getCrmMagunaByClientId } from "@/lib/supabase/queries"
 import { createClient as createSupabaseClient } from "@/lib/supabase/client"
@@ -1104,20 +1104,55 @@ const STATUS_COLORS_MAP_DEMO: Record<string, string> = {
     Reklamacija: "#f97316", Intervencija: "#ef4444",
 }
 
+const SERVICE_NICHES_ANALYTICS = new Set(["dental", "medical", "beauty", "fitness", "services", "wellness", "real-estate"])
+
+// Keyword classifiers — derive question topics & objections from raw user messages.
+const QUESTION_TOPICS: { label: string; kw: string[] }[] = [
+    { label: "Cena / cenovnik", kw: ["košta", "cena", "cenovnik", "koliko"] },
+    { label: "Slobodni termini", kw: ["slobodno", "termin", "zakaz", "sutra", "danas", "ove nedelje"] },
+    { label: "Radno vreme", kw: ["radite", "radno", "vikendom", "subotom", "otvoreno", "radni"] },
+    { label: "Dostupnost", kw: ["na stanju", "dostupno", "imate li", "ima li"] },
+    { label: "Dostava", kw: ["dostava", "šalje", "pouzeć", "kurir", "stiže"] },
+    { label: "Garancija / povraćaj", kw: ["garancij", "reklamacij", "povraćaj", "zamen"] },
+    { label: "Trajanje / pregled", kw: ["traje", "koliko traje", "pregled"] },
+    { label: "Boja / varijanta", kw: ["boj", "veličin", "model", "varijant"] },
+]
+const OBJECTION_TOPICS: { label: string; kw: string[] }[] = [
+    { label: "Cena (skupo)", kw: ["skupo", "mnogo", "preskupo", "puno para"] },
+    { label: "Razmisliću / kasnije", kw: ["razmisli", "javiću se", "možda", "kasnije", "sledeć"] },
+    { label: "Termin ne odgovara", kw: ["samo subota", "ne mogu", "radim radnim", "isključivo"] },
+    { label: "Nije na stanju", kw: ["nema na stanju", "rasprodat", "nema u"] },
+]
+
+function classify(msgs: string[], topics: { label: string; kw: string[] }[]) {
+    const counts: Record<string, number> = {}
+    for (const raw of msgs) {
+        const m = (raw || "").toLowerCase()
+        for (const t of topics) {
+            if (t.kw.some(k => m.includes(k))) counts[t.label] = (counts[t.label] ?? 0) + 1
+        }
+    }
+    return Object.entries(counts).sort((a, b) => b[1] - a[1]).map(([label, count]) => ({ label, count }))
+}
+
 function DemoAnalytics({ clientId, demoNiche }: { clientId: string; demoNiche: string }) {
     const [crmRows, setCrmRows] = useState<any[]>([])
     const [razgovori, setRazgovori] = useState<any[]>([])
+    const [appts, setAppts] = useState<any[]>([])
     const [loading, setLoading] = useState(true)
     const [period, setPeriod] = useState<'danas' | 'sedmica' | 'mesec'>('mesec')
+    const isServiceNiche = SERVICE_NICHES_ANALYTICS.has((demoNiche || "").toLowerCase())
 
     useEffect(() => {
         const sb = createSupabaseClient()
         Promise.all([
             sb.from('demo_crm').select('*').eq('client_id', clientId),
-            sb.from('razgovori').select('platform, id_razgovora, created_at').eq('client_id', clientId),
-        ]).then(([crm, razg]) => {
+            sb.from('razgovori').select('platform, id_razgovora, created_at, message, role').eq('client_id', clientId),
+            sb.from('appointments').select('starts_at, service_name').eq('client_id', clientId),
+        ]).then(([crm, razg, ap]) => {
             setCrmRows(crm.data ?? [])
             setRazgovori(razg.data ?? [])
+            setAppts(ap.data ?? [])
             setLoading(false)
         })
     }, [clientId])
@@ -1192,6 +1227,29 @@ function DemoAnalytics({ clientId, demoNiche }: { clientId: string; demoNiche: s
     // Status distribution
     const statusCounts: Record<string, number> = {}
     crmRows.forEach(r => { statusCounts[r.status] = (statusCounts[r.status] ?? 0) + 1 })
+
+    // ── AI Insights (derived from conversations) ──────────────────────────────
+    const userMessages = razgovori.filter(r => r.role === 'user').map(r => r.message as string)
+    const topQuestions = classify(userMessages, QUESTION_TOPICS).slice(0, 5)
+    const maxQ = topQuestions[0]?.count ?? 1
+    const topObjections = classify(userMessages, OBJECTION_TOPICS).slice(0, 4)
+    const maxO = topObjections[0]?.count ?? 1
+
+    // Hottest scheduling times — appointment hour histogram (service) or order-time (product)
+    const timeSource = isServiceNiche
+        ? appts.map(a => new Date(a.starts_at))
+        : razgovori.filter(r => r.role === 'user').map(r => new Date(r.created_at))
+    const hourBuckets: Record<number, number> = {}
+    timeSource.forEach(d => { const h = d.getHours(); if (h >= 7 && h <= 20) hourBuckets[h] = (hourBuckets[h] ?? 0) + 1 })
+    const hotTimes = Object.entries(hourBuckets).map(([h, c]) => ({ hour: Number(h), count: c })).sort((a, b) => b.count - a.count)
+    const maxHot = hotTimes[0]?.count ?? 1
+    const hotTimesSorted = [...hotTimes].sort((a, b) => a.hour - b.hour)
+
+    // Most-requested services/treatments (service) from appointments
+    const svcCounts: Record<string, number> = {}
+    appts.forEach(a => { if (a.service_name) svcCounts[a.service_name] = (svcCounts[a.service_name] ?? 0) + 1 })
+    const topServices = Object.entries(svcCounts).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([name, count]) => ({ name, count }))
+    const maxSvc = topServices[0]?.count ?? 1
 
     const PERIODS = [
         { key: 'danas' as const, label: 'Danas' },
@@ -1302,6 +1360,126 @@ function DemoAnalytics({ clientId, demoNiche }: { clientId: string; demoNiche: s
                     )}
                 </motion.div>
             </div>
+
+            {/* ── AI Insights — what the agent learns from conversations ───────── */}
+            <motion.div variants={fadeUp} className="flex items-center gap-3 pt-2">
+                <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: "rgba(16,185,129,0.15)", border: "1px solid rgba(16,185,129,0.3)" }}>
+                    <Sparkles className="w-4 h-4 text-emerald-400" />
+                </div>
+                <div>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-emerald-500">AI Insights</p>
+                    <p className="text-sm font-semibold text-white">Šta agent saznaje iz svakog razgovora</p>
+                </div>
+            </motion.div>
+
+            <div className="grid grid-cols-12 gap-4">
+                {/* Hottest times */}
+                <motion.div variants={fadeUp} className="col-span-12 lg:col-span-5 glass-card rounded-2xl p-6">
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-1">Špic sati</p>
+                    <p className="text-sm font-semibold text-white mb-1">{isServiceNiche ? "Najtraženiji termini" : "Najaktivniji sati"}</p>
+                    {hotTimesSorted.length > 0 && (
+                        <p className="text-[11px] text-emerald-400/80 mb-4">
+                            Najviše {isServiceNiche ? "zakazivanja" : "upita"} u {hotTimes.slice(0, 2).map(t => `${t.hour}h`).join(" i ")}
+                        </p>
+                    )}
+                    {hotTimesSorted.length === 0 ? (
+                        <p className="text-xs italic text-zinc-600">Nema dovoljno podataka</p>
+                    ) : (
+                        <div className="flex items-end justify-between gap-1.5 h-32 mt-2">
+                            {hotTimesSorted.map((t, i) => {
+                                const pct = Math.round(t.count / maxHot * 100)
+                                const isPeak = t.count === maxHot
+                                return (
+                                    <div key={t.hour} className="flex-1 flex flex-col items-center gap-1.5">
+                                        <motion.div initial={{ height: 0 }} animate={{ height: `${Math.max(pct, 6)}%` }}
+                                            transition={{ duration: 0.7, delay: 0.1 + i * 0.04, ease: 'easeOut' }}
+                                            className="w-full rounded-t-md relative group"
+                                            style={{ background: isPeak ? 'linear-gradient(180deg,#34d39e,#10b981)' : 'rgba(16,185,129,0.25)', boxShadow: isPeak ? '0 0 14px -2px rgba(16,185,129,0.6)' : 'none' }} />
+                                        <span className={`text-[9px] font-mono ${isPeak ? 'text-emerald-400 font-bold' : 'text-zinc-600'}`}>{t.hour}</span>
+                                    </div>
+                                )
+                            })}
+                        </div>
+                    )}
+                </motion.div>
+
+                {/* Top questions */}
+                <motion.div variants={fadeUp} className="col-span-12 lg:col-span-4 glass-card rounded-2xl p-6">
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-1">Potražnja</p>
+                    <p className="text-sm font-semibold text-white mb-5">Najčešća pitanja kupaca</p>
+                    {topQuestions.length === 0 ? (
+                        <p className="text-xs italic text-zinc-600">Nema dovoljno podataka</p>
+                    ) : (
+                        <div className="space-y-3">
+                            {topQuestions.map((q, i) => {
+                                const pct = Math.round(q.count / maxQ * 100)
+                                return (
+                                    <div key={q.label}>
+                                        <div className="flex items-center justify-between mb-1">
+                                            <span className="text-xs font-medium text-zinc-300">{q.label}</span>
+                                            <span className="text-xs font-black text-emerald-400">{q.count}</span>
+                                        </div>
+                                        <div className="h-1.5 rounded-full overflow-hidden bg-white/5">
+                                            <motion.div initial={{ width: 0 }} animate={{ width: `${pct}%` }}
+                                                transition={{ duration: 0.9, delay: 0.2 + i * 0.08, ease: 'easeOut' }}
+                                                className="h-full rounded-full" style={{ background: 'linear-gradient(90deg,#10b981,#06b6d4)' }} />
+                                        </div>
+                                    </div>
+                                )
+                            })}
+                        </div>
+                    )}
+                </motion.div>
+
+                {/* Top objections */}
+                <motion.div variants={fadeUp} className="col-span-12 lg:col-span-3 glass-card rounded-2xl p-6">
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-1">Prepreke</p>
+                    <p className="text-sm font-semibold text-white mb-5">Najčešće primedbe</p>
+                    {topObjections.length === 0 ? (
+                        <p className="text-xs italic text-zinc-600">Nema zabeleženih primedbi</p>
+                    ) : (
+                        <div className="space-y-2.5">
+                            {topObjections.map((o, i) => (
+                                <div key={o.label} className="rounded-xl px-3 py-2.5 flex items-center justify-between"
+                                    style={{ background: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.2)" }}>
+                                    <span className="text-xs font-medium text-amber-200/90">{o.label}</span>
+                                    <span className="text-sm font-black text-amber-400">{o.count}</span>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </motion.div>
+            </div>
+
+            {/* Most-requested services (service niches) */}
+            {isServiceNiche && topServices.length > 0 && (
+                <motion.div variants={fadeUp} className="glass-card rounded-2xl p-6">
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-1">Usluge</p>
+                    <p className="text-sm font-semibold text-white mb-5">Najtraženije usluge (po zakazanim terminima)</p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3.5">
+                        {topServices.map((s, i) => {
+                            const pct = Math.round(s.count / maxSvc * 100)
+                            const color = ['#06b6d4', '#8b5cf6', '#f59e0b', '#10b981', '#ec4899'][i] ?? '#52525b'
+                            return (
+                                <div key={s.name} className="flex items-center gap-3">
+                                    <span className="text-sm w-5 shrink-0 text-center">{['🥇', '🥈', '🥉'][i] ?? `${i + 1}`}</span>
+                                    <div className="flex-1 min-w-0">
+                                        <div className="flex items-center justify-between mb-1">
+                                            <span className="text-xs font-medium text-zinc-300 truncate pr-2">{s.name}</span>
+                                            <span className="text-xs font-black shrink-0" style={{ color }}>{s.count}</span>
+                                        </div>
+                                        <div className="h-1.5 rounded-full overflow-hidden bg-white/5">
+                                            <motion.div initial={{ width: 0 }} animate={{ width: `${pct}%` }}
+                                                transition={{ duration: 1, delay: 0.2 + i * 0.08, ease: 'easeOut' }}
+                                                className="h-full rounded-full" style={{ background: color }} />
+                                        </div>
+                                    </div>
+                                </div>
+                            )
+                        })}
+                    </div>
+                </motion.div>
+            )}
 
             {/* Conversion funnel */}
             <motion.div variants={fadeUp} className="glass-card rounded-2xl p-6">

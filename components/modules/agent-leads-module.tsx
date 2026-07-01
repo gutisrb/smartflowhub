@@ -44,6 +44,8 @@ interface AgentLeadsModuleProps {
     };
     demoMode?: boolean;
     nicheKey?: NicheKey;
+    /** During onboarding tour: pulse-highlight the row whose full_name matches */
+    tourHighlightName?: string;
 }
 
 // ── Delivery status options ────────────────────────────────────────────────────
@@ -120,7 +122,7 @@ const MOCK_BOOKSTORE_CRM_BY_CLIENT: Record<string, any[]> = {
     ],
 }
 
-export function AgentLeadsModule({ clientId, selectedBrandIds, terminology: propTerminology, demoMode, nicheKey }: AgentLeadsModuleProps) {
+export function AgentLeadsModule({ clientId, selectedBrandIds, terminology: propTerminology, demoMode, nicheKey, tourHighlightName }: AgentLeadsModuleProps) {
     const [leads, setLeads] = useState<any[]>([])
     const [loading, setLoading] = useState(true)
     const [searchTerm, setSearchTerm] = useState('')
@@ -299,10 +301,7 @@ export function AgentLeadsModule({ clientId, selectedBrandIds, terminology: prop
         if (iz.includes('whatsapp'))                           return { label: 'WhatsApp',   color: '#25d366', icon: 'whatsapp' as const }
         if (iz.includes('facebook'))                           return { label: 'Facebook',   color: '#1877f2', icon: 'facebook' as const }
         if (iz.includes('landing') || iz.includes('website')) return { label: 'Website',    color: '#8b5cf6', icon: 'globe' as const }
-        if (iz.includes('preporuka') || iz.includes('referral') || iz.includes('prijatelj')) return { label: 'Preporuka', color: '#f59e0b', icon: 'globe' as const }
-        if (iz.includes('telefon') || iz.includes('phone') || iz.includes('poziv')) return { label: 'Telefon', color: '#06b6d4', icon: 'globe' as const }
-        if (iz.includes('web'))                                return { label: 'Web',        color: '#8b5cf6', icon: 'globe' as const }
-        return { label: lead.izvor || 'Chatbot', color: '#71717a', icon: 'globe' as const }
+        return { label: 'Website', color: '#8b5cf6', icon: 'globe' as const }
     }
 
     const KanalIcon = ({ type, color }: { type: 'instagram' | 'facebook' | 'whatsapp' | 'globe'; color: string }) => {
@@ -443,16 +442,21 @@ export function AgentLeadsModule({ clientId, selectedBrandIds, terminology: prop
                                             const kanal = getKanal(lead)
                                             const isIntervencija = lead.status?.toLowerCase() === 'intervencija'
                                             const isZakazano = lead.status?.toLowerCase() === 'zakazano'
+                                            const isTourHero = !!tourHighlightName && lead.full_name === tourHighlightName
                                             return (
                                                 <motion.tr
                                                     key={lead.id}
                                                     initial={{ opacity: 0, scale: 0.98, y: 10 }}
-                                                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                                                    transition={{ delay: idx * 0.03, duration: 0.4 }}
+                                                    animate={isTourHero
+                                                        ? { opacity: 1, scale: 1, y: 0, boxShadow: ["0 0 0 0 rgba(16,185,129,0)", "inset 0 0 0 2px rgba(16,185,129,0.6), 0 0 28px -2px rgba(16,185,129,0.5)", "0 0 0 0 rgba(16,185,129,0)"] }
+                                                        : { opacity: 1, scale: 1, y: 0 }}
+                                                    transition={isTourHero
+                                                        ? { delay: 0.15, duration: 0.4, boxShadow: { delay: 0.5, duration: 1.8, repeat: Infinity, repeatDelay: 0.3 } }
+                                                        : { delay: idx * 0.03, duration: 0.4 }}
                                                     className="group border-b border-white/[0.03] transition-all duration-300 relative"
                                                     style={{
-                                                        borderLeft: isIntervencija ? '3px solid rgba(239,68,68,0.53)' : '3px solid transparent',
-                                                        backgroundColor: isIntervencija ? 'rgba(239,68,68,0.04)' : isZakazano ? 'rgba(16,185,129,0.02)' : undefined,
+                                                        borderLeft: isTourHero ? '4px solid #10b981' : isIntervencija ? '3px solid rgba(239,68,68,0.53)' : '3px solid transparent',
+                                                        backgroundColor: isTourHero ? 'rgba(16,185,129,0.09)' : isIntervencija ? 'rgba(239,68,68,0.04)' : isZakazano ? 'rgba(16,185,129,0.02)' : undefined,
                                                     }}
                                                 >
                                                     <td className="p-4">
@@ -466,7 +470,14 @@ export function AgentLeadsModule({ clientId, selectedBrandIds, terminology: prop
                                                                 {lead.full_name?.[0] || 'K'}
                                                             </div>
                                                             <div>
-                                                                <div className="font-semibold text-white">{lead.full_name}</div>
+                                                                <div className="flex items-center gap-2">
+                                                                    <span className="font-semibold text-white">{lead.full_name}</span>
+                                                                    {isTourHero && (
+                                                                        <span className="text-[9px] font-extrabold uppercase tracking-wider px-1.5 py-0.5 rounded-md animate-pulse" style={{ background: '#10b981', color: '#05080c' }}>
+                                                                            ← upravo upisano
+                                                                        </span>
+                                                                    )}
+                                                                </div>
                                                                 <div className="text-[10px] text-white/30 mt-0.5 font-mono">{formatRelativeTime(lead.created_at)}</div>
                                                             </div>
                                                         </div>
@@ -744,19 +755,24 @@ export function AgentLeadsModule({ clientId, selectedBrandIds, terminology: prop
                                             : isPorucio ? 'rgba(16,185,129,0.025)'
                                             : undefined
 
+                                        const isTourHero = !!tourHighlightName && lead.full_name === tourHighlightName
                                         return (
                                             <motion.tr
                                                 key={lead.id}
                                                 initial={{ opacity: 0, scale: 0.98, y: 10 }}
-                                                animate={{ opacity: 1, scale: 1, y: 0 }}
-                                                transition={{ delay: idx * 0.03, duration: 0.4 }}
+                                                animate={isTourHero
+                                                    ? { opacity: 1, scale: 1, y: 0, boxShadow: ["0 0 0 0 rgba(16,185,129,0)", "0 0 0 4px rgba(16,185,129,0.35)", "0 0 0 0 rgba(16,185,129,0)"] }
+                                                    : { opacity: 1, scale: 1, y: 0 }}
+                                                transition={isTourHero
+                                                    ? { delay: 0.2, duration: 0.4, boxShadow: { delay: 0.6, duration: 1.8, repeat: Infinity, repeatDelay: 0.4 } }
+                                                    : { delay: idx * 0.03, duration: 0.4 }}
                                                 className="group border-b border-white/[0.03] transition-all duration-300 relative"
                                                 style={{
-                                                    borderLeft: `3px solid ${rowBorderColor}`,
-                                                    backgroundColor: rowBgColor,
+                                                    borderLeft: isTourHero ? "3px solid #10b981" : `3px solid ${rowBorderColor}`,
+                                                    backgroundColor: isTourHero ? "rgba(16,185,129,0.07)" : rowBgColor,
                                                 }}
                                                 onMouseEnter={e => { if (!isIntervencija && !isPorucio) e.currentTarget.style.backgroundColor = `${bsColor}06` }}
-                                                onMouseLeave={e => { if (!isIntervencija && !isPorucio) e.currentTarget.style.backgroundColor = rowBgColor ?? '' }}
+                                                onMouseLeave={e => { if (!isIntervencija && !isPorucio) e.currentTarget.style.backgroundColor = isTourHero ? "rgba(16,185,129,0.07)" : (rowBgColor ?? '') }}
                                             >
                                                 {/* Kupac */}
                                                 <td className="p-4">
