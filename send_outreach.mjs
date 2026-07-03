@@ -402,6 +402,7 @@ ${loomHtml}`;
             last_sent_at: new Date().toISOString(),
             status: lead._stage.isFollowUp ? 'Follow Up' : 'Kontaktiran',
             approved_to_send: false,
+            pipeline_stage: 'sent',   // moves it out of "Email spreman" into "Poslato" in the cockpit
           };
         } else {
           metaPayload = isE3

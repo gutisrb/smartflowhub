@@ -1022,6 +1022,7 @@ async function main() {
       status            : lead.contact?.email ? 'enriched' : 'No Draft',
       izvor             : 'meta_ads_scrape',
       kategorija        : followers >= 50000 ? 'Vreo' : followers >= 15000 ? 'Topao' : 'Hladan',
+      pipeline_stage    : 'novi',   // lands in the cockpit's "Novi leadovi" for approve/discard
       intake_data,
       client_id         : SMARTFLOW_ID,
       sledeca_akcija    : lead.contact?.email ? 'Generisati email draft i poslati' : 'Pronaći kontakt email',

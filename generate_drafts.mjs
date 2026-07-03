@@ -319,6 +319,7 @@ async function main() {
   // Fetch enriched leads (initial outreach)
   // Gate on demo_built_at for initial outreach — skip leads without a demo unless --force
   const ALLOW_NO_DEMO = process.argv.includes('--allow-no-demo') || isForce;
+  const APPROVED_ONLY = process.argv.includes('--approved'); // only cockpit-approved leads (pipeline_stage='demo_building')
 
   let enrichedQuery = sb
     .from('contacts')
@@ -331,6 +332,12 @@ async function main() {
   // Only generate for leads whose demo tenant is already built (unless bypassed)
   if (!ALLOW_NO_DEMO) {
     enrichedQuery = enrichedQuery.not('demo_built_at', 'is', null);
+  }
+
+  // In the cockpit's build-approved chain, only draft for freshly-approved leads —
+  // never re-touch the archived cold pile (which shares status enriched/No Draft).
+  if (APPROVED_ONLY) {
+    enrichedQuery = enrichedQuery.eq('pipeline_stage', 'demo_building');
   }
 
   // Fetch Kontaktiran leads (E2 second touch)

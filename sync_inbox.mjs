@@ -250,6 +250,17 @@ async function main() {
           };
           const newStatus = STATUS_BY_INTENT[intent] ?? 'Odgovorio';
 
+          // Cockpit stage by intent: warm → surfaces in "Odgovori"; meeting → "sastanci"; no → archived
+          const STAGE_BY_INTENT = {
+            meeting_requested: 'booked',
+            interested:        'replied',
+            price_question:    'replied',
+            question:          'replied',
+            unclear:           'replied',
+            not_interested:    'archived',
+            wrong_contact:     'archived',
+          };
+
           const payload = {
             reply_snippet:   snippet,
             reply_intent:    intent,
@@ -259,6 +270,7 @@ async function main() {
           if (intent !== 'auto_reply' && intent !== 'out_of_office') {
             payload.replied_at = (parsed.date || new Date()).toISOString();
             payload.status = newStatus;
+            if (STAGE_BY_INTENT[intent]) payload.pipeline_stage = STAGE_BY_INTENT[intent];
           }
 
           await sb.from('contacts').update(payload).eq('id', contact.id);

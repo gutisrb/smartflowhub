@@ -337,6 +337,7 @@ The subject must NOT contain: `automatizacija`, `automatizovati`, `automatizovan
 - `Meta App Review` — done per-client, prospects don't understand or care
 - `cal.com` link in body (signature only)
 - Any pricing in body except the verbatim `delić cene jednog radnika` framing
+- Any OFFER or payment terms — e.g. `plaćate tek kada je sve aktivno`, `integracija traje 7 dana`, `10 dana besplatno`, setup fee, deposit, trial, money-back. The offer is a call topic, NEVER in the email.
 
 ### Words and Phrases You CAN Use
 - `AI agent`, `sistem`, `digitalni radnik`, `CRM`, `upiti`, `prihod`, `inbox`, `DM`

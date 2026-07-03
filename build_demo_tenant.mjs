@@ -86,6 +86,7 @@ function inferNicheKey(rawNiche, websiteSummary = '', companyName = '') {
 const isDryRun    = process.argv.includes('--dry-run')
 const isForce     = process.argv.includes('--force')
 const isAll       = process.argv.includes('--all')
+const isApproved  = process.argv.includes('--approved')  // build only cockpit-approved (pipeline_stage='demo_building')
 const isReseedOnly = process.argv.includes('--reseed-only')
 const leadIdIdx   = process.argv.indexOf('--lead-id')
 const LEAD_ID     = leadIdIdx !== -1 ? process.argv[leadIdIdx + 1] : null
@@ -934,6 +935,20 @@ async function main() {
     const { data, error } = await sb.from('contacts').select(selectFields).eq('id', LEAD_ID).single()
     if (error) { console.error(`✗ Lead not found: ${error.message}`); process.exit(1) }
     leads = [data]
+  } else if (isApproved) {
+    // Cockpit-approved leads only: pipeline_stage='demo_building', not yet built.
+    let q = sb
+      .from('contacts')
+      .select(selectFields)
+      .eq('client_id', SMARTFLOW_ID)
+      .eq('pipeline_stage', 'demo_building')
+      .is('demo_built_at', null)
+      .not('email', 'is', null)
+      .order('instagram_followers', { ascending: false })
+    if (LIMIT > 0) q = q.limit(LIMIT)
+    const { data, error } = await q
+    if (error) { console.error(`✗ Fetch error: ${error.message}`); process.exit(1) }
+    leads = data || []
   } else {
     let q = sb
       .from('contacts')
