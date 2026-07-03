@@ -70,7 +70,7 @@ const limitIdx  = process.argv.indexOf('--limit');
 const budgetIdx = process.argv.indexOf('--budget');
 const fileIdx   = process.argv.indexOf('--file');
 const FILE_PATH = fileIdx !== -1 ? process.argv[fileIdx + 1] : null; // --file <path>: load single JSON file
-const LIMIT     = limitIdx  !== -1 ? parseInt(process.argv[limitIdx  + 1]) : Infinity;
+let LIMIT       = limitIdx  !== -1 ? parseInt(process.argv[limitIdx  + 1]) : Infinity;
 
 // --budget X: cost cap in USD for the FB ads scraper (e.g. --budget 0.45 → ~600 records)
 const BUDGET_USD = budgetIdx !== -1 ? parseFloat(process.argv[budgetIdx + 1]) : null;
@@ -87,7 +87,7 @@ const LOCAL_DATASET_GLOB = 'dataset_facebook-ads-library-scraper_';
 // IG follower gates — raised from 15K → 30K based on send analysis (2026-05-07):
 // every replied lead in our 338-send history had 22K+ followers (or a decision-maker email).
 // 15K-floor accounts had ~0% reply rate — pain not felt at that scale.
-const MIN_FOLLOWERS = 30000;
+let MIN_FOLLOWERS = 30000;      // default; overridden by machine_config.source_follower_floor in main()
 const MAX_FOLLOWERS = 200000;  // cap at 200k — above this are large corps with dedicated CS teams
 
 // ── D2C retail & irrelevant exclusion ─────────────────────────────────────────
@@ -539,6 +539,23 @@ function loadLocalDatasets() {
 
 // ── Main ──────────────────────────────────────────────────────────────────────
 async function main() {
+  // Read cockpit "Novi leadovi" settings. Operator can pause sourcing or tune
+  // the daily count / follower floor from the node's settings menu.
+  try {
+    const cfgRes = await fetch(`${SUPABASE_URL}/rest/v1/machine_config?client_id=eq.${SMARTFLOW_ID}&select=*`, {
+      headers: { apikey: SERVICE_KEY, Authorization: `Bearer ${SERVICE_KEY}` },
+    });
+    const cfg = (await cfgRes.json())[0];
+    if (cfg) {
+      if (cfg.source_enabled === false) {
+        console.log('⏸  Sourcing is paused (cockpit → Novi leadovi → settings). Nothing to do.');
+        return;
+      }
+      if (Number.isFinite(cfg.source_follower_floor)) MIN_FOLLOWERS = cfg.source_follower_floor;
+      if (LIMIT === Infinity && Number.isFinite(cfg.source_daily_limit)) LIMIT = cfg.source_daily_limit;
+    }
+  } catch (e) { console.warn('⚠ Could not read machine_config, using defaults:', e.message); }
+
   const estCostAds = (RAW_LIMIT * 0.00075).toFixed(2);
   const modeLabel = isLocal
     ? `LOCAL (free, no Apify Stage 1)${isTest ? ' · TEST (no DB writes)' : ''}`

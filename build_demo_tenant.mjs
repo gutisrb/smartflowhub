@@ -93,8 +93,8 @@ const LEAD_ID     = leadIdIdx !== -1 ? process.argv[leadIdIdx + 1] : null
 const limitIdx    = process.argv.indexOf('--limit')
 const LIMIT       = limitIdx !== -1 ? parseInt(process.argv[limitIdx + 1]) : 0
 
-if (!LEAD_ID && !isAll) {
-  console.error('Usage: node build_demo_tenant.mjs --lead-id <uuid> | --all [--limit N] [--dry-run] [--force] [--reseed-only]')
+if (!LEAD_ID && !isAll && !isApproved) {
+  console.error('Usage: node build_demo_tenant.mjs --lead-id <uuid> | --all | --approved [--limit N] [--dry-run] [--force] [--reseed-only]')
   process.exit(1)
 }
 
@@ -926,6 +926,15 @@ async function main() {
   const sb = createClient(SUPABASE_URL, SERVICE_KEY, {
     auth: { autoRefreshToken: false, persistSession: false },
   })
+
+  // Cockpit "Demo se pravi" pause switch — operator can pause auto demo building.
+  if (isApproved) {
+    const { data: cfg } = await sb.from('machine_config').select('build_enabled').eq('client_id', SMARTFLOW_ID).maybeSingle()
+    if (cfg && cfg.build_enabled === false) {
+      console.log('⏸  Demo building is paused (cockpit → Demo se pravi → settings). Nothing to do.')
+      return
+    }
+  }
 
   let leads = []
 

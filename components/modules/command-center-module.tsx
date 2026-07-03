@@ -22,11 +22,21 @@ import {
   CheckCircle2,
   CalendarCheck,
   ExternalLink,
+  Settings2,
+  AlertTriangle,
 } from "lucide-react"
 import { LeadIntelligenceViewer } from "@/components/dashboard/lead-intelligence-viewer"
 
 interface CommandCenterModuleProps {
   clientId: string
+}
+
+interface MachineConfig {
+  source_enabled: boolean
+  source_daily_limit: number
+  source_follower_floor: number
+  build_enabled: boolean
+  send_enabled: boolean
 }
 
 interface Contact {
@@ -78,26 +88,38 @@ export function CommandCenterModule({ clientId }: CommandCenterModuleProps) {
   const [refreshing, setRefreshing] = useState(false)
   const [intelLead, setIntelLead] = useState<Contact | null>(null)
   const [emailLead, setEmailLead] = useState<Contact | null>(null)
+  const [config, setConfig] = useState<MachineConfig | null>(null)
 
   const fetchData = useCallback(async () => {
     const supabase = createClient()
-    const { data, error } = await supabase
-      .from("contacts")
-      .select(SELECT_FIELDS)
-      .eq("client_id", clientId)
-      .in("pipeline_stage", ["novi", "demo_building", "email_ready", "sent", "replied", "booked"])
-      .order("instagram_followers", { ascending: false })
-    if (error) {
-      console.error(error)
-    } else {
-      setContacts((data || []) as Contact[])
-    }
+    const [{ data, error }, { data: cfg }] = await Promise.all([
+      supabase
+        .from("contacts")
+        .select(SELECT_FIELDS)
+        .eq("client_id", clientId)
+        .in("pipeline_stage", ["novi", "demo_building", "email_ready", "sent", "replied", "booked"])
+        .order("instagram_followers", { ascending: false }),
+      supabase.from("machine_config").select("*").eq("client_id", clientId).maybeSingle(),
+    ])
+    if (error) console.error(error)
+    else setContacts((data || []) as Contact[])
+    if (cfg) setConfig(cfg as MachineConfig)
     setLoading(false)
   }, [clientId])
 
   useEffect(() => {
     fetchData()
   }, [fetchData])
+
+  const updateConfig = async (patch: Partial<MachineConfig>) => {
+    setConfig((prev) => (prev ? { ...prev, ...patch } : prev))
+    const supabase = createClient()
+    const { error } = await supabase
+      .from("machine_config")
+      .update({ ...patch, updated_at: new Date().toISOString() })
+      .eq("client_id", clientId)
+    if (error) { toast.error("Greška u podešavanjima"); fetchData() }
+  }
 
   const handleRefresh = async () => {
     setRefreshing(true)
@@ -189,7 +211,16 @@ export function CommandCenterModule({ clientId }: CommandCenterModuleProps) {
       </div>
 
       {/* 1. NOVI LEADOVI — approve / discard */}
-      <StageCard title="1 · Novi leadovi" hint="Pregledaj i odobri — odobreni idu u izradu demoa" count={novi.length} accent="emerald">
+      <StageCard title="1 · Novi leadovi" hint="Pregledaj i odobri — odobreni idu u izradu demoa" count={novi.length} accent="emerald"
+        info="Sistem svako jutro traži nove firme koje se oglašavaju video-oglasima na Instagramu i imaju dovoljno pratilaca. Ovde ih pregledaš: klikni na firmu da vidiš njihov Instagram i sve što je sistem prikupio. Odobreni idu u izradu demoa; odbačeni nestaju."
+        settings={config && (
+          <div className="space-y-3">
+            <Toggle label="Automatsko traženje (svako jutro u 06h)" checked={config.source_enabled} onChange={(v) => updateConfig({ source_enabled: v })} />
+            <NumberField label="Koliko novih leadova dnevno" value={config.source_daily_limit} onChange={(v) => updateConfig({ source_daily_limit: v })} />
+            <NumberField label="Minimum pratilaca" value={config.source_follower_floor} step={5000} onChange={(v) => updateConfig({ source_follower_floor: v })} />
+            <p className="text-[11px] text-silver/30">Pozadinski posao se pali/gasi u <span className="font-mono">launchd/README.md</span>. Ovaj prekidač ga pauzira i kad je upaljen.</p>
+          </div>
+        )}>
         {novi.map((c) => (
           <Row key={c.id} c={c} onIntel={() => setIntelLead(c)}>
             <Button size="sm" variant="ghost" onClick={() => openInstagram(c)} className="h-8 rounded-lg text-pink-400/70 hover:text-pink-400 hover:bg-pink-400/5 text-xs">
@@ -208,19 +239,29 @@ export function CommandCenterModule({ clientId }: CommandCenterModuleProps) {
         ))}
       </StageCard>
 
-      {/* 2. PRAVI SE DEMO — automatic, read-only */}
-      {building.length > 0 && (
-        <StageCard title="2 · Demo se pravi" hint="Automatski — sistem gradi demo za odobrene leadove" count={building.length} accent="amber">
-          {building.map((c) => (
-            <Row key={c.id} c={c} onIntel={() => setIntelLead(c)}>
-              <span className="flex items-center gap-2 text-xs text-amber-400/80 font-outfit"><Hammer className="w-3.5 h-3.5 animate-pulse" /> pravi se…</span>
-            </Row>
-          ))}
-        </StageCard>
-      )}
+      {/* 2. PRAVI SE DEMO — automatic */}
+      <StageCard title="2 · Demo se pravi" hint="Automatski — sistem gradi demo za odobrene leadove" count={building.length} accent="amber"
+        info="Za svaki lead koji odobriš, sistem sam napravi personalizovani demo dashboard sa njihovim brendom i primerima razgovora (par minuta). Troši malo API novca po demou. Kad je gotovo, lead prelazi u „Email spreman“."
+        settings={config && (
+          <Toggle label="Automatska izrada demoa za odobrene" checked={config.build_enabled} onChange={(v) => updateConfig({ build_enabled: v })} />
+        )}>
+        {building.length === 0 && <p className="text-xs text-silver/25 font-outfit italic py-5 text-center">Nema demoa u izradi</p>}
+        {building.map((c) => (
+          <Row key={c.id} c={c} onIntel={() => setIntelLead(c)}>
+            <span className="flex items-center gap-2 text-xs text-amber-400/80 font-outfit"><Hammer className="w-3.5 h-3.5 animate-pulse" /> pravi se…</span>
+          </Row>
+        ))}
+      </StageCard>
 
       {/* 3. EMAIL SPREMAN — review + approve to send */}
-      <StageCard title="3 · Email spreman" hint="Pregledaj email → odobri → šalje se" count={emailReady.length} accent="cyan">
+      <StageCard title="3 · Email spreman" hint="Pregledaj email → odobri → šalje se" count={emailReady.length} accent="cyan"
+        info="Demo je gotov i email je napisan (sa njihovim login podacima unutra). Klikni „Pogledaj email“ da ga pročitaš, pa „Odobri za slanje“. Slanje ide preko skripte — nikad iz pregledača."
+        settings={config && (
+          <div className="space-y-2">
+            <Toggle label="Automatsko slanje odobrenih (10h dnevno)" checked={config.send_enabled} onChange={(v) => updateConfig({ send_enabled: v })} danger />
+            <div className="flex items-start gap-2 text-[11px] text-amber-400/80"><AlertTriangle className="w-3.5 h-3.5 mt-0.5 shrink-0" /> Ovo šalje prave email-ove. Drži isključeno dok ne budeš siguran — do tada šalji ručno: <span className="font-mono">node send_outreach.mjs --mode approved --force-send</span></div>
+          </div>
+        )}>
         {emailReady.map((c) => (
           <Row key={c.id} c={c} onIntel={() => setIntelLead(c)}>
             <Button size="sm" variant="ghost" onClick={() => setEmailLead(c)} className="h-8 rounded-lg text-cyan-400/70 hover:text-cyan-400 hover:bg-cyan-400/5 text-xs">
@@ -235,7 +276,8 @@ export function CommandCenterModule({ clientId }: CommandCenterModuleProps) {
       </StageCard>
 
       {/* 4. ODGOVORI / U TOKU — warm handling */}
-      <StageCard title="4 · Odgovori i sastanci" hint="Topli leadovi — otvori razgovor, zakaži poziv" count={replied.length} accent="purple">
+      <StageCard title="4 · Odgovori i sastanci" hint="Topli leadovi — otvori razgovor, zakaži poziv" count={replied.length} accent="purple"
+        info="Topli odgovori koje sistem prepozna iz tvog inboxa (proverava na svaka 4 sata). Ovde vodiš razgovor i zakazuješ pozive. Promeni status padajućim menijem sa desne strane.">
         {replied.map((c) => (
           <Row key={c.id} c={c} onIntel={() => setIntelLead(c)} subtitle={c.reply_snippet || c.reply_intent || c.status}>
             {c.meeting_time && <span className="flex items-center gap-1 text-xs text-emerald/80"><CalendarCheck className="w-3.5 h-3.5" /> sastanak</span>}
@@ -245,16 +287,15 @@ export function CommandCenterModule({ clientId }: CommandCenterModuleProps) {
       </StageCard>
 
       {/* 5. POSLATO — tracking, read-only */}
-      {sent.length > 0 && (
-        <StageCard title="5 · Poslato" hint="Praćenje — otvoreno / odgovorio" count={sent.length} accent="blue">
-          {sent.slice(0, 30).map((c) => (
-            <Row key={c.id} c={c} onIntel={() => setIntelLead(c)}
-              subtitle={c.replied_at ? "odgovorio" : c.email_opened_at ? "otvorio email" : "poslato, čeka se"}>
-              {c.email_opened_at && <Eye className="w-3.5 h-3.5 text-cyan-400/70" />}
-            </Row>
-          ))}
-        </StageCard>
-      )}
+      <StageCard title="5 · Poslato" hint="Praćenje — otvoreno / odgovorio" count={sent.length} accent="blue"
+        info="Poslati email-ovi. Sistem prati ko je otvorio email i ko je odgovorio (odgovori se pojave u koraku 4). Samo za praćenje — nema akcije.">
+        {sent.slice(0, 30).map((c) => (
+          <Row key={c.id} c={c} onIntel={() => setIntelLead(c)}
+            subtitle={c.replied_at ? "odgovorio" : c.email_opened_at ? "otvorio email" : "poslato, čeka se"}>
+            {c.email_opened_at && <Eye className="w-3.5 h-3.5 text-cyan-400/70" />}
+          </Row>
+        ))}
+      </StageCard>
 
       <LeadIntelligenceViewer lead={intelLead} isOpen={!!intelLead} onClose={() => setIntelLead(null)} />
       <EmailPreview lead={emailLead} onClose={() => setEmailLead(null)} onApprove={approveEmail} />
@@ -262,7 +303,8 @@ export function CommandCenterModule({ clientId }: CommandCenterModuleProps) {
   )
 }
 
-function StageCard({ title, hint, count, accent, children }: { title: string; hint: string; count: number; accent: string; children: React.ReactNode }) {
+function StageCard({ title, hint, count, accent, info, settings, children }: { title: string; hint: string; count: number; accent: string; info?: string; settings?: React.ReactNode; children: React.ReactNode }) {
+  const [open, setOpen] = useState(false)
   const border = accent === "emerald" ? "border-emerald/20" : accent === "amber" ? "border-amber-400/20" : accent === "cyan" ? "border-cyan-400/20" : accent === "purple" ? "border-purple-400/20" : "border-blue-400/20"
   return (
     <Card className={cn("glass-card bg-obsidian/40 backdrop-blur-2xl rounded-[2rem] overflow-hidden", border)}>
@@ -271,13 +313,52 @@ function StageCard({ title, hint, count, accent, children }: { title: string; hi
           <h3 className="font-outfit font-bold text-silver text-sm uppercase tracking-widest">{title}</h3>
           <p className="text-[11px] text-silver/30 font-outfit">{hint}</p>
         </div>
-        <Badge className="bg-white/5 text-silver/70 border-white/10">{count}</Badge>
+        <div className="flex items-center gap-2">
+          {(info || settings) && (
+            <Button variant="ghost" size="sm" onClick={() => setOpen((o) => !o)}
+              className={cn("h-8 rounded-lg text-silver/40 hover:text-silver hover:bg-white/5 text-[11px] gap-1.5", open && "text-silver bg-white/5")}>
+              <Settings2 className="w-3.5 h-3.5" /> Šta je ovo?
+            </Button>
+          )}
+          <Badge className="bg-white/5 text-silver/70 border-white/10">{count}</Badge>
+        </div>
       </CardHeader>
+
+      {open && (info || settings) && (
+        <div className="mx-6 mb-4 p-4 rounded-2xl bg-white/[0.03] border border-white/10 space-y-4">
+          {info && <p className="text-xs text-silver/60 font-outfit leading-relaxed">{info}</p>}
+          {settings && <div className="pt-1 border-t border-white/5">{settings}</div>}
+        </div>
+      )}
+
       <CardContent className="space-y-2 max-h-[440px] overflow-y-auto">
         {count === 0 && <p className="text-xs text-silver/25 font-outfit italic py-5 text-center">Prazno</p>}
         {children}
       </CardContent>
     </Card>
+  )
+}
+
+function Toggle({ label, checked, onChange, danger }: { label: string; checked: boolean; onChange: (v: boolean) => void; danger?: boolean }) {
+  return (
+    <button type="button" onClick={() => onChange(!checked)} className="flex items-center justify-between w-full gap-3 group">
+      <span className="text-xs text-silver/70 font-outfit text-left">{label}</span>
+      <span className={cn("relative w-10 h-6 rounded-full transition-colors shrink-0",
+        checked ? (danger ? "bg-amber-500" : "bg-emerald") : "bg-white/10")}>
+        <span className={cn("absolute top-0.5 w-5 h-5 rounded-full bg-white transition-all", checked ? "left-[18px]" : "left-0.5")} />
+      </span>
+    </button>
+  )
+}
+
+function NumberField({ label, value, onChange, step = 1 }: { label: string; value: number; onChange: (v: number) => void; step?: number }) {
+  return (
+    <label className="flex items-center justify-between gap-3">
+      <span className="text-xs text-silver/70 font-outfit">{label}</span>
+      <input type="number" step={step} defaultValue={value}
+        onBlur={(e) => { const n = parseInt(e.target.value); if (Number.isFinite(n) && n !== value) onChange(n) }}
+        className="w-24 h-8 rounded-lg bg-white/5 border border-white/10 text-silver text-xs font-outfit px-2 text-right focus:border-emerald/40 outline-none" />
+    </label>
   )
 }
 

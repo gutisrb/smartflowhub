@@ -157,6 +157,18 @@ function parseDraft(draft) {
 async function main() {
   const sb = createClient(SUPABASE_URL, SERVICE_KEY);
 
+  // Cockpit "Email spreman" auto-send switch. Extra safety on top of the
+  // per-lead approved_to_send flag: if the operator hasn't turned auto-send on,
+  // --mode approved does nothing. Manual runs can force with --force-send.
+  if (MODE === 'approved' && !process.argv.includes('--force-send')) {
+    const { data: cfg } = await sb.from('machine_config').select('send_enabled').eq('client_id', SMARTFLOW_ID).maybeSingle();
+    if (cfg && cfg.send_enabled === false) {
+      console.log('⏸  Auto-send is OFF (cockpit → Email spreman → settings). Approved emails are queued but not sent.');
+      console.log('   To send this batch manually anyway: node send_outreach.mjs --mode approved --force-send');
+      return;
+    }
+  }
+
   // ── Create SMTP transporter ──────────────────────────────────────────────────
   const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
