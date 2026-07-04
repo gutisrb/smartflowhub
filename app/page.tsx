@@ -14,7 +14,6 @@ import { cn } from "@/lib/utils"
 import { isGroupClient, GROUP_CLIENTS, BOOK_STORE_CLIENTS, getBookStoreConfig } from "@/lib/brand-configs"
 
 // Import module components
-import { PipelineModule } from "@/components/modules/pipeline-module"
 import { GrowthEngineModule } from "@/components/modules/growth-engine-module"
 import { EmailOutreachModule } from "@/components/modules/email-outreach-module"
 import { SocialChatbotModule } from "@/components/modules/social-chatbot-module"
@@ -32,7 +31,7 @@ import { CommandCenterModule } from "@/components/modules/command-center-module"
 import type { OnboardingCopy } from "@/lib/onboarding/types"
 
 export default function DashboardPage() {
-  const [activeModule, setActiveModule] = useState<ModuleKey>('pipeline')
+  const [activeModule, setActiveModule] = useState<ModuleKey>('command-center')
   const [clientId, setClientId] = useState<string | null>(null)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [clientName, setClientName] = useState("")
@@ -172,7 +171,7 @@ export default function DashboardPage() {
     setIsAuthenticated(false)
     setClientId(null)
     setUserEmail(null)
-    setActiveModule('pipeline')
+    setActiveModule('command-center')
   }
 
   const markOnboarded = useCallback(async () => {
@@ -236,7 +235,7 @@ export default function DashboardPage() {
     const isRecruitment = clientName?.toLowerCase().includes('mjob')
     if (isRecruitment) {
       return availableModules.filter(m =>
-        ['pipeline', 'business-crm', 'agent-database', 'agent-leads', 'social-chatbot', 'chatbot-analytics'].includes(m.key)
+        ['business-crm', 'agent-database', 'agent-leads', 'social-chatbot', 'chatbot-analytics'].includes(m.key)
       )
     }
     return availableModules
@@ -262,8 +261,6 @@ export default function DashboardPage() {
     switch (activeModule) {
       case 'command-center':
         return <CommandCenterModule clientId={effectiveClientId} />
-      case 'pipeline':
-        return <PipelineModule clientId={effectiveClientId} />
       case 'growth-engine':
         return <GrowthEngineModule
           clientId={effectiveClientId}

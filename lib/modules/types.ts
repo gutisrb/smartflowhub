@@ -1,7 +1,6 @@
 import { LucideIcon } from "lucide-react"
 
 export type ModuleKey =
-  | 'pipeline'
   | 'business-crm'
   | 'email-outreach'
   | 'agent-database'

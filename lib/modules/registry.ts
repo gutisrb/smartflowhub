@@ -6,7 +6,6 @@ import {
   Users,
   MessageCircle,
   BarChart2,
-  Kanban,
   CalendarDays,
   Settings,
   Sparkles,
@@ -21,13 +20,6 @@ export const MODULE_REGISTRY: Record<ModuleKey, DashboardModule> = {
     icon: Sunrise,
     category: 'acquisition',
     description: 'Operativna kontrolna tabla — dnevni pregled i odobravanje slanja',
-  },
-  'pipeline': {
-    key: 'pipeline',
-    label: 'Pipeline',
-    icon: Kanban,
-    category: 'acquisition',
-    description: 'Deal flow kanban — stage-by-stage progression',
   },
   'growth-engine': {
     key: 'growth-engine',
