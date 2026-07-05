@@ -18,6 +18,50 @@ function getTodayDate() {
   return new Date().toISOString().split('T')[0];
 }
 
+// Helper to audit migration files for RLS settings
+function auditRLSMigrations() {
+  const migrationsDir = './supabase/migrations';
+  if (!fs.existsSync(migrationsDir)) {
+    return { error: 'Migrations directory not found' };
+  }
+
+  const files = fs.readdirSync(migrationsDir).filter(f => f.endsWith('.sql'));
+  const createdTables = new Set();
+  const rlsEnabledTables = new Set();
+
+  files.forEach(file => {
+    const content = fs.readFileSync(path.join(migrationsDir, file), 'utf8');
+    
+    // Match CREATE TABLE public.name or CREATE TABLE name (handling IF NOT EXISTS)
+    const createTableRegex = /create table\s+(?:if not exists\s+)?(?:public\.)?([a-zA-Z0-9_]+)/gi;
+    let match;
+    while ((match = createTableRegex.exec(content)) !== null) {
+      createdTables.add(match[1].toLowerCase());
+    }
+
+    // Match ALTER TABLE public.name ENABLE ROW LEVEL SECURITY
+    const alterRlsRegex = /alter table\s+(?:public\.)?([a-zA-Z0-9_]+)\s+enable\s+row\s+level\s+security/gi;
+    let rlsMatch;
+    while ((rlsMatch = alterRlsRegex.exec(content)) !== null) {
+      rlsEnabledTables.add(rlsMatch[1].toLowerCase());
+    }
+  });
+
+  const missingRLS = [];
+  createdTables.forEach(table => {
+    // Exclude views or specific tables if needed, but flag general ones
+    if (!rlsEnabledTables.has(table)) {
+      missingRLS.push(table);
+    }
+  });
+
+  return {
+    totalCreated: createdTables.size,
+    rlsEnabledCount: rlsEnabledTables.size,
+    missingRLS: missingRLS
+  };
+}
+
 // Commands
 async function handleStart() {
   printHeader('SESSION START');
@@ -87,37 +131,7 @@ async function handleStart() {
   console.log('\n🚀 PROTOCOL: Announce your plan and start coding!');
 }
 
-async function handleEnd(summaryInput) {
-  printHeader('SESSION END');
-
-  let summary = summaryInput;
-  if (!summary) {
-    // Try to get from args
-    const arg = process.argv.slice(3).join(' ');
-    if (arg) {
-      summary = arg;
-    }
-  }
-
-  if (!summary) {
-    console.log('Please provide a session summary via argument or standard input:');
-    summary = await new Promise((resolve) => {
-      const rl = readline.createInterface({
-        input: process.stdin,
-        output: process.stdout
-      });
-      rl.question('Summary of changes: ', (answer) => {
-        rl.close();
-        resolve(answer.trim());
-      });
-    });
-  }
-
-  if (!summary) {
-    console.error('❌ Summary is required to end the session.');
-    process.exit(1);
-  }
-
+async function updateVaultStatus(summary) {
   const statusFile = path.join(vaultPath, 'wiki/status.md');
   const logFile = path.join(vaultPath, 'log.md');
 
@@ -154,10 +168,9 @@ async function handleEnd(summaryInput) {
 `;
 
     // Insert new Current, and push the old current down to previous
-    // Find where the oldCurrent starts and replace it
     statusContent = statusContent.replace(oldCurrent, `${newCurrent}\n---\n\n${previousHeader}\n`);
   } else {
-    console.warn('⚠️ Could not parse "## Current" section cleanly. Appending new updates at the top of content.');
+    console.warn('⚠️ Could not parse "## Current" section cleanly. Appending new updates.');
   }
 
   // Write status
@@ -168,7 +181,6 @@ async function handleEnd(summaryInput) {
   let logContent = fs.readFileSync(logFile, 'utf8');
   const logEntry = `## [${today}] session | ${summary}\n`;
   
-  // Append after index headers or just at the end
   if (logContent.includes('## Session History')) {
     logContent = logContent.replace('## Session History', `## Session History\n\n${logEntry}`);
   } else {
@@ -176,6 +188,39 @@ async function handleEnd(summaryInput) {
   }
   fs.writeFileSync(logFile, logContent, 'utf8');
   console.log(`✅ Appended to ${logFile}`);
+}
+
+async function handleEnd(summaryInput) {
+  printHeader('SESSION END');
+
+  let summary = summaryInput;
+  if (!summary) {
+    const arg = process.argv.slice(3).join(' ');
+    if (arg) {
+      summary = arg;
+    }
+  }
+
+  if (!summary) {
+    console.log('Please provide a session summary via argument or standard input:');
+    summary = await new Promise((resolve) => {
+      const rl = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout
+      });
+      rl.question('Summary of changes: ', (answer) => {
+        rl.close();
+        resolve(answer.trim());
+      });
+    });
+  }
+
+  if (!summary) {
+    console.error('❌ Summary is required to end the session.');
+    process.exit(1);
+  }
+
+  await updateVaultStatus(summary);
 
   // Git operations
   try {
@@ -189,12 +234,30 @@ async function handleEnd(summaryInput) {
   }
 }
 
+async function handleSyncCommit() {
+  printHeader('SYNC COMMIT TO VAULT');
+  try {
+    const lastCommitMsg = execSync('git log -1 --pretty=%B', { encoding: 'utf8' }).trim();
+    if (!lastCommitMsg) {
+      console.error('❌ No commit message found.');
+      process.exit(1);
+    }
+    console.log(`💬 Last commit message: "${lastCommitMsg}"`);
+    await updateVaultStatus(`Git Commit: ${lastCommitMsg}`);
+    console.log('✅ Vault updated automatically based on git commit.');
+  } catch (err) {
+    console.error('❌ Failed to sync commit to vault:', err.message);
+  }
+}
+
 async function handleLint() {
-  printHeader('WIKI LINT');
+  printHeader('WIKI LINT & HEALTH REPORT');
   
   let brokenLinks = 0;
   let totalLinks = 0;
   let outdatedFiles = 0;
+  const brokenLinkList = [];
+  const outdatedFileList = [];
 
   const readDirRecursive = (dir) => {
     let results = [];
@@ -205,7 +268,7 @@ async function handleLint() {
       if (stat && stat.isDirectory()) {
         results = results.concat(readDirRecursive(file));
       } else {
-        if (file.endsWith('.md')) results.push(file);
+        if (file.endsWith('.md') && !file.endsWith('wiki/health.md')) results.push(file);
       }
     });
     return results;
@@ -224,18 +287,20 @@ async function handleLint() {
       const updatedDate = new Date(match[1]);
       const ageInDays = (new Date() - updatedDate) / (1000 * 60 * 60 * 24);
       if (ageInDays > 14) {
-        console.log(`📯 Outdated wiki page (updated > 2 weeks ago): ${relativePath} (${match[1]})`);
+        outdatedFileList.push({ path: relativePath, date: match[1] });
         outdatedFiles++;
       }
     }
 
-    // Check for broken links like [[wiki/status]] or [[log]]
+    // Check for broken links — strip inline code first to avoid false positives
+    const strippedContent = content.replace(/`[^`\n]+`/g, ''); // remove `inline code`
     const linkRegex = /\[\[(.*?)(?:\|.*?)?\]\]/g;
     let linkMatch;
-    while ((linkMatch = linkRegex.exec(content)) !== null) {
+    while ((linkMatch = linkRegex.exec(strippedContent)) !== null) {
       totalLinks++;
-      const linkTarget = linkMatch[1];
-      // Resolve path
+      const rawTarget = linkMatch[1];
+      // Normalize: strip .md suffix if present (so [[CLAUDE.md]] and [[CLAUDE]] both resolve)
+      const linkTarget = rawTarget.replace(/\.md$/i, '');
       const targetPaths = [
         path.join(vaultPath, `${linkTarget}.md`),
         path.join(vaultPath, `wiki/${linkTarget}.md`),
@@ -243,42 +308,82 @@ async function handleLint() {
 
       const exists = targetPaths.some(p => fs.existsSync(p));
       if (!exists) {
-        console.log(`❌ Broken link in ${relativePath}: [[${linkTarget}]]`);
+        brokenLinkList.push({ file: relativePath, target: rawTarget });
         brokenLinks++;
       }
     }
   });
 
+  // Dynamic RLS Audit
+  const rlsReport = auditRLSMigrations();
+
+  // Create Autonomous Health Report
+  const healthFile = path.join(vaultPath, 'wiki/health.md');
+  const today = getTodayDate();
+  
+  let healthMd = `---
+type: health
+updated: ${today}
+---
+# 🧠 Second Brain Health Report
+
+*This report is generated automatically by the background health daemon.*
+
+## 📊 Summary Metrics
+*   **Last Updated:** ${today}
+*   **Total Wiki Files Checked:** ${allMdFiles.length}
+*   **Total Vault Links Checked:** ${totalLinks}
+*   **Broken Links:** ${brokenLinks === 0 ? '🟢 None' : `🔴 ${brokenLinks}`}
+*   **Outdated Pages (>2 weeks old):** ${outdatedFiles === 0 ? '🟢 None' : `🟡 ${outdatedFiles}`}
+
+---
+
+## ❌ Broken Links
+${brokenLinks === 0 ? '_No broken links found._' : brokenLinkList.map(item => `*   In \`[[${item.file}]]\`: links to nonexistent \`[[${item.target}]]\``).join('\n')}
+
+---
+
+## ⏳ Outdated Wiki Pages
+${outdatedFiles === 0 ? '_All pages up to date._' : outdatedFileList.map(item => `*   \`${item.path}\` (last updated: ${item.date})`).join('\n')}
+
+---
+
+## 🔒 Database Security Audit (RLS)
+*   **RLS-Enabled Tables:** ${rlsReport.rlsEnabledCount}
+*   **Total Created Tables (Migration Scan):** ${rlsReport.totalCreated}
+*   **Tables Missing RLS (Static Warning):**
+${rlsReport.missingRLS && rlsReport.missingRLS.length > 0 
+  ? rlsReport.missingRLS.map(t => `    *   \`${t}\` ⚠️`).join('\n')
+  : '    *   🟢 All tables have RLS config statements.'}
+`;
+
+  fs.writeFileSync(healthFile, healthMd, 'utf8');
+  console.log(`✅ Autonomous Health Report written to: ${healthFile}`);
+
   console.log('\n' + '-'.repeat(40));
   console.log(`Scan complete:
 🔗 Total links verified: ${totalLinks}
 ❌ Broken links found: ${brokenLinks}
-⏳ Outdated pages: ${outdatedFiles}`);
+⏳ Outdated pages: ${outdatedFiles}
+🔒 RLS Warnings flagged: ${rlsReport.missingRLS ? rlsReport.missingRLS.length : 0}`);
 }
 
 async function handleStatus() {
   printHeader('HEALTH STATUS');
 
-  // Check codebase git branch
   try {
     const branch = execSync('git rev-parse --abbrev-ref HEAD', { encoding: 'utf8' }).trim();
     console.log(`🌿 Current codebase branch: ${branch}`);
   } catch (err) {}
 
-  // Check core table RLS warnings
-  console.log('\n🔒 RLS Table Warning Audit:');
-  const rlsExposed = [
-    'knowledge_base',
-    'linkedin_posts',
-    'pipeline_stages',
-    'companies',
-    'knjige',
-    'crm_harmonija'
-  ];
-  console.log('The following tables are noted to have RLS DISABLED in CLAUDE.md:');
-  rlsExposed.forEach(t => console.log(`  - ${t}`));
+  const rlsReport = auditRLSMigrations();
+  console.log('\n🔒 RLS Table Warning Audit (from migration scan):');
+  if (rlsReport.missingRLS && rlsReport.missingRLS.length > 0) {
+    rlsReport.missingRLS.forEach(t => console.log(`  - ⚠️ ${t} (RLS Disabled/Missing config)`));
+  } else {
+    console.log('  - 🟢 All tables have RLS enabled.');
+  }
 
-  // Check vault status
   const indexFile = path.join(vaultPath, 'index.md');
   if (fs.existsSync(indexFile)) {
     console.log(`\n📚 Second brain index found at: ${indexFile}`);
@@ -293,10 +398,12 @@ if (cmd === 'start') {
   handleStart();
 } else if (cmd === 'end') {
   handleEnd();
+} else if (cmd === 'sync-commit') {
+  handleSyncCommit();
 } else if (cmd === 'lint') {
   handleLint();
 } else if (cmd === 'status') {
   handleStatus();
 } else {
-  console.log(`Usage: node scripts/brain.mjs [start|end|lint|status]`);
+  console.log(`Usage: node scripts/brain.mjs [start|end|sync-commit|lint|status]`);
 }
