@@ -727,21 +727,23 @@ async function main() {
     const fbUri  = snap.page_profile_uri || '';
 
     // 3a. page_profile_uri is directly an instagram.com URL (rare but happens)
+    // HIGH confidence: the ad itself told us this handle — no cross-check needed.
     if (fbUri.includes('instagram.com')) {
       try {
         const path = new URL(fbUri).pathname.replace(/^\//, '').replace(/\/$/, '').split('/').pop();
-        if (isValidIgHandle(path)) { lead.igHandle = path; process.stdout.write('.'); continue; }
+        if (isValidIgHandle(path)) { lead.igHandle = path; lead.igHandleConfidence = 'high'; process.stdout.write('.'); continue; }
       } catch {}
     }
 
     // 3a.5. link_url or caption points directly to instagram.com/<handle> — very common: businesses
     // run ads with IG as the CTA destination. extractDomain filters these out as social links,
     // so we must extract the handle here before that step discards them.
+    // HIGH confidence: same reasoning as 3a.
     if (!lead.igHandle) {
       for (const src of [snap.link_url, snap.caption]) {
         if (!src) continue;
         const m = src.match(/instagram\.com\/([a-zA-Z0-9._]{2,30})\/?(?:[?#]|$)/);
-        if (m && isValidIgHandle(m[1])) { lead.igHandle = m[1]; process.stdout.write('L'); break; }
+        if (m && isValidIgHandle(m[1])) { lead.igHandle = m[1]; lead.igHandleConfidence = 'high'; process.stdout.write('L'); break; }
       }
       if (lead.igHandle) continue;
     }
@@ -756,17 +758,23 @@ async function main() {
 
     // 3d. If domain found: raw HTML scrape first, then Firecrawl fallback for JS-rendered sites.
     // Firecrawl also extracts email in the same pass — cached on lead.fcEmail for Stage 5 reuse.
+    // LOW confidence: this regex-matches the first instagram.com link found anywhere on the page,
+    // including leftover template/demo widgets that have nothing to do with the business
+    // (e.g. a furniture-store demo IG badge sitting in a website theme's footer). Stage 4
+    // cross-checks the resolved profile's own external_url against this domain before trusting it.
     if (lead.domain && !lead.igHandle) {
       lead.igHandle = await findIgOnWebsite(lead.domain);
+      if (lead.igHandle) lead.igHandleConfidence = 'low';
     }
     if (lead.domain && !lead.igHandle) {
       const fc = await findIgAndEmailWithFirecrawl(lead.domain);
-      if (fc.handle) lead.igHandle = fc.handle;
+      if (fc.handle) { lead.igHandle = fc.handle; lead.igHandleConfidence = 'low'; }
       if (fc.email)  lead.fcEmail  = fc.email;
     }
 
     // 3e. FB page slug as IG handle candidate — Serbian businesses use same handle on both platforms.
-    // Even if this is a guess, Stage 4 (Apify) confirms it and returns the real website via externalUrl.
+    // LOW confidence (guess): Stage 4 requires Apify to confirm the account exists AND cross-checks
+    // its external_url before trusting it — existence alone isn't proof it's the same business.
     if (!lead.igHandle && fbUri) {
       const slug = fbUri.replace(/\/$/, '').split('/').filter(s =>
         s && s !== 'www.facebook.com' && s !== 'facebook.com' && s !== 'https:' && s !== 'http:'
@@ -774,6 +782,7 @@ async function main() {
       if (slug && isValidIgHandle(slug)) {
         lead.igHandle = slug;
         lead.igHandleIsGuess = true;
+        lead.igHandleConfidence = 'low';
       }
     }
 
@@ -812,9 +821,27 @@ async function main() {
   }
 
   // Attach confirmed profile data to leads; unconfirmed slug guesses = mark invalid
-  let confirmed = 0, above20k = 0;
+  let confirmed = 0, above20k = 0, rejectedMismatch = 0;
   for (const lead of withHandles) {
-    const profile = profileByHandle.get(lead.igHandle.toLowerCase());
+    let profile = profileByHandle.get(lead.igHandle.toLowerCase());
+
+    // Low-confidence handles (website scrape / FB slug guess) can pick up an IG account that
+    // exists but belongs to someone else entirely — e.g. a leftover demo widget on a template
+    // site. Apify only confirms the account is real, not that it's the same business. So for
+    // low-confidence handles, require the profile's own external_url to point back to the same
+    // domain we scraped it from. A hard mismatch (e.g. our domain tartufidamar.rs vs the
+    // profile's ozdesignfurniture.com.au) means we grabbed the wrong account — drop it.
+    if (profile && lead.igHandleConfidence === 'low' && lead.domain && profile.externalUrl) {
+      let profileHost = null;
+      try { profileHost = new URL(profile.externalUrl.startsWith('http') ? profile.externalUrl : `https://${profile.externalUrl}`).hostname.replace(/^www\./, ''); } catch {}
+      if (profileHost && profileHost !== lead.domain && !profileHost.endsWith('.' + lead.domain) && !lead.domain.endsWith('.' + profileHost)) {
+        rejectedMismatch++;
+        profile = null;
+        lead.igHandle = null;
+        lead.igHandleIsGuess = false;
+      }
+    }
+
     if (profile) {
       lead.igProfile = profile;
       lead.igFollowers = profile.followersCount || 0;

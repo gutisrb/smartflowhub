@@ -5,9 +5,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Second Brain (READ THIS FIRST)
 
 This project has a persistent wiki in the Smartflow Obsidian vault.
-**Read it at the start of every session. Update it at the end.**
+**Use the automated CLI tools at the start and end of every session to prevent context amnesia.**
 
 Wiki path: `/Users/johhn/Library/Mobile Documents/iCloud~md~obsidian/Documents/Smartflow/`
+
+### Session Protocol:
+1. **START of session:** Run `npm run brain:start` (reads current status, blockers, next actions, and git status).
+2. **END of session:** Run `npm run brain:end -- "<summary of changes>"` (automatically updates `wiki/status.md`, appends to `log.md`, commits all changes, and pushes to GitHub).
+3. **Lint checks:** Run `npm run brain:lint` to verify wiki links and check for stale pages.
+4. **Health checks:** Run `npm run brain:status` to check active codebase state and database RLS warnings.
 
 | File | What's in it |
 |------|-------------|
@@ -17,8 +23,6 @@ Wiki path: `/Users/johhn/Library/Mobile Documents/iCloud~md~obsidian/Documents/S
 | `wiki/outreach.md` | Email pipeline state and scripts reference |
 | `wiki/architecture.md` | Data model, module system, n8n patterns |
 | `wiki/workflows.md` | n8n workflow inventory |
-
-Session protocol: read `wiki/status.md` → do work → update `wiki/status.md` + append to `log.md`.
 
 ## Development Commands
 

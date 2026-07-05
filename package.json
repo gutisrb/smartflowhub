@@ -8,7 +8,11 @@
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "brain:start": "node scripts/brain.mjs start",
+    "brain:end": "node scripts/brain.mjs end",
+    "brain:status": "node scripts/brain.mjs status",
+    "brain:lint": "node scripts/brain.mjs lint"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.90.0",
