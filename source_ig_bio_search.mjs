@@ -61,6 +61,8 @@ const limitIdx  = process.argv.indexOf('--limit');
 const pagesIdx  = process.argv.indexOf('--pages');
 let   LIMIT     = limitIdx !== -1 ? parseInt(process.argv[limitIdx + 1]) : Infinity;
 const PAGES_PER_TERM = pagesIdx !== -1 ? parseInt(process.argv[pagesIdx + 1]) : 1;
+const termsIdx  = process.argv.indexOf('--terms');
+const TERMS_CAP = termsIdx !== -1 ? parseInt(process.argv[termsIdx + 1]) : Infinity; // cap on # of terms used, for controlled/cheap test runs
 
 let MIN_FOLLOWERS = 30000;      // default; overridden by machine_config.source_follower_floor
 const MAX_FOLLOWERS = 200000;
@@ -72,11 +74,13 @@ const MAX_FOLLOWERS = 200000;
 // Cheap enough (1 credit/term) to run the full list every time — no rationing needed,
 // DB dedup handles repeats. Add more here over time; no need to retire any (unlike the
 // FB Ads terms, this pool isn't rank-limited the same way).
+//
+// ORDER MATTERS with --terms N (caps the list from the front, for controlled/cheap test
+// runs). Vertical/business-noun phrases are listed first — a live test of the generic
+// DM-phrase group (2026-07-05, "zakazivanje termina beograd") returned mostly small
+// personal accounts (a tattoo artist, a makeup artist) rather than businesses, so those
+// are deprioritized to the end of the list until proven otherwise.
 const TERMS = [
-  // Generic DM/booking action phrases (any service vertical)
-  'zakazivanje termina', 'javite se u poruku', 'pošaljite nam poruku za info',
-  'DM za cene', 'poručite putem poruke', 'besplatna konsultacija', 'zakažite besplatnu procenu',
-  'kontaktirajte nas za više informacija', 'pišite nam za rezervaciju',
   // Beauty / wellness
   'kozmetički salon', 'frizerski salon', 'salon lepote', 'nokti i trepavice',
   'masaža i spa', 'wellness centar', 'estetska hirurgija',
@@ -95,6 +99,11 @@ const TERMS = [
   // Professional services
   'advokatska kancelarija', 'knjigovodstvena agencija', 'turistička agencija', 'event agencija',
   'fotografski studio', 'wedding planner',
+  // Generic DM/booking action phrases — deprioritized, see note above (skewed toward
+  // personal accounts/creators in the one live test, not businesses)
+  'zakazivanje termina', 'javite se u poruku', 'pošaljite nam poruku za info',
+  'DM za cene', 'poručite putem poruke', 'besplatna konsultacija', 'zakažite besplatnu procenu',
+  'kontaktirajte nas za više informacija', 'pišite nam za rezervaciju',
 ];
 
 // ── Exclusion categories (business-category signals from ScrapeCreators' category_name) ──
@@ -105,6 +114,7 @@ const EXCLUDE_CATS = new Set([
   "Women's Clothing", "Men's Clothing", 'Cosmetics store', 'Jewelry/watches',
   'Personal blog', 'Public figure', 'Artist', 'Musician/band', 'Media/news company',
   'Shopping & retail', 'Coach', // "Coach" catches personal-brand life-coaches, not clinics
+  'Writer', // caught a personal yoga/meditation/spiritual-coaching account (2026-07-05 live test) — same family as Coach/Personal blog
   'Digital creator', 'Content creator', 'Blogger', 'Comedian', 'Entertainer', 'Actor/director',
   'Community Organization', 'Community', 'Local business', 'City', 'Region',
   'News & media website', 'Government organization', 'Political party', 'Non-profit organization',
@@ -235,7 +245,7 @@ async function main() {
 
   console.log('═══════════════════════════════════════════════════════');
   console.log('  SmartFlow Lead Sourcer — ScrapeCreators IG Bio Search');
-  console.log(`  Mode: ${isDryRun ? 'DRY RUN (no DB writes)' : 'LIVE'} | Terms: ${TERMS.length} × ${PAGES_PER_TERM} page(s) | Max inserts: ${LIMIT}`);
+  console.log(`  Mode: ${isDryRun ? 'DRY RUN (no DB writes)' : 'LIVE'} | Terms available: ${TERMS.length} (cap: ${Number.isFinite(TERMS_CAP) ? TERMS_CAP : 'none'}) × ${PAGES_PER_TERM} page(s) | Max inserts: ${LIMIT}`);
   console.log(`  Filter: ${MIN_FOLLOWERS / 1000}k–${MAX_FOLLOWERS / 1000}k followers · business account · Serbian market`);
   console.log('═══════════════════════════════════════════════════════\n');
 
@@ -252,7 +262,9 @@ async function main() {
   // ── Stage 1: search across all terms ──────────────────────────────────────
   console.log('─── Stage 1: Instagram bio/caption search ──────────────');
   const byHandle = new Map();
-  for (const term of TERMS) {
+  const termsToRun = Number.isFinite(TERMS_CAP) ? TERMS.slice(0, TERMS_CAP) : TERMS;
+  console.log(`  Using ${termsToRun.length}/${TERMS.length} terms${Number.isFinite(TERMS_CAP) ? ' (--terms cap)' : ''} — est. cost: ${termsToRun.length * PAGES_PER_TERM} credits\n`);
+  for (const term of termsToRun) {
     let cursor = null;
     for (let page = 0; page < PAGES_PER_TERM; page++) {
       try {
