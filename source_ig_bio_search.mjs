@@ -93,25 +93,29 @@ const EXCLUDE_CATS = new Set([
   "Women's Clothing", "Men's Clothing", 'Cosmetics store', 'Jewelry/watches',
   'Personal blog', 'Public figure', 'Artist', 'Musician/band', 'Media/news company',
   'Shopping & retail', 'Coach', // "Coach" catches personal-brand life-coaches, not clinics
-  'Writer', // caught a personal yoga/meditation/spiritual-coaching account (2026-07-05 live test) — same family as Coach/Personal blog
+  'Writer', 'Author', 'Entrepreneur', // personal-brand/mentor accounts, not SMBs (2026-07-06 live test)
   'Digital creator', 'Content creator', 'Blogger', 'Comedian', 'Entertainer', 'Actor/director',
   'Community Organization', 'Community', 'Local business', 'City', 'Region',
-  'News & media website', 'Government organization', 'Political party', 'Non-profit organization',
+  'News & media website', 'Government organization', 'Government official', // both org AND person
+  'Broadcasting & media production company', 'Political party', 'Non-profit organization',
   'Nonprofit organization', 'Magazine', 'Newspaper', 'Radio station', 'Podcast',
   'Restaurant', 'Cafe', 'Bar', 'Fast food restaurant', 'Pizza place', 'Bakery',
-]);
+].map(s => s.toLowerCase()));
 
 const EXCLUDE_NAME_KEYWORDS = /\b(majice|majic|cipelice|cipela|cipele|obuća|obuca|kiflice|kiflic|torte|haljine|suknje|bluze|jakne|kaputi|šminke|sminke|nakit|parfem|parfemi|podkast|podcast|fondacija|fondacij|humanitar|zaklada|blog|kanal|kreator|otkriva|otkrivamo|dobrotvorn|volonter|donacij|kladionic|kladion|kazino|casino|betting|lutrij|shein|aliexpress|garderob|butik|kolekcij|fashion|torb[aei]|nakita|narukvic|piercing|pirsing)\b/i;
 
-// ── Serbian market check — same signals proven in source_ig_native.mjs / source_ig_search.mjs ──
+// ── Serbian market check — STRICT, Serbia-only (not BA/HR/SI — user directive 2026-07-05) ──
+// Diacritics alone (š/č/ž/đ/ć) are NOT sufficient: Slovenian/Croatian/Bosnian use the same
+// letters. A live test (2026-07-06) let "dm drogerie markt Slovenija" through on diacritics
+// alone — real Slovenian-language bio ("Tvoja najljubša drogerija... kozmetiko"), wrong
+// country entirely. Require a .rs domain OR explicit Serbia-specific vocabulary instead.
 function isSerbianProfile(profile) {
   const bio = profile.biography || '';
   const extDomain = (() => {
     try { return new URL(profile.external_url).hostname.replace(/^www\./, ''); } catch { return ''; }
   })();
-  if (extDomain.endsWith('.rs') || extDomain.endsWith('.ba') || extDomain.endsWith('.hr')) return true;
-  if (/srbija|beograd|novi sad|niš|kragujevac|subotica|čačak|valjevo|užice|smederevo/i.test(bio)) return true;
-  if (/[šćčžđŠĆČŽĐ]/.test(bio)) return true;
+  if (extDomain.endsWith('.rs')) return true;
+  if (/srbija|serbia|beograd|belgrade|novi sad|niš|kragujevac|subotica|čačak|valjevo|užice|smederevo/i.test(bio)) return true;
   return false;
 }
 
@@ -123,6 +127,14 @@ const AGGREGATOR_HOSTS = new Set([
 const BAD_WEBSITE_HOSTS = new Set([
   'instagram.com','facebook.com','wa.me','t.me','tiktok.com','youtube.com','youtu.be',
   'maps.google.com','calendly.com','booksy.com','fresha.com','treatwell.com',
+  // Generic course/community/funnel platforms — a personal-brand account's "website" is often
+  // one of these, not their own domain. Hunter/domain-search on these returns some unrelated
+  // employee's email at the platform company itself (caught live 2026-07-06: a juice business's
+  // bio linked to a skool.com community, Hunter returned a Skool employee's email, not hers).
+  'skool.com','subscribepage.io','teachable.com','kajabi.com','systeme.io',
+  // Huge multinational/media domains — even when a real business account, Hunter/domain-search
+  // returns a random employee at these, never a relevant contact for a Serbian SMB outreach.
+  'bbc.com','bbc.co.uk',
 ]);
 function classifyWebsite(url) {
   if (!url) return 'none';
@@ -273,7 +285,7 @@ async function main() {
     if (!p.is_business_account && !p.is_professional_account)     { dbg.notBusiness++; continue; }
     const followers = p.follower_count || 0;
     if (followers < MIN_FOLLOWERS || followers > MAX_FOLLOWERS)    { dbg.followers++;   continue; }
-    if (EXCLUDE_CATS.has(p.category_name))                         { dbg.category++;    continue; }
+    if (EXCLUDE_CATS.has((p.category_name || '').toLowerCase()))   { dbg.category++;    continue; }
     if (EXCLUDE_NAME_KEYWORDS.test(p.full_name) || EXCLUDE_NAME_KEYWORDS.test(p.biography)) { dbg.name++; continue; }
     if (!isSerbianProfile(p))                                      { dbg.notSerbian++;  continue; }
     dbg.passed++;
