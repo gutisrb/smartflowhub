@@ -68,42 +68,21 @@ let MIN_FOLLOWERS = 30000;      // default; overridden by machine_config.source_
 const MAX_FOLLOWERS = 200000;
 
 // ── Search terms ──────────────────────────────────────────────────────────────
-// Bio/caption phrases — the query matches text Instagram's own search indexes from
-// profile bios and captions, so phrases should read like something a Serbian service
-// business would actually write in its bio, not a Google-search-style query.
-// Cheap enough (1 credit/term) to run the full list every time — no rationing needed,
-// DB dedup handles repeats. Add more here over time; no need to retire any (unlike the
-// FB Ads terms, this pool isn't rank-limited the same way).
-//
-// ORDER MATTERS with --terms N (caps the list from the front, for controlled/cheap test
-// runs). Vertical/business-noun phrases are listed first — a live test of the generic
-// DM-phrase group (2026-07-05, "zakazivanje termina beograd") returned mostly small
-// personal accounts (a tattoo artist, a makeup artist) rather than businesses, so those
-// are deprioritized to the end of the list until proven otherwise.
+// Deliberately NOT niche/vertical words (no "salon", "klinika", "servis" etc). The real
+// qualifying signal per the ICP definition (wiki/status.md, 2026-05-21) is "does this
+// business get consumer inquiries via DM that could be automated" — that's true across
+// every industry, so the search terms stay broad and industry-agnostic on purpose.
+// Business-account + follower-range + Serbian filters (Stage 2) do the real narrowing;
+// these words are just a way to surface accounts that talk to customers via DM at all.
+// Cheap enough (1 credit/term) to run the full list every time — no rationing needed.
 const TERMS = [
-  // Beauty / wellness
-  'kozmetički salon', 'frizerski salon', 'salon lepote', 'nokti i trepavice',
-  'masaža i spa', 'wellness centar', 'estetska hirurgija',
-  // Health / clinics
-  'stomatološka ordinacija', 'privatna klinika', 'fizioterapija', 'veterinarska stanica',
-  'nutricionista', 'psihoterapija',
-  // Fitness
-  'fitnes centar', 'teretana', 'pilates studio', 'personalni trener', 'yoga studio',
-  // Education
-  'škola stranih jezika', 'IT akademija', 'časovi online', 'edukativni centar',
-  // Home / construction / trades
-  'građevinska firma', 'moler radovi', 'instalater', 'solarni paneli', 'keramičarski radovi',
-  'arhitektonski biro',
-  // Automotive
-  'auto servis', 'detailing studio', 'iznajmljivanje vozila',
-  // Professional services
-  'advokatska kancelarija', 'knjigovodstvena agencija', 'turistička agencija', 'event agencija',
-  'fotografski studio', 'wedding planner',
-  // Generic DM/booking action phrases — deprioritized, see note above (skewed toward
-  // personal accounts/creators in the one live test, not businesses)
-  'zakazivanje termina', 'javite se u poruku', 'pošaljite nam poruku za info',
-  'DM za cene', 'poručite putem poruke', 'besplatna konsultacija', 'zakažite besplatnu procenu',
-  'kontaktirajte nas za više informacija', 'pišite nam za rezervaciju',
+  'pošaljite nam poruku', 'javite se u poruku', 'kontaktirajte nas za više informacija',
+  'pišite nam za sve informacije', 'DM za cene', 'cena u inbox', 'sve informacije u inbox',
+  'pošaljite upit', 'za porudžbine pišite nam', 'stanje na upit', 'dostupno na upit',
+  'pitajte u komentarima', 'za rezervaciju pišite', 'pošaljite poruku za detalje',
+  'poručite putem poruke', 'DM za porudžbinu', 'cena i dostupnost u inbox',
+  'besplatna konsultacija', 'zakažite besplatnu procenu', 'pišite nam za rezervaciju',
+  'javite se za više detalja', 'pošaljite poruku za rezervaciju', 'za sve upite pišite',
 ];
 
 // ── Exclusion categories (business-category signals from ScrapeCreators' category_name) ──
