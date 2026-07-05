@@ -828,17 +828,22 @@ async function main() {
     // Low-confidence handles (website scrape / FB slug guess) can pick up an IG account that
     // exists but belongs to someone else entirely — e.g. a leftover demo widget on a template
     // site. Apify only confirms the account is real, not that it's the same business. So for
-    // low-confidence handles, require the profile's own external_url to point back to the same
+    // low-confidence handles, require the profile's own external link to point back to the same
     // domain we scraped it from. A hard mismatch (e.g. our domain tartufidamar.rs vs the
     // profile's ozdesignfurniture.com.au) means we grabbed the wrong account — drop it.
-    if (profile && lead.igHandleConfidence === 'low' && lead.domain && profile.externalUrl) {
-      let profileHost = null;
-      try { profileHost = new URL(profile.externalUrl.startsWith('http') ? profile.externalUrl : `https://${profile.externalUrl}`).hostname.replace(/^www\./, ''); } catch {}
-      if (profileHost && profileHost !== lead.domain && !profileHost.endsWith('.' + lead.domain) && !lead.domain.endsWith('.' + profileHost)) {
-        rejectedMismatch++;
-        profile = null;
-        lead.igHandle = null;
-        lead.igHandleIsGuess = false;
+    let mismatchRejected = false;
+    if (profile && lead.igHandleConfidence === 'low' && lead.domain) {
+      const profileUrl = profile.externalUrls?.[0]?.url || profile.externalUrl || null;
+      if (profileUrl) {
+        let profileHost = null;
+        try { profileHost = new URL(profileUrl.startsWith('http') ? profileUrl : `https://${profileUrl}`).hostname.replace(/^www\./, ''); } catch {}
+        if (profileHost && profileHost !== lead.domain && !profileHost.endsWith('.' + lead.domain) && !lead.domain.endsWith('.' + profileHost)) {
+          rejectedMismatch++;
+          mismatchRejected = true;
+          profile = null;
+          lead.igHandle = null;
+          lead.igHandleIsGuess = false;
+        }
       }
     }
 
@@ -861,6 +866,9 @@ async function main() {
           }
         }
       }
+    } else if (mismatchRejected) {
+      // Cross-check above already cleared igHandle — do not fall back to FB likes,
+      // that would let the rejected/wrong account back in via the follower gate.
     } else if (lead.igHandleIsGuess) {
       // Slug guess rejected by Apify — clear it so we don't insert a wrong handle
       lead.igHandle = null;
@@ -884,6 +892,7 @@ async function main() {
   const skippedLowFollowers = qualified.length - toEnrich.length;
 
   console.log(`  Confirmed handles  : ${confirmed}/${uniqueHandles.length}`);
+  if (rejectedMismatch > 0) console.log(`  Rejected (wrong account, domain mismatch): ${rejectedMismatch}`);
   console.log(`  ≥ ${MIN_FOLLOWERS/1000}k followers (IG verified) : ${igVerified.length}`);
   console.log(`  Skipped (< ${MIN_FOLLOWERS/1000}k or unverified)  : ${skippedLowFollowers}`);
   console.log(`  Proceeding with ${toEnrich.length} leads total\n`);
