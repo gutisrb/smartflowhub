@@ -46,6 +46,8 @@ interface AgentLeadsModuleProps {
     nicheKey?: NicheKey;
     /** During onboarding tour: pulse-highlight the row whose full_name matches */
     tourHighlightName?: string;
+    /** Onboarding tour: auto-open the lead-intelligence viewer on this row */
+    tourOpenLogName?: string;
 }
 
 // ── Delivery status options ────────────────────────────────────────────────────
@@ -122,12 +124,22 @@ const MOCK_BOOKSTORE_CRM_BY_CLIENT: Record<string, any[]> = {
     ],
 }
 
-export function AgentLeadsModule({ clientId, selectedBrandIds, terminology: propTerminology, demoMode, nicheKey, tourHighlightName }: AgentLeadsModuleProps) {
+export function AgentLeadsModule({ clientId, selectedBrandIds, terminology: propTerminology, demoMode, nicheKey, tourHighlightName, tourOpenLogName }: AgentLeadsModuleProps) {
     const [leads, setLeads] = useState<any[]>([])
     const [loading, setLoading] = useState(true)
     const [searchTerm, setSearchTerm] = useState('')
     const [filter, setFilter] = useState('all')
     const [selectedLead, setSelectedLead] = useState<any | null>(null)
+
+    // Onboarding tour: open the conversation-log viewer on the hero row while
+    // the "crm-log" beat is active; close it when the beat ends or tour exits.
+    useEffect(() => {
+        if (!tourOpenLogName) { setSelectedLead(null); return }
+        if (leads.length === 0) return
+        const hit = leads.find((l: any) => l.full_name === tourOpenLogName)
+        if (hit) setSelectedLead(hit)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [tourOpenLogName, leads.length])
     const [editingStatusId, setEditingStatusId] = useState<string | null>(null)
     const [editingDeliveryId, setEditingDeliveryId] = useState<string | null>(null)
     const [editingRazlogId, setEditingRazlogId] = useState<string | null>(null)
