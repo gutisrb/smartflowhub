@@ -26,6 +26,7 @@ import { SettingsModule } from "@/components/modules/settings-module"
 import { inferNicheKey, NICHE_CONFIGS } from "@/lib/niche-config"
 import { IntroStep } from "@/components/onboarding/steps/intro-step"
 import { OnboardingTour } from "@/components/onboarding/onboarding-tour"
+import { isServiceNiche, tourHeroFor } from "@/lib/onboarding/tour-slots"
 import { PonudaModule } from "@/components/modules/ponuda-module"
 import { CommandCenterModule } from "@/components/modules/command-center-module"
 import type { OnboardingCopy } from "@/lib/onboarding/types"
@@ -48,7 +49,10 @@ export default function DashboardPage() {
   const [onboardingPhase, setOnboardingPhase] = useState<'intro' | 'tour'>('intro')
   const [inboxPlayback, setInboxPlayback] = useState(false)
   const [tourSlot, setTourSlot] = useState<string | null>(null)
-  const tourHeroName = showOnboarding ? "Marija Jović" : null
+  // Hero customer each beat spotlights — niche-branched (service demos seed
+  // Marija/Dragana, product demos Stefan/Jelena), so highlights actually match.
+  const tourIsService = isServiceNiche(demoNiche)
+  const tourHeroName = showOnboarding ? tourHeroFor(tourSlot, tourIsService) : null
 
   // Primary effective clientId — first selected brand (used by AI Agent, module loading, etc.)
   const effectiveClientId = useMemo(() => {
@@ -268,7 +272,7 @@ export default function DashboardPage() {
           statuses={settings.statuses || ['Novi Lead', 'enriched', 'Kontaktiran', 'Meeting Booked', 'Closed', 'Lost', 'Sent']}
         />
       case 'business-crm':
-        if (demoNiche) return <AgentLeadsModule clientId={effectiveClientId} demoMode nicheKey={inferNicheKey(demoNiche)} tourHighlightName={tourSlot === 'crm' ? tourHeroName ?? undefined : undefined} />
+        if (demoNiche) return <AgentLeadsModule clientId={effectiveClientId} demoMode nicheKey={inferNicheKey(demoNiche)} tourHighlightName={(tourSlot === 'crm' || tourSlot === 'crm-log') ? tourHeroName ?? undefined : undefined} tourOpenLogName={tourSlot === 'crm-log' ? tourHeroName ?? undefined : undefined} />
         return <GrowthEngineModule
           clientId={effectiveClientId}
           tableName="kontakti"
@@ -296,7 +300,7 @@ export default function DashboardPage() {
       case 'agent-leads':
         return <AgentLeadsModule clientId={effectiveClientId} terminology={terminology} selectedBrandIds={isBookStoreClient && selectedBrandIds.length > 1 ? selectedBrandIds : undefined} />
       case 'social-chatbot':
-        return <SocialChatbotModule clientId={effectiveClientId} selectedBrandIds={isBookStoreClient && selectedBrandIds.length > 0 ? selectedBrandIds : undefined} clientName={clientName} nicheKey={demoNiche ? inferNicheKey(demoNiche) : undefined} demoPlayback={inboxPlayback} />
+        return <SocialChatbotModule clientId={effectiveClientId} selectedBrandIds={isBookStoreClient && selectedBrandIds.length > 0 ? selectedBrandIds : undefined} clientName={clientName} nicheKey={demoNiche ? inferNicheKey(demoNiche) : undefined} demoPlayback={inboxPlayback} tourFocusName={(tourSlot === 'inbox' || tourSlot === 'inbox-intervencija') ? tourHeroName ?? undefined : undefined} />
       case 'website-chatbot':
         return <WebsiteChatbotModule clientId={effectiveClientId} />
       case 'chatbot-analytics':
