@@ -71,7 +71,8 @@ export function OfferContent({ brandName, brandColor = "#10b981", onPrimary, com
         <ShieldCheck className="w-5 h-5 mt-0.5 shrink-0" style={{ color: brandColor }} />
         <p className="text-[14px] text-zinc-200 leading-relaxed">
           <span className="font-semibold text-white">Probate ga uživo, na svojim kupcima.</span>{" "}
-          Postavimo ga na Vaše naloge i pustimo da radi — pre bilo kakve obaveze. Detalje rešavamo u kratkom pozivu.
+          Postavimo ga na naloge koje već imate — Instagram, Facebook, WhatsApp i sajt — i pustimo da radi,
+          pre bilo kakve obaveze. Ništa se ne menja i ništa ne migrira. Detalje rešavamo u kratkom pozivu.
         </p>
       </div>
 
