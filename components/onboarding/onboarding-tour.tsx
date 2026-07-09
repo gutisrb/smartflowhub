@@ -2,7 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { MessageCircle, Database, Calendar, BarChart3, Sparkles, ArrowRight, Play } from "lucide-react"
+import { MessageCircle, Database, Calendar, BarChart3, Sparkles, ArrowRight, ShieldAlert, FileText } from "lucide-react"
+import { expandTourSlots, isServiceNiche, type TourSlot } from "@/lib/onboarding/tour-slots"
 
 interface ModuleLike { key: string }
 
@@ -17,24 +18,12 @@ interface OnboardingTourProps {
   onComplete: () => void
 }
 
-const SERVICE_NICHES = new Set(["dental", "medical", "beauty", "fitness", "services", "wellness", "real-estate"])
-
 type StepDef = { moduleKey: string; icon: any; eyebrow: string; title: string; body: string; cta?: string }
 
-// module-key → its place in the walk; first matching key wins per slot
-const SLOT: Record<string, "inbox" | "crm" | "termini" | "analitika" | "offer"> = {
-  "social-chatbot": "inbox",
-  "business-crm": "crm", "agent-leads": "crm",
-  "calendar": "termini",
-  "chatbot-analytics": "analitika", "analytics": "analitika",
-  "ponuda": "offer",
-}
-const ORDER = ["inbox", "crm", "termini", "analitika", "offer"]
-
 export function OnboardingTour({ modules, clientName, niche, brandColor = "#10b981", onNavigate, onPlayback, onSlot, onComplete }: OnboardingTourProps) {
-  const isService = SERVICE_NICHES.has((niche || "").toLowerCase())
+  const isService = isServiceNiche(niche)
 
-  const COPY: Record<string, StepDef> = useMemo(() => ({
+  const COPY: Record<TourSlot, StepDef> = useMemo(() => ({
     inbox: {
       moduleKey: "", icon: MessageCircle, eyebrow: "Uživo · AI Inbox",
       title: "Razgovor koji agent vodi sam",
@@ -42,12 +31,26 @@ export function OnboardingTour({ modules, clientName, niche, brandColor = "#10b9
         ? "Marija Vam piše. Gledajte uživo — agent odgovara, reši primedbu na cenu i zakaže termin, ovde u Vašem inboxu. Bez Vas."
         : "Stefan šalje sliku proizvoda. Gledajte uživo — agent je prepozna, ponudi zamenu i napravi porudžbinu, ovde u Vašem inboxu. Bez Vas.",
     },
+    "inbox-intervencija": {
+      moduleKey: "", icon: ShieldAlert, eyebrow: "Uživo · Intervencija",
+      title: "Kada agent ne zna — ne izmišlja",
+      body: isService
+        ? "Pacijent pita ono što sme da odluči samo lekar. Agent ne nagađa: obaveštava Vas i predaje razgovor — a Vi odgovarate iz ovog istog inboxa."
+        : "Jelena javlja da je proizvod stigao oštećen. Agent ne raspravlja: obaveštava Vas i predaje razgovor — a Vi odgovarate iz ovog istog inboxa.",
+    },
     crm: {
       moduleKey: "", icon: Database, eyebrow: "Automatski upis",
       title: isService ? "Marija je već u bazi" : "Stefan je već u bazi",
       body: isService
         ? "Čim se razgovor završio, kupac je upisan ovde — na vrhu liste. Ime, telefon, usluga i status „Zakazano“. Niste kucali ništa."
         : "Čim je porudžbina napravljena, kupac je upisan ovde — na vrhu liste. Ime, kontakt, proizvod i status. Niste kucali ništa.",
+    },
+    "crm-log": {
+      moduleKey: "", icon: FileText, eyebrow: isService ? "Dosije pacijenta" : "Dosije kupca",
+      title: "Svaka reč, zabeležena",
+      body: isService
+        ? "Kliknite bilo kog pacijenta — ceo razgovor, status i razlog su tu. I Nikola, koji NIJE zakazao, upisan je sa razlogom: čeka termin subotom. Nijedan upit ne propada."
+        : "Stefanova porudžbina se prati do isporuke — status „Poslato“. I Jelena, koja se žalila, zabeležena je sa razlogom. Ništa ne propada.",
     },
     termini: {
       moduleKey: "", icon: Calendar, eyebrow: "Termin zakazan",
@@ -67,16 +70,10 @@ export function OnboardingTour({ modules, clientName, niche, brandColor = "#10b9
     },
   }), [isService, clientName])
 
-  const steps = useMemo(() => {
-    const bySlot: Record<string, string> = {}
-    for (const m of modules) {
-      const slot = SLOT[m.key]
-      if (slot && !bySlot[slot]) bySlot[slot] = m.key
-    }
-    // ensure offer (ponuda) is always last even if not in modules list
-    if (!bySlot["offer"]) bySlot["offer"] = "ponuda"
-    return ORDER.filter((s) => bySlot[s]).map((slot) => ({ ...COPY[slot], moduleKey: bySlot[slot], slot }))
-  }, [modules, COPY])
+  const steps = useMemo(
+    () => expandTourSlots(modules.map((m) => m.key)).map(({ slot, moduleKey }) => ({ ...COPY[slot], moduleKey, slot })),
+    [modules, COPY],
+  )
 
   const [i, setI] = useState(0)
   const step = steps[i]
@@ -85,7 +82,7 @@ export function OnboardingTour({ modules, clientName, niche, brandColor = "#10b9
   useEffect(() => {
     if (!step) return
     onNavigate(step.moduleKey)
-    onPlayback(step.slot === "inbox")
+    onPlayback(step.slot === "inbox" || step.slot === "inbox-intervencija")
     onSlot?.(step.slot)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [i])
@@ -118,7 +115,7 @@ export function OnboardingTour({ modules, clientName, niche, brandColor = "#10b9
               <div className="hidden md:flex w-12 h-12 rounded-2xl items-center justify-center shrink-0 relative"
                 style={{ background: `${brandColor}18`, border: `1px solid ${brandColor}40` }}>
                 <step.icon className="w-5 h-5" style={{ color: brandColor }} />
-                {step.slot === "inbox" && (
+                {(step.slot === "inbox" || step.slot === "inbox-intervencija") && (
                   <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full animate-pulse" style={{ background: brandColor, boxShadow: `0 0 8px ${brandColor}` }} />
                 )}
               </div>
