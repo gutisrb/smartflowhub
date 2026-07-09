@@ -776,13 +776,10 @@ export function SocialChatbotModule({ clientId, selectedBrandIds, clientName, ni
             {/* ── Header ─────────────────────────────────────────────────────── */}
             <div className="flex items-center justify-between shrink-0 flex-wrap gap-2">
                 <div>
-                    <h2 className="text-xl md:text-3xl font-outfit font-bold tracking-tight text-white">
-                        AI{" "}
-                        <span style={{ background: "linear-gradient(120deg, #34d39e, #10b981, #06b6d4)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-                            Inbox
-                        </span>
+                    <h2 className="text-xl md:text-[26px] font-outfit font-semibold tracking-tight text-white">
+                        AI Inbox
                     </h2>
-                    <p className="text-[11px] font-mono text-zinc-500 mt-0.5 tracking-wider">
+                    <p className="text-[12px] text-zinc-500 mt-0.5">
                         {isMultiBrand
                             ? `Svi brendovi · ${brandIds.length} brenda`
                             : bookStoreConfig
@@ -835,7 +832,7 @@ export function SocialChatbotModule({ clientId, selectedBrandIds, clientName, ni
 
             {/* ── Stats ──────────────────────────────────────────────────────── */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3 shrink-0">
-                <StatCard icon={<MessageCircle className="w-4 h-4" />} label={`Razgovori · ${periodLabel}`} value={upitiPeriod} variant="emerald" />
+                <StatCard icon={<MessageCircle className="w-4 h-4" />} label={`Razgovori · ${periodLabel}`} value={upitiPeriod} variant="zinc" />
                 <StatCard icon={<UserCheck className="w-4 h-4" />} label={`${closedLabel} (agent)`} value={closedByAgent} variant="emerald" />
                 <StatCard
                     icon={<AlertTriangle className="w-4 h-4" />}
@@ -844,14 +841,14 @@ export function SocialChatbotModule({ clientId, selectedBrandIds, clientName, ni
                     variant={intervencije > 0 ? "amber" : "zinc"}
                     glow={intervencije > 0}
                 />
-                <div className="rounded-2xl border border-white/[0.07] bg-white/[0.03] p-3 md:p-4 flex items-center justify-between" style={{ backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)" }}>
+                <div className="rounded-xl surface-1 p-3 md:p-4 flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl border border-cyan-500/20 bg-cyan-500/10 flex items-center justify-center text-cyan-400">
+                        <div className="w-8 h-8 md:w-9 md:h-9 rounded-lg border border-white/10 bg-white/5 flex items-center justify-center text-zinc-400 shrink-0">
                             <TrendingUp className="w-4 h-4" />
                         </div>
                         <div>
-                            <p className="text-[9px] font-mono font-bold text-zinc-500 uppercase tracking-widest">Poruke</p>
-                            <p className="text-2xl font-bold text-white font-outfit">{msgCount}</p>
+                            <p className="text-[10px] font-medium text-zinc-500 uppercase tracking-wide">Poruke</p>
+                            <p className="text-xl md:text-2xl font-bold text-white font-outfit leading-none mt-0.5">{msgCount}</p>
                         </div>
                     </div>
                     <div className="flex flex-col gap-0.5">
@@ -860,8 +857,8 @@ export function SocialChatbotModule({ clientId, selectedBrandIds, clientName, ni
                                 key={p.key}
                                 onClick={() => setMsgPeriod(p.key)}
                                 className={cn(
-                                    "text-[9px] font-mono font-bold uppercase tracking-widest px-2 py-0.5 rounded-md transition-all",
-                                    msgPeriod === p.key ? "bg-cyan-500/20 text-cyan-400" : "text-zinc-600 hover:text-zinc-400"
+                                    "text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md transition-colors",
+                                    msgPeriod === p.key ? "bg-white/10 text-white" : "text-zinc-600 hover:text-zinc-400"
                                 )}
                             >
                                 {p.label}
@@ -898,7 +895,7 @@ export function SocialChatbotModule({ clientId, selectedBrandIds, clientName, ni
 
                 {/* Conversation list */}
                 <div className={cn(
-                    "md:col-span-4 flex flex-col rounded-2xl border border-white/[0.07] bg-white/[0.02] overflow-hidden backdrop-blur-xl",
+                    "md:col-span-4 flex flex-col rounded-xl surface-1 overflow-hidden",
                     // Mobile: show only when mobilePanel === "list" (or no selection yet)
                     selected ? (mobilePanel === "list" ? "flex" : "hidden md:flex") : "flex"
                 )}>
@@ -982,9 +979,9 @@ export function SocialChatbotModule({ clientId, selectedBrandIds, clientName, ni
                                     onClick={() => { setSelectedId(conv.id); setMobilePanel("chat") }}
                                     className={cn(
                                         "w-full text-left pl-3 pr-4 py-3.5 transition-colors duration-200 relative",
-                                        isSelected ? "bg-emerald-500/[0.09]" : "hover:bg-white/[0.035]"
+                                        isSelected ? "bg-white/[0.07]" : "hover:bg-white/[0.035]"
                                     )}
-                                    style={{ borderLeft: `3px solid ${isSelected ? '#34d39e' : chHex}` }}
+                                    style={{ borderLeft: `3px solid ${chHex}` }}
                                 >
                                     {justArrived && (
                                         <span className="absolute top-2 right-3 text-[8px] font-extrabold uppercase tracking-wider px-1.5 py-0.5 rounded-md bg-emerald-400 text-[#05140d]">novo</span>
@@ -1047,7 +1044,7 @@ export function SocialChatbotModule({ clientId, selectedBrandIds, clientName, ni
 
                 {/* Chat view */}
                 <div className={cn(
-                    "md:col-span-5 flex flex-col rounded-2xl border border-white/[0.07] bg-white/[0.02] overflow-hidden backdrop-blur-xl",
+                    "md:col-span-5 flex flex-col rounded-xl surface-2 overflow-hidden",
                     mobilePanel === "chat" ? "flex" : "hidden md:flex"
                 )}>
                     {selected ? (
@@ -1222,8 +1219,11 @@ export function SocialChatbotModule({ clientId, selectedBrandIds, clientName, ni
                 )}>
                     {selected ? (
                         <>
-                            {/* Profile card — clean, centered, no colored cover bleed */}
-                            <div className="rounded-2xl border border-white/[0.07] bg-white/[0.02] backdrop-blur-xl shrink-0">
+                            {/* Profile card — surface-3 sets it apart from the chat stage, channel color marks whose conversation this is */}
+                            <div
+                                className="rounded-xl surface-3 shrink-0 border-l-[3px]"
+                                style={{ borderLeftColor: channelHex(selected.platform) }}
+                            >
                                 <div className="px-4 pt-5 pb-4 flex flex-col items-center text-center">
                                     <div className="relative">
                                         <Avatar conv={selected} size="lg" className="w-16 h-16 ring-2 ring-white/10" />
@@ -1265,8 +1265,8 @@ export function SocialChatbotModule({ clientId, selectedBrandIds, clientName, ni
                                 const phone = cm?.telefon || selected.phone
                                 const pmeta = getPlatformMeta(selected.platform)
                                 return (
-                                    <div className="rounded-2xl border border-white/[0.07] bg-white/[0.02] p-4 backdrop-blur-xl shrink-0">
-                                        <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-3">Kontakt</p>
+                                    <div className="rounded-xl surface-3 p-4 shrink-0">
+                                        <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-wide mb-3">Kontakt</p>
                                         <div className="space-y-3">
                                             <InfoRow icon={<Phone />} label="Telefon" value={phone || "Nije ostavljen"} />
                                             <InfoRow icon={<ChannelGlyph platform={selected.platform} />} label="Kanal" value={pmeta.label} />
@@ -1280,8 +1280,8 @@ export function SocialChatbotModule({ clientId, selectedBrandIds, clientName, ni
                             })()}
 
                             {/* Conversation stats */}
-                            <div className="rounded-2xl border border-white/[0.07] bg-white/[0.02] p-4 backdrop-blur-xl shrink-0">
-                                <p className="text-[9px] font-mono font-bold text-zinc-600 uppercase tracking-widest mb-3">Statistike</p>
+                            <div className="rounded-xl surface-3 p-4 shrink-0">
+                                <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-wide mb-3">Statistike</p>
                                 <div className="space-y-2">
                                     <MiniStat label="Ukupno poruka" value={currentMessages.length} />
                                     <MiniStat label="Korisnički" value={currentMessages.filter((m: any) => m.role === "user").length} />
@@ -1322,8 +1322,8 @@ export function SocialChatbotModule({ clientId, selectedBrandIds, clientName, ni
                                 }
                                 const sc = STATUS_COLOR[crmMatch.status] ?? '#6366f1'
                                 return (
-                                    <div className="rounded-2xl border border-white/[0.07] bg-white/[0.02] p-4 backdrop-blur-xl shrink-0">
-                                        <p className="text-[9px] font-mono font-bold text-zinc-600 uppercase tracking-widest mb-3">Narudžbina / CRM</p>
+                                    <div className="rounded-xl surface-3 p-4 shrink-0">
+                                        <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-wide mb-3">Narudžbina / CRM</p>
                                         <div className="space-y-2.5">
                                             {crmMatch.status && (
                                                 <div className="flex items-center justify-between">
@@ -1357,13 +1357,13 @@ export function SocialChatbotModule({ clientId, selectedBrandIds, clientName, ni
                                 )
                             })()}
 
-                            {/* AI Agent info */}
-                            <div className="rounded-2xl border border-emerald-500/15 bg-emerald-500/[0.04] p-4 backdrop-blur-xl shrink-0">
+                            {/* AI Agent info — the one card where emerald belongs: this is the AI, working */}
+                            <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/[0.06] p-4 shrink-0">
                                 <div className="flex items-center gap-2 mb-2">
                                     <Bot className="w-3.5 h-3.5 text-emerald-400" />
-                                    <span className="text-[10px] font-mono font-bold text-emerald-400 uppercase tracking-widest">AI Agent Aktivan</span>
+                                    <span className="text-[11px] font-bold text-emerald-400 uppercase tracking-wide">AI Agent Aktivan</span>
                                 </div>
-                                <p className="text-[11px] font-mono text-zinc-500 leading-relaxed">
+                                <p className="text-[12px] text-zinc-400 leading-relaxed">
                                     {bookStoreConfig
                                         ? `${bookStoreConfig.brandName} AI Agent obradjuje poruke 24/7 i automatski odgovara kupcima na svim kanalima.`
                                         : clientName
@@ -1373,8 +1373,8 @@ export function SocialChatbotModule({ clientId, selectedBrandIds, clientName, ni
                             </div>
                         </>
                     ) : (
-                        <div className="flex-1 rounded-2xl border border-white/[0.07] bg-white/[0.02] flex items-center justify-center min-h-[200px]">
-                            <p className="text-zinc-700 text-xs font-mono">Nema odabranog</p>
+                        <div className="flex-1 rounded-xl surface-3 flex items-center justify-center min-h-[200px]">
+                            <p className="text-zinc-600 text-xs">Nema odabranog razgovora</p>
                         </div>
                     )}
                 </div>
@@ -1393,24 +1393,20 @@ function StatCard({ icon, label, value, variant, glow }: {
     glow?: boolean
 }) {
     const styles = {
-        pink:    { bg: "bg-pink-500/10",    border: "border-pink-500/20",    iconClass: "text-pink-400 border-pink-500/20 bg-pink-500/10",    num: "text-white" },
-        emerald: { bg: "bg-emerald-500/10", border: "border-emerald-500/20", iconClass: "text-emerald-400 border-emerald-500/20 bg-emerald-500/10", num: "text-white" },
-        amber:   { bg: "bg-amber-500/10",   border: "border-amber-500/20",   iconClass: "text-amber-400 border-amber-500/30 bg-amber-500/15",  num: "text-amber-400" },
-        zinc:    { bg: "bg-white/[0.03]",   border: "border-white/[0.07]",   iconClass: "text-zinc-500 border-white/10 bg-white/5",           num: "text-white" },
-        cyan:    { bg: "bg-cyan-500/10",    border: "border-cyan-500/20",    iconClass: "text-cyan-400 border-cyan-500/20 bg-cyan-500/10",     num: "text-white" },
+        pink:    { bg: "bg-pink-500/[0.07]",    border: "border-pink-500/20",    iconClass: "text-pink-400 border-pink-500/20 bg-pink-500/10",    num: "text-white" },
+        emerald: { bg: "bg-emerald-500/[0.07]", border: "border-emerald-500/20", iconClass: "text-emerald-400 border-emerald-500/20 bg-emerald-500/10", num: "text-white" },
+        amber:   { bg: "bg-amber-500/[0.07]",   border: "border-amber-500/20",   iconClass: "text-amber-400 border-amber-500/30 bg-amber-500/15",  num: "text-amber-400" },
+        zinc:    { bg: "surface-1",             border: "",                      iconClass: "text-zinc-500 border-white/10 bg-white/5",           num: "text-white" },
+        cyan:    { bg: "bg-cyan-500/[0.07]",    border: "border-cyan-500/20",    iconClass: "text-cyan-400 border-cyan-500/20 bg-cyan-500/10",     num: "text-white" },
     }
     const s = styles[variant]
     return (
-        <div className={cn("rounded-2xl border p-3 md:p-4 flex items-center gap-2 md:gap-3", s.bg, s.border, glow && "ring-1 ring-amber-500/20")}
-             style={{ 
-                backdropFilter: "blur(20px)",
-                WebkitBackdropFilter: "blur(20px)" 
-             }}>
-            <div className={cn("w-8 h-8 md:w-9 md:h-9 rounded-xl flex items-center justify-center border shrink-0", s.iconClass)}>
+        <div className={cn("rounded-xl border p-3 md:p-4 flex items-center gap-2 md:gap-3", s.bg, s.border, glow && "ring-1 ring-amber-500/20")}>
+            <div className={cn("w-8 h-8 md:w-9 md:h-9 rounded-lg flex items-center justify-center border shrink-0", s.iconClass)}>
                 {icon}
             </div>
             <div>
-                <p className="text-[8px] md:text-[9px] font-mono font-bold text-zinc-500 uppercase tracking-widest">{label}</p>
+                <p className="text-[10px] font-medium text-zinc-500 uppercase tracking-wide">{label}</p>
                 <p className={cn("text-xl md:text-2xl font-bold font-outfit leading-none mt-0.5", s.num)}>{value}</p>
             </div>
         </div>

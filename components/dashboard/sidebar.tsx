@@ -45,6 +45,11 @@ const CATEGORY_CONFIG: CategoryConfig[] = [
   { key: 'settings', label: 'Podešavanja', collapsible: false, icon: Settings },
 ]
 
+// Rail is 64px collapsed, flyout expands to 272px on hover/focus — it overlays
+// the content area rather than pushing it, so the reserved layout width stays fixed.
+const RAIL_W = "w-16"
+const FLYOUT_W = "w-16 md:group-hover/rail:w-[272px] md:focus-within:w-[272px]"
+
 export function Sidebar({
   currentView, onViewChange, clientName, clientId,
   modules: propModules, loading: propLoading,
@@ -83,73 +88,58 @@ export function Sidebar({
     })
   }
 
-  // Shared wrapper classes — desktop: in-flow; mobile: fixed drawer
-  const wrapperClass = cn(
-    "fixed inset-y-0 left-0 z-50 flex flex-col glass-panel overflow-hidden transition-transform duration-300 ease-in-out",
-    "w-[280px] md:w-72",
-    isOpen ? "translate-x-0" : "-translate-x-full",
-    "md:relative md:translate-x-0 md:inset-auto md:z-20 md:m-4 md:mr-0 md:rounded-3xl md:h-[calc(100vh-2rem)]",
-    "group/sidebar animate-in slide-in-from-left-8 duration-700 ease-out"
-  )
-
   if (loading) {
     return (
-      <div className={wrapperClass}>
-        <div className="p-8 pb-4">
-          <div className="w-12 h-12 bg-emerald/10 rounded-2xl animate-pulse" />
+      <div className={cn(RAIL_W, "hidden md:flex md:flex-col shrink-0 h-screen sticky top-0 z-30 surface-rail")}>
+        <div className="p-4">
+          <div className="w-9 h-9 bg-white/5 rounded-xl animate-pulse" />
         </div>
-        <div className="flex-1 px-6 space-y-4">
+        <div className="flex-1 px-3 space-y-3">
           {[1, 2, 3, 4].map(i => (
-            <div key={i} className="h-10 bg-white/5 rounded-xl animate-pulse" style={{ animationDelay: `${i * 0.1}s` }} />
+            <div key={i} className="h-9 bg-white/5 rounded-lg animate-pulse" style={{ animationDelay: `${i * 0.1}s` }} />
           ))}
         </div>
       </div>
     )
   }
 
-  return (
-    <div className={wrapperClass}>
-      <div className="absolute inset-0 bg-gradient-to-b from-emerald/5 to-transparent pointer-events-none opacity-50" />
-
+  const navBody = (
+    <>
       {/* ── Header: brand switcher (group) OR Smartflow logo ─────────────── */}
       {isGroup && groupBrands && groupBrands.length > 0 && selectedBrandIds && onBrandSelectionChange ? (
-        <div className="relative z-10">
-          {/* Mobile close button */}
+        <div className="relative">
           {onClose && (
-            <div className="flex justify-end px-4 pt-4">
+            <div className="flex justify-end px-3 pt-4 md:hidden">
               <button
                 onClick={onClose}
-                className="md:hidden p-2 rounded-xl text-zinc-500 hover:text-white hover:bg-white/10 transition-all duration-200"
+                className="p-2 rounded-lg text-zinc-500 hover:text-white hover:bg-white/10 transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
           )}
-          <BrandSwitcherSidebar
-            brands={groupBrands}
-            selectedIds={selectedBrandIds}
-            onSelectionChange={onBrandSelectionChange}
-          />
-          {/* Divider */}
-          <div className="mx-4 mb-2 h-px bg-white/5" />
+          <div className="overflow-hidden whitespace-nowrap px-2">
+            <BrandSwitcherSidebar
+              brands={groupBrands}
+              selectedIds={selectedBrandIds}
+              onSelectionChange={onBrandSelectionChange}
+            />
+          </div>
+          <div className="mx-4 mt-2 mb-1 h-px bg-white/[0.06]" />
         </div>
       ) : (
-        <div className="px-6 md:px-7 pt-6 md:pt-7 pb-5 relative z-10">
+        <div className="pt-5 pb-4 px-3">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3.5 group cursor-pointer">
-              <div className="relative">
-                <div className="w-11 h-11 rounded-2xl flex items-center justify-center shadow-[0_8px_24px_-6px_rgba(16,185,129,0.45)] group-hover:scale-105 transition-transform duration-500 overflow-hidden"
-                  style={{ background: "linear-gradient(135deg, #34d39e, #10b981)" }}>
-                  <div className="absolute inset-0 bg-gradient-to-tr from-black/15 to-transparent" />
-                  <span className="relative z-10"><SmartflowMark size={22} /></span>
-                </div>
-                <div className="absolute -top-1 -right-1 w-3 h-3 bg-emerald border-2 border-obsidian rounded-full animate-pulse" />
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 overflow-hidden"
+                style={{ background: "linear-gradient(135deg, #34d39e, #10b981)" }}>
+                <span className="relative z-10"><SmartflowMark size={18} /></span>
               </div>
-              <div className="flex flex-col gap-1">
-                <span className="text-[10px] font-bold text-emerald/90 uppercase tracking-[0.22em] leading-none">
-                  Powered by SmartFlow
+              <div className="flex flex-col gap-0.5 min-w-0 overflow-hidden whitespace-nowrap">
+                <span className="text-[9px] font-bold text-emerald/80 uppercase tracking-[0.2em] leading-none">
+                  SmartFlow
                 </span>
-                <span className="text-lg font-outfit font-semibold text-silver tracking-tight leading-none group-hover:text-white transition-colors">
+                <span className="text-[15px] font-outfit font-semibold text-silver tracking-tight leading-none truncate">
                   {bookStoreConfig ? bookStoreConfig.brandName : (clientName || "Dashboard")}
                 </span>
               </div>
@@ -157,7 +147,7 @@ export function Sidebar({
             {onClose && (
               <button
                 onClick={onClose}
-                className="md:hidden p-2 rounded-xl text-zinc-500 hover:text-white hover:bg-white/10 transition-all duration-200"
+                className="md:hidden p-2 rounded-lg text-zinc-500 hover:text-white hover:bg-white/10 transition-colors shrink-0"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -167,24 +157,21 @@ export function Sidebar({
       )}
 
       {/* ── Nav ────────────────────────────────────────────────────────────── */}
-      <nav className="flex-1 overflow-y-auto px-4 py-2 scrollbar-none relative z-10">
+      <nav className="flex-1 overflow-y-auto overflow-x-hidden px-2 py-1 scrollbar-none">
         {hideCategories ? (
-          // Flat nav — no category headers (bookstore clients)
           <div className="space-y-1">
-            {modules.map((module, idx) => (
+            {modules.map((module) => (
               <NavItem
                 key={module.key}
                 icon={module.icon}
                 label={module.displayName}
                 active={currentView === module.key}
                 onClick={() => onViewChange(module.key)}
-                delay={idx * 0.05}
               />
             ))}
           </div>
         ) : (
-          // Categorised nav (SmartFlow / agency clients)
-          <div className="space-y-5 py-1">
+          <div className="space-y-4 py-1">
             {CATEGORY_CONFIG.map(categoryConfig => {
               const categoryModules = modulesByCategory.get(categoryConfig.key) || []
               if (categoryModules.length === 0) return null
@@ -192,36 +179,35 @@ export function Sidebar({
               const isExpanded = expandedCategories.has(categoryConfig.key)
 
               return (
-                <div key={categoryConfig.key} className="space-y-1.5">
-                  <div className="flex items-center gap-2 px-4 mb-1">
-                    <categoryConfig.icon className="w-3.5 h-3.5 text-zinc-600" />
+                <div key={categoryConfig.key} className="space-y-1">
+                  <div className="flex items-center gap-2 px-2.5 mb-1 h-4">
+                    <categoryConfig.icon className="w-3.5 h-3.5 text-zinc-600 shrink-0" />
                     {categoryConfig.collapsible ? (
                       <button
                         onClick={() => toggleCategory(categoryConfig.key)}
-                        className="flex-1 flex items-center justify-between text-[10px] font-bold text-zinc-500 hover:text-emerald uppercase tracking-[0.15em] transition-colors group/cat"
+                        className="flex-1 flex items-center justify-between text-[10px] font-bold text-zinc-500 hover:text-zinc-300 uppercase tracking-[0.13em] transition-colors whitespace-nowrap overflow-hidden"
                       >
                         <span>{categoryConfig.label}</span>
-                        <ChevronRight className={cn("w-3 h-3 transition-transform text-zinc-600 group-hover/cat:text-emerald", isExpanded && "rotate-90")} />
+                        <ChevronRight className={cn("w-3 h-3 transition-transform text-zinc-600 shrink-0", isExpanded && "rotate-90")} />
                       </button>
                     ) : (
-                      <div className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.15em]">
+                      <div className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.13em] whitespace-nowrap overflow-hidden">
                         {categoryConfig.label}
                       </div>
                     )}
                   </div>
 
                   <div className={cn(
-                    "space-y-1 overflow-hidden transition-all duration-500 ease-in-out",
+                    "space-y-0.5 overflow-hidden transition-all duration-300 ease-in-out",
                     !isExpanded ? "max-h-0 opacity-0" : "max-h-[500px] opacity-100"
                   )}>
-                    {categoryModules.map((module, idx) => (
+                    {categoryModules.map((module) => (
                       <NavItem
                         key={module.key}
                         icon={module.icon}
                         label={module.displayName}
                         active={currentView === module.key}
                         onClick={() => onViewChange(module.key)}
-                        delay={idx * 0.05}
                       />
                     ))}
                   </div>
@@ -233,63 +219,81 @@ export function Sidebar({
       </nav>
 
       {/* ── Profile footer ─────────────────────────────────────────────────── */}
-      <div className="px-4 pb-4 pt-2 relative z-10">
-        <div className="glass-card rounded-2xl p-2.5 border-emerald/5 hover:border-emerald/20 group/profile cursor-pointer">
-          <div className="flex items-center gap-3">
-            <div className="relative">
-              <div className="w-10 h-10 rounded-xl bg-zinc-800 flex items-center justify-center text-zinc-400 group-hover/profile:text-emerald transition-colors overflow-hidden border border-white/5">
-                <UserCircle className="w-6 h-6" />
-                <div className="absolute inset-0 bg-emerald/0 group-hover/profile:bg-emerald/5 transition-colors" />
+      <div className="px-2 pb-3 pt-2">
+        <div className="rounded-xl p-2 hover:bg-white/[0.05] transition-colors cursor-pointer">
+          <div className="flex items-center gap-2.5">
+            <div className="relative shrink-0">
+              <div className="w-8 h-8 rounded-lg bg-white/[0.06] flex items-center justify-center text-zinc-400 overflow-hidden">
+                <UserCircle className="w-5 h-5" />
               </div>
-              <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald border-2 border-obsidian rounded-full" />
+              <div className="absolute -bottom-0.5 -right-0.5 w-2 h-2 bg-emerald border-2 border-rail rounded-full" />
             </div>
-            <div className="flex flex-col min-w-0">
-              <span className="text-sm font-medium text-silver truncate group-hover/profile:text-white transition-colors">{clientName}</span>
+            <div className="flex flex-col min-w-0 overflow-hidden whitespace-nowrap">
+              <span className="text-[13px] font-medium text-silver truncate">{clientName}</span>
               <div className="flex items-center gap-1.5">
-                <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">Admin</span>
-                <div className="w-1 h-1 bg-zinc-600 rounded-full" />
-                <span className="text-[10px] text-emerald font-bold uppercase tracking-widest">Secure</span>
+                <span className="text-[9px] text-zinc-500 font-bold uppercase tracking-widest">Admin</span>
+                <div className="w-1 h-1 bg-zinc-600 rounded-full shrink-0" />
+                <span className="text-[9px] text-emerald font-bold uppercase tracking-widest">Secure</span>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </>
+  )
+
+  return (
+    <>
+      {/* Desktop: space-reserving rail (fixed 64px) with a flyout that expands on hover
+          and overlays the content area — content width never shifts. */}
+      <div className={cn(RAIL_W, "hidden md:block shrink-0 h-screen sticky top-0 z-30 group/rail")}>
+        <div className={cn(
+          FLYOUT_W,
+          "h-full flex flex-col surface-rail overflow-hidden transition-[width] duration-200 ease-out"
+        )}>
+          {navBody}
+        </div>
+      </div>
+
+      {/* Mobile: off-canvas drawer */}
+      <div
+        className={cn(
+          "md:hidden fixed inset-y-0 left-0 z-50 flex flex-col w-72 surface-rail transition-transform duration-300 ease-in-out",
+          isOpen ? "translate-x-0" : "-translate-x-full"
+        )}
+      >
+        {navBody}
+      </div>
+    </>
   )
 }
 
-function NavItem({ icon: Icon, label, active, onClick, delay }: {
+function NavItem({ icon: Icon, label, active, onClick }: {
   icon: any
   label: string
   active: boolean
   onClick: () => void
-  delay: number
 }) {
   return (
     <button
       onClick={onClick}
-      style={{ animationDelay: `${delay}s` }}
+      title={label}
       className={cn(
-        "w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-300 group relative overflow-hidden animate-in fade-in slide-in-from-left-4 fill-mode-both",
+        "w-full flex items-center gap-3 px-2.5 py-2.5 text-sm font-medium rounded-lg transition-colors duration-150 group relative",
         active
-          ? "bg-emerald text-obsidian shadow-[0_0_20px_rgba(16,185,129,0.2)]"
-          : "text-zinc-500 hover:text-white hover:bg-white/5"
+          ? "bg-white/[0.09] text-white"
+          : "text-zinc-500 hover:text-zinc-200 hover:bg-white/[0.04]"
       )}
     >
       <Icon className={cn(
-        "w-4 h-4 relative z-10 transition-transform duration-500 group-hover:scale-110",
-        active ? "text-obsidian" : "text-zinc-600 group-hover:text-emerald"
+        "w-[18px] h-[18px] shrink-0 transition-colors",
+        active ? "text-white" : "text-zinc-600 group-hover:text-zinc-300"
       )} />
-      <span className="relative z-10 font-outfit tracking-wide">{label}</span>
+      <span className="font-outfit tracking-wide whitespace-nowrap overflow-hidden">{label}</span>
 
       {active && (
-        <div className="absolute inset-0 bg-gradient-to-tr from-black/10 to-transparent pointer-events-none" />
+        <div className="absolute left-0 top-1.5 bottom-1.5 w-[3px] rounded-full bg-white/70" />
       )}
-
-      <div className={cn(
-        "absolute left-0 top-0 bottom-0 w-1 bg-emerald transition-transform duration-500",
-        active ? "translate-x-0" : "-translate-x-full group-hover:-translate-x-[75%]"
-      )} />
     </button>
   )
 }

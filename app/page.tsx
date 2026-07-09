@@ -321,9 +321,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="flex h-screen bg-mesh overflow-hidden font-sans">
-      <div className="absolute inset-0 bg-obsidian/40 backdrop-blur-[2px] pointer-events-none" />
-
+    <div className="flex h-screen bg-background overflow-hidden font-sans">
       {/* Mobile overlay backdrop */}
       {sidebarOpen && (
         <div
@@ -352,10 +350,10 @@ export default function DashboardPage() {
         />
       )}
 
-      <main className="flex-1 flex flex-col overflow-hidden relative z-10 p-2 md:p-4 md:pl-0">
-        <div className="flex-1 flex flex-col glass-panel rounded-2xl md:rounded-[2rem] overflow-hidden shadow-[0_0_50px_-12px_rgba(0,0,0,0.5)] border border-white/5">
+      <main className="flex-1 flex flex-col overflow-hidden relative z-10 min-w-0">
+        <div className="flex-1 flex flex-col overflow-hidden">
           {/* Header */}
-          <header className="h-14 md:h-20 flex items-center justify-between px-4 md:px-10 shrink-0 border-b border-white/5 bg-white/[0.02] gap-3">
+          <header className="h-14 md:h-16 flex items-center justify-between px-4 md:px-8 shrink-0 border-b border-white/[0.06] gap-3">
             <div className="flex items-center gap-3">
               {/* Hamburger — mobile only */}
               <button

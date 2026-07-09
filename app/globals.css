@@ -50,6 +50,13 @@
   --color-emerald: oklch(0.75 0.15 160);
   --color-obsidian: oklch(0.12 0.02 240);
   --color-silver: oklch(0.95 0 0);
+
+  /* Surface tiers — each panel gets its own step instead of one repeated glass tone.
+     Emerald is reserved for "the AI did this" (bubbles, live dot, AI-handled tag) — nowhere else. */
+  --color-rail: var(--rail);
+  --color-surface-1: var(--surface-1);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
 }
 
 :root {
@@ -86,6 +93,11 @@
   --sidebar-accent-foreground: oklch(0.12 0.02 240);
   --sidebar-border: oklch(0.9 0 0);
   --sidebar-ring: oklch(0.75 0.15 160);
+
+  --rail: oklch(0.99 0 0);
+  --surface-1: oklch(0.965 0 0);
+  --surface-2: oklch(1 0 0);
+  --surface-3: oklch(0.98 0 0);
 }
 
 .dark {
@@ -116,6 +128,12 @@
   --sidebar-accent-foreground: oklch(0.75 0.15 160);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.75 0.15 160);
+
+  /* Surface tiers, darkest to lightest — this is what separates panels, not borders/blur */
+  --rail: oklch(0.07 0.015 240);
+  --surface-1: oklch(0.13 0.02 240);
+  --surface-2: oklch(0.165 0.02 240);
+  --surface-3: oklch(0.145 0.02 240);
 }
 
 @layer base {
@@ -139,6 +157,21 @@
     @apply bg-white/5 border border-white/10 hover:border-emerald/30 transition-all duration-500 hover:shadow-[0_0_30px_-10px_rgba(16,185,129,0.2)];
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
+  }
+
+  /* Solid surface tiers — no blur, no translucency. Panels separate by luminance step,
+     not by a border you can barely see. Use instead of glass-card for static layout panels. */
+  .surface-rail {
+    @apply bg-rail border-r border-white/[0.06];
+  }
+  .surface-1 {
+    @apply bg-surface-1 border border-white/[0.06];
+  }
+  .surface-2 {
+    @apply bg-surface-2 border border-white/[0.06];
+  }
+  .surface-3 {
+    @apply bg-surface-3 border border-white/[0.06];
   }
 
   .text-glow {
