@@ -72,6 +72,29 @@ function serviceStory(nicheKey) {
   return { sale, nosale }
 }
 
+// Third hero (service niches): an expert-judgment question the agent must NOT
+// answer — it escalates instead. This is the tour's "kada agent ne zna" beat.
+function interventionStory(nicheKey) {
+  const q = {
+    dental:  { ask: "Zdravo, pijem antikoagulantnu terapiju (Marivarin). Da li smem da izvadim zub?", domain: "lekara", razlog: "Medicinsko pitanje (antikoagulantna terapija) — zahteva procenu lekara. Prosleđeno." },
+    medical: { ask: "Zdravo, na hroničnoj sam terapiji — da li smem na zahvat koji ste mi preporučili?", domain: "lekara", razlog: "Medicinsko pitanje — zahteva procenu lekara. Prosleđeno." },
+    beauty:  { ask: "Posle prošlog tretmana imala sam jaku reakciju na koži. Da li smem ponovo?", domain: "stručnjaka", razlog: "Moguća alergijska reakcija — zahteva procenu stručnjaka. Prosleđeno." },
+    fitness: { ask: "Oporavljam se od povrede ramena — koje treninge smem da radim?", domain: "trenera", razlog: "Trening uz povredu — zahteva procenu trenera. Prosleđeno." },
+  }[nicheKey] || { ask: "Imam specifičnu situaciju — treba mi stručna procena pre nego što zakažem.", domain: "stručnjaka", razlog: "Zahteva stručnu procenu. Prosleđeno." }
+  return {
+    channel: "instagram", customer: "Dragana Simić", phone: "062 334 5566",
+    msgs: [
+      ["user", q.ask],
+      ["assistant", `Zdravo, Dragana 😊 Ovo je pitanje za našeg ${q.domain} — ne bih da nagađam. Prosleđujem Vaš upit odmah i javiće Vam se lično. Mogu li da zabeležim ime i broj telefona?`],
+      ["user", "Dragana Simić, 062 334 5566"],
+      ["assistant", "Zabeleženo ✅ Javiće Vam se lično u najkraćem roku. Hvala na strpljenju 🙏"],
+      ["system", "[HUMAN_NEEDED]", { human_needed: true }],
+    ],
+    crm: { full_name: "Dragana Simić", telefon: "062 334 5566", kategorija: "Upit", proizvod: "Stručna procena", status: "Intervencija", razlog: q.razlog, izvor: "Instagram" },
+    appt: null,
+  }
+}
+
 function productStory(nicheKey) {
   const p = {
     ecommerce: { name: "krema sa slike", price: "2.490 RSD", alt: "vrlo sličan proizvod u istoj liniji", altPrice: "2.190 RSD", cat: "Nega" },
@@ -102,6 +125,7 @@ function productStory(nicheKey) {
       ["assistant", "Mnogo mi je žao zbog toga 🙏 Odmah prosleđujem Vas našem timu da to reše i pošalju zamenu."],
       ["user", "Hvala"],
       ["assistant", "Tim Vam se javlja u najkraćem roku. Imate moju poruku zabeleženu."],
+      ["system", "[HUMAN_NEEDED]", { human_needed: true }],
     ],
     crm: { full_name: "Jelena Marić", telefon: "060 444 7788", kategorija: p.cat, proizvod: "Reklamacija", status: "Intervencija", razlog: "Reklamacija — oštećen proizvod. Prosleđeno timu na rešavanje.", izvor: "Instagram" },
     appt: null,
@@ -207,6 +231,9 @@ async function seedTenant(client) {
   const now = Date.now()
   const scenarios = [
     { key: `demo_${cid8}_hero1`, s: sale, baseOffsetMin: 12 },   // most recent -> top of inbox
+    // service niches get a dedicated intervention hero (tour beat 2);
+    // product niches already use their nosale (complaint) for that beat
+    ...(isService ? [{ key: `demo_${cid8}_hero3`, s: interventionStory(niche), baseOffsetMin: 45 }] : []),
     { key: `demo_${cid8}_hero2`, s: nosale, baseOffsetMin: 90 },
   ]
 
@@ -215,9 +242,9 @@ async function seedTenant(client) {
   const appts = []
 
   for (const { key, s, baseOffsetMin } of scenarios) {
-    s.msgs.forEach(([role, text], i) => {
+    s.msgs.forEach(([role, text, extraMeta], i) => {
       const ts = new Date(now - (baseOffsetMin * 60000) + i * 40000).toISOString() // 40s apart
-      razgovori.push({ id_razgovora: key, role, message: text, platform: s.channel, client_id: cid, created_at: ts, metadata: { name: s.customer, profile_pic: pic(s.customer) } })
+      razgovori.push({ id_razgovora: key, role, message: text, platform: s.channel, client_id: cid, created_at: ts, metadata: { name: s.customer, profile_pic: pic(s.customer), ...(extraMeta || {}) } })
     })
     crmRows.push({ ...s.crm, id_razgovora: key, client_id: cid, created_at: new Date(now - baseOffsetMin * 60000).toISOString() })
     if (s.appt) {
