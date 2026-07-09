@@ -430,6 +430,8 @@ interface SocialChatbotModuleProps {
     /** Onboarding: when true, the selected (hero) conversation plays in live,
      *  message-by-message with a typing indicator, inside this real interface. */
     demoPlayback?: boolean
+    /** Onboarding tour: select this customer's conversation (by metadata name). */
+    tourFocusName?: string
 }
 
 function getPlatformMeta(platform: string) {
@@ -453,7 +455,7 @@ const CHANNEL_HEX: Record<string, string> = {
 }
 const channelHex = (p?: string) => CHANNEL_HEX[(p ?? "").toLowerCase()] ?? "#71717a"
 
-export function SocialChatbotModule({ clientId, selectedBrandIds, clientName, nicheKey, demoPlayback }: SocialChatbotModuleProps) {
+export function SocialChatbotModule({ clientId, selectedBrandIds, clientName, nicheKey, demoPlayback, tourFocusName }: SocialChatbotModuleProps) {
     const bookStoreConfig = getBookStoreConfig(clientId)
     const isMultiBrand = (selectedBrandIds?.length ?? 0) > 1
     const brandIds = selectedBrandIds && selectedBrandIds.length > 0 ? selectedBrandIds : [clientId]
@@ -635,6 +637,14 @@ export function SocialChatbotModule({ clientId, selectedBrandIds, clientName, ni
         .slice()
         .sort((a: any, b: any) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()) ?? []
 
+    // ── Onboarding tour: focus a specific hero conversation by customer name ──
+    useEffect(() => {
+        if (!tourFocusName || conversations.length === 0) return
+        const hit = conversations.find((c: any) => (c.candidateName || "") === tourFocusName)
+        if (hit && hit.id !== selectedId) setSelectedId(hit.id)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [tourFocusName, conversations])
+
     // ── Onboarding live playback: reveal the hero thread one message at a time ──
     const [pbCount, setPbCount] = useState(0)
     const [pbTyping, setPbTyping] = useState(false)
@@ -664,6 +674,11 @@ export function SocialChatbotModule({ clientId, selectedBrandIds, clientName, ni
     }, [demoPlayback, selectedId, fullMessages.length])
 
     const currentMessages = demoPlayback ? fullMessages.slice(0, pbCount) : fullMessages
+
+    // During tour playback the escalation should HAPPEN on screen, not be pre-lit:
+    // amber intervention state on the open conversation appears only once the
+    // reveal reaches the end of the thread.
+    const showSelectedHuman = !!selected?.humanNeeded && (!demoPlayback || pbCount >= fullMessages.length)
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
     useEffect(() => {
@@ -1052,7 +1067,7 @@ export function SocialChatbotModule({ clientId, selectedBrandIds, clientName, ni
                             {/* Chat header */}
                             <div className={cn(
                                 "px-5 py-3.5 border-b flex items-center gap-3 shrink-0 transition-colors",
-                                selected.humanNeeded ? "border-amber-500/25 bg-amber-500/[0.04]" : "border-white/[0.05]"
+                                showSelectedHuman ? "border-amber-500/25 bg-amber-500/[0.04]" : "border-white/[0.05]"
                             )}>
                                 <Avatar conv={selected} size="sm" className="shrink-0" />
                                 <div className="flex-1 min-w-0">
@@ -1072,7 +1087,7 @@ export function SocialChatbotModule({ clientId, selectedBrandIds, clientName, ni
                                         <span className="text-[10px] font-mono text-zinc-500">{currentMessages.length} poruka</span>
                                     </div>
                                 </div>
-                                {selected.humanNeeded && (
+                                {showSelectedHuman && (
                                     <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-500/15 border border-amber-500/30">
                                         <AlertTriangle className="w-3 h-3 text-amber-400" />
                                         <span className="text-[10px] font-mono font-bold text-amber-400 uppercase tracking-wider">Intervencija</span>
@@ -1149,10 +1164,10 @@ export function SocialChatbotModule({ clientId, selectedBrandIds, clientName, ni
                             {/* Chat footer status */}
                             <div className={cn(
                                 "px-4 py-2 border-t flex flex-col shrink-0 transition-colors",
-                                selected.humanNeeded ? "border-amber-500/20 bg-amber-500/[0.04]" : "border-white/[0.05] bg-black/15"
+                                showSelectedHuman ? "border-amber-500/20 bg-amber-500/[0.04]" : "border-white/[0.05] bg-black/15"
                             )}>
                                 <div className="flex items-center justify-between mb-2 px-1">
-                                    {selected.humanNeeded ? (
+                                    {showSelectedHuman ? (
                                         <div className="flex items-center gap-2">
                                             <AlertTriangle className="w-3.5 h-3.5 text-amber-400 shrink-0" />
                                             <p className="text-xs text-amber-400/80 font-mono">Čeka manuelnu intervenciju</p>
@@ -1248,7 +1263,7 @@ export function SocialChatbotModule({ clientId, selectedBrandIds, clientName, ni
                                                 </span>
                                             )
                                         })()}
-                                        {selected.humanNeeded && (
+                                        {showSelectedHuman && (
                                             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-mono font-bold uppercase tracking-wider border border-amber-500/30 text-amber-400 bg-amber-500/10">
                                                 <AlertTriangle className="w-2 h-2" />
                                                 Intervencija
