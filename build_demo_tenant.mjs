@@ -638,6 +638,33 @@ async function seedServicesCatalog(sb, clientId, services) {
   console.log(`  Catalog: ${rows.length} services inserted`)
 }
 
+// ── The AOV gate ─────────────────────────────────────────────────────────────
+// At a ~400 EUR/mo retainer the system has to plausibly return 2.000–4.000 EUR/mo.
+// Work that backwards against the client's own price list:
+//   dental implant  60.000 RSD → 4 extra cases/mo covers it many times over
+//   pergola        120.000 RSD → ONE extra sale pays for two years
+//   leather jacket  25.000 RSD → ~10 extra sales/mo. Plausible at 39k followers
+//   chocolate        2.000 RSD → ~150 extra orders/mo. Not plausible, ever
+//
+// Follower count was never the qualifier — average order value is. Below this
+// line the arithmetic cannot work no matter how many DMs they receive, so we
+// refuse to spend a demo build on them.
+export const MIN_AOV_RSD = 15000
+
+export function assessAov(services = []) {
+  const prices = services
+    .map(s => (typeof s.price_min === 'number' ? s.price_min : null))
+    .filter(p => p && p > 0)
+    .sort((a, b) => a - b)
+  if (prices.length < 2) return { aov: null, verdict: 'unknown', prices }
+  const median = prices[Math.floor(prices.length / 2)]
+  return {
+    aov: median,
+    verdict: median >= MIN_AOV_RSD ? 'pass' : 'fail',
+    prices,
+  }
+}
+
 async function seedAppointments(sb, clientId, appointments, services) {
   if (!appointments.length) return
 
@@ -820,6 +847,24 @@ async function buildDemoForLead(sb, lead) {
     clientId  = provisioned.clientId
     authEmail = provisioned.authEmail
   }
+
+  // ── AOV gate ────────────────────────────────────────────────────────────
+  // Runs BEFORE we spend anything on provisioning. The old order qualified on
+  // follower count, built the demo, and only then scraped the price list — so we
+  // discovered a lead was unaffordable after paying to serve them.
+  const aov = assessAov(services)
+  if (aov.verdict === 'fail' && !process.argv.includes('--ignore-aov')) {
+    console.log(`│  ⛔ AOV GATE: median price ${aov.aov.toLocaleString('de-DE')} RSD < ${MIN_AOV_RSD.toLocaleString('de-DE')} RSD`)
+    console.log(`│     At a ~400 EUR/mo retainer this business would need an implausible number of`)
+    console.log(`│     extra sales to break even. Skipping build. Override with --ignore-aov.`)
+    await sb.from('contacts').update({
+      status: 'Disqualified',
+      comment: `AOV gate: medijana cene ${aov.aov} RSD (prag ${MIN_AOV_RSD}). Prenizak tiket za mesečni retainer.`,
+    }).eq('id', lead.id)
+    return { skipped: 'aov', aov: aov.aov }
+  }
+  if (aov.verdict === 'pass') console.log(`│  ✓ AOV gate: median ${aov.aov.toLocaleString('de-DE')} RSD`)
+  else console.log(`│  ? AOV unknown (catalog has ${aov.prices.length} priced item(s)) — proceeding`)
 
   // Step 4: Upsert modules + niche
   console.log(`│  [4/5] Provisioning modules + niche...`)

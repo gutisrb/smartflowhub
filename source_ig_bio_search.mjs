@@ -37,6 +37,7 @@
 import { readFileSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
+import { isPermabanned } from './lib/permaban.mjs';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 function loadEnv() {
@@ -282,6 +283,7 @@ async function main() {
   const qualified = [];
   for (const [handle, p] of byHandle) {
     if (existingHandles.has(handle))                              { dbg.dup++;         continue; }
+    if (isPermabanned({ igHandle: handle }))                      { dbg.permaban = (dbg.permaban||0)+1; continue; }
     if (!p.is_business_account && !p.is_professional_account)     { dbg.notBusiness++; continue; }
     const followers = p.follower_count || 0;
     if (followers < MIN_FOLLOWERS || followers > MAX_FOLLOWERS)    { dbg.followers++;   continue; }

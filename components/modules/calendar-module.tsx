@@ -8,6 +8,7 @@ import {
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { NicheKey, NICHE_CONFIGS } from "@/lib/niche-config"
+import { getDemoShift, shiftRowsDays } from "@/lib/demo/time-shift"
 import {
   updateAppointmentStatus,
   insertAppointment,
@@ -39,6 +40,8 @@ interface CatalogService {
   color_hex: string
   duration_minutes: number | null
   is_active: boolean
+  price_min: number | null
+  category: string | null
 }
 
 const STATUS_LABELS: Record<string, string> = {
@@ -56,6 +59,11 @@ const STATUS_COLORS: Record<string, string> = {
 }
 
 const HOURS = Array.from({ length: 13 }, (_, i) => i + 8) // 8:00–20:00
+// Tall enough that a 45-minute booking can carry a name, a procedure and a price
+// without truncating — this grid is the product's most-screenshotted surface.
+const ROW_H = 84
+
+const rsd = (n: number) => `${Math.round(n).toLocaleString('de-DE')} RSD`
 
 function formatTime(iso: string) {
   return new Date(iso).toLocaleTimeString('sr-Latn-RS', { hour: '2-digit', minute: '2-digit' })
@@ -140,11 +148,13 @@ export function CalendarModule({ clientId, nicheKey = 'generic', tourHighlightNa
   const [services, setServices] = useState<CatalogService[]>([])
   const [loading, setLoading] = useState(true)
   const [view, setView] = useState<'week' | 'month'>('week')
+  // A booking calendar is for looking forward. A fixed Mon–Sun week spends most
+  // of its columns on days that already happened — on a Friday, four of seven.
+  // So the window rolls: yesterday for context, then today and the five days
+  // being filled up.
   const [weekStart, setWeekStart] = useState<Date>(() => {
     const d = new Date()
-    const day = d.getDay()
-    const diff = day === 0 ? -6 : 1 - day
-    d.setDate(d.getDate() + diff)
+    d.setDate(d.getDate() - 1)
     d.setHours(0, 0, 0, 0)
     return d
   })
@@ -171,23 +181,19 @@ export function CalendarModule({ clientId, nicheKey = 'generic', tourHighlightNa
       query = query.gte('starts_at', from.toISOString()).lte('starts_at', to.toISOString())
     }
 
-    const { data } = await query
+    // Resolve the demo offset alongside the fetch rather than after it — awaiting
+    // them in series was a visible stall when the tour lands on this step.
+    const [{ data }, shift] = await Promise.all([
+      query,
+      demoMode ? getDemoShift(supabase, clientId, true) : Promise.resolve({ deltaDays: 0 }),
+    ])
     let appts = (data as Appointment[]) ?? []
 
-    // Demo: shift every appointment so the earliest one lands on today (keeps
-    // relative day spacing + exact times, e.g. the hero booking stays "danas u 15h").
+    // Demo: slide the whole schedule forward so it keeps its shape — a week of
+    // already-finished appointments BEHIND today and bookings ahead of it.
+    // Whole days, so the hero stays "danas u 15h".
     if (demoMode && appts.length > 0) {
-      const midnight = (d: string | Date) => { const x = new Date(d); x.setHours(0, 0, 0, 0); return x.getTime() }
-      const earliest = Math.min(...appts.map(a => midnight(a.starts_at)))
-      const todayMid = midnight(new Date())
-      const delta = todayMid - earliest
-      if (delta !== 0) {
-        appts = appts.map(a => ({
-          ...a,
-          starts_at: new Date(new Date(a.starts_at).getTime() + delta).toISOString(),
-          ends_at: new Date(new Date(a.ends_at).getTime() + delta).toISOString(),
-        }))
-      }
+      appts = shiftRowsDays(appts, ['starts_at', 'ends_at'], shift.deltaDays)
     }
 
     setAppointments(appts)
@@ -197,7 +203,7 @@ export function CalendarModule({ clientId, nicheKey = 'generic', tourHighlightNa
   const fetchServices = useCallback(async () => {
     const { data } = await supabase
       .from('services_catalog')
-      .select('id, name, color_hex, duration_minutes, is_active')
+      .select('id, name, color_hex, duration_minutes, is_active, price_min, category')
       .eq('client_id', clientId)
       .eq('is_active', true)
       .order('sort_order', { ascending: true })
@@ -261,6 +267,14 @@ export function CalendarModule({ clientId, nicheKey = 'generic', tourHighlightNa
 
   const apptsByDay = (day: Date) => appointments.filter(a => isSameDay(new Date(a.starts_at), day))
 
+  // Appointments seeded from the catalog carry service_id; older/manual ones only
+  // have the name, so match on both before giving up on a price.
+  const priceFor = (a: Appointment): number | null => {
+    const svc = services.find(s => s.id === a.service_id)
+      ?? services.find(s => s.name.toLowerCase() === (a.service_name || '').toLowerCase())
+    return svc?.price_min ?? null
+  }
+
   const now = new Date()
   const next24h = appointments.filter(a => {
     const s = new Date(a.starts_at)
@@ -278,6 +292,7 @@ export function CalendarModule({ clientId, nicheKey = 'generic', tourHighlightNa
   const topService = Object.entries(serviceCount).sort((a, b) => b[1] - a[1])[0]?.[0] ?? '—'
 
   const DAYS_SR = ['Pon', 'Uto', 'Sri', 'Čet', 'Pet', 'Sub', 'Ned']
+  const dayLabel = (d: Date) => DAYS_SR[(d.getDay() + 6) % 7]
 
   return (
     <div className="p-6 space-y-6">
@@ -333,7 +348,7 @@ export function CalendarModule({ clientId, nicheKey = 'generic', tourHighlightNa
         {/* Main calendar */}
         <div className="lg:col-span-3">
           {view === 'week' ? (
-            <div className="glass-card rounded-2xl overflow-hidden">
+            <div data-tour-focus="calendar-week" className="glass-card rounded-2xl overflow-hidden">
               {/* Week nav */}
               <div className="flex items-center justify-between px-5 py-3 border-b border-white/5">
                 <button onClick={prevWeek} className="p-1.5 hover:bg-white/10 rounded-lg transition-colors">
@@ -355,7 +370,7 @@ export function CalendarModule({ clientId, nicheKey = 'generic', tourHighlightNa
                     const isToday = isSameDay(day, new Date())
                     return (
                       <div key={i} className={cn('py-3 flex flex-col items-center gap-1.5 border-l border-white/[0.04] transition-colors', isToday && 'bg-emerald-500/[0.06]')}>
-                        <p className={cn('text-[11px] font-bold uppercase tracking-wider', isToday ? 'text-emerald-400' : 'text-slate-500')}>{DAYS_SR[i]}</p>
+                        <p className={cn('text-[11px] font-bold uppercase tracking-wider', isToday ? 'text-emerald-400' : 'text-slate-500')}>{dayLabel(day)}</p>
                         <div className={cn('w-9 h-9 flex items-center justify-center rounded-full text-lg font-bold transition-all',
                           isToday ? 'bg-emerald-500 text-[#05140d] shadow-[0_0_16px_-2px_rgba(16,185,129,0.6)]' : 'text-white')}>
                           {day.getDate()}
@@ -367,11 +382,11 @@ export function CalendarModule({ clientId, nicheKey = 'generic', tourHighlightNa
               </div>
 
               {/* Time grid */}
-              <div className="flex overflow-y-auto max-h-[560px]">
+              <div className="flex overflow-y-auto max-h-[620px]">
                 {/* Hour labels */}
                 <div className="w-14 shrink-0">
                   {HOURS.map(h => (
-                    <div key={h} className="h-16 flex items-start justify-end pr-2.5 pt-1 border-t border-white/[0.04]">
+                    <div key={h} style={{ height: ROW_H }} className="flex items-start justify-end pr-2.5 pt-1 border-t border-white/[0.04]">
                       <span className="text-[11px] font-semibold text-slate-500 leading-none tabular-nums">{h}:00</span>
                     </div>
                   ))}
@@ -385,7 +400,7 @@ export function CalendarModule({ clientId, nicheKey = 'generic', tourHighlightNa
                       <div key={i} className={cn('relative border-l border-white/[0.04]', isSameDay(day, new Date()) && 'bg-emerald-500/[0.04]')}>
                         {/* Hour grid lines */}
                         {HOURS.map(h => (
-                          <div key={h} className="h-16 border-t border-white/[0.04]" />
+                          <div key={h} style={{ height: ROW_H }} className="border-t border-white/[0.04]" />
                         ))}
                         {/* Appointments — positioned by time, side-by-side when overlapping */}
                         {(() => {
@@ -395,22 +410,35 @@ export function CalendarModule({ clientId, nicheKey = 'generic', tourHighlightNa
                             const end = new Date(a.ends_at)
                             const startH = start.getHours() + start.getMinutes() / 60
                             const endH = end.getHours() + end.getMinutes() / 60
-                            const top = Math.max(0, (startH - 8) * 64)
-                            const height = Math.max(34, (endH - startH) * 64)
+                            const top = Math.max(0, (startH - 8) * ROW_H)
+                            const height = Math.max(46, (endH - startH) * ROW_H)
                             const { col, totalCols } = layoutMap.get(a.id) ?? { col: 0, totalCols: 1 }
                             const leftPct = (col / totalCols) * 100
                             const widthPct = (1 / totalCols) * 100
                             const isTourHero = !!tourHighlightName && a.customer_name === tourHighlightName
+                            const price = priceFor(a)
                             const cancelled = a.status === 'cancelled'
                             const accent = isTourHero ? '#10b981' : (a.service_color || '#10b981')
                             return (
+                              <div key={a.id} className="contents">
+                              {isTourHero && (
+                                <span
+                                  className="absolute z-30 pointer-events-none whitespace-nowrap text-[9px] font-black uppercase tracking-[0.12em] px-1.5 py-[3px] rounded-md bg-emerald-400 text-[#04140c] shadow-[0_4px_14px_-2px_rgba(16,185,129,0.8)]"
+                                  style={{ top: Math.max(0, top - 17), left: `calc(${leftPct}% + 2px)` }}
+                                >
+                                  upravo zakazano
+                                </span>
+                              )}
                               <button
-                                key={a.id}
+                                data-tour-focus={isTourHero ? 'appt-hero' : undefined}
                                 onClick={() => { setSelectedAppt(a); setDeleteConfirm(null) }}
                                 className={cn(
                                   'absolute rounded-lg overflow-hidden transition-all hover:z-10 hover:brightness-125 text-left pl-2 pr-1.5 py-1.5',
                                   cancelled && 'opacity-50 line-through',
-                                  isTourHero && 'animate-border-glow'
+                                  // the booking the tour just watched get made: raised out of the
+                                  // grid rather than shouted at — solid ground, a ring, and it
+                                  // sits above its neighbours
+                                  isTourHero && 'z-20',
                                 )}
                                 style={{
                                   top: top + 1,
@@ -418,16 +446,32 @@ export function CalendarModule({ clientId, nicheKey = 'generic', tourHighlightNa
                                   left: `calc(${leftPct}% + 2px)`,
                                   width: `calc(${widthPct}% - 4px)`,
                                   borderLeft: `3px solid ${accent}`,
-                                  background: isTourHero ? 'rgba(16,185,129,0.18)' : `linear-gradient(135deg, ${accent}26, ${accent}12)`,
-                                  boxShadow: isTourHero ? '0 0 16px -2px rgba(16,185,129,0.55)' : `inset 1px 0 0 ${accent}`,
+                                  background: isTourHero
+                                    ? 'linear-gradient(135deg, rgba(16,185,129,0.42), rgba(16,185,129,0.26))'
+                                    : `linear-gradient(135deg, ${accent}26, ${accent}12)`,
+                                  boxShadow: isTourHero
+                                    ? '0 0 0 1.5px rgba(52,211,153,0.85), 0 10px 28px -8px rgba(16,185,129,0.75)'
+                                    : `inset 1px 0 0 ${accent}`,
                                 }}
                               >
-                                <p className="text-[12px] font-semibold text-white truncate leading-tight">{a.customer_name}</p>
-                                {height > 40 && <p className="text-[11px] font-medium leading-tight mt-0.5 tabular-nums" style={{ color: accent }}>{formatTime(a.starts_at)}</p>}
-                                {height > 48 && a.urgency === 'high' && (
-                                  <Sparkles className="w-2.5 h-2.5 text-amber-400 mt-0.5" />
+                                <p className="text-[13px] font-semibold text-white truncate leading-tight font-outfit">{a.customer_name}</p>
+                                {height > 52 && (
+                                  <p className="text-[11px] text-zinc-300/90 truncate leading-tight mt-[3px]">{a.service_name}</p>
+                                )}
+                                {height > 68 && (
+                                  <div className="flex items-baseline gap-1.5 mt-[3px]">
+                                    <span className="text-[11px] font-bold tabular-nums leading-none" style={{ color: accent }}>
+                                      {formatTime(a.starts_at)}
+                                    </span>
+                                    {price != null && (
+                                      <span className="text-[10px] font-medium text-zinc-400 tabular-nums leading-none truncate">
+                                        · {rsd(price)}
+                                      </span>
+                                    )}
+                                  </div>
                                 )}
                               </button>
+                              </div>
                             )
                           })
                         })()}

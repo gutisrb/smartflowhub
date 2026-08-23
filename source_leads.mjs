@@ -40,6 +40,8 @@ function loadEnv() {
 }
 loadEnv();
 
+import { isPermabanned } from './lib/permaban.mjs';
+
 // ── Config ────────────────────────────────────────────────────────────────────
 const APIFY_TOKEN        = process.env.APIFY_TOKEN;
 const FB_ADS_ACTOR       = 'XtaWFhbtfxyzqrFmd';
@@ -59,7 +61,25 @@ const ADS_BASE_URL = 'https://www.facebook.com/ads/library/?active_status=active
 // B4 remaining — fresh, never run before. Track usage in MEMORY.md after each run.
 // Used: B0(kontaktirajte...), B1(otkrijte...), B2(preuzmite...), B3(vaši snovi...),
 //       B4 partial(rezultati/uspeh/kvalitet — 2026-05-05), B5(vaš/nas — EXHAUSTED)
-const ADS_QUERIES  = ['pouzdano', 'profesionalno', 'stručnost', 'iskustvo'];
+// Query terms are the first qualifier, so they should select for TICKET SIZE, not
+// for advertising in general. The old set — pouzdano / profesionalno / stručnost /
+// iskustvo — matched any Serbian advertiser at all, which is how a chocolate shop
+// and a phone-case seller ended up in the same funnel as a pergola manufacturer.
+//
+// These terms are spoken almost exclusively by businesses selling something
+// expensive. Nobody offers interest-free instalments on a 2.000 RSD product, and
+// nobody sends a technician to your address to quote for one.
+const ADS_QUERIES  = [
+  'na rate',              // instalments — the sharpest high-ticket signal there is
+  'bez kamate',           // interest-free financing
+  'besplatna procena',    // free quote → a considered, quoted purchase
+  'izlazak na teren',     // site visit → installation business
+  'montaža',              // installation included
+  'po meri',              // made to measure
+  'garancija',            // warranty → durable goods
+  'besplatna konsultacija', // consultation-led services (clinics)
+  'zakažite pregled',     // booking-shaped medical
+];
 
 const isLocal    = process.argv.includes('--local');      // read from local JSON files, skip Apify Stage 1
 const isTest     = process.argv.includes('--test');       // no DB writes
@@ -692,6 +712,12 @@ async function main() {
       const linkHost = snap.link_url ? new URL(snap.link_url).hostname : '';
       if (AD_NETWORK_DOMAINS.has(linkHost))               { dbg.adNetwork++; continue; }
     } catch {}
+    const banned = isPermabanned({ pageName, website: snap.link_url });
+    if (banned) {
+      console.log(`  ⛔ PERMABAN ${pageName} — ${banned.reason}`);
+      dbg.permabanned = (dbg.permabanned || 0) + 1;
+      continue;
+    }
     if (cats.some(c => EXCLUDE_CATS.has(c)))               { dbg.retail++;    continue; }
     // Name-based keyword filter — catches retail/personal brands with generic FB categories
     if (isExcludedByName(pageName))                        { dbg.retail++;    continue; }

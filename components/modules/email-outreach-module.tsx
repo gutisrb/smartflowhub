@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useMemo, useCallback } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Mail, TrendingUp, CheckCircle, RefreshCw, BarChart3, Layout, Send, UserCheck, MessageSquare, X, Copy, Check, Star, Pencil, Linkedin, Instagram, Tag, Zap, Trash2, Eye, Phone } from "lucide-react"
+import { Mail, TrendingUp, CheckCircle, RefreshCw, BarChart3, Layout, Send, UserCheck, MessageSquare, X, Copy, Check, Star, Pencil, Linkedin, Instagram, Tag, Zap, Trash2, Eye, Phone, Archive } from "lucide-react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { createClient } from "@/lib/supabase/client"
@@ -185,14 +185,37 @@ export function EmailOutreachModule({
     setTimeout(() => setRefreshing(false), 800)
   }
 
+  // ── Archive line ──────────────────────────────────────────────────────────
+  // The May campaign is over: 327 leads were emailed before June and not one has
+  // been touched since. They are not pipeline, they are noise sitting on top of
+  // the 408 leads that have never been contacted at all. So they get folded away
+  // by default — still there, one click from view, but out of the working set.
+  const ARCHIVE_BEFORE = new Date('2026-06-01')
+  const LIVE_STATUSES = new Set([
+    'Odgovorio', 'Zakazan Sastanak', 'In Contract Review', 'Follow Up',
+    'Demo Izgrađen', 'Demo Sent', 'Phone Contact',
+  ])
+
+  const isArchived = useCallback((l: Lead) => {
+    if (l.starred) return false                                    // hand-picked stays
+    if (l.replied_at || LIVE_STATUSES.has(l.status)) return false   // anything alive stays
+    const sent = (l as any).email_1_poslat || l.last_sent_at
+    return !!sent && new Date(sent) < ARCHIVE_BEFORE
+  }, [])
+
+  const archivedCount = useMemo(() => leads.filter(isArchived).length, [leads, isArchived])
+  const activeLeads = useMemo(() => leads.filter(l => !isArchived(l)), [leads, isArchived])
+
   const filteredLeads = useMemo(() => {
-    if (statusFilter === 'all') return leads
-    if (statusFilter === 'starred') return leads.filter(l => l.starred)
-    if (statusFilter === 'replied') return leads.filter(l => l.replied_at || l.status === 'Odgovorio')
-    if (statusFilter === 'booked') return leads.filter(l => l.status === 'Zakazan Sastanak' || l.status === 'Meeting Booked')
-    if (statusFilter === 'no_response') return leads.filter(l => (l.last_sent_at || l.status === 'Kontaktiran') && !l.replied_at && l.status !== 'Zakazan Sastanak' && l.status !== 'Meeting Booked')
-    return leads.filter(l => l.status === statusFilter)
-  }, [leads, statusFilter])
+    if (statusFilter === 'archive') return leads.filter(isArchived)
+    const leadsBase = activeLeads
+    if (statusFilter === 'all') return leadsBase
+    if (statusFilter === 'starred') return leadsBase.filter(l => l.starred)
+    if (statusFilter === 'replied') return leadsBase.filter(l => l.replied_at || l.status === 'Odgovorio')
+    if (statusFilter === 'booked') return leadsBase.filter(l => l.status === 'Zakazan Sastanak' || l.status === 'Meeting Booked')
+    if (statusFilter === 'no_response') return leadsBase.filter(l => (l.last_sent_at || l.status === 'Kontaktiran') && !l.replied_at && l.status !== 'Zakazan Sastanak' && l.status !== 'Meeting Booked')
+    return leadsBase.filter(l => l.status === statusFilter)
+  }, [leads, activeLeads, statusFilter, isArchived])
 
   const PIPELINE_STATUS_PILLS = [
     { status: 'Demo Izgrađen', label: 'demo izgrađen' },
@@ -411,6 +434,14 @@ export function EmailOutreachModule({
                   onClick={() => setStatusFilter('booked')}
                   className={cn("px-3 py-1 rounded-full text-xs font-outfit transition-all", statusFilter === 'booked' ? 'bg-amber-400 text-obsidian font-bold' : 'bg-amber-400/10 text-amber-400/70 hover:bg-amber-400/20')}
                 >zakazali ({leads.filter(l => l.status === 'Zakazan Sastanak' || l.status === 'Meeting Booked').length})</button>
+                <button
+                  onClick={() => setStatusFilter('archive')}
+                  title="Kontaktirani u staroj kampanji (pre 01.06.2026) bez odgovora"
+                  className={cn("px-3 py-1 rounded-full text-xs font-outfit transition-all flex items-center gap-1.5",
+                    statusFilter === 'archive' ? 'bg-zinc-400 text-obsidian font-bold' : 'bg-white/[0.04] text-[#8b9d9a] hover:bg-white/[0.08] hover:text-white')}
+                >
+                  <Archive className="w-3 h-3" /> arhiva {archivedCount > 0 && <span className="opacity-70">{archivedCount}</span>}
+                </button>
                 <button
                   onClick={() => setStatusFilter('no_response')}
                   className={cn("px-3 py-1 rounded-full text-xs font-outfit transition-all", statusFilter === 'no_response' ? 'bg-silver/30 text-obsidian font-bold' : 'bg-silver/5 text-silver/40 hover:bg-silver/10')}

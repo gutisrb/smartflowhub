@@ -22,6 +22,7 @@ import { readFileSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { promises as dns } from 'dns';
+import { isPermabanned } from './lib/permaban.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -270,12 +271,16 @@ async function main() {
 
   // Pass 1 — synchronous filters (cheap)
   const seenEmails = new Set();
-  let stats = { skipNoEmailComment: 0, skipBogus: 0, skipBogusDomain: 0, skipBanned: 0, skipDup: 0, skipNoMx: 0 };
+  let stats = { skipPermaban: 0, skipNoEmailComment: 0, skipBogus: 0, skipBogusDomain: 0, skipBanned: 0, skipDup: 0, skipNoMx: 0 };
   const passSync = leads.filter(l => {
     if (SKIP_NAMES.has(l.company_name)) return false;
     const df = getDraftField(l);
     if (!l[df]) return false;
     // Skip leads where enrichment flagged the email as unverified
+    // Last line of defence. Sourcing already blocks these, but a ban must hold even
+    // if a row reaches the send queue by any other route — manual insert included.
+    const ban = isPermabanned({ pageName: l.company_name, igHandle: l.instagram_handle, website: l.website, email: l.email });
+    if (ban) { console.warn(`⛔ ${l.company_name} — PERMABANNED (${ban.reason}), refusing to send`); stats.skipPermaban = (stats.skipPermaban||0)+1; return false; }
     if (l.comment && /no email found/i.test(l.comment)) { stats.skipNoEmailComment++; return false; }
     if (isBogusEmail(l.email)) { stats.skipBogus++; return false; }
     const subject = l[df].split('\n')[0];

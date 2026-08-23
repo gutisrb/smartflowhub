@@ -16,6 +16,7 @@ import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { execFile } from 'child_process';
 import { promisify } from 'util';
+import { isPermabanned } from './lib/permaban.mjs';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const execFileAsync = promisify(execFile);
 
@@ -386,6 +387,7 @@ async function main() {
     if (!owner || typeof owner !== 'string') continue;
     const low = owner.toLowerCase();
     if (existingHandles.has(low)) continue;
+    if (isPermabanned({ igHandle: low })) { console.log(`  ⛔ permaban @${low}`); continue; }
     if (!ownerMap.has(low)) ownerMap.set(low, owner);
   }
   const uniqueOwners = [...ownerMap.values()];
@@ -401,6 +403,7 @@ async function main() {
     if (!p.username) continue;
     const low = p.username.toLowerCase();
     if (existingHandles.has(low)) continue;
+    if (isPermabanned({ igHandle: low })) { console.log(`  ⛔ permaban @${low}`); continue; }
     const f = p.followersCount || 0;
     if (!p.isBusinessAccount) continue;
     if (f < MIN_FOLLOWERS || f > MAX_FOLLOWERS) continue;

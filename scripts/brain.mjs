@@ -258,6 +258,11 @@ async function handleLint() {
   let outdatedFiles = 0;
   const brokenLinkList = [];
   const outdatedFileList = [];
+  // status.md is read at the start of every session, so its size is a real cost,
+  // not a tidiness concern. It reached 109 KB / 39 sections before anyone noticed
+  // — the Current section was buried under four months of history.
+  const OVERSIZE_BYTES = 20000;
+  const oversizeList = [];
 
   const readDirRecursive = (dir) => {
     let results = [];
@@ -280,6 +285,13 @@ async function handleLint() {
   allMdFiles.forEach((filePath) => {
     const relativePath = path.relative(vaultPath, filePath);
     const content = fs.readFileSync(filePath, 'utf8');
+
+    // Flag files that have grown past the point of being readable in one sitting
+    // Archives are supposed to be big — that is the point of moving history there.
+    const bytes = Buffer.byteLength(content, 'utf8');
+    if (bytes > OVERSIZE_BYTES && !relativePath.includes('archive/')) {
+      oversizeList.push({ path: relativePath, kb: (bytes / 1024).toFixed(1) });
+    }
 
     // Check frontmatter date age
     const match = content.match(/updated: (\d{4}-\d{2}-\d{2})/);
@@ -335,6 +347,7 @@ updated: ${today}
 *   **Total Vault Links Checked:** ${totalLinks}
 *   **Broken Links:** ${brokenLinks === 0 ? '🟢 None' : `🔴 ${brokenLinks}`}
 *   **Outdated Pages (>2 weeks old):** ${outdatedFiles === 0 ? '🟢 None' : `🟡 ${outdatedFiles}`}
+*   **Oversized Pages (>20 KB):** ${oversizeList.length === 0 ? '🟢 None' : `🟠 ${oversizeList.length}`}
 
 ---
 
@@ -345,6 +358,12 @@ ${brokenLinks === 0 ? '_No broken links found._' : brokenLinkList.map(item => `*
 
 ## ⏳ Outdated Wiki Pages
 ${outdatedFiles === 0 ? '_All pages up to date._' : outdatedFileList.map(item => `*   \`${item.path}\` (last updated: ${item.date})`).join('\n')}
+
+---
+
+## 📦 Oversized Pages
+_Read at session start, so size is a context cost. Archive history out of these._
+${oversizeList.length === 0 ? '_All pages a reasonable size._' : oversizeList.map(item => `*   \`${item.path}\` — **${item.kb} KB** ⚠️`).join('\n')}
 
 ---
 

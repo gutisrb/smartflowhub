@@ -82,14 +82,37 @@ async function hunterDomainSearch(domain) {
   } catch { return null; }
 }
 
+async function hunterQuota() {
+  try {
+    const r = await fetch(`https://api.hunter.io/v2/account?api_key=${HUNTER_KEY}`);
+    const j = await r.json();
+    const s = j?.data?.requests?.searches;
+    if (!s) return null;
+    return { used: s.used, available: s.available, left: s.available - s.used };
+  } catch { return null; }
+}
+
 async function main() {
   console.log('═══════════════════════════════════════════════════════════');
   console.log('  Hunter.io Decision-Maker Upgrader');
-  console.log(`  Mode: ${isDryRun ? 'DRY RUN' : 'LIVE'}`);
+  console.log(`  Mode: ${isDryRun ? 'DRY RUN (no API calls, no writes)' : 'LIVE'}`);
   console.log('═══════════════════════════════════════════════════════════\n');
 
+  const quota = await hunterQuota();
+  if (quota) console.log(`Hunter searches left this cycle: ${quota.left} of ${quota.available}\n`);
+  if (!isDryRun && quota && quota.left <= 0) {
+    console.error('✗ Hunter search quota exhausted — nothing to spend. Aborting.');
+    process.exit(1);
+  }
+
+  // Every status a lead can hold while still being worth a better address.
+  // This used to be `status=eq.enriched` alone, which silently excluded every lead
+  // that had moved on — 16 of 17 demo-built leads were never once looked at, and
+  // went out to info@ addresses instead.
+  const ELIGIBLE = ['enriched', 'No Draft', 'Demo Izgrađen', 'Kontaktiran', 'Follow Up', 'Bounced'];
+  const statusFilter = `status=in.(${ELIGIBLE.map(s => `"${s}"`).join(',')})`;
   const res = await fetch(
-    `${SUPABASE_URL}/rest/v1/contacts?client_id=eq.${SMARTFLOW_ID}&status=eq.enriched&select=id,company_name,email,website,intake_data&limit=100`,
+    `${SUPABASE_URL}/rest/v1/contacts?client_id=eq.${SMARTFLOW_ID}&${statusFilter}&select=id,company_name,email,website,intake_data,status&limit=300`,
     { headers: { apikey: SERVICE_KEY, Authorization: `Bearer ${SERVICE_KEY}` } }
   );
   const leads = await res.json();
@@ -97,15 +120,35 @@ async function main() {
 
   console.log(`Loaded ${leads.length} enriched leads\n`);
 
-  let upgraded = 0, skipped = 0, notFound = 0;
+  let upgraded = 0, skipped = 0, notFound = 0, wouldSearch = 0, spent = 0;
+  // Never spend more than the quota, and let the caller cap it: --budget N
+  const budgetArg = process.argv.indexOf('--budget');
+  const budget = budgetArg !== -1
+    ? Number(process.argv[budgetArg + 1])
+    : (quota ? quota.left : 25);
 
   for (const lead of leads) {
-    const domain = cleanDomain(lead.website);
+    // The website column is sometimes empty even though the address itself names
+    // the company domain — office@crowndental.rs is a perfectly good lead for a
+    // domain search.
+    const emailDomain = (currentEmailDomain) => {
+      const d = (currentEmailDomain || '').split('@')[1];
+      if (!d || /gmail|yahoo|hotmail|outlook|icloud|proton/i.test(d)) return null;
+      return d;
+    };
     const currentEmail = lead.email || '';
+    const domain = cleanDomain(lead.website) || emailDomain(lead.email);
     const name = (lead.company_name || '').slice(0, 35);
 
     if (!domain) {
       console.log(`⊘ ${name} — no domain, skipping`);
+      skipped++;
+      continue;
+    }
+
+    // Skip if a previous run already upgraded this lead — searches are metered
+    if (lead.intake_data?.enrichment?.decision_maker?.email) {
+      console.log(`✓ ${name} — already upgraded, skipping`);
       skipped++;
       continue;
     }
@@ -117,7 +160,22 @@ async function main() {
       continue;
     }
 
+    // A dry run must cost nothing. This previously still called Hunter — only the
+    // DB write was skipped — so "just checking what it would do" drained the
+    // month's search quota. Dry run now reports the bill instead of paying it.
+    if (isDryRun) {
+      console.log(`· ${name} — would search ${domain} (1 search)`);
+      wouldSearch++;
+      continue;
+    }
+
+    if (spent >= budget) {
+      console.log(`⏸ ${name} — budget of ${budget} searches reached, stopping`);
+      break;
+    }
+
     const dm = await hunterDomainSearch(domain);
+    spent++;
 
     if (!dm || dm.email === currentEmail) {
       console.log(`✗ ${name} — no DM found on ${domain}`);
@@ -166,6 +224,8 @@ async function main() {
   }
 
   console.log('\n═══════════════════════════════════════════════════════════');
+  if (isDryRun) console.log(`  Would search : ${wouldSearch}  (costs ${wouldSearch} Hunter searches)`);
+  console.log(`  Searched : ${spent}`);
   console.log(`  Upgraded : ${upgraded}`);
   console.log(`  Skipped  : ${skipped}`);
   console.log(`  Not found: ${notFound}`);

@@ -1,7 +1,7 @@
 "use client"
 
 import { cn } from "@/lib/utils"
-import { ChevronRight, UserCircle, Database, LayoutDashboard, Zap, BarChart3, Settings, ShieldCheck, Sparkles, X } from "lucide-react"
+import { ChevronRight, UserCircle, Database, Zap, BarChart3, Settings, X } from "lucide-react"
 import { SmartflowMark } from "@/components/dashboard/smartflow-mark"
 import { useState, useMemo } from "react"
 import { useUnifiedModules } from "@/lib/modules/hooks"
@@ -45,10 +45,15 @@ const CATEGORY_CONFIG: CategoryConfig[] = [
   { key: 'settings', label: 'Podešavanja', collapsible: false, icon: Settings },
 ]
 
-// Rail is 64px collapsed, flyout expands to 272px on hover/focus — it overlays
-// the content area rather than pushing it, so the reserved layout width stays fixed.
+// The rail reserves a fixed 64px of layout and expands to a 272px flyout on hover,
+// overlaying the content instead of pushing it — so content width never shifts.
 const RAIL_W = "w-16"
 const FLYOUT_W = "w-16 md:group-hover/rail:w-[272px] md:focus-within:w-[272px]"
+
+// Anything that only makes sense with room to read it. Collapsed, these fade out
+// AND give up their height, so the 64px rail is icons and dividers — never a word
+// guillotined to its first letter, which is what the old rail actually rendered.
+const REVEAL = "opacity-0 md:group-hover/rail:opacity-100 md:focus-within:opacity-100 transition-opacity duration-150"
 
 export function Sidebar({
   currentView, onViewChange, clientName, clientId,
@@ -79,11 +84,8 @@ export function Sidebar({
   const toggleCategory = (category: ModuleCategory) => {
     setExpandedCategories(prev => {
       const next = new Set(prev)
-      if (next.has(category)) {
-        next.delete(category)
-      } else {
-        next.add(category)
-      }
+      if (next.has(category)) next.delete(category)
+      else next.add(category)
       return next
     })
   }
@@ -110,10 +112,7 @@ export function Sidebar({
         <div className="relative">
           {onClose && (
             <div className="flex justify-end px-3 pt-4 md:hidden">
-              <button
-                onClick={onClose}
-                className="p-2 rounded-lg text-zinc-500 hover:text-white hover:bg-white/10 transition-colors"
-              >
+              <button onClick={onClose} className="p-2 rounded-lg text-[#9fb0ad] hover:text-white hover:bg-white/10 transition-colors">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -135,20 +134,17 @@ export function Sidebar({
                 style={{ background: "linear-gradient(135deg, #34d39e, #10b981)" }}>
                 <span className="relative z-10"><SmartflowMark size={18} /></span>
               </div>
-              <div className="flex flex-col gap-0.5 min-w-0 overflow-hidden whitespace-nowrap">
+              <div className={cn("flex flex-col gap-0.5 min-w-0 overflow-hidden whitespace-nowrap", REVEAL)}>
                 <span className="text-[9px] font-bold text-emerald/80 uppercase tracking-[0.2em] leading-none">
                   SmartFlow
                 </span>
-                <span className="text-[15px] font-outfit font-semibold text-silver tracking-tight leading-none truncate">
+                <span className="text-[15px] font-outfit font-semibold text-white tracking-tight leading-none truncate">
                   {bookStoreConfig ? bookStoreConfig.brandName : (clientName || "Dashboard")}
                 </span>
               </div>
             </div>
             {onClose && (
-              <button
-                onClick={onClose}
-                className="md:hidden p-2 rounded-lg text-zinc-500 hover:text-white hover:bg-white/10 transition-colors shrink-0"
-              >
+              <button onClick={onClose} className="md:hidden p-2 rounded-lg text-[#9fb0ad] hover:text-white hover:bg-white/10 transition-colors shrink-0">
                 <X className="w-5 h-5" />
               </button>
             )}
@@ -171,8 +167,8 @@ export function Sidebar({
             ))}
           </div>
         ) : (
-          <div className="space-y-4 py-1">
-            {CATEGORY_CONFIG.map(categoryConfig => {
+          <div className="py-1">
+            {CATEGORY_CONFIG.map((categoryConfig, groupIdx) => {
               const categoryModules = modulesByCategory.get(categoryConfig.key) || []
               if (categoryModules.length === 0) return null
 
@@ -180,18 +176,27 @@ export function Sidebar({
 
               return (
                 <div key={categoryConfig.key} className="space-y-1">
-                  <div className="flex items-center gap-2 px-2.5 mb-1 h-4">
-                    <categoryConfig.icon className="w-3.5 h-3.5 text-zinc-600 shrink-0" />
+                  {/* Collapsed: a hairline is the group boundary. Expanded: the name is. */}
+                  {groupIdx > 0 && (
+                    <div className="mx-3 my-2 h-px bg-white/[0.07] md:group-hover/rail:opacity-0 md:focus-within:opacity-0 transition-opacity duration-150" />
+                  )}
+
+                  <div className={cn(
+                    "flex items-center gap-2 px-2.5 overflow-hidden",
+                    "h-0 md:group-hover/rail:h-5 md:focus-within:h-5 md:group-hover/rail:mb-1 transition-all duration-150",
+                    REVEAL,
+                  )}>
+                    <categoryConfig.icon className="w-3.5 h-3.5 text-[#7d918e] shrink-0" />
                     {categoryConfig.collapsible ? (
                       <button
                         onClick={() => toggleCategory(categoryConfig.key)}
-                        className="flex-1 flex items-center justify-between text-[10px] font-bold text-zinc-500 hover:text-zinc-300 uppercase tracking-[0.13em] transition-colors whitespace-nowrap overflow-hidden"
+                        className="flex-1 flex items-center justify-between text-[10px] font-bold text-[#9fb0ad] hover:text-white uppercase tracking-[0.13em] transition-colors whitespace-nowrap"
                       >
                         <span>{categoryConfig.label}</span>
-                        <ChevronRight className={cn("w-3 h-3 transition-transform text-zinc-600 shrink-0", isExpanded && "rotate-90")} />
+                        <ChevronRight className={cn("w-3 h-3 transition-transform text-[#7d918e] shrink-0", isExpanded && "rotate-90")} />
                       </button>
                     ) : (
-                      <div className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.13em] whitespace-nowrap overflow-hidden">
+                      <div className="text-[10px] font-bold text-[#9fb0ad] uppercase tracking-[0.13em] whitespace-nowrap">
                         {categoryConfig.label}
                       </div>
                     )}
@@ -199,7 +204,9 @@ export function Sidebar({
 
                   <div className={cn(
                     "space-y-0.5 overflow-hidden transition-all duration-300 ease-in-out",
-                    !isExpanded ? "max-h-0 opacity-0" : "max-h-[500px] opacity-100"
+                    // collapsing a category only applies once the rail is open — a
+                    // collapsed rail must never hide its icons
+                    !isExpanded ? "max-h-[500px] md:group-hover/rail:max-h-0 md:group-hover/rail:opacity-0" : "max-h-[500px] opacity-100"
                   )}>
                     {categoryModules.map((module) => (
                       <NavItem
@@ -218,23 +225,22 @@ export function Sidebar({
         )}
       </nav>
 
-      {/* ── Profile footer ─────────────────────────────────────────────────── */}
-      <div className="px-2 pb-3 pt-2">
+      {/* ── Footer: who you are, and whether the agent is actually running ─── */}
+      <div className="px-2 pb-3 pt-2 border-t border-white/[0.06] mt-1">
         <div className="rounded-xl p-2 hover:bg-white/[0.05] transition-colors cursor-pointer">
           <div className="flex items-center gap-2.5">
             <div className="relative shrink-0">
-              <div className="w-8 h-8 rounded-lg bg-white/[0.06] flex items-center justify-center text-zinc-400 overflow-hidden">
+              <div className="w-8 h-8 rounded-lg bg-white/[0.07] flex items-center justify-center text-[#b6c6c3] overflow-hidden">
                 <UserCircle className="w-5 h-5" />
               </div>
-              <div className="absolute -bottom-0.5 -right-0.5 w-2 h-2 bg-emerald border-2 border-rail rounded-full" />
+              <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-[#0b0e14]" />
             </div>
-            <div className="flex flex-col min-w-0 overflow-hidden whitespace-nowrap">
-              <span className="text-[13px] font-medium text-silver truncate">{clientName}</span>
-              <div className="flex items-center gap-1.5">
-                <span className="text-[9px] text-zinc-500 font-bold uppercase tracking-widest">Admin</span>
-                <div className="w-1 h-1 bg-zinc-600 rounded-full shrink-0" />
-                <span className="text-[9px] text-emerald font-bold uppercase tracking-widest">Secure</span>
-              </div>
+            <div className={cn("flex flex-col min-w-0 overflow-hidden whitespace-nowrap", REVEAL)}>
+              <span className="text-[13px] font-medium text-white truncate">{clientName}</span>
+              <span className="flex items-center gap-1.5 text-[10px] font-semibold text-emerald-400">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                Agent aktivan
+              </span>
             </div>
           </div>
         </div>
@@ -249,7 +255,8 @@ export function Sidebar({
       <div className={cn(RAIL_W, "hidden md:block shrink-0 h-screen sticky top-0 z-30 group/rail")}>
         <div className={cn(
           FLYOUT_W,
-          "h-full flex flex-col surface-rail overflow-hidden transition-[width] duration-200 ease-out"
+          "h-full flex flex-col surface-rail overflow-hidden transition-[width] duration-200 ease-out",
+          "md:group-hover/rail:shadow-[24px_0_60px_-24px_rgba(0,0,0,0.9)]",
         )}>
           {navBody}
         </div>
@@ -277,23 +284,36 @@ function NavItem({ icon: Icon, label, active, onClick }: {
   return (
     <button
       onClick={onClick}
-      title={label}
       className={cn(
-        "w-full flex items-center gap-3 px-2.5 py-2.5 text-sm font-medium rounded-lg transition-colors duration-150 group relative",
+        "w-full flex items-center gap-3 px-2.5 py-2.5 text-sm font-medium rounded-xl transition-colors duration-150 group/item relative",
         active
-          ? "bg-white/[0.09] text-white"
-          : "text-zinc-500 hover:text-zinc-200 hover:bg-white/[0.04]"
+          ? "bg-emerald-500/[0.14] text-white"
+          : "text-[#a9bab7] hover:text-white hover:bg-white/[0.06]"
       )}
     >
+      {/* the active marker has to survive at 64px, where the label is gone */}
+      {active && (
+        <span className="absolute left-0 top-2 bottom-2 w-[3px] rounded-r-full bg-emerald-400 shadow-[0_0_12px_0_rgba(16,185,129,0.9)]" />
+      )}
+
       <Icon className={cn(
         "w-[18px] h-[18px] shrink-0 transition-colors",
-        active ? "text-white" : "text-zinc-600 group-hover:text-zinc-300"
+        active ? "text-emerald-300" : "text-[#8b9d9a] group-hover/item:text-white"
       )} />
-      <span className="font-outfit tracking-wide whitespace-nowrap overflow-hidden">{label}</span>
 
-      {active && (
-        <div className="absolute left-0 top-1.5 bottom-1.5 w-[3px] rounded-full bg-white/70" />
-      )}
+      <span className={cn("font-outfit tracking-wide whitespace-nowrap overflow-hidden", REVEAL)}>
+        {label}
+      </span>
+
+      {/* Collapsed rail needs a name on hover; the native title tooltip is too slow
+          to be usable when you're scanning nine icons. Hidden once the rail opens. */}
+      <span className="pointer-events-none absolute left-[calc(100%+14px)] top-1/2 -translate-y-1/2 z-50
+        whitespace-nowrap rounded-lg px-2.5 py-1.5 text-[12px] font-semibold text-white
+        bg-[#151a22] border border-white/10 shadow-[0_12px_28px_-8px_rgba(0,0,0,0.9)]
+        opacity-0 group-hover/item:opacity-100 transition-opacity duration-100
+        md:group-hover/rail:hidden md:focus-within:hidden">
+        {label}
+      </span>
     </button>
   )
 }

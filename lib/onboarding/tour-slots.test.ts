@@ -2,16 +2,15 @@ import { describe, it, expect } from "vitest"
 import { expandTourSlots, tourHeroFor, isServiceNiche } from "./tour-slots"
 
 describe("expandTourSlots", () => {
-  it("expands a full module set to 7 beats in order, sub-beats reusing the parent moduleKey", () => {
+  it("expands a full module set to 6 beats in order, sub-beats reusing the parent moduleKey", () => {
     const out = expandTourSlots(["social-chatbot", "agent-leads", "calendar", "chatbot-analytics"])
     expect(out.map(o => o.slot)).toEqual([
-      "inbox", "inbox-intervencija", "crm", "crm-log", "termini", "analitika", "offer",
+      "inbox", "inbox-intervencija", "crm", "termini", "analitika", "offer",
     ])
     expect(out[0].moduleKey).toBe("social-chatbot")
     expect(out[1].moduleKey).toBe("social-chatbot") // sub-beat stays on the inbox module
     expect(out[2].moduleKey).toBe("agent-leads")
-    expect(out[3].moduleKey).toBe("agent-leads")    // sub-beat stays on the CRM module
-    expect(out[6].moduleKey).toBe("ponuda")          // offer fallback always appended
+    expect(out[5].moduleKey).toBe("ponuda")          // offer fallback always appended
   })
   it("omits sub-beats when the parent slot has no module", () => {
     const out = expandTourSlots(["calendar"])
@@ -27,7 +26,6 @@ describe("tourHeroFor", () => {
   it("maps main-hero slots by niche type", () => {
     expect(tourHeroFor("inbox", true)).toBe("Marija Jović")
     expect(tourHeroFor("crm", false)).toBe("Stefan Ilić")
-    expect(tourHeroFor("crm-log", true)).toBe("Marija Jović")
     expect(tourHeroFor("termini", false)).toBe("Stefan Ilić")
   })
   it("maps the intervention beat to the intervention hero", () => {

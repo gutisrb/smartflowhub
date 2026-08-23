@@ -14,6 +14,7 @@ import { cn } from "@/lib/utils"
 import { getBookStoreConfig } from "@/lib/brand-configs"
 import { NicheKey, NICHE_CONFIGS } from "@/lib/niche-config"
 import { ChannelGlyph } from "@/components/dashboard/channel-glyph"
+import { getDemoShift, shiftRows } from "@/lib/demo/time-shift"
 
 // ── Demo mode ────────────────────────────────────────────────────────────────
 const DEMO_MODE = false
@@ -432,6 +433,8 @@ interface SocialChatbotModuleProps {
     demoPlayback?: boolean
     /** Onboarding tour: select this customer's conversation (by metadata name). */
     tourFocusName?: string
+    /** Demo tenant: re-anchor seeded timestamps at read time so nothing goes stale. */
+    demoMode?: boolean
 }
 
 function getPlatformMeta(platform: string) {
@@ -455,7 +458,7 @@ const CHANNEL_HEX: Record<string, string> = {
 }
 const channelHex = (p?: string) => CHANNEL_HEX[(p ?? "").toLowerCase()] ?? "#71717a"
 
-export function SocialChatbotModule({ clientId, selectedBrandIds, clientName, nicheKey, demoPlayback, tourFocusName }: SocialChatbotModuleProps) {
+export function SocialChatbotModule({ clientId, selectedBrandIds, clientName, nicheKey, demoPlayback, tourFocusName, demoMode }: SocialChatbotModuleProps) {
     const bookStoreConfig = getBookStoreConfig(clientId)
     const isMultiBrand = (selectedBrandIds?.length ?? 0) > 1
     const brandIds = selectedBrandIds && selectedBrandIds.length > 0 ? selectedBrandIds : [clientId]
@@ -473,6 +476,9 @@ export function SocialChatbotModule({ clientId, selectedBrandIds, clientName, ni
     const [crmRows, setCrmRows] = useState<any[]>([])
     const messagesEndRef = useRef<HTMLDivElement>(null)
     const supabase = createClient()
+
+    const demoModeRef = useRef(demoMode)
+    useEffect(() => { demoModeRef.current = demoMode }, [demoMode])
 
     useEffect(() => { brandIdsRef.current = brandIds }, [brandIdsKey]) // eslint-disable-line
 
@@ -493,8 +499,12 @@ export function SocialChatbotModule({ clientId, selectedBrandIds, clientName, ni
 
         for (let i = 0; i < ids.length; i++) {
             const bid = ids[i]
-            const { data, error } = results[i]
-            if (error || !data) continue
+            const { data: rawData, error } = results[i]
+            if (error || !rawData) continue
+            // Demo tenants: slide seeded timestamps forward so the inbox is never stale.
+            const data = demoModeRef.current
+                ? shiftRows(rawData, ["created_at"], (await getDemoShift(supabase, bid, true)).deltaMs)
+                : rawData
 
             if (data.length === 0 && getBookStoreConfig(bid)) {
                 const { conversations: demoConvs, allMessages: demoMsgs } = generateBookstoreDemoData(bid)
@@ -680,9 +690,16 @@ export function SocialChatbotModule({ clientId, selectedBrandIds, clientName, ni
     // reveal reaches the end of the thread.
     const showSelectedHuman = !!selected?.humanNeeded && (!demoPlayback || pbCount >= fullMessages.length)
 
+    // Keep the thread pinned to its newest message. scrollIntoView() was walking
+    // up the DOM and scrolling the PAGE too, so during tour playback every revealed
+    // message dragged the whole dashboard further down the screen. Scroll the
+    // message column itself instead — ancestors stay where the viewer put them.
     // eslint-disable-next-line react-hooks/exhaustive-deps
     useEffect(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+        const end = messagesEndRef.current
+        const pane = end?.parentElement
+        if (!pane) return
+        pane.scrollTo({ top: pane.scrollHeight, behavior: "smooth" })
     }, [selectedId, currentMessages.length, pbTyping])
 
     const getDisplayName = (conv: any) => {
@@ -849,13 +866,15 @@ export function SocialChatbotModule({ clientId, selectedBrandIds, clientName, ni
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3 shrink-0">
                 <StatCard icon={<MessageCircle className="w-4 h-4" />} label={`Razgovori · ${periodLabel}`} value={upitiPeriod} variant="zinc" />
                 <StatCard icon={<UserCheck className="w-4 h-4" />} label={`${closedLabel} (agent)`} value={closedByAgent} variant="emerald" />
-                <StatCard
-                    icon={<AlertTriangle className="w-4 h-4" />}
-                    label="Intervencije"
-                    value={intervencije}
-                    variant={intervencije > 0 ? "amber" : "zinc"}
-                    glow={intervencije > 0}
-                />
+                <div data-tour-focus="intervencije-stat">
+                    <StatCard
+                        icon={<AlertTriangle className="w-4 h-4" />}
+                        label="Intervencije"
+                        value={intervencije}
+                        variant={intervencije > 0 ? "amber" : "zinc"}
+                        glow={intervencije > 0}
+                    />
+                </div>
                 <div className="rounded-xl surface-1 p-3 md:p-4 flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         <div className="w-8 h-8 md:w-9 md:h-9 rounded-lg border border-white/10 bg-white/5 flex items-center justify-center text-zinc-400 shrink-0">
@@ -1058,7 +1077,7 @@ export function SocialChatbotModule({ clientId, selectedBrandIds, clientName, ni
                 </div>
 
                 {/* Chat view */}
-                <div className={cn(
+                <div data-tour-focus="chat-thread" className={cn(
                     "md:col-span-5 flex flex-col rounded-xl surface-2 overflow-hidden",
                     mobilePanel === "chat" ? "flex" : "hidden md:flex"
                 )}>

@@ -26,7 +26,8 @@ import { SettingsModule } from "@/components/modules/settings-module"
 import { inferNicheKey, NICHE_CONFIGS } from "@/lib/niche-config"
 import { IntroStep } from "@/components/onboarding/steps/intro-step"
 import { OnboardingTour } from "@/components/onboarding/onboarding-tour"
-import { isServiceNiche, tourHeroFor } from "@/lib/onboarding/tour-slots"
+import { isServiceNiche, tourHeroFor, focusBeatsFor } from "@/lib/onboarding/tour-slots"
+import { TourFocus } from "@/components/onboarding/tour-focus"
 import { PonudaModule } from "@/components/modules/ponuda-module"
 import { CommandCenterModule } from "@/components/modules/command-center-module"
 import type { OnboardingCopy } from "@/lib/onboarding/types"
@@ -272,7 +273,7 @@ export default function DashboardPage() {
           statuses={settings.statuses || ['Novi Lead', 'enriched', 'Kontaktiran', 'Meeting Booked', 'Closed', 'Lost', 'Sent']}
         />
       case 'business-crm':
-        if (demoNiche) return <AgentLeadsModule clientId={effectiveClientId} demoMode nicheKey={inferNicheKey(demoNiche)} tourHighlightName={(tourSlot === 'crm' || tourSlot === 'crm-log') ? tourHeroName ?? undefined : undefined} tourOpenLogName={tourSlot === 'crm-log' ? tourHeroName ?? undefined : undefined} />
+        if (demoNiche) return <AgentLeadsModule clientId={effectiveClientId} demoMode nicheKey={inferNicheKey(demoNiche)} tourHighlightName={tourSlot === 'crm' ? tourHeroName ?? undefined : undefined} tourOpenLogName={tourSlot === 'crm' ? tourHeroName ?? undefined : undefined} />
         return <GrowthEngineModule
           clientId={effectiveClientId}
           tableName="kontakti"
@@ -300,7 +301,7 @@ export default function DashboardPage() {
       case 'agent-leads':
         return <AgentLeadsModule clientId={effectiveClientId} terminology={terminology} selectedBrandIds={isBookStoreClient && selectedBrandIds.length > 1 ? selectedBrandIds : undefined} />
       case 'social-chatbot':
-        return <SocialChatbotModule clientId={effectiveClientId} selectedBrandIds={isBookStoreClient && selectedBrandIds.length > 0 ? selectedBrandIds : undefined} clientName={clientName} nicheKey={demoNiche ? inferNicheKey(demoNiche) : undefined} demoPlayback={inboxPlayback} tourFocusName={(tourSlot === 'inbox' || tourSlot === 'inbox-intervencija') ? tourHeroName ?? undefined : undefined} />
+        return <SocialChatbotModule clientId={effectiveClientId} selectedBrandIds={isBookStoreClient && selectedBrandIds.length > 0 ? selectedBrandIds : undefined} clientName={clientName} nicheKey={demoNiche ? inferNicheKey(demoNiche) : undefined} demoMode={!!demoNiche} demoPlayback={inboxPlayback} tourFocusName={(tourSlot === 'inbox' || tourSlot === 'inbox-intervencija') ? tourHeroName ?? undefined : undefined} />
       case 'website-chatbot':
         return <WebsiteChatbotModule clientId={effectiveClientId} />
       case 'chatbot-analytics':
@@ -422,7 +423,15 @@ export default function DashboardPage() {
           </header>
 
           {/* Content */}
-          <div className="flex-1 overflow-y-auto p-3 md:p-10 scrollbar-none custom-scrollbar pb-24 md:pb-32">
+          <div
+            data-tour-scroll
+            className={cn(
+              "flex-1 overflow-y-auto p-3 md:p-10 scrollbar-none custom-scrollbar",
+              // the tour's narration bar is fixed over the bottom of this area —
+              // reserve enough room that nothing (least of all the CTA) hides under it
+              showOnboarding && onboardingPhase === 'tour' ? "pb-56 md:pb-64" : "pb-24 md:pb-32",
+            )}
+          >
             <div className="max-w-[1600px] mx-auto" data-tour="module-content">
               {isLoading ? (
                 <div className="flex h-[60vh] items-center justify-center">
@@ -526,6 +535,9 @@ export default function DashboardPage() {
 
       {showOnboarding && onboardingPhase === 'intro' && (
         <IntroStep brandColor="#10b981" onNext={() => setOnboardingPhase('tour')} />
+      )}
+      {showOnboarding && onboardingPhase === 'tour' && (
+        <TourFocus beats={focusBeatsFor(tourSlot)} brandColor="#10b981" beatKey={tourSlot ?? ""} scrollSelector="[data-tour-scroll]" />
       )}
       {showOnboarding && onboardingPhase === 'tour' && (
         <OnboardingTour

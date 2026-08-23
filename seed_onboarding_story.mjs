@@ -32,13 +32,43 @@ function apptStart(hour = 15) {
   const d = new Date(); d.setHours(hour, 0, 0, 0); return d
 }
 
-function serviceStory(nicheKey) {
-  const svc = {
+const rsd = (n) => `${Math.round(n).toLocaleString("de-DE")} RSD`
+
+/** Pull a real "expensive ask" + "cheaper alternative" pair out of the tenant's
+ *  scraped catalog, so the demo conversation quotes their own prices back at them
+ *  instead of numbers we invented. Falls back to the generic pair when the catalog
+ *  is thin. */
+function catalogPair(catalog) {
+  const priced = (catalog || []).filter((c) => c.name && c.price_min > 0)
+  if (priced.length < 2) return null
+  const sorted = [...priced].sort((a, b) => a.price_min - b.price_min)
+  const cheap = sorted[0]
+  const dear = sorted[sorted.length - 1]
+  if (cheap.id === dear.id) return null
+  return {
+    sale: dear.name.toLowerCase(), price: rsd(dear.price_min),
+    alt: cheap.name.toLowerCase(), altPrice: rsd(cheap.price_min),
+    altName: cheap.name, altId: cheap.id, altColor: cheap.color_hex || "#10b981",
+    altDuration: cheap.duration_minutes || 45,
+    cat: cheap.category || "Usluge",
+  }
+}
+
+function serviceStory(nicheKey, catalog) {
+  const real = catalogPair(catalog)
+  const svc = real ? { ...defaultSvc(nicheKey), ...real } : defaultSvc(nicheKey)
+  return buildServiceStory(svc)
+}
+
+function defaultSvc(nicheKey) {
+  return {
     dental:  { sale: "izbeljivanje zuba", price: "18.000 RSD", alt: "poliranje i uklanjanje fleka", altPrice: "7.000 RSD", altName: "Poliranje zuba", cat: "Estetska stomatologija", noSvc: "vađenje umnjaka", noCat: "Oralna hirurgija" },
     beauty:  { sale: "tretman lica", price: "4.500 RSD", alt: "dubinsko čišćenje", altPrice: "2.900 RSD", altName: "Dubinsko čišćenje", cat: "Nega lica", noSvc: "tretman za akne", noCat: "Nega lica" },
     fitness: { sale: "personalni trening", price: "2.500 RSD", alt: "grupni čas", altPrice: "900 RSD", altName: "Grupni čas", cat: "Treninzi", noSvc: "jutarnji termin", noCat: "Treninzi" },
   }[nicheKey] || { sale: "termin", price: "5.000 RSD", alt: "kraći termin", altPrice: "3.000 RSD", altName: "Kraći termin", cat: "Usluge", noSvc: "termin subotom", noCat: "Usluge" }
+}
 
+function buildServiceStory(svc) {
   const sale = {
     channel: "whatsapp", customer: "Marija Jović", phone: "064 123 4567",
     msgs: [
@@ -54,7 +84,7 @@ function serviceStory(nicheKey) {
       ["assistant", "Zakazano za danas u 15h ✅ Poslaću Vam podsetnik."],
     ],
     crm: { full_name: "Marija Jović", telefon: "064 123 4567", kategorija: svc.cat, proizvod: svc.altName, status: "Zakazano", razlog: `Zakazala nakon ponuđene povoljnije alternative (${svc.alt} umesto ${svc.sale}).`, izvor: "WhatsApp" },
-    appt: { service_name: svc.altName, color: "#10b981" },
+    appt: { service_name: svc.altName, color: svc.altColor || "#10b981", service_id: svc.altId ?? null, duration: svc.altDuration ?? 45 },
   }
   const nosale = {
     channel: "instagram", customer: "Nikola Perić", phone: "063 555 1212",
@@ -171,51 +201,218 @@ function bgProductConvos() {
   ]
 }
 
-// spread appointments across the current week, varied hours, skipping today@15 (hero slot)
-function weekAppts(crmFullName) {
-  const svcPool = [
-    { s: "Konsultacije", c: "#10b981" }, { s: "Kontrola", c: "#0ea5e9" },
-    { s: "Tretman", c: "#8b5cf6" }, { s: "Prvi pregled", c: "#f59e0b" },
-  ]
-  const names = ["Petar Nikolić","Marko Savić","Tamara Đorđević","Milica Jovanović","Filip Stojanović","Stefan Petrović","Ana Kovačević","Jovana Ilić","Nemanja Ristić","Sara Marković","Luka Pavlović","Katarina Lukić"]
-  const phones = ["063 221 4567","065 884 1290","060 552 7781","064 119 3320","062 770 5512","061 443 8890","063 905 2218","065 117 6643","060 338 9921","064 552 1147","062 661 2204","060 774 9183"]
-  // anchor FORWARD from today so the calendar stays populated for ~10 days regardless
-  // of when the demo is viewed. [dayOffset, hour] — skip today@15 (Marija's hero slot).
-  const today = new Date(); today.setHours(0,0,0,0)
-  const slots = [
-    [0,9],[0,11],[0,17],[1,10],[1,14],[2,9],[2,13],[2,16],[3,11],[3,15],[4,10],[4,14],[5,12],[6,10],[7,13],[8,11],
-  ]
-  return slots.map(([d,h], i) => {
-    const start = new Date(today); start.setDate(today.getDate() + d); start.setHours(h,0,0,0)
-    const svc = svcPool[i % svcPool.length]
-    return { customer_name: names[i % names.length], customer_phone: phones[i % phones.length], service_name: svc.s, service_color: svc.c, starts_at: start.toISOString(), ends_at: new Date(start.getTime()+45*60000).toISOString(), status: "confirmed", urgency: i % 5 === 0 ? "high" : "normal", source: ["WhatsApp","Instagram","Website","Facebook"][i%4], notes: "Zakazano preko AI agenta" }
-  })
+// ── Schedule ────────────────────────────────────────────────────────────────
+// A demo calendar has to look like a real, busy business: weeks of finished
+// appointments BEHIND today and bookings ahead of it. Anchored on the seed day;
+// the dashboard slides the whole set forward at read time (lib/demo/time-shift).
+const SERVICE_POOL = {
+  dental: [
+    { s: "Kontrola", c: "#0ea5e9", w: 5 },
+    { s: "Čišćenje kamenca", c: "#10b981", w: 4 },
+    { s: "Popravka zuba", c: "#8b5cf6", w: 4 },
+    { s: "Prvi pregled", c: "#f59e0b", w: 3 },
+    { s: "Izbeljivanje zuba", c: "#ec4899", w: 2 },
+    { s: "Konsultacije — implant", c: "#06b6d4", w: 2 },
+  ],
+  medical: [
+    { s: "Kontrola", c: "#0ea5e9", w: 5 }, { s: "Prvi pregled", c: "#f59e0b", w: 4 },
+    { s: "Ultrazvuk", c: "#8b5cf6", w: 3 }, { s: "Konsultacije", c: "#10b981", w: 3 },
+    { s: "Laboratorija", c: "#06b6d4", w: 2 },
+  ],
+  beauty: [
+    { s: "Tretman lica", c: "#ec4899", w: 5 }, { s: "Dubinsko čišćenje", c: "#10b981", w: 4 },
+    { s: "Manikir", c: "#f59e0b", w: 4 }, { s: "Depilacija", c: "#8b5cf6", w: 3 },
+    { s: "Konsultacije", c: "#0ea5e9", w: 2 },
+  ],
+  fitness: [
+    { s: "Personalni trening", c: "#10b981", w: 5 }, { s: "Grupni čas", c: "#0ea5e9", w: 5 },
+    { s: "Merenje sastava tela", c: "#f59e0b", w: 2 }, { s: "Konsultacije", c: "#8b5cf6", w: 2 },
+  ],
+  generic: [
+    { s: "Konsultacije", c: "#10b981", w: 5 }, { s: "Kontrola", c: "#0ea5e9", w: 4 },
+    { s: "Tretman", c: "#8b5cf6", w: 3 }, { s: "Prvi pregled", c: "#f59e0b", w: 3 },
+  ],
 }
 
-// short, varied conversations spread over the last 28 days — pure volume so the
-// analytics period charts and totals read like an active, successful account.
-const FN = ["Ana","Marko","Jovana","Petar","Milica","Nikola","Tamara","Luka","Sara","Filip","Katarina","Stefan","Ivana","Vuk","Sofija","Bojan","Milan","Jelena","Dragan","Vesna","Miloš","Tijana","Aleksandar","Nina","Nemanja","Teodora","Đorđe","Lana","Uroš","Maja"]
-const LN = ["Petrović","Jovanović","Nikolić","Ilić","Marković","Savić","Kovačević","Đorđević","Stojanović","Lukić","Ristić","Pavlović","Mitić","Kostić","Janković"]
-const CH4 = ["instagram","whatsapp","facebook","website"]
-function fillerConvos(isService, n, cid8) {
-  const qa = isService
-    ? [["Da li je slobodno ovih dana?","Imamo termina ove nedelje 😊 Da Vas upišem?"],["Koliko košta?","Šaljem Vam ceo cenovnik odmah 📋"],["Radite vikendom?","Subotom radimo 9–14h. Da zakažem?"],["Koliko traje pregled?","Oko 30–45 min. Želite termin?"],["Mogu li sutra?","Imam sutra 11h ili 16h — šta Vam odgovara?"],["Da li primate nove?","Naravno! Recite šta Vam treba pa da nađemo termin."]]
-    : [["Na stanju?","Jeste! Da Vam kreiram porudžbinu?"],["Koliko košta dostava?","Besplatna preko 3.000 RSD 🚚"],["Imate li u drugoj boji?","Imamo u više boja 😊 Koju želite?"],["Radi li pouzeće?","Da, plaćate kuriru pri preuzimanju 👍"],["Naručujem ovo","Super! Pouzeće ili kartica?"],["Garancija?","12 meseci garancije na sve 😊"]]
+// Peak hours are the point of the "špic sati" chart — a real practice fills up
+// mid-morning and after work, not uniformly across the day.
+const HOUR_WEIGHTS = [[9,3],[10,6],[11,6],[12,3],[13,2],[14,3],[15,4],[16,5],[17,6],[18,5],[19,2]]
+
+const CLIENT_NAMES = [
+  "Ana Kovačević","Petar Nikolić","Jovana Ilić","Marko Savić","Tamara Đorđević","Luka Pavlović",
+  "Milica Jovanović","Nemanja Ristić","Sara Marković","Filip Stojanović","Katarina Lukić","Stefan Petrović",
+  "Ivana Nikolić","Vuk Janković","Sofija Mitić","Bojan Kostić","Milan Ilić","Jelena Savić",
+  "Dragan Tomić","Vesna Đorđević","Miloš Jovanović","Tijana Rašić","Aleksandar Mitić","Nina Vuković",
+  "Teodora Popović","Đorđe Lazić","Lana Simić","Uroš Blagojević","Maja Radovanović","Igor Stanković",
+]
+const phoneFor = (i) => `06${(i % 5) + 1} ${100 + (i * 37) % 900} ${1000 + (i * 131) % 9000}`
+
+// deterministic pseudo-random so reseeds are stable
+const rnd = (n) => { const x = Math.sin(n * 12.9898) * 43758.5453; return x - Math.floor(x) }
+const pickWeighted = (pool, r) => {
+  const total = pool.reduce((t, p) => t + (p.w ?? p[1]), 0)
+  let acc = r * total
+  for (const p of pool) { acc -= (p.w ?? p[1]); if (acc <= 0) return p }
+  return pool[pool.length - 1]
+}
+
+function scheduleAppts(nicheKey, catalog) {
+  // Prefer the tenant's own scraped services over our invented ones — a schedule
+  // full of THEIR procedures at THEIR prices is the whole point of the demo.
+  const real = (catalog || []).filter((c) => c.name)
+  // Weight inversely by price: a clinic books far more whitenings and check-ups
+  // than implant surgeries, and a week of nothing but the flagship reads as fake.
+  const byPrice = [...real].sort((a, b) => (a.price_min || 0) - (b.price_min || 0))
+  const pool = real.length >= 3
+    ? byPrice.map((c, i) => ({ s: c.name, c: c.color_hex || "#10b981", id: c.id, dur: c.duration_minutes || 45, w: Math.max(1, byPrice.length - i) }))
+    : (SERVICE_POOL[nicheKey] || SERVICE_POOL.generic)
+  const today = new Date(); today.setHours(0, 0, 0, 0)
   const out = []
-  for (let i = 0; i < n; i++) {
-    const name = `${FN[i % FN.length]} ${LN[(i * 7) % LN.length]}`
-    const [q, a] = qa[i % qa.length]
-    const minAgo = 1600 + Math.floor((i * (28 * 24 * 60)) / n) // ~28 days span, oldest first
-    out.push({ key: `demo_${cid8}_fill${i}`, name, ch: CH4[(i * 3) % 4], minAgo, msgs: [["user", q], ["assistant", a]] })
+  let n = 0
+  for (let d = -21; d <= 10; d++) {
+    const day = new Date(today); day.setDate(today.getDate() + d)
+    const dow = day.getDay()
+    if (dow === 0) continue                       // closed Sunday
+    const perDay = dow === 6 ? 3 : 5 + Math.floor(rnd(d * 3 + 1) * 2)  // 5–6 weekdays, 3 Saturday
+    const used = new Set()
+    for (let k = 0; k < perDay; k++) {
+      n++
+      const hour = pickWeighted(HOUR_WEIGHTS, rnd(n * 7 + d))[0]
+      if (used.has(hour)) continue                 // no double-booking the same hour
+      if (d === 0 && hour === 15) continue         // today 15:00 belongs to the hero booking
+      used.add(hour)
+      const svc = pickWeighted(pool, rnd(n * 11 + 3))
+      const start = new Date(day); start.setHours(hour, 0, 0, 0)
+      const past = d < 0
+      // ~6% of finished appointments fall through — a 0% cancel rate reads as fake
+      const roll = rnd(n * 17 + 5)
+      const status = past ? (roll < 0.04 ? "cancelled" : roll < 0.06 ? "no_show" : "completed") : "confirmed"
+      out.push({
+        customer_name: CLIENT_NAMES[n % CLIENT_NAMES.length],
+        customer_phone: phoneFor(n),
+        service_id: svc.id ?? null, service_name: svc.s, service_color: svc.c,
+        starts_at: start.toISOString(),
+        ends_at: new Date(start.getTime() + Math.min(svc.dur ?? 45, 90) * 60000).toISOString(),
+        status, urgency: "normal",
+        source: ["Instagram", "WhatsApp", "Website", "Facebook"][n % 4],
+        notes: "Zakazano preko AI agenta",
+      })
+    }
   }
   return out
 }
 
+// ── Conversation volume ─────────────────────────────────────────────────────
+// The analytics module reads meaning straight out of these messages (top questions,
+// top objections, channel mix), so the filler is written to carry that signal —
+// not just to make a number go up.
+const FN = ["Ana","Marko","Jovana","Petar","Milica","Nikola","Tamara","Luka","Sara","Filip","Katarina","Stefan","Ivana","Vuk","Sofija","Bojan","Milan","Jelena","Dragan","Vesna","Miloš","Tijana","Aleksandar","Nina","Nemanja","Teodora","Đorđe","Lana","Uroš","Maja"]
+const LN = ["Petrović","Jovanović","Nikolić","Ilić","Marković","Savić","Kovačević","Đorđević","Stojanović","Lukić","Ristić","Pavlović","Mitić","Kostić","Janković"]
+
+// Instagram carries most of it — that is the pitch. [channel, weight]
+const CHANNEL_MIX = [["instagram", 55], ["whatsapp", 20], ["facebook", 13], ["website", 12]]
+
+const SERVICE_QA = [
+  ["Da li imate slobodnih termina ove nedelje?", "Imamo 😊 Sreda 11h ili četvrtak 17h — šta Vam odgovara?"],
+  ["Koliko košta pregled?", "Šaljem Vam ceo cenovnik odmah 📋 Da Vam odmah rezervišem termin?"],
+  ["Radite li subotom?", "Subotom radimo 9–14h. Da Vas upišem?"],
+  ["Koliko traje pregled?", "Oko 30–45 min. Želite li termin ove nedelje?"],
+  ["Ima li slobodno sutra?", "Ima — sutra 10h ili 16h. Koje Vam odgovara?"],
+  ["Koliko košta čišćenje?", "Cena je u cenovniku koji Vam šaljem 📋 Trajanje je oko 40 min."],
+  ["Da li dajete garanciju?", "Da, dajemo garanciju — objasniću Vam detalje na terminu 🙏"],
+  ["Koje je radno vreme danas?", "Danas radimo do 20h. Imam slobodno u 17h ako Vam odgovara?"],
+  ["Da li primate nove pacijente?", "Naravno! Recite mi šta Vam treba pa da nađemo termin."],
+  ["Mogu li da zakažem za sledeću nedelju?", "Možete — ponedeljak 12h ili utorak 18h?"],
+  ["Koliko košta prvi pregled?", "Prvi pregled Vam šaljem u cenovniku 📋 Da rezervišem termin?"],
+  ["Ima li mesta danas popodne?", "Ima u 17h i 18h. Koje Vam odgovara?"],
+  ["Da li mogu da pomerim termin?", "Naravno. Kada bi Vam odgovaralo?"],
+  ["Da li radite vikendom?", "Subotom 9–14h, nedeljom ne radimo 😊"],
+]
+const SERVICE_OBJECTIONS = [
+  "Malo mi je skupo iskreno",
+  "Razmisliću pa se javim",
+  "Mogu samo subotom, radim radnim danima",
+  "Javiću se sledeće nedelje",
+  "Preskupo mi je trenutno",
+  "Možda kasnije, hvala",
+]
+const PRODUCT_QA = [
+  ["Da li je na stanju?", "Jeste! Da Vam kreiram porudžbinu?"],
+  ["Koliko košta dostava?", "Besplatna preko 3.000 RSD 🚚 Stiže za dva dana."],
+  ["Imate li u drugoj boji?", "Imamo u više boja 😊 Koju želite?"],
+  ["Radi li pouzeće?", "Da, plaćate kuriru pri preuzimanju 👍"],
+  ["Koliko košta ovo?", "Šaljem Vam cenu i sve varijante odmah 📋"],
+  ["Imate li veći model?", "Imamo — šaljem Vam veličine koje su na stanju."],
+  ["Da li ima garancija?", "12 meseci garancije na sve 😊"],
+  ["Kada stiže porudžbina?", "Kurir isporučuje za dva radna dana 📦"],
+  ["Ima li ovo u veličini M?", "Ima na stanju! Da Vam rezervišem?"],
+  ["Može li zamena ako ne odgovara?", "Naravno, zamena je moguća u roku od 14 dana 🙏"],
+  ["Da li šaljete u inostranstvo?", "Šaljemo — javite mi grad pa računam dostavu."],
+  ["Koliko košta uz dostavu?", "Šaljem Vam ukupan iznos sa dostavom odmah 📋"],
+  ["Imate li ovaj model na stanju?", "Taj je rasprodat, ali imam vrlo sličan — da pošaljem?"],
+  ["Da li mogu dva komada?", "Možete! Beležim 2 kom — adresa i telefon?"],
+]
+const PRODUCT_OBJECTIONS = [
+  "Skupo mi je za sada",
+  "Razmisliću pa se javim",
+  "Nema na stanju baš taj, šteta",
+  "Možda sledeći mesec",
+  "Mnogo je to para",
+  "Javiću se kasnije",
+]
+
+// status mix ≈ 55% of everyone who writes ends up booked/served — a strong but
+// believable best case for warm inbound DMs.
+const OUTCOME_MIX_SERVICE = [
+  ["Zakazano", 31], ["Završeno", 24], ["Zainteresovan", 30], ["Novi", 11], ["Intervencija", 4],
+]
+const OUTCOME_MIX_PRODUCT = [
+  ["Naručio", 32], ["Isporučeno", 23], ["Zainteresovan", 29], ["Novi", 12], ["Intervencija", 4],
+]
+
+function fillerConvos(isService, n, cid8, nicheKey, catalog) {
+  const qa = isService ? SERVICE_QA : PRODUCT_QA
+  const objections = isService ? SERVICE_OBJECTIONS : PRODUCT_OBJECTIONS
+  const outcomes = isService ? OUTCOME_MIX_SERVICE : OUTCOME_MIX_PRODUCT
+  const real = (catalog || []).filter((c) => c.name)
+  const pool = real.length >= 3
+    ? real.map((c) => ({ s: c.name, w: 3 }))
+    : (SERVICE_POOL[nicheKey] || SERVICE_POOL.generic)
+  const out = []
+  for (let i = 0; i < n; i++) {
+    const name = `${FN[i % FN.length]} ${LN[(i * 7) % LN.length]}`
+    const [q, a] = qa[i % qa.length]
+    const msgs = [["user", q], ["assistant", a]]
+    // every third thread carries an objection the agent answers — that is what
+    // fills the "najčešće primedbe" card with something worth reading
+    if (i % 3 === 1) {
+      msgs.push(["user", objections[i % objections.length]])
+      msgs.push(["assistant", isService
+        ? "Razumem potpuno 🙏 Ostavljam Vam termin otvoren — javite se kad Vam odgovara."
+        : "Razumem 🙏 Zabeležio sam Vas — javim čim bude akcija ili novo stanje."])
+    }
+    const status = pickWeighted(outcomes, rnd(i * 5 + 2))[0]
+    // spread across the last 28 days, denser toward now (a growing account)
+    const dayBack = Math.floor(28 * Math.pow(i / n, 0.85))
+    const hour = pickWeighted(HOUR_WEIGHTS, rnd(i * 3 + 9))[0]
+    const minAgo = dayBack * 24 * 60 + (24 - hour) * 60 + (i * 7) % 60
+    out.push({
+      key: `demo_${cid8}_fill${i}`, name, ch: pickWeighted(CHANNEL_MIX, rnd(i * 13 + 4))[0],
+      minAgo, msgs, status,
+      proizvod: pickWeighted(pool, rnd(i * 19 + 6)).s,
+      telefon: phoneFor(i),
+    })
+  }
+  return out
+}
 async function seedTenant(client) {
   const cid = client.id
   const niche = (client.demo_niche || "generic").toLowerCase()
   const isService = SERVICE_NICHES.has(niche)
-  const { sale, nosale } = isService ? serviceStory(niche) : productStory(niche)
+  const { data: catalog } = await sb
+    .from("services_catalog").select("id,name,category,price_min,color_hex,duration_minutes")
+    .eq("client_id", cid).eq("is_active", true).order("sort_order")
+  const { sale, nosale } = isService ? serviceStory(niche, catalog) : productStory(niche)
   const cid8 = cid.slice(0, 8)
 
   // wipe prior hero + background rows
@@ -224,6 +421,7 @@ async function seedTenant(client) {
   await sb.from("razgovori").delete().eq("client_id", cid).like("id_razgovora", `%_fill%`)
   await sb.from("demo_crm").delete().eq("client_id", cid).like("id_razgovora", `%_hero%`)
   await sb.from("demo_crm").delete().eq("client_id", cid).like("id_razgovora", `%_bg%`)
+  await sb.from("demo_crm").delete().eq("client_id", cid).like("id_razgovora", `%_fill%`)
   // Own the whole demo calendar: clear ALL appointments (incl. build_demo_tenant's
   // stale May-dated set) so there's one clean, forward-dated schedule.
   await sb.from("appointments").delete().eq("client_id", cid)
@@ -249,7 +447,7 @@ async function seedTenant(client) {
     crmRows.push({ ...s.crm, id_razgovora: key, client_id: cid, created_at: new Date(now - baseOffsetMin * 60000).toISOString() })
     if (s.appt) {
       const start = apptStart(15)
-      appts.push({ client_id: cid, customer_name: s.crm.full_name, customer_phone: s.crm.telefon, service_name: s.appt.service_name, service_color: s.appt.color, starts_at: start.toISOString(), ends_at: new Date(start.getTime() + 45 * 60000).toISOString(), status: "confirmed", urgency: "normal", source: s.channel === "whatsapp" ? "WhatsApp" : "Instagram", notes: "Zakazano preko AI agenta" })
+      appts.push({ client_id: cid, customer_name: s.crm.full_name, customer_phone: s.crm.telefon, service_id: s.appt.service_id ?? null, service_name: s.appt.service_name, service_color: s.appt.color, starts_at: start.toISOString(), ends_at: new Date(start.getTime() + (s.appt.duration ?? 45) * 60000).toISOString(), status: "confirmed", urgency: "normal", source: s.channel === "whatsapp" ? "WhatsApp" : "Instagram", notes: "Zakazano preko AI agenta" })
     }
   }
 
@@ -262,24 +460,43 @@ async function seedTenant(client) {
       const ts = new Date(now - baseOffsetMin * 60000 + i * 40000).toISOString()
       razgovori.push({ id_razgovora: key, role, message: text, platform: c.ch, client_id: cid, created_at: ts, metadata: { name: c.name, profile_pic: pic(c.name) } })
     })
+    crmRows.push({
+      id_razgovora: key, client_id: cid, full_name: c.name, telefon: phoneFor(idx + 41),
+      kategorija: isService ? "Usluge" : "Proizvodi", status: c.st,
+      izvor: c.ch === "whatsapp" ? "WhatsApp" : c.ch === "facebook" ? "Facebook" : c.ch === "website" ? "Website" : "Instagram",
+      created_at: new Date(now - baseOffsetMin * 60000).toISOString(),
+    })
   })
-  // ── filler convos spread across the last 28 days → analytics feels established
-  const FILL_N = 34
-  for (const f of fillerConvos(isService, FILL_N, cid8)) {
+
+  // ── filler convos across the last 28 days ────────────────────────────────
+  // Each one also becomes a CRM row, because the whole claim is "nijedan upit ne
+  // propada" — a full inbox next to a near-empty CRM would say the opposite.
+  const FILL_N = 170
+  for (const f of fillerConvos(isService, FILL_N, cid8, niche, catalog)) {
     f.msgs.forEach(([role, text], i) => {
       const ts = new Date(now - f.minAgo * 60000 + i * 40000).toISOString()
       razgovori.push({ id_razgovora: f.key, role, message: text, platform: f.ch, client_id: cid, created_at: ts, metadata: { name: f.name, profile_pic: pic(f.name) } })
     })
+    crmRows.push({
+      id_razgovora: f.key, client_id: cid, full_name: f.name, telefon: f.telefon,
+      kategorija: isService ? "Usluge" : "Proizvodi", proizvod: f.proizvod, status: f.status,
+      izvor: f.ch === "whatsapp" ? "WhatsApp" : f.ch === "facebook" ? "Facebook" : f.ch === "website" ? "Website" : "Instagram",
+      created_at: new Date(now - f.minAgo * 60000).toISOString(),
+    })
   }
+
   if (isService) {
-    for (const a of weekAppts()) appts.push({ client_id: cid, ...a })
+    for (const a of scheduleAppts(niche, catalog)) appts.push({ client_id: cid, ...a })
   }
 
   const r1 = await sb.from("razgovori").insert(razgovori)
   const r2 = await sb.from("demo_crm").insert(crmRows)
   const r3 = appts.length ? await sb.from("appointments").insert(appts) : { error: null }
   const errs = [r1.error, r2.error, r3.error].filter(Boolean).map((e) => e.message)
-  console.log(`  ${client.name} (${niche}, ${isService ? "service" : "product"}): ${razgovori.length} msgs, ${crmRows.length} CRM, ${appts.length} appt ${errs.length ? "ERR: " + errs.join("; ") : "✓"}`)
+  const mix = crmRows.reduce((m, r) => ({ ...m, [r.status]: (m[r.status] ?? 0) + 1 }), {})
+  const conv = crmRows.length ? Math.round((crmRows.filter(r => ["Zakazano","Završeno","Naručio","Isporučeno"].includes(r.status)).length / crmRows.length) * 100) : 0
+  console.log(`  ${client.name} (${niche}, ${isService ? "service" : "product"}): ${razgovori.length} msgs, ${crmRows.length} CRM (${conv}% konv.), ${appts.length} appt ${errs.length ? "ERR: " + errs.join("; ") : "✓"}`)
+  console.log(`    status mix:`, mix)
 }
 
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1)

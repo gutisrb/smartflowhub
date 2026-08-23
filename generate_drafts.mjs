@@ -38,7 +38,11 @@ const SUPABASE_URL  = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SERVICE_KEY   = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const SMARTFLOW_ID  = '69acf7e9-557e-4ca3-85bd-a785ef39e351';
 const OPENAI_KEY   = process.env.OPENAI_API_KEY;
-const OPENAI_MODEL = 'gpt-4o-mini';
+// gpt-4o-mini kept producing Serbian grammar slips that survived explicit
+// instructions — repeated nouns ("upiše termin ... i zakaže termin"), wrong cases.
+// Draft volume is tiny (tens of leads, not thousands), so the quality difference
+// is worth cents. Override with OPENAI_MODEL=gpt-4o-mini for bulk runs.
+const OPENAI_MODEL = process.env.OPENAI_MODEL || 'gpt-4o';
 
 if (!OPENAI_KEY) {
   console.error('✗ OPENAI_API_KEY not set in .env.local');
@@ -169,11 +173,15 @@ function inferBusinessTypeFromContext(niche, bio, companyName) {
 async function fetchDemoStats(sb, demoClientId) {
   if (!demoClientId) return null;
   try {
-    const [appt, crm, svc, razg] = await Promise.all([
+    const [appt, crm, svc, razg, priced] = await Promise.all([
       sb.from('appointments').select('id', { count: 'exact', head: true }).eq('client_id', demoClientId),
       sb.from('demo_crm').select('id', { count: 'exact', head: true }).eq('client_id', demoClientId),
       sb.from('services_catalog').select('id', { count: 'exact', head: true }).eq('client_id', demoClientId),
       sb.from('razgovori').select('platform, id_razgovora').eq('client_id', demoClientId),
+      // Their own scraped catalogue. Naming a real service at its real price is the
+      // most verifiable thing the email can say — it proves the demo is actually theirs.
+      sb.from('services_catalog').select('name, price_min').eq('client_id', demoClientId)
+        .eq('is_active', true).not('price_min', 'is', null).order('price_min', { ascending: false }),
     ]);
     const distinctConvs = new Set((razg.data || []).map(r => r.id_razgovora)).size;
     const platformSet = new Set((razg.data || []).map(r => r.platform).filter(Boolean));
@@ -187,6 +195,10 @@ async function fetchDemoStats(sb, demoClientId) {
       appointments_count: appt.count ?? 0,
       has_calendar: (appt.count ?? 0) > 0,
       has_catalog: (svc.count ?? 0) > 0,
+      top_service:   priced.data?.[0]?.name ?? null,
+      top_price:     priced.data?.[0]?.price_min ?? null,
+      entry_service: priced.data?.[priced.data.length - 1]?.name ?? null,
+      entry_price:   priced.data?.[priced.data.length - 1]?.price_min ?? null,
     };
   } catch {
     return null;
@@ -251,7 +263,8 @@ function buildLeadIntel(lead, emailType, demoStats = null) {
 // E2: second touch ("did you log in?")
 // E3: third touch ("closing your demo")
 const FRAMEWORKS = {
-  '4-para-overview':   { file: 'ai-agent-email-prompt.md',       label: 'A (long)'  },
+  'operator':          { file: 'ai-agent-email-prompt-operator.md', label: 'Operator' },
+  '4-para-overview':   { file: 'ai-agent-email-prompt.md',       label: 'A (long, retired)'  },
   '3-line-question':   { file: 'ai-agent-email-prompt-short.md', label: 'B (short)' },
   'e2-did-you-log-in': { file: 'ai-agent-email-prompt-e2.md',    label: 'E2'        },
   'e3-closing-demo':   { file: 'ai-agent-email-prompt-e3.md',    label: 'E3'        },
@@ -272,9 +285,11 @@ function getSystemPrompt(framework) {
 function assignFramework(leadId) {
   const force = process.env.FORCE_FRAMEWORK;
   if (force && FRAMEWORKS[force]) return force;
-  const c = (leadId || '').replace(/-/g, '').charAt(0);
-  const n = parseInt(c, 16);
-  return Number.isNaN(n) ? '4-para-overview' : (n % 2 === 0 ? '4-para-overview' : '3-line-question');
+  // The A/B between the two chatbot-era arms is over — both sold "an AI that answers
+  // messages, cheaper than staff", and between them produced 332 sends and 0 closes.
+  // Everything now generates on the operator framing. Set FORCE_FRAMEWORK to run an
+  // old arm deliberately.
+  return 'operator';
 }
 
 // ── OpenAI API Call ───────────────────────────────────────────────────────────
@@ -308,10 +323,11 @@ async function generateDraft(leadIntel, systemPrompt) {
 async function main() {
   const sb = createClient(SUPABASE_URL, SERVICE_KEY);
   // Cache prompts so we don't re-read for every lead
-  const promptCache = {
-    '4-para-overview': getSystemPrompt('4-para-overview'),
-    '3-line-question': getSystemPrompt('3-line-question'),
-  };
+  // Load every framework, so adding one to FRAMEWORKS can't silently yield an
+  // empty system prompt (which is what an undefined cache entry produced).
+  const promptCache = Object.fromEntries(
+    Object.keys(FRAMEWORKS).map(k => [k, getSystemPrompt(k)])
+  );
 
   // .neq alone silently drops NULL rows in Postgres — must explicitly include NULLs
   const notDisqualified = 'kategorija.neq.Disqualified,kategorija.is.null';
@@ -325,7 +341,7 @@ async function main() {
     .from('contacts')
     .select('*')
     .eq('client_id', SMARTFLOW_ID)
-    .in('status', ['enriched', 'No Draft'])
+    .in('status', ['enriched', 'No Draft', 'Demo Izgrađen'])
     .or(notDisqualified)
     .not('email', 'is', null);
 
@@ -418,6 +434,7 @@ async function main() {
                     : emailType === 'e2' ? 'e2-did-you-log-in'
                     : assignFramework(lead.id);
     const systemPrompt = promptCache[framework];
+    if (!systemPrompt) throw new Error(`No system prompt loaded for framework '${framework}'`);
 
     const demoStats = (!isFollowUp && lead.demo_client_id)
       ? await fetchDemoStats(sb, lead.demo_client_id)

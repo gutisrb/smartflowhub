@@ -1,7 +1,8 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { createClient } from "@/lib/supabase/client"
+import { getDemoShift, shiftRows } from "@/lib/demo/time-shift"
 import {
     Dialog,
     DialogContent,
@@ -58,6 +59,10 @@ interface LeadIntelligenceViewerProps {
     onClose: () => void
     isClientView?: boolean
     isRecruitment?: boolean
+    /** Demo tenant: re-anchor the seeded conversation log to now. */
+    demoMode?: boolean
+    /** Onboarding tour: shorten the panel so the narration bar can't sit on top of it. */
+    tourMode?: boolean
 }
 
 // ─── B2B Lead Intel Panel ─────────────────────────────────────────────────────
@@ -113,7 +118,22 @@ function getDeliveryStatusColor(s: string) {
 
 // ─── Demo CRM Customer Panel ──────────────────────────────────────────────────
 
-function DemoCRMCustomerPanel({ lead, messages, messagesLoading }: { lead: any; messages: Message[]; messagesLoading: boolean }) {
+function DemoCRMCustomerPanel({ lead, messages, messagesLoading, tourMode }: { lead: any; messages: Message[]; messagesLoading: boolean; tourMode?: boolean }) {
+    // During the tour the point of opening this panel is the conversation log, which
+    // sits below the contact and order cards. Bring it up rather than making the
+    // viewer find it — they have about four seconds of attention here.
+    const logRef = useRef<HTMLDivElement>(null)
+    useEffect(() => {
+        if (!tourMode || messagesLoading || messages.length === 0) return
+        const t = setTimeout(() => {
+            const el = logRef.current
+            const pane = el?.closest('[data-radix-scroll-area-viewport]') as HTMLElement | null
+            if (!el || !pane) return
+            pane.scrollTo({ top: el.offsetTop - 12, behavior: 'smooth' })
+        }, 700)
+        return () => clearTimeout(t)
+    }, [tourMode, messagesLoading, messages.length])
+
     const [copiedField, setCopiedField] = useState<string | null>(null)
     const copy = (text: string, field: string) => {
         navigator.clipboard.writeText(text)
@@ -326,7 +346,7 @@ function DemoCRMCustomerPanel({ lead, messages, messagesLoading }: { lead: any; 
             )}
 
             {/* Conversation history — the actual AI agent chat */}
-            <div className="pt-2">
+            <div ref={logRef} className="pt-2">
                 <div className="flex items-center gap-3 mb-3">
                     <div className="h-px flex-1 bg-white/[0.06]" />
                     <span className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest">
@@ -778,7 +798,7 @@ function B2BLeadIntelPanel({ lead }: { lead: any }) {
 
 // ─── Main component ───────────────────────────────────────────────────────────
 
-export function LeadIntelligenceViewer({ lead, isOpen, onClose }: LeadIntelligenceViewerProps) {
+export function LeadIntelligenceViewer({ lead, isOpen, onClose, demoMode, tourMode }: LeadIntelligenceViewerProps) {
     const [messages, setMessages] = useState<Message[]>([])
     const [loading, setLoading] = useState(false)
     const supabase = createClient()
@@ -824,7 +844,12 @@ export function LeadIntelligenceViewer({ lead, isOpen, onClose }: LeadIntelligen
             .neq("role", "system")
             .order("created_at", { ascending: true })
 
-        if (!error) setMessages(data || [])
+        if (!error) {
+            // Demo tenants: same read-time re-anchor the inbox uses, so the log
+            // timestamps agree with the conversation the lead just watched.
+            const { deltaMs } = await getDemoShift(supabase, lead.client_id, !!demoMode)
+            setMessages(shiftRows(data || [], ['created_at'], deltaMs))
+        }
         setLoading(false)
     }
 
@@ -885,7 +910,16 @@ export function LeadIntelligenceViewer({ lead, isOpen, onClose }: LeadIntelligen
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="sm:max-w-[640px] h-[88vh] flex flex-col p-0 overflow-hidden border-white/5 bg-obsidian/95 backdrop-blur-2xl rounded-[2rem] shadow-2xl">
+            <DialogContent
+                data-tour-focus={tourMode ? "lead-file" : undefined}
+                className={cn(
+                    "sm:max-w-[640px] flex flex-col p-0 overflow-hidden border-white/5 bg-obsidian/95 backdrop-blur-2xl rounded-[2rem] shadow-2xl",
+                    // During the tour the narration bar owns the bottom of the screen, so
+                    // the panel gets shorter. It must NOT add its own translate-y — that
+                    // would cancel the dialog's own centring transform and drop it low.
+                    tourMode ? "h-[64vh]" : "h-[88vh]",
+                )}
+            >
 
                 {/* Header */}
                 <div className="px-8 pt-8 pb-5 shrink-0 border-b border-white/5">
@@ -947,7 +981,7 @@ export function LeadIntelligenceViewer({ lead, isOpen, onClose }: LeadIntelligen
                         {isB2BLead ? (
                             <B2BLeadIntelPanel lead={lead} />
                         ) : isDemoCRMCustomer ? (
-                            <DemoCRMCustomerPanel lead={lead} messages={messages} messagesLoading={loading} />
+                            <DemoCRMCustomerPanel lead={lead} messages={messages} messagesLoading={loading} tourMode={tourMode} />
                         ) : (
                             <div className="px-8 py-6 space-y-3 pb-12">
                                 {loading && (

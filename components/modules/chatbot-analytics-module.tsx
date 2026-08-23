@@ -12,6 +12,7 @@ import { TrendingUp, MessageSquare, Users, Zap, Activity, BookOpen, Tag, Shoppin
 import { getBookStoreConfig, BookStoreConfig, BOOK_STORE_CLIENTS } from "@/lib/brand-configs"
 import { getCrmHarmonijaByClientId, getCrmPublikByClientId, getCrmStelaByClientId, getCrmAleksandarMNByClientId, getCrmMagunaByClientId } from "@/lib/supabase/queries"
 import { createClient as createSupabaseClient } from "@/lib/supabase/client"
+import { getDemoShift, shiftRows, shiftRowsDays } from "@/lib/demo/time-shift"
 
 interface ChatbotAnalyticsModuleProps {
     clientId: string
@@ -1149,10 +1150,12 @@ function DemoAnalytics({ clientId, demoNiche }: { clientId: string; demoNiche: s
             sb.from('demo_crm').select('*').eq('client_id', clientId),
             sb.from('razgovori').select('platform, id_razgovora, created_at, message, role').eq('client_id', clientId),
             sb.from('appointments').select('starts_at, service_name').eq('client_id', clientId),
-        ]).then(([crm, razg, ap]) => {
-            setCrmRows(crm.data ?? [])
-            setRazgovori(razg.data ?? [])
-            setAppts(ap.data ?? [])
+            getDemoShift(sb, clientId, true),
+        ]).then(([crm, razg, ap, shift]) => {
+            // Demo data is seeded once and viewed weeks later — re-anchor to now.
+            setCrmRows(shiftRows(crm.data ?? [], ['created_at'], shift.deltaMs))
+            setRazgovori(shiftRows(razg.data ?? [], ['created_at'], shift.deltaMs))
+            setAppts(shiftRowsDays(ap.data ?? [], ['starts_at'], shift.deltaDays))
             setLoading(false)
         })
     }, [clientId])
@@ -1185,7 +1188,9 @@ function DemoAnalytics({ clientId, demoNiche }: { clientId: string; demoNiche: s
     const isporuceno = crmRows.filter(r => ['Isporučeno', 'Završeno'].includes(r.status)).length
     const zainteresovano = crmRows.filter(r => r.status === 'Zainteresovan').length
     const intervencija = crmRows.filter(r => r.status === 'Intervencija').length
-    const konverzija = total > 0 ? Math.round((narucilo / total) * 100) : 0
+    // Both a booked appointment and a finished one are conversions — counting only
+    // the still-open ones understated the agent's real close rate.
+    const konverzija = total > 0 ? Math.round(((narucilo + isporuceno) / total) * 100) : 0
 
     // Top products
     const productCounts: Record<string, number> = {}
@@ -1279,11 +1284,11 @@ function DemoAnalytics({ clientId, demoNiche }: { clientId: string; demoNiche: s
             </motion.div>
 
             {/* Key metrics */}
-            <motion.div variants={fadeUp} className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <motion.div variants={fadeUp} data-tour-focus="analytics-metrics" className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {[
                     { label: "Razgovora", value: distinctConversations, color: "#10b981", Icon: MessageSquare },
-                    { label: "Naručilo", value: narucilo, color: "#06b6d4", Icon: ShoppingBag },
-                    { label: "Isporučeno", value: isporuceno, color: "#8b5cf6", Icon: Users },
+                    { label: isServiceNiche ? "Zakazalo" : "Naručilo", value: narucilo, color: "#06b6d4", Icon: ShoppingBag },
+                    { label: isServiceNiche ? "Obavljeno" : "Isporučeno", value: isporuceno, color: "#8b5cf6", Icon: Users },
                     { label: "Konverzija", value: `${konverzija}%`, color: "#f59e0b", Icon: TrendingUp },
                 ].map(m => (
                     <div key={m.label} className="glass-card rounded-2xl p-5 relative overflow-hidden">
@@ -1361,26 +1366,57 @@ function DemoAnalytics({ clientId, demoNiche }: { clientId: string; demoNiche: s
                 </motion.div>
             </div>
 
-            {/* ── AI Insights — what the agent learns from conversations ───────── */}
-            <motion.div variants={fadeUp} className="flex items-center gap-3 pt-2">
-                <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: "rgba(16,185,129,0.15)", border: "1px solid rgba(16,185,129,0.3)" }}>
-                    <Sparkles className="w-4 h-4 text-emerald-400" />
+            {/* ── AI Insights ───────────────────────────────────────────────────
+                This is the part of the dashboard nobody else has: not "how many
+                messages", but what customers actually asked, what stopped them
+                buying, and when they want to come in. It gets its own framed
+                stage so it doesn't read as three more chart tiles. */}
+            <motion.div
+                variants={fadeUp}
+                data-tour-focus="ai-insights"
+                className="relative rounded-3xl p-5 md:p-7 mt-2"
+                style={{
+                    background: "linear-gradient(160deg, rgba(16,185,129,0.07) 0%, rgba(16,185,129,0.015) 45%, transparent 100%)",
+                    border: "1px solid rgba(16,185,129,0.22)",
+                    boxShadow: "0 24px 70px -30px rgba(16,185,129,0.45)",
+                }}
+            >
+                <div className="flex items-start gap-3.5 mb-5">
+                    <div className="w-11 h-11 rounded-2xl flex items-center justify-center shrink-0"
+                        style={{ background: "rgba(16,185,129,0.16)", border: "1px solid rgba(16,185,129,0.35)" }}>
+                        <Sparkles className="w-5 h-5 text-emerald-400" />
+                    </div>
+                    <div className="min-w-0">
+                        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-emerald-500 mb-1">AI Insights</p>
+                        <h3 className="text-xl md:text-2xl font-bold text-white font-outfit leading-tight">
+                            Šta Vaši kupci stvarno pitaju
+                        </h3>
+                        <p className="text-[13px] md:text-sm text-zinc-400 leading-relaxed mt-1.5 max-w-2xl">
+                            Agent čita svaki razgovor i izvlači ono što se inače nikad ne zapiše: koje pitanje se ponavlja,
+                            šta ljude zaustavi pred zakazivanje i u koje sate Vas najviše traže.
+                            <span className="text-zinc-200 font-medium"> Ovo je Vaše tržište, rečeno njihovim rečima.</span>
+                        </p>
+                    </div>
                 </div>
-                <div>
-                    <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-emerald-500">AI Insights</p>
-                    <p className="text-sm font-semibold text-white">Šta agent saznaje iz svakog razgovora</p>
-                </div>
-            </motion.div>
 
             <div className="grid grid-cols-12 gap-4">
                 {/* Hottest times */}
                 <motion.div variants={fadeUp} className="col-span-12 lg:col-span-5 glass-card rounded-2xl p-6">
                     <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-1">Špic sati</p>
-                    <p className="text-sm font-semibold text-white mb-1">{isServiceNiche ? "Najtraženiji termini" : "Najaktivniji sati"}</p>
+                    <p className="text-base font-bold text-white mb-1 font-outfit">{isServiceNiche ? "Najtraženiji termini" : "Najaktivniji sati"}</p>
                     {hotTimesSorted.length > 0 && (
-                        <p className="text-[11px] text-emerald-400/80 mb-4">
-                            Najviše {isServiceNiche ? "zakazivanja" : "upita"} u {hotTimes.slice(0, 2).map(t => `${t.hour}h`).join(" i ")}
-                        </p>
+                        <>
+                            <p className="text-[13px] text-zinc-400 leading-snug mb-3">
+                                Kada Vas ljudi traže — pa znate gde da otvorite mesta.
+                            </p>
+                            <div className="inline-flex items-center gap-2 rounded-lg px-2.5 py-1.5 mb-3"
+                                style={{ background: "rgba(16,185,129,0.12)", border: "1px solid rgba(16,185,129,0.28)" }}>
+                                <span className="text-[11px] uppercase tracking-wider text-emerald-500/80 font-bold">Vrh</span>
+                                <span className="text-sm font-black text-emerald-300">
+                                    {hotTimes.slice(0, 2).map(t => `${t.hour}h`).join(" i ")}
+                                </span>
+                            </div>
+                        </>
                     )}
                     {hotTimesSorted.length === 0 ? (
                         <p className="text-xs italic text-zinc-600">Nema dovoljno podataka</p>
@@ -1406,7 +1442,10 @@ function DemoAnalytics({ clientId, demoNiche }: { clientId: string; demoNiche: s
                 {/* Top questions */}
                 <motion.div variants={fadeUp} className="col-span-12 lg:col-span-4 glass-card rounded-2xl p-6">
                     <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-1">Potražnja</p>
-                    <p className="text-sm font-semibold text-white mb-5">Najčešća pitanja kupaca</p>
+                    <p className="text-base font-bold text-white mb-1 font-outfit">Najčešća pitanja kupaca</p>
+                    <p className="text-[13px] text-zinc-400 leading-snug mb-4">
+                        Ono što se ponavlja svaki dan — gotov spisak za Vaš sajt, story i cenovnik.
+                    </p>
                     {topQuestions.length === 0 ? (
                         <p className="text-xs italic text-zinc-600">Nema dovoljno podataka</p>
                     ) : (
@@ -1416,8 +1455,8 @@ function DemoAnalytics({ clientId, demoNiche }: { clientId: string; demoNiche: s
                                 return (
                                     <div key={q.label}>
                                         <div className="flex items-center justify-between mb-1">
-                                            <span className="text-xs font-medium text-zinc-300">{q.label}</span>
-                                            <span className="text-xs font-black text-emerald-400">{q.count}</span>
+                                            <span className="text-[13px] font-medium text-zinc-200">{q.label}</span>
+                                            <span className="text-base font-black text-emerald-400 tabular-nums">{q.count}</span>
                                         </div>
                                         <div className="h-1.5 rounded-full overflow-hidden bg-white/5">
                                             <motion.div initial={{ width: 0 }} animate={{ width: `${pct}%` }}
@@ -1433,23 +1472,30 @@ function DemoAnalytics({ clientId, demoNiche }: { clientId: string; demoNiche: s
 
                 {/* Top objections */}
                 <motion.div variants={fadeUp} className="col-span-12 lg:col-span-3 glass-card rounded-2xl p-6">
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-1">Prepreke</p>
-                    <p className="text-sm font-semibold text-white mb-5">Najčešće primedbe</p>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-amber-500/80 mb-1">Prepreke</p>
+                    <p className="text-base font-bold text-white mb-1 font-outfit">Zašto ljudi ne zakažu</p>
+                    <p className="text-[13px] text-zinc-400 leading-snug mb-4">
+                        Razlog koji Vam niko ne kaže u lice — a agent ga čuje svaki dan.
+                    </p>
                     {topObjections.length === 0 ? (
                         <p className="text-xs italic text-zinc-600">Nema zabeleženih primedbi</p>
                     ) : (
                         <div className="space-y-2.5">
                             {topObjections.map((o, i) => (
-                                <div key={o.label} className="rounded-xl px-3 py-2.5 flex items-center justify-between"
-                                    style={{ background: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.2)" }}>
-                                    <span className="text-xs font-medium text-amber-200/90">{o.label}</span>
-                                    <span className="text-sm font-black text-amber-400">{o.count}</span>
+                                <div key={o.label} className="rounded-xl px-3.5 py-3 flex items-center justify-between gap-3"
+                                    style={{
+                                        background: i === 0 ? "rgba(245,158,11,0.16)" : "rgba(245,158,11,0.07)",
+                                        border: `1px solid rgba(245,158,11,${i === 0 ? 0.42 : 0.18})`,
+                                    }}>
+                                    <span className="text-[13px] font-medium text-amber-100/90 leading-snug">{o.label}</span>
+                                    <span className="text-xl font-black text-amber-400 tabular-nums shrink-0">{o.count}</span>
                                 </div>
                             ))}
                         </div>
                     )}
                 </motion.div>
             </div>
+            </motion.div>
 
             {/* Most-requested services (service niches) */}
             {isServiceNiche && topServices.length > 0 && (
@@ -1482,15 +1528,15 @@ function DemoAnalytics({ clientId, demoNiche }: { clientId: string; demoNiche: s
             )}
 
             {/* Conversion funnel */}
-            <motion.div variants={fadeUp} className="glass-card rounded-2xl p-6">
+            <motion.div variants={fadeUp} data-tour-focus="analytics-funnel" className="glass-card rounded-2xl p-6">
                 <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-1">Konverzija</p>
-                <p className="text-sm font-semibold text-white mb-6">Put do narudžbine</p>
+                <p className="text-sm font-semibold text-white mb-6">{isServiceNiche ? "Put do termina" : "Put do narudžbine"}</p>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                     {[
                         { label: 'Razgovarali',    count: total,           pct: 100,                                                              color: '#10b981' },
                         { label: 'Zainteresovani', count: zainteresovano,  pct: total > 0 ? Math.round(zainteresovano / total * 100) : 0,         color: '#f59e0b' },
-                        { label: 'Naručili',       count: narucilo,        pct: total > 0 ? Math.round(narucilo / total * 100) : 0,               color: '#06b6d4' },
-                        { label: 'Isporučeno',     count: isporuceno,      pct: total > 0 ? Math.round(isporuceno / total * 100) : 0,             color: '#8b5cf6' },
+                        { label: isServiceNiche ? 'Zakazali' : 'Naručili',   count: narucilo,   pct: total > 0 ? Math.round(narucilo / total * 100) : 0,   color: '#06b6d4' },
+                        { label: isServiceNiche ? 'Obavljeno' : 'Isporučeno', count: isporuceno, pct: total > 0 ? Math.round(isporuceno / total * 100) : 0, color: '#8b5cf6' },
                     ].map((s, i) => (
                         <div key={i} className="relative flex flex-col gap-3">
                             {i < 3 && (

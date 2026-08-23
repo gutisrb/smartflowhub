@@ -23,6 +23,7 @@ import { getKandidatiByClientId, updateKandidat, getCrmHarmonijaByClientId, getC
 import { NicheKey, NICHE_CONFIGS } from "@/lib/niche-config"
 import { getBookStoreConfig, BOOK_STORE_CLIENTS } from "@/lib/brand-configs"
 import { createClient } from "@/lib/supabase/client"
+import { getDemoShift, shiftRows } from "@/lib/demo/time-shift"
 import { motion, AnimatePresence } from "framer-motion"
 import { cn } from "@/lib/utils"
 import { GlassCard } from "@/components/ui/glass-card"
@@ -131,13 +132,16 @@ export function AgentLeadsModule({ clientId, selectedBrandIds, terminology: prop
     const [filter, setFilter] = useState('all')
     const [selectedLead, setSelectedLead] = useState<any | null>(null)
 
-    // Onboarding tour: open the conversation-log viewer on the hero row while
-    // the "crm-log" beat is active; close it when the beat ends or tour exits.
+    // Onboarding tour: the CRM beat tells one story in two moves — the row lands
+    // in the list, then the patient file opens on top of it. The pause is what
+    // makes it read as a consequence rather than a screen change.
     useEffect(() => {
         if (!tourOpenLogName) { setSelectedLead(null); return }
         if (leads.length === 0) return
         const hit = leads.find((l: any) => l.full_name === tourOpenLogName)
-        if (hit) setSelectedLead(hit)
+        if (!hit) return
+        const t = setTimeout(() => setSelectedLead(hit), 3800)
+        return () => clearTimeout(t)
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [tourOpenLogName, leads.length])
     const [editingStatusId, setEditingStatusId] = useState<string | null>(null)
@@ -170,7 +174,9 @@ export function AgentLeadsModule({ clientId, selectedBrandIds, terminology: prop
             // Demo mode: load from demo_crm table
             if (isDemoMode) {
                 const data = await getDemoCrmByClientId(clientId)
-                setLeads(data || [])
+                // Seeded once, opened weeks later — re-anchor so "kada" reads as recent.
+                const { deltaMs } = await getDemoShift(createClient(), clientId, true)
+                setLeads(shiftRows(data || [], ['created_at', 'updated_at'], deltaMs))
                 setLoading(false)
                 return
             }
@@ -458,13 +464,14 @@ export function AgentLeadsModule({ clientId, selectedBrandIds, terminology: prop
                                             return (
                                                 <motion.tr
                                                     key={lead.id}
+                                                    data-tour-focus={isTourHero ? "crm-hero-row" : undefined}
                                                     initial={{ opacity: 0, scale: 0.98, y: 10 }}
                                                     animate={isTourHero
                                                         ? { opacity: 1, scale: 1, y: 0, boxShadow: ["0 0 0 0 rgba(16,185,129,0)", "inset 0 0 0 2px rgba(16,185,129,0.6), 0 0 28px -2px rgba(16,185,129,0.5)", "0 0 0 0 rgba(16,185,129,0)"] }
                                                         : { opacity: 1, scale: 1, y: 0 }}
                                                     transition={isTourHero
                                                         ? { delay: 0.15, duration: 0.4, boxShadow: { delay: 0.5, duration: 1.8, repeat: Infinity, repeatDelay: 0.3 } }
-                                                        : { delay: idx * 0.03, duration: 0.4 }}
+                                                        : { delay: Math.min(idx, 12) * 0.03, duration: 0.4 }}
                                                     className="group border-b border-white/[0.03] transition-all duration-300 relative"
                                                     style={{
                                                         borderLeft: isTourHero ? '4px solid #10b981' : isIntervencija ? '3px solid rgba(239,68,68,0.53)' : '3px solid transparent',
@@ -611,6 +618,8 @@ export function AgentLeadsModule({ clientId, selectedBrandIds, terminology: prop
                             isOpen={!!selectedLead}
                             onClose={() => setSelectedLead(null)}
                             isRecruitment={false}
+                            demoMode={isDemoMode}
+                            tourMode={!!tourOpenLogName}
                         />
                     )}
                 </AnimatePresence>
@@ -771,13 +780,14 @@ export function AgentLeadsModule({ clientId, selectedBrandIds, terminology: prop
                                         return (
                                             <motion.tr
                                                 key={lead.id}
+                                                data-tour-focus={isTourHero ? "crm-hero-row" : undefined}
                                                 initial={{ opacity: 0, scale: 0.98, y: 10 }}
                                                 animate={isTourHero
                                                     ? { opacity: 1, scale: 1, y: 0, boxShadow: ["0 0 0 0 rgba(16,185,129,0)", "0 0 0 4px rgba(16,185,129,0.35)", "0 0 0 0 rgba(16,185,129,0)"] }
                                                     : { opacity: 1, scale: 1, y: 0 }}
                                                 transition={isTourHero
                                                     ? { delay: 0.2, duration: 0.4, boxShadow: { delay: 0.6, duration: 1.8, repeat: Infinity, repeatDelay: 0.4 } }
-                                                    : { delay: idx * 0.03, duration: 0.4 }}
+                                                    : { delay: Math.min(idx, 12) * 0.03, duration: 0.4 }}
                                                 className="group border-b border-white/[0.03] transition-all duration-300 relative"
                                                 style={{
                                                     borderLeft: isTourHero ? "3px solid #10b981" : `3px solid ${rowBorderColor}`,
@@ -1042,6 +1052,8 @@ export function AgentLeadsModule({ clientId, selectedBrandIds, terminology: prop
                         isOpen={!!selectedLead}
                         onClose={() => setSelectedLead(null)}
                         isRecruitment={isRecruitment}
+                        demoMode={isDemoMode}
+                        tourMode={!!tourOpenLogName}
                     />
                 )}
             </AnimatePresence>

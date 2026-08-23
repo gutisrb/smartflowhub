@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>rs.smartflow.brain-health</string>
+
+    <!-- Run Second Brain self-linting and health checking -->
+    <key>ProgramArguments</key>
+    <array>
+        <string>/Users/johhn/.nvm/versions/node/v25.1.0/bin/node</string>
+        <string>/Users/johhn/.gemini/antigravity/playground/photonic-lunar/ai-growth-dashboard/scripts/brain.mjs</string>
+        <string>lint</string>
+    </array>
+
+    <key>WorkingDirectory</key>
+    <string>/Users/johhn/.gemini/antigravity/playground/photonic-lunar/ai-growth-dashboard</string>
+
+    <!-- Run every 12 hours -->
+    <key>StartInterval</key>
+    <integer>43200</integer>
+
+    <key>StandardOutPath</key>
+    <string>/tmp/smartflow-brain-health.log</string>
+    <key>StandardErrorPath</key>
+    <string>/tmp/smartflow-brain-health.err</string>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>/Users/johhn/.nvm/versions/node/v25.1.0/bin:/usr/local/bin:/usr/bin:/bin</string>
+        <key>OBSIDIAN_VAULT_PATH</key>
+        <string>/Users/johhn/Library/Mobile Documents/iCloud~md~obsidian/Documents/Smartflow</string>
+    </dict>
+</dict>
+</plist>
