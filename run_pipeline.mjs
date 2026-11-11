@@ -275,7 +275,7 @@ async function main() {
       // the business runs a serious social sales pipeline. An unmeasured lead waits for `node find_leads.mjs --place`.
       const d = r.intake_data?.dm_demand
       const fit = leadFit({ name: r.company_name, followers: r.instagram_followers, email: r.email,
-        medViews: d?.median_views ?? null, viewsPerFollower: d?.views_per_follower ?? null, daysSincePost: d?.days_since_post ?? null })
+        medViews: d?.median_views ?? null, viewsPerFollower: d?.views_per_follower ?? null, reels12: d?.reels12 ?? null, dmPrompt: d?.dm_prompt ?? null })
       if (!fit.pass) { console.log(`  ↷ ${r.company_name}: lead gate — ${fit.fails.join(' | ')}`); continue }
       promote.push(r)
     }

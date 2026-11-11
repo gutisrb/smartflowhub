@@ -26,14 +26,15 @@ describe('profileFit (who is worth a demo)', () => {
     const r = profileFit({ name: 'Plemenita ulja', bio: 'Prirodna kozmetička ulja', followers: 40000 })
     expect(r.pass).toBe(false); expect(r.fails.join(' ')).toMatch(/low-ticket/)
   })
-  it('rejects a vertical that is not on the list instead of letting it through by default', () => {
+  it('has no niche whitelist: an unlisted business passes as "other" (the ICP is behaviour, lib/lead-fit.mjs)', () => {
     const r = profileFit({ name: 'Nešto d.o.o.', bio: 'Kreativna agencija', followers: 50000 })
-    expect(r.pass).toBe(false); expect(r.fails.join(' ')).toMatch(/not in the high-consideration list/)
+    expect(r.pass).toBe(true); expect(r.vertical).toBe('other')
   })
   it('rejects chains, wholesale groups and anything over 200k followers (not owner-run SMBs)', () => {
     expect(profileFit({ name: 'Nameštaj Grupa', bio: 'veleprodaja nameštaja, grupa', followers: 60000 }).pass).toBe(false)
     expect(profileFit({ name: 'Nameštaj Gigant', bio: 'nameštaj', followers: 300000 }).pass).toBe(false)
     expect(profileFit({ name: 'Salon nameštaja', bio: 'preko 12 prodavnica širom Srbije', followers: 80000 }).pass).toBe(false)
+    expect(profileFit({ name: 'Luxor Furniture', bio: 'Dostava širom Srbije', followers: 44000 }).pass).toBe(true) // delivery area, not a chain
   })
   it('lets a clinic through the low-ticket filter when it is dental or aesthetic surgery', () => {
     expect(pass('Dental centar', 'stomatološka ordinacija, tretmani i wellness')).toBe(true)
@@ -45,5 +46,9 @@ describe('profileFit (who is worth a demo)', () => {
   })
   it('keeps a dental clinic the classifier labelled klinika_wellness (Up Dent Belgrade)', () => {
     expect(profileFit({ name: 'Up Dent Belgrade', niche: 'klinika_wellness', followers: 28000 }).pass).toBe(true)
+  })
+  it('rejects small boutiques: fashion, jewelry, underwear, bags (the "small fish" Nikola does not want)', () => {
+    for (const n of ['sfashionshop.bn', 'Hirurški čelik Royal nakit', 'mare.underwear', 'Night wish underwear', 'Lux boutique']) expect(profileFit({ name: n, followers: 40000 }).pass).toBe(false)
+    expect(profileFit({ name: 'Aluroll doo', bio: 'rolo zavese, roletne', followers: 35000 }).pass).toBe(true)
   })
 })

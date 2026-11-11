@@ -151,7 +151,7 @@ for (const source of SOURCES) {
       await sb.from('contacts').update({ ...(c.source === 'maps' ? { instagram_handle: c.handle, instagram_followers: r.followers } : {}), intake_data: { ...(c.row.intake_data || {}), dm_demand: { checked_at: TODAY, tier: r.tier, why: r.why || null,
         views_per_follower: r.viewsPerFollower, median_views: r.medViews, median_comments: r.medComments, buyer_qs: r.buyerQs, sample_qs: r.sampleQs, days_since_post: r.daysSincePost } } }).eq('id', c.id)
     }
-    const fit = leadFit({ followers: r.followers, medViews: r.medViews, viewsPerFollower: r.viewsPerFollower, reels12: r.reels12, daysSincePost: r.daysSincePost }, { requireEmail: false })
+    const fit = leadFit({ followers: r.followers, medViews: r.medViews, viewsPerFollower: r.viewsPerFollower, reels12: r.reels12, dmPrompt: !!(r.inviteBio || r.inviteCaps >= 1) }, { requireEmail: false })
     const prof = profileFit({ name: r.fullName || c.name, bio: r.bio, category: r.category, followers: r.followers })
     if (!fit.pass || !prof.pass || (r.followers || 0) < 15000) { console.log(`     ✗ ${[...fit.fails, ...prof.fails].join(' | ').slice(0, 150)}`); continue }
     const site = await ownSite(r) || (c.dbSite && !NOT_OWN_SITE.test(c.dbSite) ? c.dbSite : null)

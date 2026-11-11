@@ -45,7 +45,7 @@ const passed = [];
 for (const c of data) {
   const d = c.intake_data?.dm_demand;
   const fit = leadFit({ name: c.company_name, followers: c.instagram_followers, email: c.email,
-    medViews: d?.median_views ?? null, viewsPerFollower: d?.views_per_follower ?? null, daysSincePost: d?.days_since_post ?? null, buyerQs: d?.buyer_qs ?? null });
+    medViews: d?.median_views ?? null, viewsPerFollower: d?.views_per_follower ?? null, reels12: d?.reels12 ?? null, dmPrompt: d?.dm_prompt ?? null, buyerQs: d?.buyer_qs ?? null });
   if (!fit.pass) { console.log(`  ✗ ${c.company_name} — lead gate: ${fit.fails.join(' | ')}`); continue; }
   if (!c.demo_tenant_email) { console.log(`  ✗ ${c.company_name} — no demo tenant to verify`); continue; }
   const g = await verifyTenant(sb, c.demo_tenant_email, { live: true });
