@@ -55,4 +55,8 @@ describe('profileFit (who is worth a demo)', () => {
     for (const n of ['Balkan Party Band', 'Madam Estetik C.', 'Na Klik Store', 'Dr Jasmina Lalosevic AestheticMed']) expect(profileFit({ name: n, followers: 40000 }).pass).toBe(false)
     for (const n of ['Aluroll doo', 'Emmeti', 'industrija_bg', 'Montažne hale', 'Linea Milanovic - luxury furniture & interiors']) expect(profileFit({ name: n, followers: 40000 }).pass).toBe(true)
   })
+  it('rejects government, foundations and comedy acts, reading Cyrillic (МУП Републике Србије, Fondacija Mozzart, Великаши)', () => {
+    for (const n of ['МУП Републике Србије', 'Fondacija Mozzart', 'Великаши', 'standuprs', 'Rasadnik Eko-plan']) expect(profileFit({ name: n, followers: 40000 }).pass).toBe(false)
+    for (const n of ['Nameštaj Lazor', 'SLW Container', 'Aluroll doo']) expect(profileFit({ name: n, followers: 40000 }).pass).toBe(true)
+  })
 })

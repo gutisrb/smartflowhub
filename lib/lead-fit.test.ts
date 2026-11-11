@@ -31,4 +31,9 @@ describe('leadFit', () => {
     expect(leadFit({ ...ok, email: null, followers: 40000, medViews: 242604 }).fails).toContain('no sendable email')
     expect(leadFit({ ...ok, email: null, followers: 40000, medViews: 242604 }, { requireEmail: false }).pass).toBe(true)
   })
+  it('wants recent reels unless the account is paying for ads (ENTERijer-tim: last reel 117 days ago)', () => {
+    const r = leadFit({ ...ok, followers: 69000, medViews: 23038, daysSincePost: 117 }); expect(r.pass).toBe(false); expect(r.fails.join(' ')).toMatch(/last reel 117/)
+    expect(leadFit({ ...ok, followers: 69000, medViews: 23038, daysSincePost: 117, paidAds: true }).pass).toBe(true)
+    expect(leadFit({ ...ok, followers: 40000, medViews: 242604, daysSincePost: 20 }).pass).toBe(true)
+  })
 })

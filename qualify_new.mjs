@@ -56,12 +56,28 @@ let reach = []
 const toMeasure = stage2
 if (toMeasure.length) { const m = await measureReach(toMeasure.map((r) => r.instagram_handle), { maxUsd: MAX_USD }); if (m.error) console.log('reach error:', m.error); reach = m.rows }
 // the DM prompt: in the bio, in an ad (CTA "Send message" or ad copy), or in the captions of its reels
-let dmMap = new Map()
-if (stage2.length) dmMap = await measureDmPrompt(stage2.map((r) => r.instagram_handle), { maxUsd: 0.5 })
+// the DM prompt is only a good sign now (Nikola, 2026-11-11), so it is read from data we already have: the ad, the stored bio, the reels' captions
+const dmMap = new Map()
 const dmPromptOf = (r, m) => !!dmMap.get(r.instagram_handle)?.dm || INVITE.test(r.intake_data?.enrichment?.instagram_profile?.bio || '') || /message|poruk/i.test(r.intake_data?.ad_cta || '') || INVITE.test(JSON.stringify(r.intake_data?.ad_copies || '')) || (m?.dmCaptions ?? 0) >= 1
+// an e-mail from the business's own website (home + contact pages), same-domain address first
+async function emailFromSite(site) {
+  const base = /^https?:/.test(site) ? site : `https://${site}`
+  const host = (() => { try { return new URL(base).hostname.replace(/^www\./, '') } catch { return '' } })()
+  const found = new Set()
+  for (const path of ['', '/kontakt', '/contact', '/kontakt/', '/o-nama']) {
+    try {
+      const res = await fetch(base.replace(/\/$/, '') + path, { redirect: 'follow', signal: AbortSignal.timeout(10000), headers: { 'user-agent': 'Mozilla/5.0' } })
+      if (!res.ok) continue
+      for (const m of (await res.text()).matchAll(/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g)) if (!/\.(png|jpg|jpeg|webp|svg|gif)$/i.test(m[0]) && !/sentry|example|wixpress|domain\.com/i.test(m[0])) found.add(m[0].toLowerCase())
+    } catch { /* next page */ }
+  }
+  const all = [...found]
+  return all.find((e) => host && e.endsWith(host)) || all[0] || null
+}
 const passed = []
 for (const r of stage2) {
   const m = reach.find((x) => x.handle === r.instagram_handle) || {}
+  if (!r.email && r.website) { const e = await emailFromSite(r.website); if (e) { r.email = e; r._emailFound = true } }
   const fit = leadFit({ followers: r._followers, medViews: m.medViews ?? null, viewsPerFollower: r._followers && m.medViews != null ? +(m.medViews / r._followers).toFixed(3) : null, reels12: m.reels12 ?? null, daysSincePost: m.daysSincePost ?? null, email: r.email, paidAds: isPaid(r), dmPrompt: dmPromptOf(r, m), activeAds: r.intake_data?.active_ads_count ? Number(r.intake_data.active_ads_count) : null })
   r._reach = m; r._fit = fit; r._dm = dmPromptOf(r, m)
   const emailOnly = fit.fails.length === 1 && /email/.test(fit.fails[0])
@@ -77,7 +93,7 @@ if (APPLY) {
   for (const r of cands) {
     const ok = r._verdict?.startsWith('PASS')
     const note = ok ? `2026-11-11 qualified (reels ${r._reach?.medViews} median over ${r._reach?.reels12} reels, ${r._followers} followers)` : `2026-11-11 archived by qualify_new: ${r._verdict}`
-    await sb.from('contacts').update({ pipeline_stage: ok ? 'demo_building' : 'archived', instagram_followers: r._followers ?? r.instagram_followers, comment: ((r.comment ? r.comment + ' | ' : '') + note).slice(0, 900),
+    await sb.from('contacts').update({ pipeline_stage: ok ? 'demo_building' : 'archived', ...(r._emailFound ? { email: r.email, status: 'enriched' } : {}), instagram_followers: r._followers ?? r.instagram_followers, comment: ((r.comment ? r.comment + ' | ' : '') + note).slice(0, 900),
       intake_data: { ...(r.intake_data || {}), dm_demand: r._reach ? { dm_prompt: !!r._dm, paid_ads: isPaid(r), checked_at: new Date().toISOString().slice(0, 10), median_views: r._reach.medViews, views_per_follower: r._followers ? +(r._reach.medViews / r._followers).toFixed(3) : null, days_since_post: r._reach.daysSincePost, reels12: r._reach.reels12, source: 'apify-reel-scraper-12' } : r.intake_data?.dm_demand } }).eq('id', r.id)
   }
   console.log('applied: passed → demo_building, the rest → archived')
