@@ -80,18 +80,18 @@ const MAX_FOLLOWERS = 200000;
 // these words are just a way to surface accounts that talk to customers via DM at all.
 // Cheap enough (1 credit/term) to run the full list every time — no rationing needed.
 const TERMS = [
-  // 2026-11-11 (Nikola: "I like the OG batch… future leads over that quality"): ONLY self-descriptions of high-consideration, owner-run
-  // verticals, the kinds of business in the original batch (prefab and tiny homes, pergolas, custom furniture, windows and doors,
-  // pools and solar, dental implants, aesthetic surgery, cars, phones, experiences). The generic "DM us" phrases returned 0 qualified from
-  // 142 candidates (international creators), and the beauty / laser / wellness / hotel terms below this line before today are exactly what
-  // pulled in the weak leads (two bridal shops, a laser studio, a hair-extension shop). lib/lead-profile.mjs is the same rule as a filter.
-  'montažne kuće', 'kontejnerske kuće', 'tiny house', 'drvene kuće', 'mobilne kuće',
-  'pergole', 'bioklimatske pergole', 'tende i pergole', 'zimske bašte', 'klizni krov',
-  'nameštaj po meri', 'kuhinje po meri', 'proizvodnja nameštaja', 'salon nameštaja', 'plakari po meri', 'ugaone garniture',
-  'PVC stolarija', 'aluminijumska stolarija', 'izgradnja bazena', 'solarni paneli', 'fotonaponski sistemi',
-  'stomatološka ordinacija', 'implantologija', 'dental centar', 'ortodoncija', 'zubna protetika',
-  'estetska hirurgija', 'plastična hirurgija', 'auto salon', 'polovni automobili', 'mobilni telefoni otkup',
-  'tandem skokovi', 'paraglajding', 'izgradnja stanova',
+  // RESTORED 2026-11-11. These are the DM-prompting phrases that found the original leads (IG bio search of 2026-07-05: DENTALUX, JetSet, Varmus,
+  // LOGERA = 4 of 31 at 30k+, vault lead-quality.md "How the 12 good leads were found"). Nikola: "searching by niche is not good because a niche does
+  // not indicate an ICP… search by what indicates it… bio search like 'send us a message', 'orders in DMs'." An account that tells its followers to
+  // order, ask the price or book IN THE DM is selling in the inbox, whatever it sells. On 2026-11-11 I had replaced this list with niche terms: wrong.
+  // Sales in the inbox
+  'pošaljite nam poruku', 'javite se u poruku', 'pišite nam za sve informacije', 'DM za cene', 'cena u inbox', 'sve informacije u inbox',
+  'pošaljite upit', 'za porudžbine pišite nam', 'poručite putem poruke', 'DM za porudžbinu', 'cena i dostupnost u inbox', 'poručite u inbox',
+  'porudžbine u DM', 'za cenu pišite u inbox', 'upit u DM', 'cena na upit', 'svi detalji u inbox', 'pišite nam na Viber', 'pošaljite poruku za ponudu',
+  'stanje na upit', 'dostupno na upit', 'pitajte u komentarima', 'kontaktirajte nas za više informacija', 'pošaljite poruku za detalje',
+  // Bookings and quotes asked for in the inbox
+  'besplatna konsultacija', 'zakažite besplatnu procenu', 'za rezervaciju pišite', 'pišite nam za rezervaciju', 'pošaljite poruku za rezervaciju',
+  'javite se za više detalja', 'za sve upite pišite', 'pošaljite fotografije za procenu', 'besplatna ponuda u inboxu',
 ];
 
 // ── Generated geo terms ───────────────────────────────────────────────────────
