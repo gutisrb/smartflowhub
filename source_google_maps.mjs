@@ -207,6 +207,9 @@ async function main() {
     // cannot qualify them and the demo would be generic. Those are worth 10x less.
     if (!domain)                                      { dbg.noWebsite++;  continue; }
     if (!isSerbian(it))                               { dbg.notSerbian++; continue; }
+    // 2026-11-11: an established business has reviews. A 5-review workshop will never have the 15k+ Instagram audience the offer needs, and each
+    // such place cost a paid result for nothing (23 inserted, 0 qualified). Maps ships `reviewsCount` for free.
+    if ((it.reviewsCount ?? 0) < 25)                  { dbg.fewReviews = (dbg.fewReviews || 0) + 1; continue; }
     if (seenDomains.has(domain) || seenNames.has(name.toLowerCase())) { dbg.dup++; continue; }
 
     const match = plan.find(p => (it.searchString || '').includes(p.query.split(' ').slice(0, 2).join(' ')));

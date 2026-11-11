@@ -22,11 +22,11 @@ const __dirname = dirname(fileURLToPath(import.meta.url))
 for (const l of readFileSync(resolve(__dirname, '.env.local'), 'utf8').split('\n')) { const m = l.match(/^([^#=]+)=(.*)$/); if (m && process.env[m[1].trim()] === undefined) process.env[m[1].trim()] = m[2].trim().replace(/^['"]|['"]$/g, '') }
 const SF = '69acf7e9-557e-4ca3-85bd-a785ef39e351'
 const arg = (k, d) => { const i = process.argv.indexOf(k); return i > -1 ? process.argv[i + 1] : d }
-const HOURS = Number(arg('--hours', 24)), APPLY = process.argv.includes('--apply'), MAX_USD = Number(arg('--max-usd', 1))
+const STAGES = arg('--stages', 'novi,sourced').split(','), HOURS = Number(arg('--hours', 24)), APPLY = process.argv.includes('--apply'), MAX_USD = Number(arg('--max-usd', 1))
 const sb = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY)
 
 const since = new Date(Date.now() - HOURS * 36e5).toISOString()
-const { data: rows } = await sb.from('contacts').select('id,company_name,instagram_handle,instagram_followers,email,website,niche,comment,intake_data,pipeline_stage,status').eq('client_id', SF).in('pipeline_stage', ['novi', 'sourced']).gte('created_at', since)
+const { data: rows } = await sb.from('contacts').select('id,company_name,instagram_handle,instagram_followers,email,website,niche,comment,intake_data,pipeline_stage,status').eq('client_id', SF).in('pipeline_stage', STAGES).gte('created_at', since)
 const cands = (rows || []).filter((r) => r.instagram_handle)
 console.log(`${cands.length} new leads with a handle (last ${HOURS} h)\n`)
 
@@ -34,11 +34,13 @@ console.log(`${cands.length} new leads with a handle (last ${HOURS} h)\n`)
 const stage1 = []
 for (const r of cands) {
   const bio = r.intake_data?.enrichment?.instagram_profile?.bio || r.intake_data?.ad_title || ''
-  const p = profileFit({ name: r.company_name, bio: `${bio} ${r.niche || ''}`, followers: r.instagram_followers })
+  const p = profileFit({ name: r.company_name, niche: r.niche, bio, followers: r.instagram_followers })
   r._profile = p
   if (!p.pass) { r._verdict = `profile: ${p.fails[0].slice(0, 70)}`; continue }
   stage1.push(r)
 }
+// every lead of the original batch has its own website, and a demo is built from it: no site, no demo
+for (let i = stage1.length - 1; i >= 0; i--) if (!stage1[i].website) { stage1[i]._verdict = 'no own website (a demo is built from the site)'; stage1.splice(i, 1) }
 // 2. free: real follower count from the public page, 15k–200k
 const stage2 = []
 for (const r of stage1) {
@@ -47,13 +49,16 @@ for (const r of stage1) {
   if (r._followers == null || r._followers < 15000 || r._followers > 200000) { r._verdict = `followers ${r._followers} outside 15k-200k`; continue }
   stage2.push(r)
 }
-// 3. paid (~$0.011 each): last 12 reels
+// a live Instagram video ad = paid reach (lib/lead-fit.mjs): no reel measurement needed for those
+const isPaid = (r) => !!(r.intake_data?.ad_start_date && (r.intake_data?.publisher_platforms || []).includes('INSTAGRAM'))
+// 3. paid (~$0.011 each): last 12 reels, only for leads that are not already buying reach
 let reach = []
-if (stage2.length) { const m = await measureReach(stage2.map((r) => r.instagram_handle), { maxUsd: MAX_USD }); if (m.error) console.log('reach error:', m.error); reach = m.rows }
+const toMeasure = stage2.filter((r) => !isPaid(r))
+if (toMeasure.length) { const m = await measureReach(toMeasure.map((r) => r.instagram_handle), { maxUsd: MAX_USD }); if (m.error) console.log('reach error:', m.error); reach = m.rows }
 const passed = []
 for (const r of stage2) {
   const m = reach.find((x) => x.handle === r.instagram_handle) || {}
-  const fit = leadFit({ followers: r._followers, medViews: m.medViews ?? null, viewsPerFollower: r._followers && m.medViews != null ? +(m.medViews / r._followers).toFixed(3) : null, reels12: m.reels12 ?? null, daysSincePost: m.daysSincePost ?? null, email: r.email })
+  const fit = leadFit({ followers: r._followers, medViews: m.medViews ?? null, viewsPerFollower: r._followers && m.medViews != null ? +(m.medViews / r._followers).toFixed(3) : null, reels12: m.reels12 ?? null, daysSincePost: m.daysSincePost ?? null, email: r.email, paidAds: isPaid(r) })
   r._reach = m; r._fit = fit
   const emailOnly = fit.fails.length === 1 && /email/.test(fit.fails[0])
   if (fit.pass || emailOnly) { r._verdict = fit.pass ? 'PASS' : 'PASS (needs an email)'; passed.push(r) } else r._verdict = `reach: ${fit.fails.join(' | ').slice(0, 90)}`

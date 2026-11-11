@@ -51,4 +51,13 @@ describe('leadFit (reels-led lead gate)', () => {
     expect(leadFit({ ...base, followers: 40000, medViews: 50000, aov: 4000 }).pass).toBe(false)
     expect(leadFit({ ...base, followers: 40000, medViews: 50000 }).notes).toContain('ticket unverified')
   })
+  it('counts an active Instagram video ad as reach: paid views are views (Nikola, 2026-11-11)', () => {
+    const r = leadFit({ ...base, followers: 28000, medViews: 2873, viewsPerFollower: 0.103, reels12: 12, daysSincePost: 6, paidAds: true })
+    expect(r.pass).toBe(true); expect(r.notes.join(' ')).toMatch(/paid reach/)
+    // no reels, no recent post, still a pass: the ad proves the account is alive and buying reach
+    expect(leadFit({ email: 'a@b.rs', followers: 37000, paidAds: true }).pass).toBe(true)
+  })
+  it('still needs a sendable email and the right business even when it pays for ads', () => {
+    expect(leadFit({ email: null, followers: 37000, paidAds: true }).pass).toBe(false)
+  })
 })

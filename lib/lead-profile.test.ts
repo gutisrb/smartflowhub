@@ -38,4 +38,12 @@ describe('profileFit (who is worth a demo)', () => {
   it('lets a clinic through the low-ticket filter when it is dental or aesthetic surgery', () => {
     expect(pass('Dental centar', 'stomatološka ordinacija, tretmani i wellness')).toBe(true)
   })
+  it('does not let a bio keyword turn a beauty studio into a surgery clinic (Studio Namaste: "plastična hirurgija" in its bio)', () => {
+    const r = profileFit({ name: 'Studio Namaste za negu i lepotu tela', niche: 'klinika_wellness', bio: 'Generalni distributer za JETPEEL, nega posle plastične hirurgije', followers: 25000 })
+    expect(r.pass).toBe(false); expect(r.fails.join(' ')).toMatch(/low-ticket/)
+    expect(profileFit({ name: 'Mia Body Space', niche: 'klinika_wellness', followers: 65000 }).pass).toBe(false)
+  })
+  it('keeps a dental clinic the classifier labelled klinika_wellness (Up Dent Belgrade)', () => {
+    expect(profileFit({ name: 'Up Dent Belgrade', niche: 'klinika_wellness', followers: 28000 }).pass).toBe(true)
+  })
 })

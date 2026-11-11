@@ -90,18 +90,19 @@ const ADS_BASE_URL = 'https://www.facebook.com/ads/library/?active_status=active
 // search. Payment-term queries are retained at the end, demoted, because they are a genuine
 // high-ticket signal when combined with a niche word rather than used alone.
 const ADS_QUERIES  = [
-  // Dental / medical — one client is worth thousands of euros
-  'stomatološka ordinacija', 'zubni implanti', 'ortodoncija', 'proteza zuba',
-  'estetska medicina', 'laserska epilacija', 'antiaging tretman',
-  // Furniture / interiors — the niche that has produced the most priced demos
-  'nameštaj po meri', 'kuhinje po meri', 'plakari po meri', 'ugaone garniture',
-  // Home improvement with a site visit — high ticket, inquiry-driven
-  'pvc stolarija', 'aluminijumska stolarija', 'solarni paneli', 'montažne kuće',
-  'pergole i tende', 'bazeni po meri',
-  // Hospitality / events — bookings come through DMs
-  'wellness paket', 'sala za venčanja', 'organizacija venčanja',
-  // Demoted: real high-ticket signals, but far too broad on their own
-  'na rate', 'bez kamate', 'besplatna procena',
+  // 2026-11-11 rewritten from the yield file (ads_query_yield.json), not from guesses. Measured: "stomatološka ordinacija" 3 qualified, "nameštaj po meri" 3,
+  // "ugaone garniture" 1; "laserska epilacija" and "antiaging tretman" produced only beauty salons (Mia Body Space, Studio Namaste) and are gone, as are the
+  // wellness / wedding-venue terms. Six high-ticket verticals were in the old list and had never been run. The new tail is phrasing that ads for expensive,
+  // inquiry-driven work actually use. A query that returns nothing twice is dropped; one that returns leads is re-run first (pickQueries).
+  // Dental
+  'stomatološka ordinacija', 'zubni implanti', 'implantologija', 'dentalni turizam', 'ortodoncija',
+  // Furniture / interiors
+  'nameštaj po meri', 'ugaone garniture', 'kuhinje po meri', 'spavaće sobe po meri', 'garderoberi po meri', 'enterijer po meri',
+  // Home building and improvement with a site visit
+  'montažne kuće', 'kuće na ključ', 'pergole i tende', 'bioklimatske pergole', 'pvc stolarija', 'aluminijumska stolarija', 'sobna vrata',
+  'solarni paneli', 'toplotne pumpe', 'bazeni po meri', 'adaptacija stanova', 'izgradnja kuća',
+  // Other high-ticket, conversation-sold
+  'auto salon', 'polovni automobili', 'novi i polovni telefoni',
 ];
 
 const isLocal    = process.argv.includes('--local');      // read from local JSON files, skip Apify Stage 1
