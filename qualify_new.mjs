@@ -50,6 +50,7 @@ for (const r of stage1) {
   if (r._followers == null || r._followers < 15000 || r._followers > 200000) { r._verdict = `followers ${r._followers} outside 15k-200k`; continue }
   stage2.push(r)
 }
+const isPaid = (r) => !!(r.intake_data?.ad_start_date && (r.intake_data?.publisher_platforms || []).includes('INSTAGRAM'))
 // reels are measured for every candidate: reach is reel views ≥ 30% of followers, paid or not (Nikola, 2026-11-11)
 let reach = []
 const toMeasure = stage2
@@ -61,7 +62,7 @@ const dmPromptOf = (r, m) => !!dmMap.get(r.instagram_handle)?.dm || INVITE.test(
 const passed = []
 for (const r of stage2) {
   const m = reach.find((x) => x.handle === r.instagram_handle) || {}
-  const fit = leadFit({ followers: r._followers, medViews: m.medViews ?? null, viewsPerFollower: r._followers && m.medViews != null ? +(m.medViews / r._followers).toFixed(3) : null, reels12: m.reels12 ?? null, daysSincePost: m.daysSincePost ?? null, email: r.email, dmPrompt: dmPromptOf(r, m), activeAds: r.intake_data?.active_ads_count ? Number(r.intake_data.active_ads_count) : null })
+  const fit = leadFit({ followers: r._followers, medViews: m.medViews ?? null, viewsPerFollower: r._followers && m.medViews != null ? +(m.medViews / r._followers).toFixed(3) : null, reels12: m.reels12 ?? null, daysSincePost: m.daysSincePost ?? null, email: r.email, paidAds: isPaid(r), dmPrompt: dmPromptOf(r, m), activeAds: r.intake_data?.active_ads_count ? Number(r.intake_data.active_ads_count) : null })
   r._reach = m; r._fit = fit; r._dm = dmPromptOf(r, m)
   const emailOnly = fit.fails.length === 1 && /email/.test(fit.fails[0])
   if (fit.pass || emailOnly) { r._verdict = fit.pass ? 'PASS' : 'PASS (needs an email)'; passed.push(r) } else r._verdict = `reach: ${fit.fails.join(' | ').slice(0, 90)}`
@@ -77,7 +78,7 @@ if (APPLY) {
     const ok = r._verdict?.startsWith('PASS')
     const note = ok ? `2026-11-11 qualified (reels ${r._reach?.medViews} median over ${r._reach?.reels12} reels, ${r._followers} followers)` : `2026-11-11 archived by qualify_new: ${r._verdict}`
     await sb.from('contacts').update({ pipeline_stage: ok ? 'demo_building' : 'archived', instagram_followers: r._followers ?? r.instagram_followers, comment: ((r.comment ? r.comment + ' | ' : '') + note).slice(0, 900),
-      intake_data: { ...(r.intake_data || {}), dm_demand: r._reach ? { dm_prompt: !!r._dm, checked_at: new Date().toISOString().slice(0, 10), median_views: r._reach.medViews, views_per_follower: r._followers ? +(r._reach.medViews / r._followers).toFixed(3) : null, days_since_post: r._reach.daysSincePost, reels12: r._reach.reels12, source: 'apify-reel-scraper-12' } : r.intake_data?.dm_demand } }).eq('id', r.id)
+      intake_data: { ...(r.intake_data || {}), dm_demand: r._reach ? { dm_prompt: !!r._dm, paid_ads: isPaid(r), checked_at: new Date().toISOString().slice(0, 10), median_views: r._reach.medViews, views_per_follower: r._followers ? +(r._reach.medViews / r._followers).toFixed(3) : null, days_since_post: r._reach.daysSincePost, reels12: r._reach.reels12, source: 'apify-reel-scraper-12' } : r.intake_data?.dm_demand } }).eq('id', r.id)
   }
   console.log('applied: passed → demo_building, the rest → archived')
 }

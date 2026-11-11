@@ -51,4 +51,8 @@ describe('profileFit (who is worth a demo)', () => {
     for (const n of ['sfashionshop.bn', 'Hirurški čelik Royal nakit', 'mare.underwear', 'Night wish underwear', 'Lux boutique']) expect(profileFit({ name: n, followers: 40000 }).pass).toBe(false)
     expect(profileFit({ name: 'Aluroll doo', bio: 'rolo zavese, roletne', followers: 35000 }).pass).toBe(true)
   })
+  it('rejects entertainment acts, aesthetic centers and generic online stores that pass on paid ads alone', () => {
+    for (const n of ['Balkan Party Band', 'Madam Estetik C.', 'Na Klik Store', 'Dr Jasmina Lalosevic AestheticMed']) expect(profileFit({ name: n, followers: 40000 }).pass).toBe(false)
+    for (const n of ['Aluroll doo', 'Emmeti', 'industrija_bg', 'Montažne hale', 'Linea Milanovic - luxury furniture & interiors']) expect(profileFit({ name: n, followers: 40000 }).pass).toBe(true)
+  })
 })
