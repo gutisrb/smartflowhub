@@ -90,19 +90,13 @@ const ADS_BASE_URL = 'https://www.facebook.com/ads/library/?active_status=active
 // search. Payment-term queries are retained at the end, demoted, because they are a genuine
 // high-ticket signal when combined with a niche word rather than used alone.
 const ADS_QUERIES  = [
-  // 2026-11-11 rewritten from the yield file (ads_query_yield.json), not from guesses. Measured: "stomatološka ordinacija" 3 qualified, "nameštaj po meri" 3,
-  // "ugaone garniture" 1; "laserska epilacija" and "antiaging tretman" produced only beauty salons (Mia Body Space, Studio Namaste) and are gone, as are the
-  // wellness / wedding-venue terms. Six high-ticket verticals were in the old list and had never been run. The new tail is phrasing that ads for expensive,
-  // inquiry-driven work actually use. A query that returns nothing twice is dropped; one that returns leads is re-run first (pickQueries).
-  // Dental
-  'stomatološka ordinacija', 'zubni implanti', 'implantologija', 'dentalni turizam', 'ortodoncija',
-  // Furniture / interiors
-  'nameštaj po meri', 'ugaone garniture', 'kuhinje po meri', 'spavaće sobe po meri', 'garderoberi po meri', 'enterijer po meri',
-  // Home building and improvement with a site visit
-  'montažne kuće', 'kuće na ključ', 'pergole i tende', 'bioklimatske pergole', 'pvc stolarija', 'aluminijumska stolarija', 'sobna vrata',
-  'solarni paneli', 'toplotne pumpe', 'bazeni po meri', 'adaptacija stanova', 'izgradnja kuća',
-  // Other high-ticket, conversation-sold
-  'auto salon', 'polovni automobili', 'novi i polovni telefoni',
+  // 2026-11-11 (Nikola: "searching by niche is not good, a niche does not indicate an ICP… search by what indicates it"): ad COPY that prompts a message,
+  // because an advertiser whose ad says "write to us" is paying for inbox conversations whatever it sells. Niche words are only a short tail.
+  'pošaljite poruku', 'pišite nam u poruku', 'javite nam se u inbox', 'za porudžbine pišite nam', 'poručite putem poruke', 'DM za cenu',
+  'pošaljite upit', 'pošaljite nam poruku', 'cena u inbox', 'pišite nam za ponudu', 'zakažite besplatnu procenu', 'besplatna konsultacija',
+  'pošaljite fotografije za procenu', 'za rezervaciju pišite', 'javite se za više detalja', 'sve informacije u inbox',
+  // niche tail (kept because they have produced leads: stomatološka ordinacija 3, nameštaj po meri 3)
+  'stomatološka ordinacija', 'nameštaj po meri', 'ugaone garniture', 'montažne kuće', 'pergole i tende', 'pvc stolarija',
 ];
 
 const isLocal    = process.argv.includes('--local');      // read from local JSON files, skip Apify Stage 1
@@ -718,11 +712,21 @@ async function main() {
   } else {
     console.log('─── Stage 1: FB Ads Library via Apify ──────────────────');
     // Build URLs across all target countries × all queries
+    // Ads sorted by impressions return the SAME top spenders for a query on every run (Nikola, 2026-11-11). Each run therefore looks at a different
+    // window of ad START dates (30-day slices, newest first, advancing one slice per run, stored in the yield file), so the same query reaches new advertisers.
+    let AD_WINDOW = '';
+    try {
+      const st = JSON.parse(readFileSync(YIELD_FILE, 'utf8')); const k = Number(st.__window || 0) % 12;
+      const day = (d) => new Date(Date.now() - d * 864e5).toISOString().slice(0, 10);
+      AD_WINDOW = `&start_date[min]=${day(30 * (k + 1))}&start_date[max]=${day(30 * k)}`;
+      st.__window = k + 1; writeFileSync(YIELD_FILE, JSON.stringify(st, null, 2));
+      console.log(`  ad start-date window: ${day(30 * (k + 1))} → ${day(30 * k)}`);
+    } catch {}
     const urlsToScrape = [];
     for (const country of ADS_COUNTRIES) {
       const base = ADS_BASE_URL.replace('country=RS', `country=${country}`);
       for (const q of pickQueries(ADS_QUERIES, QUERY_BUDGET)) {
-        urlsToScrape.push({ url: `${base}&q=${encodeURIComponent(q)}`, country, q });
+        urlsToScrape.push({ url: `${base}&q=${encodeURIComponent(q)}${AD_WINDOW}`, country, q });
       }
     }
     const numBatches    = urlsToScrape.length;
