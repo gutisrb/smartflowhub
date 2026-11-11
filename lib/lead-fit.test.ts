@@ -36,4 +36,8 @@ describe('leadFit', () => {
     expect(leadFit({ ...ok, followers: 69000, medViews: 23038, daysSincePost: 117, paidAds: true }).pass).toBe(true)
     expect(leadFit({ ...ok, followers: 40000, medViews: 242604, daysSincePost: 20 }).pass).toBe(true)
   })
+  it('passes when the top quarter of its reels is strong even if the median is not (a viral account)', () => {
+    const r = leadFit({ ...ok, followers: 183000, medViews: 15000, p75Views: 52000 }); expect(r.pass).toBe(true); expect(r.notes.join(' ')).toMatch(/top-quartile/)
+    expect(leadFit({ ...ok, followers: 183000, medViews: 15000, p75Views: 20000 }).pass).toBe(false)
+  })
 })

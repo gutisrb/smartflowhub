@@ -78,7 +78,7 @@ const passed = []
 for (const r of stage2) {
   const m = reach.find((x) => x.handle === r.instagram_handle) || {}
   if (!r.email && r.website) { const e = await emailFromSite(r.website); if (e) { r.email = e; r._emailFound = true } }
-  const fit = leadFit({ followers: r._followers, medViews: m.medViews ?? null, viewsPerFollower: r._followers && m.medViews != null ? +(m.medViews / r._followers).toFixed(3) : null, reels12: m.reels12 ?? null, daysSincePost: m.daysSincePost ?? null, email: r.email, paidAds: isPaid(r), dmPrompt: dmPromptOf(r, m), activeAds: r.intake_data?.active_ads_count ? Number(r.intake_data.active_ads_count) : null })
+  const fit = leadFit({ followers: r._followers, medViews: m.medViews ?? null, viewsPerFollower: r._followers && m.medViews != null ? +(m.medViews / r._followers).toFixed(3) : null, reels12: m.reels12 ?? null, p75Views: m.p75Views ?? null, daysSincePost: m.daysSincePost ?? null, email: r.email, paidAds: isPaid(r), dmPrompt: dmPromptOf(r, m), activeAds: r.intake_data?.active_ads_count ? Number(r.intake_data.active_ads_count) : null })
   r._reach = m; r._fit = fit; r._dm = dmPromptOf(r, m)
   const emailOnly = fit.fails.length === 1 && /email/.test(fit.fails[0])
   if (fit.pass || emailOnly) { r._verdict = fit.pass ? 'PASS' : 'PASS (needs an email)'; passed.push(r) } else r._verdict = `reach: ${fit.fails.join(' | ').slice(0, 90)}`
