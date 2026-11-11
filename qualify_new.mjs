@@ -18,6 +18,8 @@ import { profileFit } from './lib/lead-profile.mjs'
 import { leadFit } from './lib/lead-fit.mjs'
 import { measureReach, followersFree, measureDmPrompt } from './lib/reach-apify.mjs'
 import { INVITE } from './lib/dm-demand.mjs'
+import { findEmail, findWebsite, ownDomain, siteAlive } from './lib/email-finder.mjs'
+import { pickApifyToken } from './lib/apify-key.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 for (const l of readFileSync(resolve(__dirname, '.env.local'), 'utf8').split('\n')) { const m = l.match(/^([^#=]+)=(.*)$/); if (m && process.env[m[1].trim()] === undefined) process.env[m[1].trim()] = m[2].trim().replace(/^['"]|['"]$/g, '') }
@@ -35,13 +37,21 @@ console.log(`${cands.length} new leads with a handle (last ${HOURS} h)\n`)
 const stage1 = []
 for (const r of cands) {
   const bio = r.intake_data?.enrichment?.instagram_profile?.bio || r.intake_data?.ad_title || ''
-  const p = profileFit({ name: r.company_name, niche: r.niche, bio, followers: r.instagram_followers })
+  const p = profileFit({ name: r.company_name, niche: r.niche, bio, category: r.intake_data?.enrichment?.instagram_profile?.business_category, followers: r.instagram_followers })
   r._profile = p
   if (!p.pass) { r._verdict = `profile: ${p.fails[0].slice(0, 70)}`; continue }
   stage1.push(r)
 }
 // every lead of the original batch has its own website, and a demo is built from it: no site, no demo
-for (let i = stage1.length - 1; i >= 0; i--) if (!stage1[i].website) { stage1[i]._verdict = 'no own website (a demo is built from the site)'; stage1.splice(i, 1) }
+for (let i = stage1.length - 1; i >= 0; i--) {
+  const w = stage1[i].website
+  if (!ownDomain(w || "")) {
+    const found = await findWebsite(stage1[i])
+    if (found) { stage1[i].website = found; stage1[i]._websiteFound = found; console.log(`  website found for ${stage1[i].company_name}: ${found}`) }
+  }
+  if (!stage1[i].website || !ownDomain(stage1[i].website)) { stage1[i]._verdict = 'no own website (a demo is built from the site; a Facebook or marketplace link is not one)'; stage1.splice(i, 1) }
+  else if (!(await siteAlive(stage1[i].website))) { stage1[i]._verdict = `website does not resolve (${stage1[i].website})`; stage1.splice(i, 1) }
+}
 // 2. free: real follower count from the public page, 15k–200k
 const stage2 = []
 for (const r of stage1) {
@@ -59,25 +69,17 @@ if (toMeasure.length) { const m = await measureReach(toMeasure.map((r) => r.inst
 // the DM prompt is only a good sign now (Nikola, 2026-11-11), so it is read from data we already have: the ad, the stored bio, the reels' captions
 const dmMap = new Map()
 const dmPromptOf = (r, m) => !!dmMap.get(r.instagram_handle)?.dm || INVITE.test(r.intake_data?.enrichment?.instagram_profile?.bio || '') || /message|poruk/i.test(r.intake_data?.ad_cta || '') || INVITE.test(JSON.stringify(r.intake_data?.ad_copies || '')) || (m?.dmCaptions ?? 0) >= 1
-// an e-mail from the business's own website (home + contact pages), same-domain address first
-async function emailFromSite(site) {
-  const base = /^https?:/.test(site) ? site : `https://${site}`
-  const host = (() => { try { return new URL(base).hostname.replace(/^www\./, '') } catch { return '' } })()
-  const found = new Set()
-  for (const path of ['', '/kontakt', '/contact', '/kontakt/', '/o-nama']) {
-    try {
-      const res = await fetch(base.replace(/\/$/, '') + path, { redirect: 'follow', signal: AbortSignal.timeout(10000), headers: { 'user-agent': 'Mozilla/5.0' } })
-      if (!res.ok) continue
-      for (const m of (await res.text()).matchAll(/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g)) if (!/\.(png|jpg|jpeg|webp|svg|gif)$/i.test(m[0]) && !/sentry|example|wixpress|domain\.com/i.test(m[0])) found.add(m[0].toLowerCase())
-    } catch { /* next page */ }
-  }
-  const all = [...found]
-  return all.find((e) => host && e.endsWith(host)) || all[0] || null
-}
+// an e-mail for the lead: lib/email-finder.mjs tries stored text, the site, Firecrawl, Facebook, search, then Hunter (2026-11-11)
+let hunterLeft = 8
+const apifyKey = await pickApifyToken(0.05, { quiet: true })
 const passed = []
 for (const r of stage2) {
   const m = reach.find((x) => x.handle === r.instagram_handle) || {}
-  if (!r.email && r.website) { const e = await emailFromSite(r.website); if (e) { r.email = e; r._emailFound = true } }
+  if (!r.email) {
+    const f = await findEmail(r, { apifyToken: apifyKey?.token || null, hunter: hunterLeft > 0 })
+    if (f.source?.startsWith('hunter')) hunterLeft--
+    if (f.email) { r.email = f.email; r._emailFound = true; r._emailSource = { source: f.source, evidence: f.evidence, at: new Date().toISOString() } }
+  }
   const fit = leadFit({ followers: r._followers, medViews: m.medViews ?? null, viewsPerFollower: r._followers && m.medViews != null ? +(m.medViews / r._followers).toFixed(3) : null, reels12: m.reels12 ?? null, p75Views: m.p75Views ?? null, daysSincePost: m.daysSincePost ?? null, email: r.email, paidAds: isPaid(r), dmPrompt: dmPromptOf(r, m), activeAds: r.intake_data?.active_ads_count ? Number(r.intake_data.active_ads_count) : null })
   r._reach = m; r._fit = fit; r._dm = dmPromptOf(r, m)
   const emailOnly = fit.fails.length === 1 && /email/.test(fit.fails[0])
@@ -93,8 +95,8 @@ if (APPLY) {
   for (const r of cands) {
     const ok = r._verdict?.startsWith('PASS')
     const note = ok ? `2026-11-11 qualified (reels ${r._reach?.medViews} median over ${r._reach?.reels12} reels, ${r._followers} followers)` : `2026-11-11 archived by qualify_new: ${r._verdict}`
-    await sb.from('contacts').update({ pipeline_stage: ok ? 'demo_building' : 'archived', ...(r._emailFound ? { email: r.email, status: 'enriched' } : {}), instagram_followers: r._followers ?? r.instagram_followers, comment: ((r.comment ? r.comment + ' | ' : '') + note).slice(0, 900),
-      intake_data: { ...(r.intake_data || {}), dm_demand: r._reach ? { dm_prompt: !!r._dm, paid_ads: isPaid(r), checked_at: new Date().toISOString().slice(0, 10), median_views: r._reach.medViews, views_per_follower: r._followers ? +(r._reach.medViews / r._followers).toFixed(3) : null, days_since_post: r._reach.daysSincePost, reels12: r._reach.reels12, source: 'apify-reel-scraper-12' } : r.intake_data?.dm_demand } }).eq('id', r.id)
+    await sb.from('contacts').update({ pipeline_stage: ok ? 'demo_building' : 'archived', ...(r._emailFound ? { email: r.email, status: 'enriched' } : {}), ...(r._websiteFound ? { website: r._websiteFound } : {}), instagram_followers: r._followers ?? r.instagram_followers, comment: ((r.comment ? r.comment + ' | ' : '') + note).slice(0, 900),
+      intake_data: { ...(r.intake_data || {}), ...(r._emailSource ? { email_source: r._emailSource } : {}), dm_demand: r._reach ? { dm_prompt: !!r._dm, paid_ads: isPaid(r), checked_at: new Date().toISOString().slice(0, 10), median_views: r._reach.medViews, views_per_follower: r._followers ? +(r._reach.medViews / r._followers).toFixed(3) : null, days_since_post: r._reach.daysSincePost, reels12: r._reach.reels12, source: 'apify-reel-scraper-12' } : r.intake_data?.dm_demand } }).eq('id', r.id)
   }
   console.log('applied: passed → demo_building, the rest → archived')
 }

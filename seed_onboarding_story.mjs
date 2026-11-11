@@ -14,10 +14,12 @@
  *   node seed_onboarding_story.mjs --all-demos
  */
 import { createClient } from "@supabase/supabase-js"
-import { readFileSync } from "fs"
+import { readFileSync, existsSync } from "fs"
 import { resolve, dirname } from "path"
 import { fileURLToPath } from "url"
-import { buildSaleMessages, buildHesitationMessages, normalizeOfferTerms, cleanServiceName } from "./lib/sales-playbook.mjs"
+import { buildSaleMessages, buildHesitationMessages, normalizeOfferTerms, cleanServiceName, groundFirstStep } from "./lib/sales-playbook.mjs"
+import { vetNiche } from "./lib/niche-vet.mjs"
+import { derivePolicyComplaint } from "./lib/complaint-policy.mjs"
 import { salesModelOf, normalizeSalesModel } from "./lib/sales-model.mjs"
 import { stayStory, stayHesitation, stayQA, bgStayConvos } from "./lib/stay-story.mjs"
 import { pickOpening, pickObjection, pickFollowUp, openingFromOverride } from "./lib/customer-voice.mjs"
@@ -666,19 +668,31 @@ async function retireBuilderThreads(cid) {
   await sb.from("demo_crm").delete().eq("client_id", cid).is("id_razgovora", null)
 }
 
+function corpusTextOf(email) {
+  try { return JSON.parse(readFileSync(resolve(__dirname, "corpus", `${email}.json`), "utf8")).text || "" } catch { return "" }
+}
+
 async function seedTenant(client) {
   const cid = client.id
-  const niche = (client.demo_niche || "generic").toLowerCase()
+  const nicheLabel = (client.demo_niche || "generic").toLowerCase()
+  const { data: catalog } = await sb
+    .from("services_catalog").select("id,name,category,price_min,color_hex,duration_minutes,image_url")
+    .eq("client_id", cid).eq("is_active", true).order("sort_order")
+  const sheet0 = client.onboarding_copy?.business_sheet || null
+  const niche = vetNiche(nicheLabel, `${JSON.stringify(sheet0 || {})} ${(catalog || []).map((c) => `${c.name} ${c.category || ""}`).join(" ")} ${(client.onboarding_copy?.customer_voice?.posts || []).map((p) => p.caption).join(" ")}`)
+  if (niche !== nicheLabel) {
+    console.log(`  niche label "${nicheLabel}" has no support in the business's own words → neutral "${niche}"`)
+    await sb.from("clients").update({ demo_niche: niche }).eq("id", cid)
+  }
+  let terms = client.onboarding_copy?.offer_terms ? normalizeOfferTerms(client.onboarding_copy.offer_terms) : null
+  // a hand sheet's wording is the lead's own; otherwise the first step's "how"/"outcome" must be on the site
+  if (terms?.free_consultation && !existsSync(resolve(__dirname, "sheets", `${client.email}.json`))) terms = { ...terms, free_consultation: groundFirstStep(terms.free_consultation, corpusTextOf(client.email)) }
   // How this business sells decides the whole story (lib/sales-model.mjs). A lead analysed by
   // analyze_leads.mjs carries it; otherwise it follows from the niche. `isService` = the people-
   // facing heroes (Marija, Dragana, Nikola), which both booking and quote businesses use.
   const model = normalizeSalesModel(client.onboarding_copy?.sales_model) || salesModelOf(niche)
   const strategy = client.onboarding_copy?.sales_strategy || null
   const isService = model !== "order"
-  const { data: catalog } = await sb
-    .from("services_catalog").select("id,name,category,price_min,color_hex,duration_minutes,image_url")
-    .eq("client_id", cid).eq("is_active", true).order("sort_order")
-  const terms = client.onboarding_copy?.offer_terms ? normalizeOfferTerms(client.onboarding_copy.offer_terms) : null
   // The Business Sheet (build_sheets.mjs) says how this business hands things over. A store people
   // come into gets a visit story; a shop that ships gets orders with delivery stages.
   const sheet = client.onboarding_copy?.business_sheet || null
@@ -730,6 +744,11 @@ async function seedTenant(client) {
     }
   }
   if (!isService && heroOverride?.complaint?.ask) story.nosale = ownComplaint(heroOverride.complaint, story.sale?.crm?.kategorija)
+  else if (!isService && !stays) {
+    // no hand-written complaint: the shop's own complaint rule from its site, when it states one
+    const own = derivePolicyComplaint(corpusTextOf(client.email), (catalog || []).find((c) => c.name) ? { name: cleanServiceName((catalog || []).find((c) => c.name).name) } : null)
+    if (own) { story.nosale = ownComplaint(own, story.sale?.crm?.kategorija); console.log(`  complaint from the shop's own rule: ${own.source.slice(0, 90)}…`) }
+  }
   const { sale, nosale } = story
   const cid8 = cid.slice(0, 8)
 
@@ -882,11 +901,11 @@ async function main() {
   const args = process.argv.slice(2)
   let clients = []
   if (args.includes("--all-demos")) {
-    const { data } = await sb.from("clients").select("id,name,demo_niche,onboarding_copy").not("demo_niche", "is", null)
+    const { data } = await sb.from("clients").select("id,name,email,demo_niche,onboarding_copy").not("demo_niche", "is", null)
     clients = data || []
   } else {
     const ei = args.indexOf("--email"); const email = ei !== -1 ? args[ei + 1] : "office@crowndental.rs"
-    const { data } = await sb.from("clients").select("id,name,demo_niche,onboarding_copy").eq("email", email).single()
+    const { data } = await sb.from("clients").select("id,name,email,demo_niche,onboarding_copy").eq("email", email).single()
     clients = data ? [data] : []
   }
   console.log(`Seeding onboarding story for ${clients.length} tenant(s):`)

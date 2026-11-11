@@ -25,8 +25,6 @@ if (process.argv.includes('--all-pipeline')) {
   const { data } = await sb.from('contacts').select('demo_tenant_email').eq('client_id', SF).in('pipeline_stage', ['demo_building', 'email_ready']).not('demo_tenant_email', 'is', null)
   tenants = (data || []).map((r) => r.demo_tenant_email)
 } else if (arg('--email')) tenants = [arg('--email')]
-const key = await pickApifyToken(0.1, { quiet: true })
-if (!key) { console.error('no Apify key with budget'); process.exit(1) }
 
 for (const t of tenants) {
   const { data: client } = await sb.from('clients').select('id,name,onboarding_copy').eq('email', t).single()
@@ -35,6 +33,8 @@ for (const t of tenants) {
   const have = client.onboarding_copy?.customer_voice?.questions?.length || 0
   if (have >= 3 && process.argv.includes('--all-pipeline')) { console.log(`skip ${client.name}: ${have} real questions already stored`); continue }
   const handle = contact.instagram_handle
+  const key = await pickApifyToken(0.15, { quiet: true }) // per business: a key can run dry mid-batch
+  if (!key) { console.log('no Apify key with budget left'); break }
   const r = await fetch(`https://api.apify.com/v2/acts/apify~instagram-reel-scraper/run-sync-get-dataset-items?token=${key.token}&maxTotalChargeUsd=0.12&timeout=200`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ username: [handle], resultsLimit: 12 }), signal: AbortSignal.timeout(220000) })
   if (!r.ok) { console.log(`${client.name}: apify ${r.status}`); continue }
   const items = (await r.json()).filter((x) => x.ownerUsername?.toLowerCase() === handle.toLowerCase())

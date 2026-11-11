@@ -59,4 +59,17 @@ describe('profileFit (who is worth a demo)', () => {
     for (const n of ['МУП Републике Србије', 'Fondacija Mozzart', 'Великаши', 'standuprs', 'Rasadnik Eko-plan']) expect(profileFit({ name: n, followers: 40000 }).pass).toBe(false)
     for (const n of ['Nameštaj Lazor', 'SLW Container', 'Aluroll doo']) expect(profileFit({ name: n, followers: 40000 }).pass).toBe(true)
   })
+  it('rejects food, media and catering accounts that passed the first discovery run (2026-11-11)', () => {
+    for (const [name, bio] of [['TORTA', 'Jedna je TORTA. Ona koja okuplja.'], ['Puls Generacije', 'Sirov kadar protiv montirane stvarnosti News & media website'], ['Stefan Farmer', 'Poruči proizvode agriculture'], ['Domestico | organizacija događaja', 'Ukusan i kvalitetan ketering za sve prilike'], ['Vinarija i bazeni Grabak', '']])
+      expect(pass(name, bio), name).toBe(false)
+  })
+  it('keeps the furniture, bike, decking and dental accounts of the same run', () => {
+    for (const [name, bio] of [['Bee Bike', 'KUPOVINA NA 24 RATE E-MOBILITY'], ['TopDek', 'Premium WPC sistemi, fasade, podovi, ograde, 20 godina garancije'], ['Elan Domis', 'Salon 1: TUTIN'], ['Marco Dental Tourism', 'Besplatan ONLINE PREGLED pre dolaska u ordinaciju']])
+      expect(pass(name, bio), name).toBe(true)
+  })
+  it('rejects a telecom brand and low-ticket decor/textile shops (2026-11-11 stale-lead run)', () => {
+    for (const [name, bio] of [['Mts', 'Telekom Srbija'], ['Casa Jana Kućni Dekor', 'Kućni dekor'], ['paletatextil', 'Tekstil za dom']])
+      expect(pass(name, bio), name).toBe(false)
+    expect(pass('Aluroll doo', 'Roletne, komarnici, garažna vrata')).toBe(true)
+  })
 })

@@ -128,3 +128,12 @@ describe('sales playbook', () => {
     expect(all).not.toMatch(/Pre toga:|slanje fotograf/)
   })
 })
+
+import { groundFirstStep } from './sales-playbook.mjs'
+describe('groundFirstStep', () => {
+  it('keeps the site’s first step and drops the model’s own how/outcome (Bee Bike 2026-11-11)', () => {
+    const site = 'Sopstveni servis i delovi. 24 rate bez učešća. Zakaži test vožnju. 2 godine garancije. Dostava 3 do 7 radnih dana. Saloni Novi Beograd, Novi Sad i Čačak. Kupovina na rate. Odluka o kupovini je Vaša.'
+    const fc = groundFirstStep({ label: 'Zakaži test vožnju', how: 'dođete u salon, sednete i provozate model', outcome: 'informativna odluka o kupovini' }, site)
+    expect(fc).toEqual({ label: 'Zakaži test vožnju', how: '', outcome: '' })
+  })
+})

@@ -112,3 +112,15 @@ describe('numberSet', () => {
     expect(s.has('44400')).toBe(true); expect(s.has('5600')).toBe(true); expect(s.has('2.5')).toBe(true)
   })
 })
+
+describe('checkDemo: booking talk at a business with no calendar (Montažne hale, SLW Container 2026-11-11)', () => {
+  it('flags "Ima li slobodnih termina?" and "Koji dan i vreme Vam odgovaraju?" when there is no calendar', () => {
+    const r = checkDemo(base({ flows: { quote: true, calendar: false }, threads: [{ id: 'demo_x_hero2', role: 'user', message: 'Zdravo, zanima me projektovanje montažnih hala. Ima li slobodnih termina?' }, agent('Zdravo, Nikola 😊 Koji dan i vreme Vam odgovaraju?', 'demo_x_hero2')] }))
+    expect(rules(r)).toEqual(expect.arrayContaining(['booking-talk']))
+    expect(r.failures.filter((f: any) => f.rule === 'booking-talk').length).toBe(2)
+  })
+  it('allows it where the site books', () => {
+    const r = checkDemo(base({ flows: { quote: false, calendar: true }, threads: [agent('Koji dan i vreme Vam odgovaraju?')] }))
+    expect(rules(r)).not.toContain('booking-talk')
+  })
+})
