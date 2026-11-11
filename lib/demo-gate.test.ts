@@ -12,6 +12,10 @@ const agent = (message: string, id = 'demo_x_hero1') => ({ id, role: 'assistant'
 const rules = (r: any) => r.failures.map((f: any) => f.rule)
 
 describe('checkDemo: what the agent says', () => {
+  it('catches a hall/container word on a furniture business (Modesta, Emmeti 2026-11-11: "Za taj objekat šaljemo ponudu")', () => {
+    expect(rules(checkDemo(base({ threads: [agent('Zdravo, Marija 😊 Za taj objekat šaljemo ponudu sa svim stavkama.'), { id: 'demo_x_hero2', role: 'user', message: 'Treba mi ponuda za naš objekat.' }] })))).toEqual(['borrowed-noun', 'borrowed-noun'])
+    expect(rules(checkDemo(base({ corpus: SITE + ' Montažni objekti po meri.', threads: [agent('Za taj objekat šaljemo ponudu.')] })))).not.toContain('borrowed-noun')
+  })
   it('catches a concession to the price objection (Dallas, Cvejanović, Luxor)', () => {
     for (const line of ['Nije mala cifra, slažem se. Uz to dobijate 25 meseci garancije.', 'Jasno. Uz to dobijate 2 godine garancije.', 'Razumem Vas. Ostalo je isto.'])
       expect(rules(checkDemo(base({ threads: [agent(line)] })))).toContain('concedes-price')
