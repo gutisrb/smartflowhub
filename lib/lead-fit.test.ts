@@ -6,7 +6,10 @@ const base = { email: 'info@example.rs', reels12: 6, daysSincePost: 2 }
 
 describe('leadFit (reels-led lead gate)', () => {
   it('passes a lead with strong absolute reach, even with a low ratio (Cvejanović: large audience)', () => {
-    expect(leadFit({ ...base, followers: 182236, medViews: 37334, viewsPerFollower: 0.205 }).pass).toBe(true)
+    expect(leadFit({ ...base, followers: 182236, medViews: 23343, viewsPerFollower: 0.128 }).pass).toBe(true)
+  })
+  it('treats 0.298 as 0.30: Instagram rounds follower counts (Luxor, 12-reel median)', () => {
+    expect(leadFit({ ...base, followers: 44000, medViews: 13105, viewsPerFollower: 0.298 }).pass).toBe(true)
   })
   it('passes a lead with modest views that are at least 30% of followers (Luxor)', () => {
     expect(leadFit({ ...base, followers: 40803, medViews: 13311, viewsPerFollower: 0.326 }).pass).toBe(true)

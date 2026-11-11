@@ -105,10 +105,10 @@ const TERMS = [
 // synonyms of the same query. Appended AFTER the hand-written list so `--terms N` always
 // keeps the proven terms first and treats these as the expansion tail.
 const GEO_NICHES = [
-  'stomatolog', 'stomatološka ordinacija', 'ortodoncija', 'implantologija',
-  'estetska medicina', 'kozmetički salon', 'salon lepote', 'laserska epilacija',
-  'nameštaj po meri', 'kuhinje po meri', 'salon nameštaja', 'tapaciranje nameštaja',
-  'fizikalna terapija', 'wellness centar', 'privatna klinika',
+  // 2026-11-11: high-consideration verticals only (same list as TERMS above and lib/lead-profile.mjs); the old salon/laser/wellness/clinic niches are gone.
+  'montažne kuće', 'tiny house', 'pergole', 'bioklimatske pergole', 'nameštaj po meri', 'kuhinje po meri',
+  'salon nameštaja', 'PVC stolarija', 'aluminijumska stolarija', 'izgradnja bazena', 'solarni paneli',
+  'stomatološka ordinacija', 'implantologija', 'ortodoncija',
 ];
 const GEO_CITIES = [
   'Beograd', 'Novi Sad', 'Niš', 'Kragujevac', 'Subotica', 'Čačak', 'Kraljevo',

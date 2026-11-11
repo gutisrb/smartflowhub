@@ -87,7 +87,7 @@ async function backlog() {
   let all = [], from = 0
   for (;;) {
     const { data, error } = await sb.from('contacts').select('id,company_name,instagram_handle,instagram_followers,status,comment,website,email,izvor,intake_data,demo_tenant_email,email_1_poslat,pipeline_stage')
-      .eq('client_id', SF).in('pipeline_stage', ['archived', 'sourced', 'novi']).gte('instagram_followers', 30000).lte('instagram_followers', 200000).range(from, from + 999)
+      .eq('client_id', SF).in('pipeline_stage', ['archived', 'sourced', 'novi']).gte('instagram_followers', 15000).lte('instagram_followers', 200000).range(from, from + 999)
     if (error) throw error
     all = all.concat(data); if (data.length < 1000) break; from += 1000
   }
@@ -153,7 +153,7 @@ for (const source of SOURCES) {
     }
     const fit = leadFit({ followers: r.followers, medViews: r.medViews, viewsPerFollower: r.viewsPerFollower, reels12: r.reels12, daysSincePost: r.daysSincePost }, { requireEmail: false })
     const prof = profileFit({ name: r.fullName || c.name, bio: r.bio, category: r.category, followers: r.followers })
-    if (!fit.pass || !prof.pass || (r.followers || 0) < 30000) { console.log(`     ✗ ${[...fit.fails, ...prof.fails].join(' | ').slice(0, 150)}`); continue }
+    if (!fit.pass || !prof.pass || (r.followers || 0) < 15000) { console.log(`     ✗ ${[...fit.fails, ...prof.fails].join(' | ').slice(0, 150)}`); continue }
     const site = await ownSite(r) || (c.dbSite && !NOT_OWN_SITE.test(c.dbSite) ? c.dbSite : null)
     // every lead of the original batch has its own website: no site, no demo can be built from it
     if (!site) { console.log('     ✗ no own website found'); continue }
