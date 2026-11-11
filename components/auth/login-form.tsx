@@ -16,23 +16,28 @@ const TEAL_BORDER = "rgba(13,214,202,0.20)"
 const features = [
     {
         icon: MessageCircle,
-        label: "AI Agent odgovara kupcima 24/7",
-        desc: "Instagram, Facebook, web — sve na jednom mestu",
+        label: "AI agent odgovara klijentima u svako doba",
+        desc: "Instagram, Facebook, WhatsApp i sajt na jednom mestu",
     },
     {
         icon: BarChart3,
-        label: "CRM koji se sam popunjava",
-        desc: "Svaki razgovor automatski postaje kontakt u bazi",
+        label: "Baza klijenata koja se sama popunjava",
+        desc: "Svaki razgovor postaje kontakt u bazi, sa razlogom",
     },
     {
         icon: Zap,
-        label: "Analitika u realnom vremenu",
-        desc: "Pratite konverzije, trendove i razgovore uživo",
+        label: "Analitika uživo",
+        desc: "Šta Vas pitaju, šta ih zaustavi i kada Vas traže",
     },
 ]
 
 export function LoginForm({ onLoginSuccess }: LoginFormProps) {
-    const [email, setEmail] = useState("")
+    // The cockpit's "Demo" button opens this page with ?email=… so checking a demo
+    // is one click and a paste rather than copying two fields by hand.
+    const [email, setEmail] = useState(() => {
+        if (typeof window === "undefined") return ""
+        return new URLSearchParams(window.location.search).get("email") ?? ""
+    })
     const [password, setPassword] = useState("")
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
@@ -211,7 +216,7 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
                     </h1>
 
                     <p className="text-zinc-400 text-[15px] leading-relaxed mb-10 max-w-[360px]">
-                        SmartFlow automatizuje komunikaciju s kupcima, prati prodaju i generiše izveštaje — za sve vaše brendove odjednom.
+                        Vaš AI sistem vodi prodaju i komunikaciju sa klijentima na svim digitalnim kanalima i beleži svaki razgovor.
                     </p>
 
                     {/* Features */}

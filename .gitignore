@@ -42,3 +42,6 @@ next-env.d.ts
 .next/
 node_modules/
 enrich_missing.mjs
+
+# fetched site text the demo gate verifies against (lib/demo-gate-io.mjs)
+/corpus/

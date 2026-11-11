@@ -28,16 +28,19 @@
  *   node source_ig_bio_search.mjs             — live run, enrich + insert
  *   node source_ig_bio_search.mjs --limit 15  — cap DB inserts
  *   node source_ig_bio_search.mjs --pages 2   — fetch 2 cursor pages per term instead of 1 (2x cost)
+ *   node source_ig_bio_search.mjs --geo       — also run the 300 niche × city terms (off by default since 2026-11-05)
+ *   node source_ig_bio_search.mjs --dry-run --json out.json — write filtered candidates for find_leads.mjs
  *
  * NOTE: requires SC_API_KEY / SCRAPECREATORS_KEY to have a paid credit balance.
  * As of 2026-07-05 the shared key was out of credits (confirmed via a live 402) — this
  * script has been written against the documented API but not yet run end-to-end live.
  */
 
-import { readFileSync } from 'fs';
+import { readFileSync, writeFileSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { isPermabanned } from './lib/permaban.mjs';
+import { qualifyForQueue } from './lib/lead-queue.mjs';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 function loadEnv() {
@@ -77,14 +80,47 @@ const MAX_FOLLOWERS = 200000;
 // these words are just a way to surface accounts that talk to customers via DM at all.
 // Cheap enough (1 credit/term) to run the full list every time — no rationing needed.
 const TERMS = [
-  'pošaljite nam poruku', 'javite se u poruku', 'kontaktirajte nas za više informacija',
-  'pišite nam za sve informacije', 'DM za cene', 'cena u inbox', 'sve informacije u inbox',
-  'pošaljite upit', 'za porudžbine pišite nam', 'stanje na upit', 'dostupno na upit',
-  'pitajte u komentarima', 'za rezervaciju pišite', 'pošaljite poruku za detalje',
-  'poručite putem poruke', 'DM za porudžbinu', 'cena i dostupnost u inbox',
-  'besplatna konsultacija', 'zakažite besplatnu procenu', 'pišite nam za rezervaciju',
-  'javite se za više detalja', 'pošaljite poruku za rezervaciju', 'za sve upite pišite',
+  // 2026-11-11 (Nikola: "I like the OG batch… future leads over that quality"): ONLY self-descriptions of high-consideration, owner-run
+  // verticals, the kinds of business in the original batch (prefab and tiny homes, pergolas, custom furniture, windows and doors,
+  // pools and solar, dental implants, aesthetic surgery, cars, phones, experiences). The generic "DM us" phrases returned 0 qualified from
+  // 142 candidates (international creators), and the beauty / laser / wellness / hotel terms below this line before today are exactly what
+  // pulled in the weak leads (two bridal shops, a laser studio, a hair-extension shop). lib/lead-profile.mjs is the same rule as a filter.
+  'montažne kuće', 'kontejnerske kuće', 'tiny house', 'drvene kuće', 'mobilne kuće',
+  'pergole', 'bioklimatske pergole', 'tende i pergole', 'zimske bašte', 'klizni krov',
+  'nameštaj po meri', 'kuhinje po meri', 'proizvodnja nameštaja', 'salon nameštaja', 'plakari po meri', 'ugaone garniture',
+  'PVC stolarija', 'aluminijumska stolarija', 'izgradnja bazena', 'solarni paneli', 'fotonaponski sistemi',
+  'stomatološka ordinacija', 'implantologija', 'dental centar', 'ortodoncija', 'zubna protetika',
+  'estetska hirurgija', 'plastična hirurgija', 'auto salon', 'polovni automobili', 'mobilni telefoni otkup',
+  'tandem skokovi', 'paraglajding', 'izgradnja stanova',
 ];
+
+// ── Generated geo terms ───────────────────────────────────────────────────────
+// Measured 2026-09-15: the ScrapeCreators profile search returns NO pagination cursor —
+// one page of 10 results per term, full stop. `--pages` is therefore a no-op, and the only
+// lever on this channel's volume is the number of distinct search terms. 51 terms produced
+// ~390 unique profiles and 1 qualified lead, so term count is the whole ballgame.
+//
+// A business names its city in its IG bio far more reliably than it uses any particular CTA
+// phrase, so niche × city is a dense, non-overlapping way to generate real terms rather than
+// synonyms of the same query. Appended AFTER the hand-written list so `--terms N` always
+// keeps the proven terms first and treats these as the expansion tail.
+const GEO_NICHES = [
+  'stomatolog', 'stomatološka ordinacija', 'ortodoncija', 'implantologija',
+  'estetska medicina', 'kozmetički salon', 'salon lepote', 'laserska epilacija',
+  'nameštaj po meri', 'kuhinje po meri', 'salon nameštaja', 'tapaciranje nameštaja',
+  'fizikalna terapija', 'wellness centar', 'privatna klinika',
+];
+const GEO_CITIES = [
+  'Beograd', 'Novi Sad', 'Niš', 'Kragujevac', 'Subotica', 'Čačak', 'Kraljevo',
+  'Novi Pazar', 'Leskovac', 'Valjevo', 'Šabac', 'Užice', 'Zrenjanin', 'Pančevo',
+  'Smederevo', 'Kruševac', 'Sombor', 'Vranje', 'Zaječar', 'Loznica',
+];
+// City-major, so a --terms cap still yields every niche rather than 20 cities of one niche.
+// 2026-11-05: OPT-IN (--geo). Measured on the full run of 2026-11-04: ~375 terms (300 of them niche × city) →
+// 1851 profiles, 1263 under 1k followers, 25 in the 30k-200k band, 6 past the filters, 3 past the reel check:
+// ~125 credits per good lead, and the run left 140 credits. A business with 30k+ followers rarely names a
+// small town in its bio; "kozmetički salon Loznica" finds the salon with 800 followers.
+if (process.argv.includes('--geo')) for (const c of GEO_CITIES) for (const n of GEO_NICHES) TERMS.push(`${n} ${c}`);
 
 // ── Exclusion categories (business-category signals from ScrapeCreators' category_name) ──
 // Same principle as source_leads.mjs: exclude D2C retail, media, and personal brands —
@@ -255,7 +291,10 @@ async function main() {
   console.log('─── Stage 1: Instagram bio/caption search ──────────────');
   const byHandle = new Map();
   const termsToRun = Number.isFinite(TERMS_CAP) ? TERMS.slice(0, TERMS_CAP) : TERMS;
-  console.log(`  Using ${termsToRun.length}/${TERMS.length} terms${Number.isFinite(TERMS_CAP) ? ' (--terms cap)' : ''} — est. cost: ${termsToRun.length * PAGES_PER_TERM} credits\n`);
+  // Cost is terms, not terms × pages: the API returns no cursor, so every term is exactly
+  // one request no matter what --pages says.
+  console.log(`  Using ${termsToRun.length}/${TERMS.length} terms${Number.isFinite(TERMS_CAP) ? ' (--terms cap)' : ''} — est. cost: ${termsToRun.length} credits\n`);
+  if (PAGES_PER_TERM > 1) console.log('  (--pages is a no-op: this endpoint returns no pagination cursor)\n');
   for (const term of termsToRun) {
     let cursor = null;
     for (let page = 0; page < PAGES_PER_TERM; page++) {
@@ -264,7 +303,8 @@ async function main() {
         const profiles = result.profiles || [];
         process.stdout.write(`  "${term}"${page > 0 ? ` p${page + 1}` : ''}: ${profiles.length} results\n`);
         for (const p of profiles) {
-          if (p.username && !byHandle.has(p.username.toLowerCase())) byHandle.set(p.username.toLowerCase(), p);
+          // _term: which search term found it, so each run shows which terms produce leads that pass.
+          if (p.username && !byHandle.has(p.username.toLowerCase())) byHandle.set(p.username.toLowerCase(), { ...p, _term: term });
         }
         cursor = result.cursor;
         if (!cursor) break;
@@ -279,9 +319,14 @@ async function main() {
 
   // ── Stage 2: filter ────────────────────────────────────────────────────────
   console.log('─── Stage 2: Filter ─────────────────────────────────────');
+  const isDebug = process.argv.includes('--debug');
   const dbg = { dup: 0, notBusiness: 0, followers: 0, category: 0, name: 0, notSerbian: 0, passed: 0 };
   const qualified = [];
   for (const [handle, p] of byHandle) {
+    if (isDebug) {
+      const followers = p.follower_count || 0;
+      console.log(`  DEBUG @${handle}: followers=${followers} biz=${p.is_business_account} pro=${p.is_professional_account} cat=${p.category_name || '—'}`);
+    }
     if (existingHandles.has(handle))                              { dbg.dup++;         continue; }
     if (isPermabanned({ igHandle: handle }))                      { dbg.permaban = (dbg.permaban||0)+1; continue; }
     if (!p.is_business_account && !p.is_professional_account)     { dbg.notBusiness++; continue; }
@@ -302,9 +347,37 @@ async function main() {
   console.log(`  Not Serbian      : ${dbg.notSerbian}`);
   console.log(`  Qualified        : ${dbg.passed}\n`);
 
+  // The follower band rejects far more candidates than every other filter combined (500 of 691
+  // on the 2026-09-15 150-term run), so the floor is the single highest-leverage knob on this
+  // channel — and it was invisible, reported only as one lumped "Follower range" count. Print
+  // the distribution so the trade-off is a number rather than a guess.
+  const BUCKETS = [[0, 1000], [1000, 5000], [5000, 10000], [10000, 20000], [20000, 30000], [30000, 200000], [200000, Infinity]];
+  const bcount = BUCKETS.map(() => 0);
+  for (const prof of byHandle.values()) {
+    const f = prof.follower_count ?? prof.followers ?? prof.followerCount ?? 0;
+    const i = BUCKETS.findIndex(([lo, hi]) => f >= lo && f < hi);
+    if (i >= 0) bcount[i]++;
+  }
+  console.log('  Follower distribution of everything found:');
+  BUCKETS.forEach(([lo, hi], i) => {
+    const label = hi === Infinity ? `${lo / 1000}k+` : `${lo >= 1000 ? lo / 1000 + 'k' : lo}-${hi / 1000}k`;
+    const mark = lo >= MIN_FOLLOWERS && hi <= MAX_FOLLOWERS ? '  <- current band' : '';
+    console.log(`    ${label.padEnd(10)} ${String(bcount[i]).padStart(4)}${mark}`);
+  });
+  console.log('');
+
   if (!qualified.length) { console.log('No qualified leads found.'); return; }
 
   const toProcess = Number.isFinite(LIMIT) ? qualified.slice(0, LIMIT) : qualified;
+
+  // --json <file>: hand the filtered candidates to find_leads.mjs, which runs the reel/comment check before anything
+  // is enriched or inserted (the expensive and irreversible steps come last).
+  const jsonIdx = process.argv.indexOf('--json');
+  if (jsonIdx !== -1) {
+    writeFileSync(process.argv[jsonIdx + 1], JSON.stringify(qualified.map(p => ({ handle: p.username, name: p.full_name, followers: p.follower_count,
+      bio: p.biography, website: p.external_url, category: p.category_name, term: p._term })), null, 2));
+    console.log(`  → ${qualified.length} candidates written to ${process.argv[jsonIdx + 1]}`);
+  }
 
   if (isDryRun) {
     console.log('═══════════════════════════════════════════════════════');
@@ -374,7 +447,9 @@ async function main() {
       status             : p._contact?.email ? 'enriched' : 'No Draft',
       izvor              : 'ig_bio_search_scrapecreators',
       kategorija         : (p.follower_count || 0) >= 50000 ? 'Vreo' : (p.follower_count || 0) >= 15000 ? 'Topao' : 'Hladan',
-      pipeline_stage     : 'novi',
+      // Only a lead that survives the gate lands in 'novi' — that stage is the
+      // cockpit's approval queue, not a staging area.
+      pipeline_stage     : 'novi',   // overwritten just below by the qualification gate
       intake_data: {
         scraped_at   : new Date().toISOString(),
         scrape_method: 'scrapecreators_ig_bio_search',
@@ -390,6 +465,15 @@ async function main() {
       client_id      : SMARTFLOW_ID,
       sledeca_akcija : p._contact?.email ? 'Generisati email draft i poslati' : 'Pronaći kontakt email',
     };
+
+    // The gate decides where this lands. 'novi' IS the cockpit's approval queue, so
+    // only a lead we can actually judge — reachable, audience measured, handle sane —
+    // belongs there. Everything else waits in 'sourced' for enrichment or a look.
+    const q = qualifyForQueue(record);
+    record.pipeline_stage = q.verdict === 'ready' ? 'novi' : 'sourced';
+    record.prioritet_skor = q.score;
+    record.sledeca_akcija = q.action;
+    if (q.verdict === 'reject') record.status = 'Disqualified';
 
     // No on_conflict here: (client_id, instagram_handle) has no UNIQUE CONSTRAINT in the DB
     // (8 pre-existing duplicate pairs from other channels block adding one without a cleanup

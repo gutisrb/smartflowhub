@@ -1,7 +1,8 @@
 "use client"
 
-import { useState, useEffect, useCallback, useMemo } from "react"
+import { useState, useEffect, useCallback, useMemo, useRef } from "react"
 import { createClient } from "@/lib/supabase/client"
+import { adoptDemoSession } from "@/lib/supabase/demo-preview"
 import { LoginForm } from "@/components/auth/login-form"
 import { Sidebar } from "@/components/dashboard/sidebar"
 import { useUnifiedModules } from "@/lib/modules/hooks"
@@ -26,8 +27,11 @@ import { SettingsModule } from "@/components/modules/settings-module"
 import { inferNicheKey, NICHE_CONFIGS } from "@/lib/niche-config"
 import { IntroStep } from "@/components/onboarding/steps/intro-step"
 import { OnboardingTour } from "@/components/onboarding/onboarding-tour"
-import { isServiceNiche, tourHeroFor, focusBeatsFor } from "@/lib/onboarding/tour-slots"
+import { canChangeView, shouldSwallowKey } from "@/lib/onboarding/tour-lock"
+import { setStatusLabels } from "@/lib/lead-status"
+import { isServiceNiche, isQuoteNiche, tourHeroFor, tourFileFor, focusBeatsFor, focusFollowFor } from "@/lib/onboarding/tour-slots"
 import { TourFocus } from "@/components/onboarding/tour-focus"
+import { brandAccent } from "@/lib/brand-color"
 import { PonudaModule } from "@/components/modules/ponuda-module"
 import { CommandCenterModule } from "@/components/modules/command-center-module"
 import type { OnboardingCopy } from "@/lib/onboarding/types"
@@ -39,6 +43,7 @@ export default function DashboardPage() {
   const [clientName, setClientName] = useState("")
   const [userEmail, setUserEmail] = useState<string | null>(null)
   const [demoNiche, setDemoNiche] = useState<string | null>(null)
+  const [brandHex, setBrandHex] = useState<string | null>(null)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   // For group clients: selected brand IDs (multi-select). Default = first brand only.
   const [selectedBrandIds, setSelectedBrandIds] = useState<string[]>([])
@@ -53,7 +58,62 @@ export default function DashboardPage() {
   // Hero customer each beat spotlights — niche-branched (service demos seed
   // Marija/Dragana, product demos Stefan/Jelena), so highlights actually match.
   const tourIsService = isServiceNiche(demoNiche)
+  // this business's own words for the stored statuses (Business Sheet); set before any module renders
+  useMemo(() => {
+    const sheet = (onboardingCopy as any)?.business_sheet
+    setStatusLabels(sheet?.status_labels ?? null, sheet?.won_tile ?? null)
+  }, [onboardingCopy])
+  // The tenant's own accent, floored so it still reads on the dark UI.
+  const accent = brandAccent(brandHex)
   const tourHeroName = showOnboarding ? tourHeroFor(tourSlot, tourIsService) : null
+  const tourActive = showOnboarding && onboardingPhase === 'tour'
+
+  // Every navigation the viewer starts goes through here. While the tour runs only the tour
+  // moves the page (it calls setActiveModule directly), so no click path can walk off the
+  // beat, however it got past the pointer lock.
+  const changeView = (view: ModuleKey) => {
+    if (!canChangeView(tourActive, "user")) return
+    userPickedRef.current = true
+    setActiveModule(view)
+    setSidebarOpen(false)
+  }
+
+  // The tour is a guided film, not a live session: while it runs, clicks anywhere but the
+  // tour card are swallowed (the viewer was able to open modals under the highlight and
+  // walk off to other pages mid-beat). Scrolling still works — the long pages are meant
+  // to be read — and the cursor stops promising clickable things (globals.css).
+  useEffect(() => {
+    if (!tourActive) return
+    const root = document.documentElement
+    root.classList.add('tour-locked')
+    const swallow = (e: Event) => {
+      const t = e.target as Element | null
+      if (t && typeof t.closest === 'function' && t.closest('[data-tour-ui]')) return
+      e.preventDefault()
+      e.stopPropagation()
+    }
+    // Escape closes Radix dialogs from a document-level listener, so it is stopped here, at the
+    // window in the capture phase, before any of them see it. Everything else only needs its
+    // default action cancelled, which leaves the tour card's own shortcuts working.
+    const onKey = (e: KeyboardEvent) => {
+      const t = e.target as Element | null
+      const inTourUi = !!(t && typeof t.closest === 'function' && t.closest('[data-tour-ui]'))
+      if (!shouldSwallowKey(e.key, inTourUi)) return
+      e.preventDefault()
+      if (e.key === 'Escape') e.stopPropagation()
+    }
+    const types = ['pointerdown', 'mousedown', 'mouseup', 'click', 'dblclick', 'auxclick', 'contextmenu', 'submit']
+    types.forEach(ty => window.addEventListener(ty, swallow, true))
+    window.addEventListener('keydown', onKey, true)
+    window.addEventListener('keyup', onKey, true)
+    ;(document.activeElement as HTMLElement | null)?.blur?.()
+    return () => {
+      root.classList.remove('tour-locked')
+      types.forEach(ty => window.removeEventListener(ty, swallow, true))
+      window.removeEventListener('keydown', onKey, true)
+      window.removeEventListener('keyup', onKey, true)
+    }
+  }, [tourActive])
 
   // Primary effective clientId — first selected brand (used by AI Agent, module loading, etc.)
   const effectiveClientId = useMemo(() => {
@@ -68,6 +128,9 @@ export default function DashboardPage() {
   const { modules: availableModules, loading: isLoading } = useUnifiedModules(effectiveClientId)
 
   const checkSession = useCallback(async () => {
+    // A demo-preview tab arrives holding freshly minted tokens; install them
+    // before anything asks who is signed in.
+    await adoptDemoSession(supabase)
     const { data: { session } } = await supabase.auth.getSession()
     if (session) {
       setIsAuthenticated(true)
@@ -75,7 +138,7 @@ export default function DashboardPage() {
       if (session.user.email) {
         const { data } = await supabase
           .from('clients')
-          .select('id, name, demo_niche')
+          .select('id, name, demo_niche, demo_brand_color')
           .eq('email', session.user.email)
           .single()
 
@@ -83,6 +146,7 @@ export default function DashboardPage() {
           setClientId(data.id)
           setClientName(data.name)
           setDemoNiche((data as any).demo_niche ?? null)
+          setBrandHex((data as any).demo_brand_color ?? null)
           // Onboarding gating fields — guarded so a pre-migration schema
           // (columns absent) never breaks login; on error treat as onboarded.
           const { data: ob, error: obErr } = await supabase
@@ -105,12 +169,30 @@ export default function DashboardPage() {
     checkSession()
   }, [checkSession])
 
-  // Ensure active module is in available set
+  // Landing module.
+  //
+  // The module list arrives in stages. During one of those frames `command-center`
+  // is briefly absent, the old fallback picked availableModules[0] — Email Outreach,
+  // the raw 500-row table — and that choice then stuck because it was itself valid.
+  // Net effect: the operator opened the app every day on a list of 500 archived
+  // leads instead of the seven that need a decision.
+  //
+  // So the landing choice is made ONCE, after the list settles, and only until the
+  // operator picks something themselves.
+  // "Settled" is not a state we can detect: isLoading goes false while the list is
+  // still partial, which is how the fallback kept landing on Email Outreach. So we
+  // keep steering to the conveyor for as long as the operator hasn't chosen a module
+  // themselves — once they click anything, we never override again.
+  const userPickedRef = useRef(false)
   useEffect(() => {
-    if (!isLoading && availableModules.length > 0) {
-      if (!availableModules.some(m => m.key === activeModule)) {
-        setActiveModule(availableModules[0].key)
-      }
+    if (isLoading || availableModules.length === 0) return
+
+    if (!userPickedRef.current) {
+      const cc = availableModules.find(m => m.key === 'command-center')
+      if (cc && activeModule !== cc.key) { setActiveModule(cc.key); return }
+    }
+    if (!availableModules.some(m => m.key === activeModule)) {
+      setActiveModule(availableModules[0].key)
     }
   }, [availableModules, isLoading, activeModule])
 
@@ -273,7 +355,7 @@ export default function DashboardPage() {
           statuses={settings.statuses || ['Novi Lead', 'enriched', 'Kontaktiran', 'Meeting Booked', 'Closed', 'Lost', 'Sent']}
         />
       case 'business-crm':
-        if (demoNiche) return <AgentLeadsModule clientId={effectiveClientId} demoMode nicheKey={inferNicheKey(demoNiche)} tourHighlightName={tourSlot === 'crm' ? tourHeroName ?? undefined : undefined} tourOpenLogName={tourSlot === 'crm' ? tourHeroName ?? undefined : undefined} />
+        if (demoNiche) return <AgentLeadsModule clientId={effectiveClientId} demoMode nicheKey={inferNicheKey(demoNiche)} tourHighlightName={(tourSlot === 'crm' || tourSlot === 'crm-izgubljen') ? tourHeroName ?? undefined : undefined} orderTracking={!!(onboardingCopy as any)?.business_sheet?.flows?.orderTracking} tourOpenLogName={showOnboarding ? tourFileFor(tourSlot, tourIsService) ?? undefined : undefined} />
         return <GrowthEngineModule
           clientId={effectiveClientId}
           tableName="kontakti"
@@ -291,6 +373,11 @@ export default function DashboardPage() {
         const nicheCatalogLabel = demoNiche ? (NICHE_CONFIGS[nicheKey]?.catalogLabel ?? 'Usluge') : 'Usluge'
         return <AgentDatabaseModule
           clientId={effectiveClientId}
+          catalogSource={(onboardingCopy as any)?.catalog_source ?? null}
+          catalogSyncedAt={(onboardingCopy as any)?.catalog_synced_at ?? null}
+          catalogTerms={(onboardingCopy as any)?.offer_terms ?? null}
+          serviceMode={isServiceNiche(demoNiche)}
+          quoteMode={isQuoteNiche(demoNiche)}
           terminology={terminology}
           selectedBrandIds={isBookStoreClient && selectedBrandIds.length > 1 ? selectedBrandIds : undefined}
           demoMode={!!demoNiche && !isBookStoreClient}
@@ -301,13 +388,13 @@ export default function DashboardPage() {
       case 'agent-leads':
         return <AgentLeadsModule clientId={effectiveClientId} terminology={terminology} selectedBrandIds={isBookStoreClient && selectedBrandIds.length > 1 ? selectedBrandIds : undefined} />
       case 'social-chatbot':
-        return <SocialChatbotModule clientId={effectiveClientId} selectedBrandIds={isBookStoreClient && selectedBrandIds.length > 0 ? selectedBrandIds : undefined} clientName={clientName} nicheKey={demoNiche ? inferNicheKey(demoNiche) : undefined} demoMode={!!demoNiche} demoPlayback={inboxPlayback} tourFocusName={(tourSlot === 'inbox' || tourSlot === 'inbox-intervencija') ? tourHeroName ?? undefined : undefined} />
+        return <SocialChatbotModule clientId={effectiveClientId} selectedBrandIds={isBookStoreClient && selectedBrandIds.length > 0 ? selectedBrandIds : undefined} clientName={clientName} nicheKey={demoNiche ? inferNicheKey(demoNiche) : undefined} demoMode={!!demoNiche} demoPlayback={inboxPlayback} tourFocusName={(tourSlot === 'inbox' || tourSlot === 'inbox-intervencija' || tourSlot === 'inbox-odgovor') ? tourHeroName ?? undefined : undefined} />
       case 'website-chatbot':
         return <WebsiteChatbotModule clientId={effectiveClientId} />
       case 'chatbot-analytics':
         return <ChatbotAnalyticsModule clientId={effectiveClientId} selectedBrandIds={isBookStoreClient && selectedBrandIds.length > 1 ? selectedBrandIds : undefined} demoNiche={demoNiche} />
       case 'ponuda':
-        return <PonudaModule clientName={clientName} onReplay={replayOnboarding} />
+        return <PonudaModule clientName={clientName} brandColor={accent} niche={demoNiche} flows={(onboardingCopy as any)?.business_sheet?.flows ?? null} onReplay={replayOnboarding} />
       case 'settings':
         return <SettingsModule clientId={effectiveClientId} selectedBrandIds={selectedBrandIds.length > 0 ? selectedBrandIds : undefined} />
       default:
@@ -326,7 +413,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="flex h-screen bg-background overflow-hidden font-sans">
+    <div data-tour-lockable className="flex h-screen bg-background overflow-hidden font-sans">
       {/* Mobile overlay backdrop */}
       {sidebarOpen && (
         <div
@@ -338,7 +425,7 @@ export default function DashboardPage() {
       {isAuthenticated && (
         <Sidebar
           currentView={activeModule}
-          onViewChange={(view) => { setActiveModule(view); setSidebarOpen(false) }}
+          onViewChange={(view) => changeView(view)}
           clientName={clientName}
           clientId={effectiveClientId}
           modules={filteredModules}
@@ -351,7 +438,8 @@ export default function DashboardPage() {
             : undefined}
           selectedBrandIds={selectedBrandIds.length > 0 ? selectedBrandIds : (clientId && isGroupClient(clientId) ? [GROUP_CLIENTS[clientId]?.[0] ?? ''] : undefined)}
           onBrandSelectionChange={(ids) => setSelectedBrandIds(ids)}
-          hideCategories={isBookStoreClient}
+          logoUrl={(onboardingCopy as any)?.brand_logo ?? null}
+          locked={tourActive}
         />
       )}
 
@@ -426,10 +514,12 @@ export default function DashboardPage() {
           <div
             data-tour-scroll
             className={cn(
-              "flex-1 overflow-y-auto p-3 md:p-10 scrollbar-none custom-scrollbar",
+              // one consistent inset for every module (modules no longer add their own p-6 on top)
+              "flex-1 overflow-y-auto p-3 md:p-6 lg:px-8 lg:py-6 scrollbar-none custom-scrollbar",
               // the tour's narration bar is fixed over the bottom of this area —
               // reserve enough room that nothing (least of all the CTA) hides under it
-              showOnboarding && onboardingPhase === 'tour' ? "pb-56 md:pb-64" : "pb-24 md:pb-32",
+              // identical in and out of the tour: the tour is an overlay, never a layout change
+              "pb-10",
             )}
           >
             <div className="max-w-[1600px] mx-auto" data-tour="module-content">
@@ -450,7 +540,9 @@ export default function DashboardPage() {
                   </div>
                 </div>
               ) : effectiveClientId ? (
-                <div className="animate-in fade-in slide-in-from-bottom-6 duration-1000 ease-out fill-mode-forwards">
+                // During the tour: fade only. A 24px slide-in moved every target out from
+                // under the highlight for a full second after each step began.
+                <div className={cn("animate-in fade-in fill-mode-forwards", tourActive ? "duration-300" : "slide-in-from-bottom-6 duration-1000 ease-out")}>
                   {renderModule()}
                 </div>
               ) : (
@@ -471,7 +563,7 @@ export default function DashboardPage() {
                   return (
                     <button
                       key={mod.key}
-                      onClick={() => { setActiveModule(mod.key); setSidebarOpen(false) }}
+                      onClick={() => changeView(mod.key)}
                       className={cn(
                         "flex flex-col items-center gap-1 px-3 py-2 rounded-xl shrink-0 transition-all duration-200 min-w-[60px]",
                         isActive
@@ -509,7 +601,7 @@ export default function DashboardPage() {
               className="pointer-events-auto flex items-start gap-3 rounded-2xl border border-white/10 bg-[#0e1116]/95 backdrop-blur-xl shadow-2xl px-4 py-3 min-w-[260px] max-w-[320px] cursor-pointer"
               style={{ borderLeft: `3px solid ${toast.color}` }}
               onClick={() => {
-                setActiveModule('social-chatbot')
+                changeView('social-chatbot')
                 setIntervencijaToasts(p => p.filter(t => t.id !== toast.id))
               }}
             >
@@ -534,21 +626,22 @@ export default function DashboardPage() {
       </div>
 
       {showOnboarding && onboardingPhase === 'intro' && (
-        <IntroStep brandColor="#10b981" onNext={() => setOnboardingPhase('tour')} />
+        <IntroStep brandColor={accent} clientName={clientName} niche={demoNiche} artUrl={(onboardingCopy as any)?.intro_art ?? null} logoUrl={(onboardingCopy as any)?.brand_logo ?? null} inStore={!!(onboardingCopy as any)?.business_sheet?.flows?.inStore && !(onboardingCopy as any)?.business_sheet?.flows?.orderTracking} stays={!!(onboardingCopy as any)?.business_sheet?.flows?.stays} onNext={() => setOnboardingPhase('tour')} />
       )}
       {showOnboarding && onboardingPhase === 'tour' && (
-        <TourFocus beats={focusBeatsFor(tourSlot)} brandColor="#10b981" beatKey={tourSlot ?? ""} scrollSelector="[data-tour-scroll]" />
+        <TourFocus beats={focusBeatsFor(tourSlot)} follow={focusFollowFor(tourSlot)} brandColor={accent} beatKey={tourSlot ?? ""} scrollSelector="[data-tour-scroll]" />
       )}
       {showOnboarding && onboardingPhase === 'tour' && (
         <OnboardingTour
           modules={filteredModules}
           clientName={clientName}
           niche={demoNiche}
-          brandColor="#10b981"
+          brandColor={accent}
           onNavigate={(key) => setActiveModule(key as ModuleKey)}
           onPlayback={setInboxPlayback}
           onSlot={setTourSlot}
           onComplete={() => { setInboxPlayback(false); markOnboarded() }}
+          flows={(onboardingCopy as any)?.business_sheet?.flows ?? null}
         />
       )}
     </div>

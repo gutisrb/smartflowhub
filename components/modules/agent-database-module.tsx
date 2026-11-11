@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { ModuleHeader } from "@/components/ui/module-header"
 import {
     Plus,
     Database,
@@ -57,6 +58,11 @@ interface AgentDatabaseModuleProps {
     demoMode?: boolean            // When true, fetch from services_catalog (generic demo tenants)
     demoLabel?: string            // Tab label override when in demo mode (e.g. "Tretmani", "Meni")
     nicheKey?: string             // Demo niche key — ecommerce niches use proizvodi table instead of services_catalog
+    catalogSource?: string | null   // domain this catalogue was built from
+    catalogSyncedAt?: string | null // when it was last pulled
+    catalogTerms?: { guarantee?: string | null; payment_schedule?: string | null; financing?: string | null; free_consultation?: { label?: string } | null; included?: string[]; delivery?: string | null; returns?: string | null } | null
+    serviceMode?: boolean           // scheduling business: show terms, not stock/photos/orders
+    quoteMode?: boolean             // made-to-order business: terms, but no durations (nothing is booked by the hour)
     terminology?: {
         title: string
         highlight: string
@@ -76,6 +82,11 @@ export function AgentDatabaseModule({
     demoMode = false,
     demoLabel = 'Usluge',
     nicheKey,
+    catalogSource,
+    catalogSyncedAt,
+    catalogTerms,
+    serviceMode,
+    quoteMode,
     terminology = {
         title: "Growth",
         highlight: "Engine",
@@ -339,7 +350,8 @@ export function AgentDatabaseModule({
     }, [terminology])
 
     if (demoMode) {
-        return <ServicesCatalogView items={items} loading={loading} label={demoLabel} onRefresh={handleRefresh} />
+        return <ServicesCatalogView items={items} loading={loading} label={demoLabel} onRefresh={handleRefresh}
+            source={catalogSource} syncedAt={catalogSyncedAt} terms={catalogTerms} serviceMode={serviceMode} quoteMode={quoteMode} />
     }
 
     return (
@@ -982,7 +994,13 @@ function getStockStatus(item: ServiceItem): { label: string; color: string } | n
         : { label: 'Na stanju', color: 'text-emerald-400 bg-emerald-400/10 border-emerald-400/20' }
 }
 
-function ServicesCatalogView({ items, loading, label, onRefresh }: { items: ServiceItem[]; loading: boolean; label: string; onRefresh: () => void }) {
+/** Serbian count agreement: 1 stavka, 2–4 stavke, 5+ stavki. */
+function srCount(n: number, one: string, few: string, many: string) {
+    const m10 = n % 10, m100 = n % 100
+    return `${n} ${m10 === 1 && m100 !== 11 ? one : m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14) ? few : many}`
+}
+
+function ServicesCatalogView({ items, loading, label, onRefresh, source, syncedAt, terms, serviceMode, quoteMode }: { items: ServiceItem[]; loading: boolean; label: string; onRefresh: () => void; source?: string | null; syncedAt?: string | null; terms?: AgentDatabaseModuleProps['catalogTerms']; serviceMode?: boolean; quoteMode?: boolean }) {
     const [search, setSearch] = useState("")
     const [selectedCategory, setSelectedCategory] = useState<string>("all")
     const [selected, setSelected] = useState<ServiceItem | null>(null)
@@ -1041,53 +1059,111 @@ function ServicesCatalogView({ items, loading, label, onRefresh }: { items: Serv
         setSavingId(null)
     }
 
+    const priced = localItems.filter(i => (i.price_min ?? 0) > 0)
+    const withPhoto = localItems.filter(i => i.image_url)
+    // a made-to-order business has no durations (nothing is booked by the hour), so one column less
+    const listCols = quoteMode ? 'grid-cols-[minmax(0,2.2fr)_minmax(0,3fr)_130px]' : 'grid-cols-[minmax(0,2.2fr)_minmax(0,3fr)_90px_130px]'
+    const syncedLabel = syncedAt
+        ? new Date(syncedAt).toLocaleDateString('sr-Latn-RS', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
+        : null
+
     return (
-        <div className="p-6 space-y-6">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h2 className="text-xl font-outfit font-semibold text-white">{label}</h2>
-                    <p className="text-sm text-slate-400 mt-0.5">{localItems.length} stavki · {localItems.filter(i => i.is_active).length} dostupno</p>
-                </div>
-                <div className="flex items-center gap-2">
-                    <div className="flex items-center rounded-xl glass-card overflow-hidden">
-                        <button
-                            onClick={() => setViewMode('grid')}
-                            className={cn("p-2 transition-colors", viewMode === 'grid' ? "bg-white/15 text-white" : "text-slate-500 hover:text-slate-300")}
-                            title="Grid prikaz"
-                        >
-                            <LayoutGrid className="w-4 h-4" />
-                        </button>
-                        <button
-                            onClick={() => setViewMode('list')}
-                            className={cn("p-2 transition-colors", viewMode === 'list' ? "bg-white/15 text-white" : "text-slate-500 hover:text-slate-300")}
-                            title="Lista"
-                        >
-                            <List className="w-4 h-4" />
-                        </button>
-                    </div>
-                    <button onClick={onRefresh} className="p-2 rounded-lg glass-card hover:bg-white/10 transition-colors">
-                        <RefreshCw className="w-4 h-4 text-slate-400" />
+        <div className="space-y-3">
+            <ModuleHeader
+                title={label}
+                subtitle={serviceMode
+                    ? (quoteMode ? srCount(localItems.length, 'proizvod', 'proizvoda', 'proizvoda') : srCount(localItems.length, 'usluga', 'usluge', 'usluga'))
+                    : `${srCount(localItems.length, 'artikal', 'artikla', 'artikala')} · ${localItems.filter(i => i.is_active).length} na stanju`}
+            >
+                <div className="flex items-center rounded-lg surface-1 overflow-hidden">
+                    <button
+                        onClick={() => setViewMode('grid')}
+                        className={cn("p-1.5 transition-colors", viewMode === 'grid' ? "bg-white/10 text-white" : "text-zinc-500 hover:text-zinc-300")}
+                        title="Mreža"
+                    >
+                        <LayoutGrid className="w-4 h-4" />
+                    </button>
+                    <button
+                        onClick={() => setViewMode('list')}
+                        className={cn("p-1.5 transition-colors", viewMode === 'list' ? "bg-white/10 text-white" : "text-zinc-500 hover:text-zinc-300")}
+                        title="Lista"
+                    >
+                        <List className="w-4 h-4" />
                     </button>
                 </div>
-            </div>
+                <button onClick={onRefresh} className="p-1.5 rounded-lg surface-1 hover:bg-white/10 transition-colors" title="Osveži">
+                    <RefreshCw className="w-4 h-4 text-zinc-400" />
+                </button>
+            </ModuleHeader>
+
+            {/* ── Provenance ──────────────────────────────────────────────────
+                A catalogue page that is just a grid reads as a list somebody typed
+                up. The whole claim of this module is that it MIRRORS their shop and
+                that the agent quotes from it — so the page states that first, with
+                the numbers that back it. */}
+            {source && (
+                <div data-tour-focus="catalog-proof" className="rounded-xl border border-emerald-500/20 bg-emerald-500/[0.045] px-4 py-3">
+                    <div className="flex items-start justify-between gap-4 flex-wrap">
+                        <div className="flex items-center gap-2.5">
+                            <span className="relative flex w-2 h-2 shrink-0">
+                                <span className="absolute inline-flex w-full h-full rounded-full bg-emerald-400 opacity-70 animate-ping" />
+                                <span className="relative inline-flex w-2 h-2 rounded-full bg-emerald-400" />
+                            </span>
+                            <p className="text-[14px] text-white font-semibold">
+                                Nacrt iz <span className="text-emerald-300">{source}</span>
+                            </p>
+                            {syncedLabel && (
+                                <span className="text-[11px] text-[#8b9d9a]">· pročitano {syncedLabel} · na razgovoru ga usklađujemo sa Vašim načinom rada</span>
+                            )}
+                        </div>
+                        <button onClick={onRefresh}
+                            className="text-[11px] font-semibold text-emerald-300 hover:text-emerald-200 transition-colors">
+                            Osveži
+                        </button>
+                    </div>
+
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 mt-3">
+                        {(serviceMode
+                            ? [
+                                { k: quoteMode ? 'Proizvodi i cene' : 'Usluge i cene', v: `${priced.length} sa cenom`, d: 'Cene i uslovi koje agent navodi.' },
+                                { k: 'Šta je uključeno', v: terms?.included?.length ? srCount(terms.included.length, 'stavka', 'stavke', 'stavki') : 'nije navedeno', d: terms?.included?.length ? terms.included.slice(0, 3).join(', ') : 'Agent ne pretpostavlja šta cena sadrži.' },
+                                { k: 'Garancija', v: terms?.guarantee ? 'navedena' : 'nije navedena', d: terms?.guarantee ?? 'Agent je ne pominje dok je ne upišete.' },
+                                { k: 'Plaćanje', v: terms?.financing ? 'sa ratama' : terms?.payment_schedule ? 'u fazama' : 'nije navedeno', d: terms?.financing ?? terms?.payment_schedule ?? 'Rate ne nudi dok ih ne upišete.' },
+                            ]
+                            : [
+                                { k: 'Cene', v: `${priced.length} artikala`, d: 'Agent citira ove cene, ne izmišlja svoje.' },
+                                { k: 'Stanje', v: `${localItems.filter(i => i.is_active).length} dostupno`, d: 'Rasprodato ne nudi — predlaže zamenu.' },
+                                { k: 'Fotografije', v: `${withPhoto.length} sa slikom`, d: 'Prepoznaje artikal kada kupac pošalje sliku.' },
+                                { k: 'Porudžbine', v: 'idu u CRM', d: 'Ime, telefon i adresa — bez prekucavanja.' },
+                            ]
+                        ).map(c => (
+                            <div key={c.k} className="rounded-lg bg-black/25 border border-white/[0.06] px-3 py-2">
+                                <p className="text-[10px] font-black uppercase tracking-[0.14em] text-[#8b9d9a]">{c.k}</p>
+                                <p className="text-[15px] font-bold text-white mt-1 leading-none">{c.v}</p>
+                                <p className="text-[11px] text-[#a9bab7] leading-snug mt-1.5">{c.d}</p>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
 
             {/* Filters */}
-            <div className="flex flex-col sm:flex-row gap-3">
-                <div className="relative flex-1">
+            <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
+                <div className="relative sm:w-80">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
                     <input
                         type="text"
-                        placeholder="Pretraži katalog..."
+                        placeholder="Pretražite katalog…"
                         value={search}
                         onChange={e => setSearch(e.target.value)}
-                        className="w-full pl-9 pr-4 py-2 rounded-xl glass-card text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-white/20"
+                        className="w-full pl-9 pr-4 py-1.5 rounded-lg surface-1 text-[13px] text-white placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-white/20"
                     />
                 </div>
                 {categories.length > 1 && (
                     <div className="flex gap-2 flex-wrap">
                         <button
                             onClick={() => setSelectedCategory("all")}
-                            className={cn("px-3 py-1.5 rounded-lg text-sm transition-colors", selectedCategory === "all" ? "bg-white/15 text-white" : "text-slate-400 hover:text-white")}
+                            className={cn("px-2.5 py-1 rounded-md text-[12.5px] transition-colors", selectedCategory === "all" ? "bg-white/10 text-white" : "text-zinc-400 hover:text-white")}
                         >
                             Sve
                         </button>
@@ -1095,7 +1171,7 @@ function ServicesCatalogView({ items, loading, label, onRefresh }: { items: Serv
                             <button
                                 key={cat}
                                 onClick={() => setSelectedCategory(cat)}
-                                className={cn("px-3 py-1.5 rounded-lg text-sm transition-colors", selectedCategory === cat ? "bg-white/15 text-white" : "text-slate-400 hover:text-white")}
+                                className={cn("px-2.5 py-1 rounded-md text-[12.5px] transition-colors", selectedCategory === cat ? "bg-white/10 text-white" : "text-zinc-400 hover:text-white")}
                             >
                                 {cat}
                             </button>
@@ -1115,7 +1191,7 @@ function ServicesCatalogView({ items, loading, label, onRefresh }: { items: Serv
                 </div>
             ) : viewMode === 'grid' ? (
                 /* Grid view — visual ecommerce style */
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                <div data-tour-focus="catalog-grid" className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
                     {[...featured, ...rest].map(item => {
                         const stock = getStockStatus(item)
                         return (
@@ -1155,7 +1231,12 @@ function ServicesCatalogView({ items, loading, label, onRefresh }: { items: Serv
                                     <div className="flex items-center justify-between mt-2.5">
                                         {formatPrice(item.price_min, item.price_max) ? (
                                             <p className={cn("text-sm font-bold", !item.is_active && "line-through text-slate-500")} style={item.is_active ? { color: item.color_hex } : {}}>{formatPrice(item.price_min, item.price_max)}</p>
-                                        ) : <span />}
+                                        ) : (
+                                            /* A null price is now a real, common state: the demo builder refuses to invent
+                                               prices, and whole niches (aesthetic medicine, dentistry) publish none. An empty
+                                               <span /> here read as missing data; this reads as the deliberate Serbian norm. */
+                                            <p className="text-sm font-semibold text-slate-500">Cena na upit</p>
+                                        )}
                                         {isProductNiche ? (
                                             stock && (
                                                 <span className={cn("text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full border", stock.color)}>
@@ -1163,7 +1244,7 @@ function ServicesCatalogView({ items, loading, label, onRefresh }: { items: Serv
                                                 </span>
                                             )
                                         ) : (
-                                            item.duration_minutes && (
+                                            item.duration_minutes && !quoteMode && (
                                                 <p className="text-[10px] text-slate-500 flex items-center gap-1">
                                                     <Clock className="w-3 h-3" /> {item.duration_minutes} min
                                                 </p>
@@ -1176,53 +1257,45 @@ function ServicesCatalogView({ items, loading, label, onRefresh }: { items: Serv
                     })}
                 </div>
             ) : (
-                /* List layout */
-                <div className="glass-card rounded-2xl divide-y divide-white/[0.04]">
+                /* List layout — columns, one line per service, so a 40-item price list fits on a screen */
+                <div data-tour-focus="catalog-grid" className="rounded-xl surface-1 overflow-hidden">
+                    <div className={`grid ${listCols} gap-4 px-4 py-2 border-b border-white/[0.07] text-[10.5px] font-semibold uppercase tracking-[0.12em] text-zinc-500`}>
+                        <span>{quoteMode ? 'Proizvod' : serviceMode ? 'Usluga' : 'Artikal'}</span><span>Opis</span>{!quoteMode && <span className="text-right">{isProductNiche ? 'Stanje' : 'Trajanje'}</span>}<span className="text-right">Cena</span>
+                    </div>
+                    <div className="divide-y divide-white/[0.04]">
                     {[...featured, ...rest].map(item => {
                         const stock = getStockStatus(item)
+                        const price = formatPrice(item.price_min, item.price_max)
                         return (
                             <button
                                 key={item.id}
                                 onClick={() => setSelected(item)}
-                                className={cn("w-full text-left flex items-center gap-4 px-5 py-4 hover:bg-white/[0.03] transition-colors", !item.is_active && "opacity-50")}
+                                className={cn("w-full text-left grid gap-4 items-center px-4 py-2.5 hover:bg-white/[0.03] transition-colors", listCols, !item.is_active && "opacity-50")}
                             >
-                                {item.image_url ? (
-                                    <img src={item.image_url} alt={item.name} className="w-14 h-14 rounded-xl object-cover shrink-0" />
-                                ) : (
-                                    <div className="w-14 h-14 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: `${item.color_hex}20` }}>
-                                        <Tag className="w-5 h-5" style={{ color: item.is_active ? item.color_hex : '#64748b' }} />
-                                    </div>
-                                )}
-                                <div className="flex-1 min-w-0">
-                                    <div className="flex items-center gap-2 flex-wrap">
-                                        <p className={cn("text-sm font-semibold", item.is_active ? "text-white" : "text-slate-500 line-through")}>{item.name}</p>
-                                        {item.is_featured && <span className="text-[10px] text-amber-400 bg-amber-400/10 px-1.5 py-0.5 rounded-full">★ Istaknuto</span>}
-                                        {!item.is_active && <span className="text-[10px] text-red-400 bg-red-400/10 px-1.5 py-0.5 rounded-full">Nedostupno</span>}
-                                    </div>
-                                    {item.category && <p className="text-[10px] text-slate-500 uppercase tracking-widest mt-0.5">{item.category}</p>}
-                                    {item.description && <p className="text-xs text-slate-400 mt-1 line-clamp-2 leading-relaxed">{item.description}</p>}
-                                </div>
-                                <div className="text-right shrink-0 space-y-1.5 min-w-[90px]">
-                                    {formatPrice(item.price_min, item.price_max) && (
-                                        <p className={cn("text-sm font-bold", !item.is_active && "line-through text-slate-500")} style={item.is_active ? { color: item.color_hex } : {}}>{formatPrice(item.price_min, item.price_max)}</p>
-                                    )}
-                                    {isProductNiche ? (
-                                        stock && (
-                                            <span className={cn("text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full border block text-center", stock.color)}>
-                                                {stock.label}
-                                            </span>
-                                        )
-                                    ) : (
-                                        item.duration_minutes && (
-                                            <p className="text-xs text-slate-500 flex items-center gap-1 justify-end">
-                                                <Clock className="w-3 h-3" /> {item.duration_minutes} min
-                                            </p>
-                                        )
-                                    )}
-                                </div>
+                                <span className="flex items-center gap-2.5 min-w-0">
+                                    <span className="w-1 self-stretch rounded-full shrink-0" style={{ background: item.color_hex || '#64748b' }} />
+                                    <span className="min-w-0">
+                                        <span className="flex items-center gap-1.5">
+                                            <span className={cn("text-[13.5px] font-semibold truncate", item.is_active ? "text-white" : "text-slate-500 line-through")}>{item.name}</span>
+                                            {item.is_featured && <span className="text-[10px] text-amber-400 shrink-0">★</span>}
+                                        </span>
+                                        {item.category && <span className="block text-[11.5px] text-zinc-500 truncate">{item.category}</span>}
+                                    </span>
+                                </span>
+                                <span className="text-[12.5px] text-zinc-400 truncate">{item.description || '—'}</span>
+                                {!quoteMode && <span className="text-right text-[12.5px] text-zinc-400 tabular-nums">
+                                    {isProductNiche
+                                        ? (stock ? <span className={cn("text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded border", stock.color)}>{stock.label}</span> : '—')
+                                        : (item.duration_minutes ? `${item.duration_minutes} min` : '—')}
+                                </span>}
+                                <span className={cn("text-right text-[13.5px] font-bold tabular-nums", !item.is_active && "line-through text-slate-500")}
+                                    style={item.is_active && price ? { color: item.color_hex } : undefined}>
+                                    {price || <span className="text-[12px] font-medium text-zinc-500">Cena na upit</span>}
+                                </span>
                             </button>
                         )
                     })}
+                    </div>
                 </div>
             )}
 
@@ -1267,7 +1340,7 @@ function ServicesCatalogView({ items, loading, label, onRefresh }: { items: Serv
                                 ) : (
                                     <div className="flex items-center gap-2">
                                         <p className="text-base font-bold" style={{ color: selected.color_hex }}>
-                                            {formatPrice(selected.price_min, selected.price_max) ?? '—'}
+                                            {formatPrice(selected.price_min, selected.price_max) ?? 'Cena na upit'}
                                         </p>
                                         <button
                                             onClick={() => setEditingPrice({ id: selected.id, value: String(selected.price_min ?? selected.price_max ?? '') })}
@@ -1278,7 +1351,7 @@ function ServicesCatalogView({ items, loading, label, onRefresh }: { items: Serv
                                     </div>
                                 )}
                             </div>
-                            {selected.duration_minutes && (
+                            {selected.duration_minutes && !quoteMode && (
                                 <div>
                                     <p className="text-xs text-slate-500">Trajanje</p>
                                     <p className="text-base font-bold text-white">{selected.duration_minutes} min</p>

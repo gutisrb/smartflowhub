@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react"
 import { createClient } from "@/lib/supabase/client"
-import { getDemoShift, shiftRows } from "@/lib/demo/time-shift"
+import { getDemoShift, shiftRows, shiftRowsDays } from "@/lib/demo/time-shift"
 import {
     Dialog,
     DialogContent,
@@ -41,6 +41,8 @@ import {
     AlertTriangle,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { bucketForRow, bucketLabel, BUCKET_STYLE } from "@/lib/lead-status"
+import { ChannelGlyph } from "@/components/dashboard/channel-glyph"
 import { motion, AnimatePresence } from "framer-motion"
 import { format } from "date-fns"
 
@@ -63,6 +65,8 @@ interface LeadIntelligenceViewerProps {
     demoMode?: boolean
     /** Onboarding tour: shorten the panel so the narration bar can't sit on top of it. */
     tourMode?: boolean
+    /** made-to-order business: no calendar, the history is the offer */
+    quoteMode?: boolean
 }
 
 // ─── B2B Lead Intel Panel ─────────────────────────────────────────────────────
@@ -118,18 +122,70 @@ function getDeliveryStatusColor(s: string) {
 
 // ─── Demo CRM Customer Panel ──────────────────────────────────────────────────
 
-function DemoCRMCustomerPanel({ lead, messages, messagesLoading, tourMode }: { lead: any; messages: Message[]; messagesLoading: boolean; tourMode?: boolean }) {
-    // During the tour the point of opening this panel is the conversation log, which
-    // sits below the contact and order cards. Bring it up rather than making the
-    // viewer find it — they have about four seconds of attention here.
+/** First customer photo the inbox has for this thread — same face in the file as in the inbox. */
+function customerPhoto(messages: Message[]): string | null {
+    for (const m of messages) {
+        const pic = m.role === 'user' ? m.metadata?.profile_pic : null
+        if (pic) return pic
+    }
+    return null
+}
+
+function CustomerAvatar({ src, name, size = 28 }: { src: string | null; name: string; size?: number }) {
+    const [broken, setBroken] = useState(false)
+    if (src && !broken) {
+        // eslint-disable-next-line @next/next/no-img-element
+        return <img src={src} alt="" onError={() => setBroken(true)} className="rounded-full object-cover ring-2 ring-black/30 shrink-0" style={{ width: size, height: size }} />
+    }
+    return (
+        <div className="rounded-full shrink-0 flex items-center justify-center font-bold text-white bg-gradient-to-br from-emerald-500/60 to-cyan-600/60 ring-2 ring-black/30"
+            style={{ width: size, height: size, fontSize: Math.round(size * 0.4) }}>
+            {(name || '?')[0]?.toUpperCase()}
+        </div>
+    )
+}
+
+interface HistoryItem { id: string; when: Date; title: string; status: string; tone: 'next' | 'done' | 'miss' | 'neutral'; note?: string | null }
+
+const APPT_STATUS: Record<string, { label: string; tone: HistoryItem['tone'] }> = {
+    completed: { label: 'Završen', tone: 'done' },
+    cancelled: { label: 'Otkazan', tone: 'miss' },
+    no_show:   { label: 'Nije došao', tone: 'miss' },
+}
+
+/**
+ * The outcome, written as a sentence. A status pill says "Zainteresovan"; the owner
+ * wants to know what happened. This is the first thing on the file and the thing the
+ * tour points at.
+ */
+function outcomeOf(lead: any, service: boolean, quote = false) {
+    const s = (lead.status || '').toLowerCase()
+    const bucket = bucketForRow(lead)
+    if (s === 'ponuda' || (quote && s === 'zakazano')) return { title: 'Ponuda zatražena', bucket, fallback: null }
+    if (s === 'zakazano')                       return { title: 'Termin zakazan', bucket, fallback: null }
+    if (s === 'završeno')                       return { title: 'Termin održan', bucket, fallback: null }
+    if (s === 'naručio' || s === 'poručio')     return { title: 'Porudžbina primljena', bucket, fallback: null }
+    if (s === 'isporučeno' || s === 'dostavljeno') return { title: 'Porudžbina isporučena', bucket, fallback: null }
+    if (s === 'intervencija')                   return { title: 'Čeka Vaš odgovor', bucket, fallback: 'Agent je prosledio razgovor Vama. Odgovorite iz inboxa.' }
+    if (s === 'reklamacija' || lead.status_porudzbine === 'Reklamacija') return { title: 'Reklamacija', bucket, fallback: 'Kupac ima reklamaciju. Javite mu se što pre.' }
+    if (bucket === 'lost')                      return { title: 'Izgubljen upit', bucket, fallback: 'Bez odgovora više od nedelju dana.' }
+    if (bucket === 'no_reply')                  return { title: 'Bez odgovora', bucket, fallback: 'Agent je poslednji pisao, a odgovor još nije stigao.' }
+    if (s === 'zainteresovan')                  return { title: quote ? 'Razgovor bez ponude' : service ? 'Razgovor bez termina' : 'Razgovor bez porudžbine', bucket, fallback: quote ? 'Interesovanje postoji, ali ponuda još nije zatražena.' : service ? 'Interesovanje postoji, ali termin još nije zakazan.' : 'Interesovanje postoji, ali porudžbine još nema.' }
+    return { title: 'Novi upit', bucket, fallback: null }
+}
+
+// a parcel is couriered, a sofa or a house is delivered (lib/shop-story.mjs DELIVERY_STAGES)
+const DELIVERY_SETS = [['Obrađuje se', 'Poslato', 'Dostavljeno'], ['U pripremi', 'Zakazana dostava', 'Isporučeno']]
+
+function DemoCRMCustomerPanel({ lead, messages, messagesLoading, tourMode, demoMode, quoteMode }: { lead: any; messages: Message[]; messagesLoading: boolean; tourMode?: boolean; demoMode?: boolean; quoteMode?: boolean }) {
+    // During the tour the point of opening this panel is the conversation log.
+    // Pin its own scroller to the newest message rather than making the viewer look for it.
     const logRef = useRef<HTMLDivElement>(null)
     useEffect(() => {
         if (!tourMode || messagesLoading || messages.length === 0) return
         const t = setTimeout(() => {
-            const el = logRef.current
-            const pane = el?.closest('[data-radix-scroll-area-viewport]') as HTMLElement | null
-            if (!el || !pane) return
-            pane.scrollTo({ top: el.offsetTop - 12, behavior: 'smooth' })
+            const pane = logRef.current?.querySelector('.overflow-y-auto') as HTMLElement | null
+            if (pane) pane.scrollTo({ top: pane.scrollHeight, behavior: 'smooth' })
         }, 700)
         return () => clearTimeout(t)
     }, [tourMode, messagesLoading, messages.length])
@@ -141,268 +197,258 @@ function DemoCRMCustomerPanel({ lead, messages, messagesLoading, tourMode }: { l
         setTimeout(() => setCopiedField(null), 2000)
     }
 
-    const status   = (lead.status || 'Novi') as string
-    const statusLc = status.toLowerCase()
+    const statusLc = (lead.status || '').toLowerCase()
+    const service = !lead.status_porudzbine && !['naručio', 'poručio', 'isporučeno', 'dostavljeno'].includes(statusLc)
+    const outcome = outcomeOf(lead, service, quoteMode)
+    const tone = BUCKET_STYLE[outcome.bucket].color
     const product  = lead.proizvod || lead.knjiga || null
     const category = lead.zdravstveni_cilj || lead.tema || lead.kategorija || null
-    const joinedDate = lead.created_at ? format(new Date(lead.created_at), 'dd.MM.yyyy.') : null
+    const photo = customerPhoto(messages)
+    const lastUser = [...messages].reverse().find(m => m.role === 'user')
+    const lastIsUnanswered = ['active', 'no_reply', 'lost', 'new'].includes(outcome.bucket) && !!lastUser
+    const deliveryStep = lead.status_porudzbine as string | null
+    const DELIVERY_STEPS = DELIVERY_SETS.find((set) => set.includes(deliveryStep ?? '')) ?? DELIVERY_SETS[0]
+    const deliveryIdx = DELIVERY_STEPS.indexOf(deliveryStep ?? '')
+    const iz = (lead.izvor || '').toLowerCase()
+    const channel = iz.includes('instagram') ? 'instagram' : iz.includes('facebook') ? 'facebook' : iz.includes('whatsapp') ? 'whatsapp' : 'website'
+    const channelColor = { instagram: '#E1306C', facebook: '#1877F2', whatsapp: '#25D366', website: '#8b5cf6' }[channel]
 
-    // Bookstore/Maguna style: delivery pipeline lives in status_porudzbine
-    const deliveryStep    = lead.status_porudzbine as string | null
-    const deliverySteps   = ['Obrađuje se', 'Poslato', 'Dostavljeno']
-    const deliveryStepIdx = deliverySteps.indexOf(deliveryStep ?? '')
-    const hasDelivery     = !!deliveryStep && deliveryStep !== 'Reklamacija'
+    // ── History: past and upcoming meetings, or the order on file ──────────────
+    const [history, setHistory] = useState<HistoryItem[] | null>(null)
+    useEffect(() => {
+        let alive = true
+        ;(async () => {
+            if (quoteMode) {
+                // a made-to-order business has no calendar: the history is the offer asked for and any order
+                const asked = ['zakazano', 'ponuda', 'naručio'].includes(statusLc)
+                if (alive) setHistory(asked && lead.created_at ? [{
+                    id: 'offer', when: new Date(lead.created_at), title: product || 'Ponuda',
+                    status: statusLc === 'naručio' ? 'Naručeno' : 'Ponuda zatražena', note: lead.komentar || null, tone: 'done',
+                }] : [])
+                return
+            }
+            if (!service) {
+                const hasOrder = !!lead.status_porudzbine || ['naručio', 'poručio', 'isporučeno', 'dostavljeno'].includes(statusLc)
+                const items: HistoryItem[] = hasOrder && lead.created_at ? [{
+                    id: 'order', when: new Date(lead.created_at), title: product || 'Porudžbina',
+                    status: lead.status_porudzbine || lead.status, note: lead.komentar || null,
+                    tone: (lead.status_porudzbine || lead.status) === 'Reklamacija' ? 'miss' : 'done',
+                }] : []
+                if (alive) setHistory(items)
+                return
+            }
+            const sb = createClient()
+            const [{ data }, shift] = await Promise.all([
+                sb.from('appointments').select('id, starts_at, service_name, status, notes')
+                    .eq('client_id', lead.client_id).eq('customer_name', lead.full_name)
+                    .order('starts_at', { ascending: false }).limit(12),
+                getDemoShift(sb, lead.client_id, !!demoMode),
+            ])
+            const rows = demoMode ? shiftRowsDays(data || [], ['starts_at'], shift.deltaDays) : (data || [])
+            const now = Date.now()
+            const items: HistoryItem[] = rows.map((r: any) => {
+                const when = new Date(r.starts_at)
+                const st = APPT_STATUS[r.status]
+                const upcoming = when.getTime() > now && r.status !== 'cancelled'
+                const today = r.status === 'confirmed' && when.toDateString() === new Date(now).toDateString()
+                return {
+                    id: r.id, when, title: r.service_name || 'Termin',
+                    status: today ? 'Danas' : upcoming ? 'Predstoji' : (st?.label ?? 'Završen'),
+                    tone: today || upcoming ? 'next' : (st?.tone ?? 'done'),
+                }
+            })
+            if (alive) setHistory(items)
+        })()
+        return () => { alive = false }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [lead?.id])
 
-    // ecommerce/furniture style: status IS the order state
-    const isOrdered      = ['naručio', 'poručio'].includes(statusLc)
-    const isDelivered    = ['isporučeno', 'dostavljeno'].includes(statusLc)
-    const isAppt         = ['zakazano', 'završeno'].includes(statusLc)
-    const isComplaint    = statusLc === 'reklamacija' || deliveryStep === 'Reklamacija'
-    const isInterested   = statusLc === 'zainteresovan'
-    const isIntervention = statusLc === 'intervencija'
-
-    const sourceColor = (() => {
-        const iz = (lead.izvor || '').toLowerCase()
-        if (iz.includes('instagram'))  return '#e1306c'
-        if (iz.includes('facebook'))   return '#1877f2'
-        if (iz.includes('whatsapp'))   return '#25d366'
-        if (iz.includes('website') || iz.includes('web') || iz.includes('landing')) return '#8b5cf6'
-        return '#71717a'
-    })()
-
-    const getKanalIcon = (iz: string) => {
-        const v = (iz || '').toLowerCase()
-        if (v.includes('instagram')) return <Instagram className="w-3 h-3 text-pink-400" />
-        if (v.includes('facebook'))  return <Facebook className="w-3 h-3 text-blue-400" />
-        if (v.includes('whatsapp'))  return <MessageCircle className="w-3 h-3 text-emerald-400" />
-        return <Globe className="w-3 h-3 text-zinc-400" />
-    }
+    const Section = ({ title, count, children, focus }: { title: string; count?: number; children: React.ReactNode; focus?: string }) => (
+        <section data-tour-focus={focus} className="px-5 py-4 border-t border-white/[0.06] first:border-t-0">
+            <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#8b9d9a] mb-2.5 flex items-baseline gap-2">
+                {title}{count != null && count > 0 && <span className="tabular-nums text-[#5f6f6c]">{count}</span>}
+            </p>
+            {children}
+        </section>
+    )
+    const CopyBtn = ({ value, field, label }: { value: string; field: string; label: string }) => (
+        <button onClick={() => copy(value, field)} aria-label={label} className="shrink-0 text-zinc-600 hover:text-emerald-400 transition-colors">
+            {copiedField === field ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+        </button>
+    )
 
     return (
-        <div className="px-8 py-6 space-y-4 pb-12">
+        // Facts left, the conversation right, each scrolling on its own.
+        <div className="flex h-full min-h-0">
+        <div className="w-[340px] shrink-0 overflow-y-auto scrollbar-none border-r border-white/[0.07]">
 
-            {/* Contact info */}
-            <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="rounded-2xl border border-white/[0.06] bg-white/[0.03] overflow-hidden">
-                <div className="px-5 py-3 border-b border-white/[0.05]">
-                    <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Kontakt</span>
+            {/* Outcome — what happened, in a sentence */}
+            <div className="p-4">
+                <div data-tour-focus="lead-outcome" className="rounded-xl p-4 relative overflow-hidden border" style={{ borderColor: `${tone}40`, background: `${tone}0f` }}>
+                    <span className="absolute left-0 top-0 bottom-0 w-[3px]" style={{ background: tone }} />
+                    <p className="text-[10px] font-bold uppercase tracking-[0.16em]" style={{ color: tone }}>Ishod</p>
+                    <p className="mt-1 text-[18px] font-bold text-white font-outfit leading-tight">{outcome.title}</p>
+                    {(lead.razlog || outcome.fallback) && <p className="mt-1.5 text-[13px] text-zinc-300 leading-relaxed">{lead.razlog || outcome.fallback}</p>}
+                    {lastIsUnanswered && (
+                        <div className="mt-3 pt-3 border-t border-white/[0.07]">
+                            <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#8b9d9a]">Poslednja poruka klijenta</p>
+                            <p className="mt-1 text-[13.5px] text-white italic leading-snug">„{lastUser!.message}“</p>
+                        </div>
+                    )}
                 </div>
-                <div className="px-5 py-4 space-y-3">
-                    {lead.email ? (
-                        <div className="flex items-center gap-3">
-                            <Mail className="w-3.5 h-3.5 text-zinc-500 shrink-0" />
-                            <span className="text-xs text-zinc-200 font-mono flex-1 truncate">{lead.email}</span>
-                            <button onClick={() => copy(lead.email, 'email')} className="shrink-0 text-zinc-600 hover:text-emerald-400 transition-colors">
-                                {copiedField === 'email' ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                            </button>
-                        </div>
-                    ) : (
-                        <div className="flex items-center gap-3">
-                            <Mail className="w-3.5 h-3.5 text-zinc-700 shrink-0" />
-                            <span className="text-xs text-zinc-600 italic">Email nije zabeležen</span>
-                        </div>
-                    )}
-                    {lead.telefon ? (
-                        <div className="flex items-center gap-3">
-                            <Phone className="w-3.5 h-3.5 text-zinc-500 shrink-0" />
-                            <span className="text-sm text-zinc-300 flex-1">{lead.telefon}</span>
-                            <button onClick={() => copy(lead.telefon, 'phone')} className="shrink-0 text-zinc-600 hover:text-emerald-400 transition-colors">
-                                {copiedField === 'phone' ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                            </button>
-                        </div>
-                    ) : (
-                        <div className="flex items-center gap-3">
-                            <Phone className="w-3.5 h-3.5 text-zinc-700 shrink-0" />
-                            <span className="text-xs text-zinc-600 italic">Telefon nije zabeležen</span>
-                        </div>
-                    )}
-                    <div className="flex items-center justify-between pt-1 border-t border-white/[0.04]">
-                        <div className="flex items-center gap-1.5">
-                            {getKanalIcon(lead.izvor || '')}
-                            <span className="text-xs font-semibold" style={{ color: sourceColor }}>{lead.izvor || 'Nepoznat izvor'}</span>
-                        </div>
-                        {joinedDate && <span className="text-xs text-zinc-600">{joinedDate}</span>}
+            </div>
+
+            {/* Delivery — shops that track the order */}
+            {!service && deliveryStep && deliveryStep !== 'Reklamacija' && (
+                <Section title="Isporuka">
+                    <div className="flex items-center">
+                        {DELIVERY_STEPS.map((step, i) => {
+                            const done = deliveryIdx >= 0 && i <= deliveryIdx
+                            return (
+                                <div key={step} className="flex items-center flex-1 last:flex-none">
+                                    <div className="flex flex-col items-center gap-1">
+                                        <span className={cn("w-6 h-6 rounded-full border-2 flex items-center justify-center",
+                                            done ? "border-emerald-400 bg-emerald-400/20" : "border-white/15")}>
+                                            {done ? <Check className="w-3 h-3 text-emerald-300" /> : <span className="w-1.5 h-1.5 rounded-full bg-white/20" />}
+                                        </span>
+                                        <span className={cn("text-[10px] whitespace-nowrap", done ? "text-zinc-200" : "text-zinc-600")}>{step}</span>
+                                    </div>
+                                    {i < DELIVERY_STEPS.length - 1 && <span className={cn("h-px flex-1 mx-1.5 -mt-4", i < deliveryIdx ? "bg-emerald-400/40" : "bg-white/10")} />}
+                                </div>
+                            )
+                        })}
                     </div>
-                </div>
-            </motion.div>
+                    {deliveryIdx < 0 && <p className="text-[12px] text-zinc-400 mt-2">{deliveryStep}</p>}
+                </Section>
+            )}
 
-            {/* Product / service interest */}
+            {/* History — meetings (services) or orders (shops) */}
+            <Section title={quoteMode ? 'Ponuda' : service ? 'Termini' : 'Porudžbine'} count={history?.length} focus="lead-history">
+                {history === null ? (
+                    <div className="h-10 rounded-lg bg-white/[0.03] animate-pulse" />
+                ) : history.length === 0 ? (
+                    <p className="text-[13px] text-zinc-500 leading-snug">
+                        {quoteMode ? 'Ponuda još nije zatražena. Ovo je prvi kontakt.' : service ? 'Još nema termina. Ovo je prvi kontakt.' : 'Još nema porudžbina. Ovo je prvi kontakt.'}
+                    </p>
+                ) : (
+                    <ol className="relative">
+                        {history.map((h, idx) => (
+                            <li key={h.id} className="relative pl-5 pb-3 last:pb-0">
+                                {idx < history.length - 1 && <span className="absolute left-[4px] top-3 bottom-0 w-px bg-white/[0.09]" />}
+                                <span className={cn(
+                                    "absolute left-0 top-[5px] w-[9px] h-[9px] rounded-full border-2",
+                                    h.tone === 'next' ? "border-emerald-400 bg-emerald-400/30"
+                                        : h.tone === 'miss' ? "border-orange-400/70 bg-transparent"
+                                        : "border-zinc-500 bg-zinc-500/40",
+                                )} />
+                                <div className="flex items-baseline justify-between gap-2">
+                                    <p className="text-[13px] font-semibold text-white leading-snug truncate">{h.title}</p>
+                                    <span className={cn("text-[10px] font-bold uppercase tracking-wider shrink-0",
+                                        h.tone === 'next' ? "text-emerald-300" : h.tone === 'miss' ? "text-orange-300" : "text-zinc-500")}>{h.status}</span>
+                                </div>
+                                <p className="text-[12px] text-zinc-500 tabular-nums mt-0.5">
+                                    {service ? format(h.when, 'dd.MM.yyyy. · HH:mm') : format(h.when, 'dd.MM.yyyy.')}
+                                </p>
+                                {h.note && <p className="text-[12px] text-zinc-400 mt-1 leading-snug">{h.note}</p>}
+                            </li>
+                        ))}
+                    </ol>
+                )}
+            </Section>
+
+            {/* Interest */}
             {(category || product) && (
-                <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="rounded-2xl border border-white/[0.06] bg-white/[0.03] overflow-hidden">
-                    <div className="px-5 py-3 border-b border-white/[0.05]">
-                        <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Interesovanje</span>
-                    </div>
-                    <div className="px-5 py-4 space-y-3">
-                        {category && (
-                            <div className="flex items-center gap-3">
-                                <span className="text-[10px] text-zinc-600 uppercase tracking-widest w-20 shrink-0">Kategorija</span>
-                                <span className="text-xs text-zinc-300 bg-white/[0.05] border border-white/[0.07] px-2.5 py-1 rounded-full">{category}</span>
-                            </div>
-                        )}
-                        {product && (
-                            <div className="flex items-start gap-3">
-                                <span className="text-[10px] text-zinc-600 uppercase tracking-widest w-20 shrink-0 mt-0.5">Proizvod</span>
-                                <span className="text-sm font-semibold text-white leading-snug">{product}</span>
-                            </div>
-                        )}
-                    </div>
-                </motion.div>
+                <Section title="Interesovanje">
+                    {product && <p className="text-[14px] font-semibold text-white leading-snug">{product}</p>}
+                    {category && <span className="inline-block mt-1.5 text-[11px] text-zinc-300 bg-white/[0.05] border border-white/[0.08] px-2 py-0.5 rounded-full">{category}</span>}
+                </Section>
             )}
 
-            {/* Order status — ecommerce/furniture direct status */}
-            {(isOrdered || isDelivered || isAppt) && !isComplaint && (
-                <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08 }} className="rounded-2xl border border-emerald-500/15 bg-emerald-500/[0.03] overflow-hidden">
-                    <div className="px-5 py-3 flex items-center gap-2">
-                        <ShoppingBag className="w-3 h-3 text-emerald-400" />
-                        <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest">
-                            {isAppt ? 'Termin' : 'Porudžbina'}
+            {/* Contact */}
+            <Section title="Kontakt">
+                <div className="space-y-2">
+                    <div className="flex items-center gap-2.5">
+                        <Phone className="w-3.5 h-3.5 text-zinc-500 shrink-0" />
+                        <span className={cn("text-[13px] tabular-nums flex-1 truncate", lead.telefon ? "text-zinc-200" : "text-zinc-600")}>{lead.telefon || 'Telefon nije zabeležen'}</span>
+                        {lead.telefon && <CopyBtn value={lead.telefon} field="phone" label="Kopiraj telefon" />}
+                    </div>
+                    <div className="flex items-center gap-2.5">
+                        <Mail className="w-3.5 h-3.5 text-zinc-500 shrink-0" />
+                        <span className={cn("text-[12.5px] truncate flex-1", lead.email ? "text-zinc-300 font-mono" : "text-zinc-600")}>{lead.email || 'Email nije zabeležen'}</span>
+                        {lead.email && <CopyBtn value={lead.email} field="email" label="Kopiraj email" />}
+                    </div>
+                    <div className="flex items-center justify-between pt-2 mt-1 border-t border-white/[0.05]">
+                        <span className="flex items-center gap-1.5 text-[12px] font-semibold" style={{ color: channelColor }}>
+                            <ChannelGlyph platform={channel} className="w-3.5 h-3.5" /> {lead.izvor || 'Nepoznat izvor'}
                         </span>
-                        <Badge className="ml-auto text-[10px] border px-2.5 py-0.5 rounded-full font-bold uppercase tracking-widest bg-emerald-500/10 text-emerald-400 border-emerald-500/15">
-                            {status}
-                        </Badge>
+                        {lead.created_at && <span className="text-[12px] text-zinc-500 tabular-nums">od {format(new Date(lead.created_at), 'dd.MM.yyyy.')}</span>}
                     </div>
-                </motion.div>
-            )}
+                    {lead.komentar && <p className="text-[12px] text-zinc-400 leading-snug pt-1">{lead.komentar}</p>}
+                </div>
+            </Section>
+        </div>
 
-            {/* Delivery pipeline — bookstore/Maguna style (status_porudzbine) */}
-            {hasDelivery && !isComplaint && (
-                <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08 }} className="rounded-2xl border border-emerald-500/15 bg-emerald-500/[0.03] overflow-hidden">
-                    <div className="px-5 py-3 border-b border-emerald-500/10 flex items-center gap-2">
-                        <ShoppingBag className="w-3 h-3 text-emerald-400" />
-                        <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest">Isporuka</span>
-                        <Badge className={cn("ml-auto text-[10px] border px-2.5 py-0.5 rounded-full font-bold uppercase tracking-widest", getDeliveryStatusColor(deliveryStep!))}>
-                            {deliveryStep}
-                        </Badge>
-                    </div>
-                    {deliveryStepIdx >= 0 && (
-                        <div className="px-5 py-5">
-                            <div className="flex items-center">
-                                {deliverySteps.map((step, i) => {
-                                    const done = i <= deliveryStepIdx
-                                    const current = i === deliveryStepIdx
-                                    return (
-                                        <div key={step} className="flex items-center flex-1 last:flex-none">
-                                            <div className="flex flex-col items-center gap-1.5">
-                                                <div className={cn(
-                                                    "w-7 h-7 rounded-full border-2 flex items-center justify-center shrink-0 transition-all",
-                                                    current ? "border-emerald-400 bg-emerald-400/20 shadow-[0_0_10px_rgba(16,185,129,0.25)]"
-                                                        : done ? "border-emerald-600/50 bg-emerald-600/10"
-                                                        : "border-white/10 bg-white/[0.02]"
-                                                )}>
-                                                    {done ? <Check className={cn("w-3 h-3", current ? "text-emerald-400" : "text-emerald-600")} />
-                                                         : <span className="w-1.5 h-1.5 rounded-full bg-white/20" />}
-                                                </div>
-                                                <span className={cn("text-[9px] uppercase tracking-widest whitespace-nowrap", done ? "text-zinc-300" : "text-zinc-600")}>{step}</span>
-                                            </div>
-                                            {i < deliverySteps.length - 1 && (
-                                                <div className={cn("h-px flex-1 mx-2 -mt-4", i < deliveryStepIdx ? "bg-emerald-600/30" : "bg-white/[0.07]")} />
-                                            )}
-                                        </div>
-                                    )
-                                })}
-                            </div>
-                        </div>
+        {/* The conversation — same faces and agent marks as the inbox */}
+        <div ref={logRef} data-tour-focus="lead-log" className="flex-1 min-w-0 flex flex-col min-h-0 bg-black/15">
+                <div className="shrink-0 px-6 py-3.5 border-b border-white/[0.07] flex items-baseline gap-2.5">
+                    <span className="text-[11px] font-black uppercase tracking-[0.2em] text-emerald-400">Razgovor sa agentom</span>
+                    {messages.length > 0 && (
+                        <span className="text-[11px] font-medium text-[#8b9d9a] tabular-nums">{messages.length} poruka</span>
                     )}
-                </motion.div>
-            )}
-
-            {/* Complaint */}
-            {isComplaint && (
-                <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="rounded-2xl border border-orange-500/25 bg-orange-500/[0.04] overflow-hidden">
-                    <div className="px-5 py-3 border-b border-orange-500/15 flex items-center gap-2">
-                        <AlertTriangle className="w-3 h-3 text-orange-400" />
-                        <span className="text-[10px] font-bold text-orange-400 uppercase tracking-widest">Reklamacija</span>
-                    </div>
-                    <div className="px-5 py-4">
-                        {lead.razlog
-                            ? <p className="text-sm text-zinc-300">{lead.razlog}</p>
-                            : <p className="text-xs text-zinc-400 leading-relaxed">Kupac ima reklamaciju — kontaktirajte ga što pre.</p>
-                        }
-                    </div>
-                </motion.div>
-            )}
-
-            {/* Zainteresovan — hasn't ordered yet */}
-            {isInterested && (
-                <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="rounded-2xl border border-amber-500/15 bg-amber-500/[0.02] overflow-hidden">
-                    <div className="px-5 py-3 border-b border-amber-500/10 flex items-center gap-2">
-                        <span className="text-[10px] font-bold text-amber-400 uppercase tracking-widest">Zainteresovan</span>
-                    </div>
-                    <div className="px-5 py-4">
-                        {lead.razlog
-                            ? <p className="text-sm text-zinc-300">{lead.razlog}</p>
-                            : <p className="text-xs text-zinc-500">Pokazao interesovanje — nije još naručio.</p>
-                        }
-                    </div>
-                </motion.div>
-            )}
-
-            {/* Intervention */}
-            {isIntervention && (
-                <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="rounded-2xl border border-red-500/20 bg-red-500/[0.03] px-5 py-3 flex items-center gap-3">
-                    <AlertTriangle className="w-3.5 h-3.5 text-red-400" />
-                    <span className="text-xs text-red-300 font-semibold">Zahteva hitnu intervenciju</span>
-                    {lead.razlog && <span className="text-xs text-zinc-400 ml-1">— {lead.razlog}</span>}
-                </motion.div>
-            )}
-
-            {/* Conversation history — the actual AI agent chat */}
-            <div ref={logRef} className="pt-2">
-                <div className="flex items-center gap-3 mb-3">
-                    <div className="h-px flex-1 bg-white/[0.06]" />
-                    <span className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest">
-                        Razgovor sa agentom
-                        {messages.length > 0 && <span className="ml-1.5 text-emerald-600">· {messages.length} poruka</span>}
-                    </span>
-                    <div className="h-px flex-1 bg-white/[0.06]" />
                 </div>
 
                 {messagesLoading ? (
-                    <div className="flex justify-center py-8">
+                    <div className="flex-1 flex items-center justify-center">
                         <RefreshCw className="w-4 h-4 text-emerald-500 animate-spin opacity-40" />
                     </div>
                 ) : messages.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-8 text-zinc-700">
-                        <Bot className="w-7 h-7 mb-2 opacity-20" />
-                        <p className="text-[10px] uppercase tracking-widest">Nema zabeleženih poruka</p>
+                    <div className="flex-1 flex flex-col items-center justify-center text-zinc-600">
+                        <Bot className="w-7 h-7 mb-2 opacity-30" />
+                        <p className="text-[12px]">Nema zabeleženih poruka za ovaj kontakt.</p>
                     </div>
                 ) : (
-                    <div className="space-y-2.5">
-                        <AnimatePresence mode="popLayout">
-                            {messages.map((msg, idx) => {
-                                const isUser  = msg.role === 'user'
-                                const hasImage = msg.metadata?.type === 'image'
-                                const isStory  = msg.metadata?.type === 'story_reply'
-                                return (
-                                    <motion.div
-                                        key={msg.id || idx}
-                                        initial={{ opacity: 0, y: 4 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        transition={{ delay: idx * 0.02 }}
-                                        className={cn("flex", isUser ? "justify-start" : "justify-end")}
+                    <div className="flex-1 overflow-y-auto scrollbar-none px-6 py-5 space-y-3">
+                        {messages.map((msg, idx) => {
+                            const isUser  = msg.role === 'user'
+                            const hasImage = msg.metadata?.type === 'image'
+                            const isStory  = msg.metadata?.type === 'story_reply'
+                            return (
+                                <motion.div
+                                    key={msg.id || idx}
+                                    initial={{ opacity: 0, y: 4 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: Math.min(idx * 0.02, 0.3), duration: 0.2 }}
+                                    className={cn("flex gap-2.5", isUser ? "justify-start" : "justify-end")}
+                                >
+                                    {isUser && <div className="mt-1"><CustomerAvatar src={msg.metadata?.profile_pic || photo} name={lead.full_name} /></div>}
+                                    <div
+                                        className={cn(
+                                            "max-w-[74%] rounded-2xl px-3.5 py-2.5 font-outfit",
+                                            isUser ? "bg-[#1a1a28] text-zinc-200 rounded-tl-none border border-white/[0.07]" : "text-[#05140d] rounded-tr-none shadow-lg",
+                                        )}
+                                        style={!isUser ? { background: "linear-gradient(135deg, #34d39e, #10b981)" } : undefined}
                                     >
-                                        <div className={cn(
-                                            "max-w-[80%] rounded-2xl px-4 py-2.5 text-sm font-outfit",
-                                            isUser
-                                                ? "bg-white/[0.06] text-silver/90 rounded-tl-none border border-white/[0.05]"
-                                                : "bg-gradient-to-br from-emerald-600/60 to-cyan-600/60 text-white rounded-tr-none"
-                                        )}>
-                                            {(hasImage || isStory) && (
-                                                <p className="text-[10px] uppercase tracking-widest opacity-50 mb-1">
-                                                    {isStory ? '↩ Story odgovor' : '📷 Slika'}
-                                                </p>
-                                            )}
-                                            <p className="leading-relaxed">{msg.message}</p>
-                                            <span className={cn("text-[10px] mt-1 block opacity-40", isUser ? "text-zinc-400" : "text-white")}>
-                                                {format(new Date(msg.created_at), 'HH:mm')}
-                                            </span>
+                                        {(hasImage || isStory) && (
+                                            <p className="text-[9px] font-mono uppercase tracking-widest opacity-50 mb-1">{isStory ? '↩ Story odgovor' : '📷 Slika'}</p>
+                                        )}
+                                        <p className="leading-relaxed text-[13px]">{msg.message}</p>
+                                        <span className={cn("text-[10px] mt-1.5 block font-mono", isUser ? "opacity-35 text-zinc-400" : "opacity-50 text-[#05140d]")}>
+                                            {format(new Date(msg.created_at), 'HH:mm')}
+                                        </span>
+                                    </div>
+                                    {!isUser && (
+                                        <div className="shrink-0 mt-1">
+                                            <div className="w-7 h-7 rounded-lg flex items-center justify-center border border-emerald-400/35 bg-emerald-400/12" title="Odgovorio AI agent">
+                                                <Bot className="w-3.5 h-3.5 text-emerald-300" />
+                                            </div>
                                         </div>
-                                    </motion.div>
-                                )
-                            })}
-                        </AnimatePresence>
+                                    )}
+                                </motion.div>
+                            )
+                        })}
                     </div>
                 )}
-            </div>
+        </div>
         </div>
     )
 }
@@ -798,7 +844,7 @@ function B2BLeadIntelPanel({ lead }: { lead: any }) {
 
 // ─── Main component ───────────────────────────────────────────────────────────
 
-export function LeadIntelligenceViewer({ lead, isOpen, onClose, demoMode, tourMode }: LeadIntelligenceViewerProps) {
+export function LeadIntelligenceViewer({ lead, isOpen, onClose, demoMode, tourMode, quoteMode }: LeadIntelligenceViewerProps) {
     const [messages, setMessages] = useState<Message[]>([])
     const [loading, setLoading] = useState(false)
     const supabase = createClient()
@@ -889,9 +935,9 @@ export function LeadIntelligenceViewer({ lead, isOpen, onClose, demoMode, tourMo
         lead.izvor && { icon: <Facebook className="w-3 h-3" />, label: "Izvor", value: lead.izvor },
         lead.created_at && { icon: <Calendar className="w-3 h-3" />, label: "Datum", value: format(new Date(lead.created_at), 'dd.MM.yyyy.') },
     ].filter(Boolean) : isDemoCRMCustomer ? [
-        lead.status_porudzbine && { icon: <ShoppingBag className="w-3 h-3" />, label: "Porudžbina", value: lead.status_porudzbine },
         lead.izvor && { icon: getKanalIcon(lead.izvor), label: "Kanal", value: lead.izvor },
-        lead.created_at && { icon: <Calendar className="w-3 h-3" />, label: "Datum", value: format(new Date(lead.created_at), 'dd.MM.yyyy.') },
+        lead.telefon && { icon: <Phone className="w-3 h-3" />, label: "Telefon", value: lead.telefon },
+        lead.created_at && { icon: <Calendar className="w-3 h-3" />, label: "U bazi od", value: `u bazi od ${format(new Date(lead.created_at), 'dd.MM.yyyy.')}` },
     ].filter(Boolean) : [
         lead.starost && { icon: <User className="w-3 h-3" />, label: "Godine", value: `${lead.starost} god.` },
         lead.lokacija && { icon: <MapPin className="w-3 h-3" />, label: "Lokacija", value: lead.lokacija },
@@ -911,20 +957,51 @@ export function LeadIntelligenceViewer({ lead, isOpen, onClose, demoMode, tourMo
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent
+                // the tour opens and closes this file itself; Escape or a stray click must not
+                onEscapeKeyDown={tourMode ? (e) => e.preventDefault() : undefined}
+                onPointerDownOutside={tourMode ? (e) => e.preventDefault() : undefined}
+                onInteractOutside={tourMode ? (e) => e.preventDefault() : undefined}
                 data-tour-focus={tourMode ? "lead-file" : undefined}
                 className={cn(
-                    "sm:max-w-[640px] flex flex-col p-0 overflow-hidden border-white/5 bg-obsidian/95 backdrop-blur-2xl rounded-[2rem] shadow-2xl",
-                    // During the tour the narration bar owns the bottom of the screen, so
-                    // the panel gets shorter. It must NOT add its own translate-y — that
-                    // would cancel the dialog's own centring transform and drop it low.
-                    tourMode ? "h-[64vh]" : "h-[88vh]",
+                    "flex flex-col p-0 overflow-hidden border-white/5 bg-obsidian/95 backdrop-blur-2xl rounded-2xl shadow-2xl",
+                    // Two columns: facts and the conversation. Same size in and out of the tour —
+                    // the tour card sits beside the file, it never resizes or moves it.
+                    isDemoCRMCustomer ? "sm:max-w-[1080px]" : "sm:max-w-[640px]",
+                    "h-[88vh]",
                 )}
             >
 
                 {/* Header */}
+                {isDemoCRMCustomer ? (() => {
+                    const b = bucketForRow(lead)
+                    const c = BUCKET_STYLE[b].color
+                    return (
+                        // one compact block: who, where they stand, where they came from
+                        <div className="px-6 py-4 pr-14 shrink-0 border-b border-white/[0.06] flex items-center gap-3.5">
+                            <CustomerAvatar src={customerPhoto(messages)} name={displayName} size={40} />
+                            <div className="min-w-0">
+                                <div className="flex items-center gap-2.5 flex-wrap">
+                                    <DialogTitle className="text-[20px] font-outfit font-bold text-white tracking-tight leading-tight">{displayName}</DialogTitle>
+                                    <span className="inline-flex items-center gap-1.5 text-[11.5px] font-bold px-2 py-0.5 rounded-md" style={{ color: c, background: `${c}1a` }}>
+                                        <span className="w-1.5 h-1.5 rounded-full" style={{ background: c }} />{bucketLabel(b, lead.niche, lead.status)}
+                                    </span>
+                                    {lead.status && bucketLabel(b, lead.niche, lead.status) !== lead.status && (
+                                        <span className="text-[11px] text-zinc-500">u bazi: {quoteMode && String(lead.status).toLowerCase() === 'zakazano' ? 'Ponuda' : lead.status}</span>
+                                    )}
+                                </div>
+                                <p className="text-[12.5px] text-zinc-500 mt-0.5 truncate">
+                                    {[lead.proizvod, lead.kategorija].filter(Boolean).join(' · ') || 'Bez navedenog interesovanja'}
+                                </p>
+                            </div>
+                        </div>
+                    )
+                })() : (
                 <div className="px-8 pt-8 pb-5 shrink-0 border-b border-white/5">
                     <div className="flex items-start justify-between gap-4">
                         <div className="flex items-center gap-4">
+                            {isDemoCRMCustomer ? (
+                                <CustomerAvatar src={customerPhoto(messages)} name={displayName} size={48} />
+                            ) : (
                             <div className={cn(
                                 "w-12 h-12 rounded-xl border border-white/10 flex items-center justify-center font-bold text-lg shrink-0",
                                 isB2BLead
@@ -933,6 +1010,7 @@ export function LeadIntelligenceViewer({ lead, isOpen, onClose, demoMode, tourMo
                             )}>
                                 {displayInitial}
                             </div>
+                            )}
                             <div>
                                 <DialogTitle className="text-2xl font-outfit font-bold text-silver tracking-tight">
                                     {displayName}
@@ -965,10 +1043,11 @@ export function LeadIntelligenceViewer({ lead, isOpen, onClose, demoMode, tourMo
                         </div>
                     )}
                 </div>
+                )}
 
                 {/* Content area */}
                 <div className="flex-1 min-h-0 flex flex-col">
-                    <div className="px-8 py-3 border-b border-white/5 shrink-0">
+                    <div className={cn("px-8 py-3 border-b border-white/5 shrink-0", isDemoCRMCustomer && "hidden")}>
                         <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">
                             {isB2BLead ? 'Lead Intelligence' : isDemoCRMCustomer ? 'Profil Kupca' : 'Istorija Razgovora'}
                             {!isB2BLead && !isDemoCRMCustomer && messages.length > 0 && (
@@ -977,11 +1056,11 @@ export function LeadIntelligenceViewer({ lead, isOpen, onClose, demoMode, tourMo
                         </span>
                     </div>
 
-                    <div className="flex-1 overflow-y-auto min-h-0">
+                    <div className={cn("flex-1 min-h-0", isDemoCRMCustomer ? "overflow-hidden" : "overflow-y-auto")}>
                         {isB2BLead ? (
                             <B2BLeadIntelPanel lead={lead} />
                         ) : isDemoCRMCustomer ? (
-                            <DemoCRMCustomerPanel lead={lead} messages={messages} messagesLoading={loading} tourMode={tourMode} />
+                            <DemoCRMCustomerPanel lead={lead} messages={messages} messagesLoading={loading} tourMode={tourMode} demoMode={demoMode} quoteMode={quoteMode} />
                         ) : (
                             <div className="px-8 py-6 space-y-3 pb-12">
                                 {loading && (

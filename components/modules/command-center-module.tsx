@@ -24,6 +24,9 @@ import {
   AlertTriangle,
 } from "lucide-react"
 import { LeadIntelligenceViewer } from "@/components/dashboard/lead-intelligence-viewer"
+// The same gate qualify_queue.mjs runs, so a lead that skipped the script still
+// cannot surface as a decision. Station 1 is for leads worth your click.
+import { qualifyForQueue } from "@/lib/lead-queue.mjs"
 
 interface CommandCenterModuleProps {
   clientId: string
@@ -43,6 +46,8 @@ interface Contact {
   email: string | null
   status: string
   pipeline_stage: string | null
+  demo_tenant_email?: string | null
+  demo_tenant_password?: string | null
   instagram_handle: string | null
   instagram_followers: number | null
   email_draft: string | null
@@ -58,12 +63,13 @@ interface Contact {
   meeting_time: string | null
   niche: string | null
   demo_tenant_url: string | null
+  sledeca_akcija?: string | null
 }
 
 const STATUS_OPTIONS = ["Novi Lead", "Kontaktiran", "Follow Up", "Odgovorio", "Zakazan Sastanak", "Lost"]
 
 const SELECT_FIELDS =
-  "id, company_name, email, status, pipeline_stage, instagram_handle, instagram_followers, email_draft, email_2_draft, email_1_poslat, email_2_poslat, approved_to_send, last_sent_at, email_opened_at, replied_at, reply_intent, reply_snippet, meeting_time, niche, demo_tenant_url"
+  "id, company_name, email, status, pipeline_stage, instagram_handle, instagram_followers, email_draft, email_2_draft, email_1_poslat, email_2_poslat, approved_to_send, last_sent_at, email_opened_at, replied_at, reply_intent, reply_snippet, meeting_time, niche, demo_tenant_url, demo_tenant_email, demo_tenant_password, sledeca_akcija"
 
 // per-stage accent — used ONLY on the numbered marker + thin rules, never on body text
 type Accent = "emerald" | "amber" | "cyan" | "purple" | "blue"
@@ -76,6 +82,11 @@ const ACCENT: Record<Accent, { text: string; ring: string; line: string; dot: st
 }
 
 function draftOf(c: Contact): string | null {
+  // A lead sitting in "email_ready" is queued for its initial send, so that is the draft
+  // to review — even when email_1_poslat is still true from an earlier campaign. Keying
+  // only on that flag showed months-old follow-up drafts on the review screen while the
+  // freshly written E1 sat unseen.
+  if (c.pipeline_stage === "email_ready") return c.email_draft
   if (c.email_1_poslat && c.email_2_draft && !c.email_2_poslat) return c.email_2_draft
   return c.email_draft
 }
@@ -151,13 +162,19 @@ export function CommandCenterModule({ clientId }: CommandCenterModuleProps) {
     const supabase = createClient()
     await supabase.from("contacts").update({ status }).eq("id", id)
   }
-  const openInstagram = (c: Contact) => {
-    if (c.instagram_handle) window.open(`https://instagram.com/${c.instagram_handle.replace(/^@/, "")}`, "_blank")
-    else toast("Nema Instagram handle za ovaj lead")
-  }
 
-  const byStage = (s: string) => contacts.filter((c) => c.pipeline_stage === s)
-  const novi = byStage("novi")
+  // A lead can be disqualified (chocolate shop, wrong country, enterprise) while its
+  // pipeline_stage is still "novi". Station 1 was listing those for approval, which
+  // is how Adoré Chocolat kept reappearing after being written off.
+  const DEAD = new Set(["Disqualified", "Lost", "Bounced"])
+  const byStage = (s: string) =>
+    contacts.filter((c) => c.pipeline_stage === s && !DEAD.has(c.status || ""))
+  // Sourcing writes straight to `novi`, which is this station. Until qualify_queue.mjs
+  // ran, station 1 was raw scraper output: 68 rows, of which 4 had no way to be
+  // contacted at all and 53 had never had their Instagram measured.
+  const novi = byStage("novi").filter(
+    (c) => qualifyForQueue(c, { followerFloor: config?.source_follower_floor }).verdict === "ready",
+  )
   const building = byStage("demo_building")
   const emailReady = byStage("email_ready")
   const sent = byStage("sent")
@@ -211,7 +228,6 @@ export function CommandCenterModule({ clientId }: CommandCenterModuleProps) {
             ? <Empty text="Još nema novih leadova. Uključi traženje ili pokreni skrejper." />
             : novi.map((c) => (
               <Row key={c.id} c={c} onIntel={() => setIntelLead(c)}>
-                <IconBtn onClick={() => openInstagram(c)} tone="pink"><Instagram className="w-3.5 h-3.5" /> Instagram</IconBtn>
                 <IconBtn onClick={() => setIntelLead(c)} tone="silver"><Eye className="w-3.5 h-3.5" /> Intel</IconBtn>
                 <Button size="sm" onClick={() => approveLead(c)} className="h-9 rounded-xl bg-emerald text-obsidian font-outfit font-bold text-xs hover:brightness-110 px-4">
                   <Check className="w-4 h-4 mr-1" /> Odobri
@@ -231,7 +247,10 @@ export function CommandCenterModule({ clientId }: CommandCenterModuleProps) {
           {building.length === 0
             ? <Empty text="Ništa se trenutno ne pravi." />
             : building.map((c) => (
-              <Row key={c.id} c={c} onIntel={() => setIntelLead(c)}>
+              // 2026-11-05: leads wait here for Nikola's hand check before any demo is built; the subtitle is
+              // what the reel/comment check found (views vs followers, buyer questions, site, email).
+              <Row key={c.id} c={c} onIntel={() => setIntelLead(c)} subtitle={c.demo_tenant_email ? undefined : c.sledeca_akcija || undefined}>
+                <OpenDemoBtn c={c} />
                 <span className="flex items-center gap-2 text-xs text-amber-400 font-outfit font-semibold"><Hammer className="w-4 h-4 animate-pulse" /> pravi se…</span>
               </Row>
             ))}
@@ -252,6 +271,7 @@ export function CommandCenterModule({ clientId }: CommandCenterModuleProps) {
             ? <Empty text="Nijedan email još nije spreman." />
             : emailReady.map((c) => (
               <Row key={c.id} c={c} onIntel={() => setIntelLead(c)}>
+                <OpenDemoBtn c={c} />
                 <IconBtn onClick={() => setEmailLead(c)} tone="cyan"><Mail className="w-3.5 h-3.5" /> Pogledaj email</IconBtn>
                 <Button size="sm" disabled={c.approved_to_send} onClick={() => approveEmail(c)}
                   className={cn("h-9 rounded-xl font-outfit font-bold text-xs px-4", c.approved_to_send ? "bg-emerald/15 text-emerald cursor-default" : "bg-emerald text-obsidian hover:brightness-110")}>
@@ -363,8 +383,67 @@ function Row({ c, onIntel, subtitle, children }: { c: Contact; onIntel: () => vo
           {c.niche ? ` · ${c.niche}` : ""}{subtitle ? ` · ${subtitle}` : ""}
         </p>
       </button>
-      <div className="flex items-center gap-1.5 shrink-0">{children}</div>
+      <div className="flex items-center gap-1.5 shrink-0">
+        <InstagramBtn c={c} />
+        {children}
+      </div>
     </div>
+  )
+}
+
+/** One click to the lead's Instagram on every row — comments there are the fastest fit check. */
+function InstagramBtn({ c }: { c: Contact }) {
+  const handle = c.instagram_handle?.replace(/^@/, "")
+  return (
+    <a
+      href={handle ? `https://instagram.com/${handle}` : undefined}
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-disabled={!handle}
+      title={handle ? `Otvori @${handle}` : "Nema Instagram handle"}
+      className={cn(
+        "h-9 px-3 rounded-xl inline-flex items-center gap-1.5 text-xs font-outfit font-bold transition-colors border",
+        handle
+          ? "bg-pink-400/10 text-pink-400 hover:bg-pink-400/20 border-pink-400/25"
+          : "bg-white/[0.04] text-silver/30 border-white/5 pointer-events-none",
+      )}
+    >
+      <Instagram className="w-3.5 h-3.5" /> IG
+    </a>
+  )
+}
+
+/**
+ * Open this lead's demo in a new tab.
+ *
+ * Checking a demo before sending it used to mean digging the credentials out of
+ * the lead panel, copying two fields and logging in by hand — enough friction that
+ * demos went out unseen. The password is copied to the clipboard and the tenant
+ * dashboard opens with the email pre-filled, so it is one click and a paste.
+ */
+function OpenDemoBtn({ c }: { c: Contact }) {
+  const ready = !!c.demo_tenant_email
+  const open = () => {
+    if (!ready) return
+    // Straight in — /api/demo-login mints a session for the demo tenant and
+    // redirects. Prefilling a login form still meant typing a password to check
+    // your own demo, which is friction nobody pays twice.
+    window.open(`/api/demo-login?email=${encodeURIComponent(c.demo_tenant_email || "")}`, "_blank", "noopener")
+  }
+  return (
+    <button
+      onClick={open}
+      disabled={!ready}
+      title={ready ? `Otvori demo bez prijave (${c.demo_tenant_email})` : "Demo još nije napravljen"}
+      className={cn(
+        "h-9 px-3 rounded-xl inline-flex items-center gap-1.5 text-xs font-outfit font-bold transition-colors",
+        ready
+          ? "bg-emerald/15 text-emerald hover:bg-emerald/25 border border-emerald/25"
+          : "bg-white/[0.04] text-silver/30 border border-white/5 cursor-not-allowed",
+      )}
+    >
+      <ExternalLink className="w-3.5 h-3.5" /> Demo
+    </button>
   )
 }
 

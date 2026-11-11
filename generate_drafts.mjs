@@ -14,7 +14,7 @@
  *   node generate_drafts.mjs --limit 10                   — cap batch size
  */
 
-import OpenAI from 'openai';
+import { makeLlm } from './lib/llm.mjs';
 import { createClient } from '@supabase/supabase-js';
 import { readFileSync } from 'fs';
 import { resolve, dirname } from 'path';
@@ -44,11 +44,11 @@ const OPENAI_KEY   = process.env.OPENAI_API_KEY;
 // is worth cents. Override with OPENAI_MODEL=gpt-4o-mini for bulk runs.
 const OPENAI_MODEL = process.env.OPENAI_MODEL || 'gpt-4o';
 
-if (!OPENAI_KEY) {
-  console.error('✗ OPENAI_API_KEY not set in .env.local');
+if (!process.env.GEMINI_API_KEY) {
+  console.error('✗ GEMINI_API_KEY not set in .env.local');
   process.exit(1);
 }
-const openai = new OpenAI({ apiKey: OPENAI_KEY });
+const openai = makeLlm(); // Gemini (lib/llm.mjs)
 
 // ── CLI args ───────────────────────────────────────────────────────────────────
 const isDryRun    = process.argv.includes('--dry-run');
@@ -206,6 +206,78 @@ async function fetchDemoStats(sb, demoClientId) {
 }
 
 /** Build the lead intel object for Gemini */
+
+// Which BCO "Buyer" line the email opens on. Chosen here rather than in the prompt so the
+// qualification signals it keys off (ad volume, followers, catalogue size) never enter the
+// model's context — they are internal scoring, and copy that echoes them tells the reader we
+// screened his budget before writing.
+// What the business IS — never a verdict on how it is doing.
+//
+// "koje su u fazi rasta" and "koje drže korak sa svojom strukom" were judgements about their
+// state. We cannot know either, a reader can find both patronising, and being wrong in the
+// first line loses them. So: an empty qualifier by default (the precise niche noun carries
+// the sentence on its own), and otherwise only qualifiers backed by a verifiable fact —
+// several branches, decades of trading, a stated credential.
+const B_OPTIONS = {
+  1: '',                                   // no qualifier: niche noun alone
+  2: 'koje drže vrhunski standard u struci', // ONLY with a stated credential in bio/site
+  3: 'koje posluju na više lokacija',       // ONLY with 2+ locations named
+  4: '',                                   // retired (was "u fazi rasta")
+  5: '',                                   // retired
+};
+
+// The niche noun the opener addresses. Left to the model this produced "kompanijama" and
+// "prodavnicama" — vague where the whole point is to be specific.
+const NICHE_NOUNS = {
+  stomatologija:    'privatnim stomatološkim ordinacijama',
+  klinika_wellness: 'privatnim klinikama',
+  namestaj:         'salonima nameštaja',
+  kuhinje:          'salonima kuhinja',
+  fashion:          'modnim brendovima',
+  beauty:           'parfimerijama i kozmetičkim salonima',
+  fitnes:           'prodavnicama sportske opreme',
+  nekretnine:       'agencijama za nekretnine',
+  ugostiteljstvo:   'ugostiteljskim objektima',
+  putovanja:        'turističkim agencijama',
+  edukacija:        'obrazovnim centrima',
+  online_prodaja:   'onlajn prodavnicama',
+};
+
+// Where the taxonomy is too coarse to be honest, name the actual trade.
+// Who the data stays with, in the dative. "Kodzic Fashion ostaje baza kupaca" is
+// ungrammatical — the clause needs a dative, and it should never be the company name.
+const OWNER_DATIVE = {
+  stomatologija: 'ordinaciji', klinika_wellness: 'klinici',
+  namestaj: 'salonu', kuhinje: 'salonu',
+  fashion: 'brendu', beauty: 'radnji', fitnes: 'prodavnici',
+  nekretnine: 'agenciji', ugostiteljstvo: 'objektu',
+  putovanja: 'agenciji', edukacija: 'centru', online_prodaja: 'prodavnici',
+};
+
+const COMPANY_NOUN = {
+  'Kodzic Fashion':      'brendovima kožne konfekcije',
+  'Belodore Srbija':     'parfimerijama',
+  'M-BIKE SHOP':         'prodavnicama bicikala i sportske opreme',
+  'Demart Serbia D.O.O': 'proizvođačima kliznih krovova i sistema za zasenu',
+};
+
+function chooseBOption(lead, bio, websiteSummary) {
+  const text = `${bio || ''} ${websiteSummary || ''}`.toLowerCase();
+  const ads = lead.intake_data?.active_ads_count || 0;
+
+  // multiple physical locations named in the bio/site
+  const locationHits = (text.match(/\b(tc |mall|centar|poslovnica|lokacij|ogranak)\b/g) || []).length;
+  if (locationHits >= 2) return 3;
+
+  // heritage / credential / premium signals
+  if (/\b(since \d{4}|od \d{4}|leader|vrhunsk|premium|luksuz|godina iskustva|specijalist|university|nyu)\b/.test(text)) return 2;
+
+  // a clear expansion push
+  if (ads >= 5) return 4;
+
+  return 1; // default: tech-forward, no AI yet
+}
+
 function buildLeadIntel(lead, emailType, demoStats = null) {
   const enrichment = lead.intake_data?.enrichment || {};
   const igProfile  = enrichment.instagram_profile || {};
@@ -223,7 +295,12 @@ function buildLeadIntel(lead, emailType, demoStats = null) {
     .filter(Boolean);
 
   // Ad copies — stored at top-level intake_data.ad_copies (from source_leads pipeline)
-  const adCopies = (lead.intake_data?.ad_copies || enrichment.ad_copies || []).slice(0, 3).filter(Boolean);
+  // Meta dynamic-ad creatives arrive with unrendered tokens ({{product.brand}}).
+  // They are not copy — feeding them to the model produced drafts written from garbage.
+  const isTemplateToken = (t) => !t || /\{\{[^}]+\}\}/.test(t) || t.trim().length < 12;
+  const adCopies = (lead.intake_data?.ad_copies || enrichment.ad_copies || [])
+    .filter((t) => !isTemplateToken(t))
+    .slice(0, 3);
 
   const businessType = inferBusinessTypeFromContext(lead.niche, bio, companyName);
 
@@ -247,12 +324,22 @@ function buildLeadIntel(lead, emailType, demoStats = null) {
     // Primary context — use this to understand what the business actually does
     instagram_bio: bio || null,
     website: lead.website ? lead.website.replace(/^https?:\/\/(www\.)?/, '') : null,
-    instagram_followers: igProfile.followers || igProfile.follower_count || lead.instagram_followers || 0,
-    active_ads_count: lead.intake_data?.active_ads_count || 0,
+    // NOTE: instagram_followers and active_ads_count are deliberately NOT passed.
+    // They are qualification signals; see chooseBOption above.
+    // The exact phrase the opener must address them as. Used verbatim.
+    niche_noun: COMPANY_NOUN[lead.company_name]
+      || NICHE_NOUNS[lead.niche]
+      || 'firmama u ' + (lead.niche || 'ovoj') + ' delatnosti',
+    owner_dative: OWNER_DATIVE[lead.niche] || 'firmi',
+    b_qualifier: (() => {
+      const n = chooseBOption(lead, bio, enrichment.website_summary);
+      return B_OPTIONS[n] || null;
+    })(),
     instagram_reels: reelSamples,
     ad_copies: adCopies,
     website_summary: enrichment.website_summary || null,
-    subject_variant: demoStats ? 3 : subjectVariant(lead.company_name || lead.ime || ''),
+    // The subject is fixed by the prompt ("AI sistem za [Company]"); variants are retired.
+    subject_variant: null,
     demo_stats: demoStats,
   };
 }
@@ -316,7 +403,54 @@ async function generateDraft(leadIntel, systemPrompt) {
     throw new Error(`OpenAI response missing subject or body: ${JSON.stringify(parsed).slice(0, 200)}`);
   }
 
-  return `Subject: ${parsed.subject}\n\n${parsed.body}`;
+  return repairSerbian(`Subject: ${parsed.subject}\n\n${parsed.body}`);
+}
+
+
+// Mechanical Serbian repairs applied to every generated draft.
+//
+// The model complies with the prompt's grammar rules most of the time, but "most of the
+// time" ships broken Serbian to a real prospect. These are the errors it actually made,
+// each with one correct rewrite, so compliance stops depending on the model's mood.
+const SERBIAN_REPAIRS = [
+  [/\bMeta-verified\b/g,                    'Meta-verifikovan'],
+  [/\bstorij(e|ama|a)\b/gi,                 (m) => m.toLowerCase().startsWith('storija') ? 'priča' : (m.toLowerCase() === 'storijama' ? 'pričama' : 'priče')],
+  [/\bsumnjive upite\b/gi,                  'pitanja koja prevazilaze njegovu nadležnost'],
+  [/\bsumnjiva pitanja\b/gi,                'pitanja koja prevazilaze njegovu nadležnost'],
+  [/\bsa službom\b/gi,                      'sa uslugom'],
+  [/\bSistem koji predlažemo\b/g,           'Sistem'],
+  [/\bsistem koji predlažemo\b/g,           'sistem'],
+  // reflexive `se` belongs in second position
+  // A Serbian enclitic can never open a clause, so this may only fire where an explicit
+  // subject precedes it and can host the `se`. The earlier, looser version matched at the
+  // start of a sentence and produced "se Ne zaustavlja" — ungrammatical, and shipped.
+  [/\b(sistem|agent|nalog)\s+(ne)\s+(zaustavlja|prestaje|završava|zadržava)\s+se\b/gi,
+    (_, subj, ne, v) => `${subj} se ${ne} ${v}`],
+  // formal address is capitalised in Serbian business correspondence
+  // NOTE: JS \b is ASCII-only, so /\bvaš\b/ never matches — "š" is not a word character to
+  // the regex engine, and every Serbian word ending in a diacritic slips through. Use an
+  // explicit Serbian letter class in lookarounds instead.
+  [/(?<![A-Za-zČĆŽŠĐčćžšđ])(vi|vas|vam|vama|vaš|vaša|vaše|vašeg|vašem|vašim|vaših|vašoj|vašu|vašom)(?![A-Za-zČĆŽŠĐčćžšđ])/g,
+    (m) => m.charAt(0).toUpperCase() + m.slice(1)],
+  [/\bpristup je na linku ispod\b/gi, 'Podaci za pristup su na dnu ovog mejla'],
+  [/\b(Naš|naš)\s+sistem\b/g, (_, a) => a === 'Naš' ? 'Sistem' : 'sistem'],
+  // "Demo" is masculine
+  [/\bDemo je već (konfigurisana|podešena|prilagođena)\b/g,
+    (_, w) => `Demo je već ${w.slice(0, -1)}`],
+  [/\bvideti u akciji\b/gi, 'videti kako radi'],
+  [/\s*[^.!?]*\b(četbot|chatbot)\w*\b[^.!?]*[.!?]/gi, ''],
+  [/\bSistem koji (nudimo|predlažemo)\b/g, 'Sistem'],
+  [/\bu akciji\b/gi, 'na delu'],
+  // relative pronoun must agree with a masculine plural noun
+  // Masculine plurals take "koji"; feminine plurals (ordinacijama, parfimerijama,
+  // prodavnicama, agencijama) correctly take "koje", so only the masculine heads are listed.
+  // The pronoun is often not adjacent ("brendovima kožne konfekcije koje"), hence the gap.
+  [/\b(brendovi|brendovima|proizvođači|proizvođačima|saloni|salonima|objekti|objektima|centri|centrima|sistemi|sistemima)((?:\s+\S+){0,3}?)\s+koje\b/gi,
+    (_, n, gap) => `${n}${gap} koji`],
+];
+
+function repairSerbian(text) {
+  return SERBIAN_REPAIRS.reduce((acc, [re, to]) => acc.replace(re, to), text);
 }
 
 // ── Main ───────────────────────────────────────────────────────────────────────
@@ -458,7 +592,7 @@ async function main() {
     const draftFieldName = emailType === 'e3' ? 'email_3_draft' : emailType === 'e2' ? 'email_2_draft' : 'email_draft';
 
     if (isDryRun) {
-      console.log(`  Classification: ${intel.email_classification}  |  Followers: ${intel.instagram_followers}  |  Ads: ${intel.active_ads_count}  |  Variant: ${intel.subject_variant}  |  Framework: ${framework}`);
+      console.log(`  ${intel.niche_noun}${intel.b_qualifier ? ' ' + intel.b_qualifier : ''}`);
       console.log(`  ✓ [DRY RUN — would generate ${draftFieldName}]\n`);
       continue;
     }

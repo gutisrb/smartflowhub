@@ -1,0 +1,105 @@
+/* The Ponuda: the closing page of a demo, inside the app's own dark UI. One job: book the 20-minute call.
+   Nikola, 2026-11-10: the first version was dark and grey ("hard to read"), the second white ("too bright, pops out"). Neither was
+   designed. This one uses the app's own surface tiers (app/globals.css .dark: --background, --surface-2/3) so it belongs to the
+   page it sits in, text far above the grey the old version used (body 0.88, secondary 0.74 lightness; contrast checked by
+   scripts/check_ponuda_contrast.mjs), and the owner's brand colour in exactly two places: the call button and the "live" node.
+   Every block answers one question the owner has, in order; nothing moves except what answers a click. */
+.sheet {
+  --brand: #10b981;
+  --on-brand: #0b0d0c;
+  --ink: oklch(0.97 0 0);            /* headings */
+  --body: oklch(0.88 0.005 240);     /* reading text */
+  --soft: oklch(0.74 0.01 240);      /* secondary: dates, labels, answers' small print */
+  --panel: var(--surface-2);         /* the one raised tier */
+  --line: oklch(1 0 0 / 10%);
+
+  width: 100%;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 8px 4px 40px;
+  text-align: left;
+  color: var(--body);
+  font-family: var(--font-outfit), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+.sheet :where(p, h2, h3) { margin: 0; }
+
+/* 1. what is the offer */
+.meta { font-size: 15px; color: var(--soft); }
+.title {
+  margin-top: 16px;
+  max-width: 17em;
+  font-size: clamp(2.1rem, 1.2rem + 3.2vw, 3.4rem);
+  line-height: 1.04;
+  font-weight: 600;
+  letter-spacing: -0.035em;
+  color: var(--ink);
+  text-wrap: balance;
+}
+/* the offer itself, in plain words, right under the headline: this is what makes the yes easy */
+.free { margin-top: 20px; max-width: 30em; padding-left: 16px; border-left: 3px solid var(--brand); font-size: 20px; line-height: 1.45; font-weight: 500; color: var(--ink); }
+.lead { margin-top: 18px; max-width: 34em; font-size: 18px; line-height: 1.55; }
+.cta { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 24px; margin-top: 28px; }
+.btn {
+  display: inline-flex; align-items: center; gap: 10px;
+  padding: 15px 24px;
+  border-radius: 12px;
+  background: var(--brand);
+  color: var(--on-brand);
+  font-size: 17px; font-weight: 600;
+  text-decoration: none;
+  transition: transform 0.15s ease;
+}
+.btn:hover { transform: translateY(-1px); }
+.btn:active { transform: scale(0.98); }
+.btn:focus-visible, .tel:focus-visible, .qa summary:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+.tel { display: inline-flex; align-items: center; gap: 8px; font-size: 16px; color: var(--body); text-decoration: underline; text-decoration-color: var(--line); text-underline-offset: 4px; }
+.tel:hover { color: var(--ink); }
+
+/* shared */
+.block { margin-top: 56px; }
+.h3 { margin-bottom: 20px; font-size: 1.5rem; line-height: 1.15; font-weight: 600; letter-spacing: -0.02em; color: var(--ink); }
+
+/* 2. how does it go, what is on me: the one real sequence on the page */
+.steps { list-style: none; margin: 0; padding: 0; }
+.step { position: relative; padding: 0 0 26px 40px; }
+.step:last-child { padding-bottom: 0; }
+.step::before { content: ""; position: absolute; left: 9px; top: 24px; bottom: 0; width: 2px; background: var(--line); }
+.step:last-child::before { display: none; }
+.node { position: absolute; left: 0; top: 3px; width: 20px; height: 20px; border-radius: 50%; background: var(--surface-3); border: 2px solid var(--soft); }
+.live .node { background: var(--brand); border-color: var(--brand); box-shadow: 0 0 0 5px color-mix(in oklab, var(--brand) 22%, transparent); }
+.when { font-size: 15px; color: var(--soft); }
+.stepTitle { margin-top: 2px; font-size: 19px; line-height: 1.3; font-weight: 600; color: var(--ink); }
+.stepBody { margin-top: 6px; max-width: 36em; font-size: 17px; line-height: 1.55; }
+.split {
+  margin-top: 28px; padding: 18px 22px;
+  display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 28px;
+  border-radius: 14px; background: var(--panel); border: 1px solid var(--line);
+}
+.you { font-size: 17px; line-height: 1.45; }
+.you strong { color: var(--ink); font-weight: 600; }
+.me { font-size: 19px; font-weight: 600; color: var(--ink); }
+
+/* 3. what is the catch: said once, as confidence */
+.band { margin-top: 56px; padding: 26px 28px; border-radius: 16px; background: var(--panel); border: 1px solid var(--line); border-left: 4px solid var(--brand); }
+.bandTitle { font-size: 1.6rem; line-height: 1.15; font-weight: 600; letter-spacing: -0.02em; color: var(--ink); text-wrap: balance; }
+.bandBody { margin-top: 10px; max-width: 38em; font-size: 17px; line-height: 1.55; }
+
+/* 4. price and lock-in: the questions that decide it, answered on request */
+.faq { border-top: 1px solid var(--line); }
+.qa { border-bottom: 1px solid var(--line); }
+.qa summary { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 18px 0; cursor: pointer; list-style: none; font-size: 18px; font-weight: 600; color: var(--ink); }
+.qa summary::-webkit-details-marker { display: none; }
+.qa summary svg { flex: none; color: var(--soft); transition: transform 0.2s ease; }
+.qa[open] summary svg { transform: rotate(45deg); }
+.qa p { margin: -2px 0 20px; max-width: 38em; font-size: 17px; line-height: 1.55; }
+
+/* 5. next step */
+.close { margin-top: 56px; }
+.closeTitle { max-width: 18em; font-size: clamp(1.6rem, 1.1rem + 1.6vw, 2.2rem); line-height: 1.1; font-weight: 600; letter-spacing: -0.03em; color: var(--ink); text-wrap: balance; }
+.closeLine { margin-top: 10px; max-width: 34em; font-size: 17px; line-height: 1.55; }
+.close .cta { margin-top: 22px; }
+.sign { margin-top: 18px; font-size: 15px; color: var(--soft); }
+
+@media (max-width: 560px) { .band { padding: 20px; } .split { flex-direction: column; } }
+@media (prefers-reduced-motion: reduce) { .btn, .qa summary svg { transition: none; } }

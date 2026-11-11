@@ -119,14 +119,20 @@ function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 // ── IG caption keyword search (single run, all keywords at once) ──────────────
 
 async function runKeywordSearch(keywords, sessionId) {
+  // `maxPosts` below is just an actor INPUT hint — this actor isn't obligated to honor it
+  // as a hard cap. The `&maxItems=` query param on the run-creation request is what Apify's
+  // platform actually enforces for pay-per-result actors (see runApify() in source_leads.mjs,
+  // which refuses to launch a run without it). This call was missing it and ran up $5.19 in
+  // under a minute on 2026-09-08 before the account's monthly cap force-aborted it.
+  const MAX_POSTS = 150;
   const res = await fetch(
-    `https://api.apify.com/v2/acts/${ACTOR}/runs?token=${TOKEN}`,
+    `https://api.apify.com/v2/acts/${ACTOR}/runs?token=${TOKEN}&maxItems=${MAX_POSTS}`,
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         keywords,
-        maxPosts: 150,
+        maxPosts: MAX_POSTS,
         cookies: JSON.stringify([{ name: 'sessionid', value: sessionId }]),
         sessionName: 'smartflow',
       }),

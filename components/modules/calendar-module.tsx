@@ -7,6 +7,8 @@ import {
   ChevronLeft, ChevronRight, Sparkles, UserX, Plus, Pencil, Trash2
 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { ModuleHeader } from "@/components/ui/module-header"
+import { StatStrip } from "@/components/ui/stat-strip"
 import { NicheKey, NICHE_CONFIGS } from "@/lib/niche-config"
 import { getDemoShift, shiftRowsDays } from "@/lib/demo/time-shift"
 import {
@@ -59,9 +61,9 @@ const STATUS_COLORS: Record<string, string> = {
 }
 
 const HOURS = Array.from({ length: 13 }, (_, i) => i + 8) // 8:00–20:00
-// Tall enough that a 45-minute booking can carry a name, a procedure and a price
-// without truncating — this grid is the product's most-screenshotted surface.
-const ROW_H = 84
+// 60px per hour: the whole working day (08–20h) fits on one screen, and an hour-long booking
+// still carries a name and a procedure. 84px meant only ~7 hours were visible at once.
+const ROW_H = 60
 
 const rsd = (n: number) => `${Math.round(n).toLocaleString('de-DE')} RSD`
 
@@ -289,77 +291,68 @@ export function CalendarModule({ clientId, nicheKey = 'generic', tourHighlightNa
     : 0
   const serviceCount: Record<string, number> = {}
   appointments.forEach(a => { serviceCount[a.service_name] = (serviceCount[a.service_name] ?? 0) + 1 })
-  const topService = Object.entries(serviceCount).sort((a, b) => b[1] - a[1])[0]?.[0] ?? '—'
+  const topEntry = Object.entries(serviceCount).sort((a, b) => b[1] - a[1])[0]
+  const topService = topEntry?.[0] ?? '—'
+  const today = appointments.filter(a => isSameDay(new Date(a.starts_at), now)).sort((a, b) => a.starts_at.localeCompare(b.starts_at))
+  const tomorrowEnd = new Date(now.getTime() + 24 * 3600 * 1000)
+  const laterNext24 = next24h.filter(a => !isSameDay(new Date(a.starts_at), now) && new Date(a.starts_at) <= tomorrowEnd)
 
   const DAYS_SR = ['Pon', 'Uto', 'Sri', 'Čet', 'Pet', 'Sub', 'Ned']
   const dayLabel = (d: Date) => DAYS_SR[(d.getDay() + 6) % 7]
 
   return (
-    <div className="p-6 space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between gap-3 flex-wrap">
-        <div>
-          <h2 className="text-xl font-outfit font-semibold text-white">{config.calendarLabel}</h2>
-          <p className="text-sm text-slate-400 mt-0.5">Pregled zakazanih termina</p>
-        </div>
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => { setFormAppt(null); setShowForm(true) }}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/15 text-emerald-400 border border-emerald-500/20 text-sm font-medium hover:bg-emerald-500/25 transition-colors"
-          >
-            <Plus className="w-4 h-4" /> Dodaj termin
-          </button>
-          <div className="flex items-center gap-1 bg-white/5 rounded-lg p-0.5">
-            <button
-              onClick={() => setView('week')}
-              className={cn('px-3 py-1.5 rounded-md text-sm transition-colors', view === 'week' ? 'bg-white/15 text-white' : 'text-slate-400 hover:text-white')}
-            >
-              Nedelja
+    <div className="space-y-3">
+      <ModuleHeader title={config.calendarLabel} subtitle={`${thisWeek.length} termina ove nedelje · ${today.length} danas`}>
+        <button
+          onClick={() => { setFormAppt(null); setShowForm(true) }}
+          className="flex items-center gap-1.5 h-8 px-3 rounded-lg bg-emerald-500/15 text-emerald-400 border border-emerald-500/20 text-[13px] font-semibold hover:bg-emerald-500/25 transition-colors"
+        >
+          <Plus className="w-4 h-4" /> Dodaj termin
+        </button>
+        <div className="flex items-center rounded-lg surface-1 p-0.5">
+          {(['week', 'month'] as const).map(v => (
+            <button key={v} onClick={() => setView(v)}
+              className={cn('px-2.5 py-1 rounded-md text-[12px] font-semibold transition-colors', view === v ? 'bg-white/10 text-white' : 'text-zinc-500 hover:text-zinc-300')}>
+              {v === 'week' ? 'Nedelja' : 'Mesec'}
             </button>
-            <button
-              onClick={() => setView('month')}
-              className={cn('px-3 py-1.5 rounded-md text-sm transition-colors', view === 'month' ? 'bg-white/15 text-white' : 'text-slate-400 hover:text-white')}
-            >
-              Mesec
-            </button>
-          </div>
+          ))}
         </div>
-      </div>
+      </ModuleHeader>
 
-      {/* Metrics strip */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        {[
-          { label: 'Sledećih 24h', value: next24h.length, icon: Clock, color: 'text-amber-400' },
-          { label: 'Ova nedelja', value: thisWeek.length, icon: CalendarDays, color: 'text-sky-400' },
-          { label: 'Stopa otkazivanja', value: `${cancelRate}%`, icon: XCircle, color: 'text-red-400' },
-          { label: 'Najpopularnija usluga', value: topService, icon: CheckCircle, color: 'text-emerald-400' },
-        ].map(m => (
-          <div key={m.label} className="glass-card rounded-xl p-4 flex items-center gap-3">
-            <m.icon className={cn('w-5 h-5 shrink-0', m.color)} />
-            <div className="min-w-0">
-              <p className="text-xs text-slate-400">{m.label}</p>
-              <p className="text-sm font-semibold text-white truncate">{m.value}</p>
-            </div>
-          </div>
-        ))}
-      </div>
+      <StatStrip className="grid-cols-2 sm:grid-cols-5" stats={[
+        { key: 'today', label: 'Danas', value: today.length, color: '#10b981' },
+        { key: 'next', label: 'Sledećih 24h', value: next24h.length, color: '#f59e0b' },
+        { key: 'week', label: 'Ova nedelja', value: thisWeek.length, color: '#38bdf8' },
+        { key: 'cancel', label: 'Otkazano ili nije došao', value: `${cancelRate}%`, color: '#f43f5e' },
+        { key: 'top', label: 'Najtraženija usluga', value: topEntry?.[1] ?? 0, hint: topService, color: '#a78bfa' },
+      ]} />
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-3">
         {/* Main calendar */}
         <div className="lg:col-span-3">
           {view === 'week' ? (
-            <div data-tour-focus="calendar-week" className="glass-card rounded-2xl overflow-hidden">
-              {/* Week nav */}
-              <div className="flex items-center justify-between px-5 py-3 border-b border-white/5">
-                <button onClick={prevWeek} className="p-1.5 hover:bg-white/10 rounded-lg transition-colors">
+            <div data-tour-focus="calendar-week" className="rounded-xl surface-1 overflow-hidden">
+              {/* Week nav + legend in one bar */}
+              <div className="flex items-center gap-3 px-3 py-2 border-b border-white/[0.06]">
+                <button onClick={prevWeek} aria-label="Prethodna nedelja" className="p-1 hover:bg-white/10 rounded-md transition-colors">
                   <ChevronLeft className="w-4 h-4 text-slate-400" />
                 </button>
-                <span className="text-sm font-medium text-white">
+                <span className="text-[13px] font-semibold text-white capitalize">
                   {weekDays[0].toLocaleDateString('sr-Latn-RS', { month: 'long', year: 'numeric' })}
                 </span>
-                <button onClick={nextWeek} className="p-1.5 hover:bg-white/10 rounded-lg transition-colors">
+                <button onClick={nextWeek} aria-label="Sledeća nedelja" className="p-1 hover:bg-white/10 rounded-md transition-colors">
                   <ChevronRight className="w-4 h-4 text-slate-400" />
                 </button>
+                <div className="ml-auto hidden xl:flex items-center gap-3 min-w-0 overflow-hidden">
+                  {Object.entries(serviceCount).sort((a, b) => b[1] - a[1]).slice(0, 4).map(([name]) => {
+                    const color = appointments.find(a => a.service_name === name)?.service_color ?? '#6366f1'
+                    return (
+                      <span key={name} className="inline-flex items-center gap-1.5 text-[11px] text-zinc-400 truncate max-w-[200px]">
+                        <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: color }} />{name}
+                      </span>
+                    )
+                  })}
+                </div>
               </div>
 
               {/* Day headers */}
@@ -369,9 +362,9 @@ export function CalendarModule({ clientId, nicheKey = 'generic', tourHighlightNa
                   {weekDays.map((day, i) => {
                     const isToday = isSameDay(day, new Date())
                     return (
-                      <div key={i} className={cn('py-3 flex flex-col items-center gap-1.5 border-l border-white/[0.04] transition-colors', isToday && 'bg-emerald-500/[0.06]')}>
+                      <div key={i} className={cn('py-1.5 flex items-center justify-center gap-2 border-l border-white/[0.04] transition-colors', isToday && 'bg-emerald-500/[0.06]')}>
                         <p className={cn('text-[11px] font-bold uppercase tracking-wider', isToday ? 'text-emerald-400' : 'text-slate-500')}>{dayLabel(day)}</p>
-                        <div className={cn('w-9 h-9 flex items-center justify-center rounded-full text-lg font-bold transition-all',
+                        <div className={cn('w-7 h-7 flex items-center justify-center rounded-full text-[15px] font-bold transition-all',
                           isToday ? 'bg-emerald-500 text-[#05140d] shadow-[0_0_16px_-2px_rgba(16,185,129,0.6)]' : 'text-white')}>
                           {day.getDate()}
                         </div>
@@ -382,7 +375,7 @@ export function CalendarModule({ clientId, nicheKey = 'generic', tourHighlightNa
               </div>
 
               {/* Time grid */}
-              <div className="flex overflow-y-auto max-h-[620px]">
+              <div className="flex overflow-y-auto max-h-[calc(100vh-300px)]">
                 {/* Hour labels */}
                 <div className="w-14 shrink-0">
                   {HOURS.map(h => (
@@ -411,7 +404,7 @@ export function CalendarModule({ clientId, nicheKey = 'generic', tourHighlightNa
                             const startH = start.getHours() + start.getMinutes() / 60
                             const endH = end.getHours() + end.getMinutes() / 60
                             const top = Math.max(0, (startH - 8) * ROW_H)
-                            const height = Math.max(46, (endH - startH) * ROW_H)
+                            const height = Math.max(30, (endH - startH) * ROW_H)
                             const { col, totalCols } = layoutMap.get(a.id) ?? { col: 0, totalCols: 1 }
                             const leftPct = (col / totalCols) * 100
                             const widthPct = (1 / totalCols) * 100
@@ -423,6 +416,8 @@ export function CalendarModule({ clientId, nicheKey = 'generic', tourHighlightNa
                               <div key={a.id} className="contents">
                               {isTourHero && (
                                 <span
+                                  // part of the tour highlight: the ring encloses the badge instead of washing it out
+                                  data-tour-focus-part="appt-hero"
                                   className="absolute z-30 pointer-events-none whitespace-nowrap text-[9px] font-black uppercase tracking-[0.12em] px-1.5 py-[3px] rounded-md bg-emerald-400 text-[#04140c] shadow-[0_4px_14px_-2px_rgba(16,185,129,0.8)]"
                                   style={{ top: Math.max(0, top - 17), left: `calc(${leftPct}% + 2px)` }}
                                 >
@@ -455,10 +450,10 @@ export function CalendarModule({ clientId, nicheKey = 'generic', tourHighlightNa
                                 }}
                               >
                                 <p className="text-[13px] font-semibold text-white truncate leading-tight font-outfit">{a.customer_name}</p>
-                                {height > 52 && (
+                                {height > 44 && (
                                   <p className="text-[11px] text-zinc-300/90 truncate leading-tight mt-[3px]">{a.service_name}</p>
                                 )}
-                                {height > 68 && (
+                                {height > 64 && (
                                   <div className="flex items-baseline gap-1.5 mt-[3px]">
                                     <span className="text-[11px] font-bold tabular-nums leading-none" style={{ color: accent }}>
                                       {formatTime(a.starts_at)}
@@ -489,59 +484,41 @@ export function CalendarModule({ clientId, nicheKey = 'generic', tourHighlightNa
           )}
         </div>
 
-        {/* Next 24h panel */}
-        <div className="space-y-3">
-          <h3 className="text-sm font-medium text-slate-400 uppercase tracking-wider">Sledećih 24h</h3>
-          {loading ? (
-            <p className="text-sm text-slate-500">Učitavanje...</p>
-          ) : next24h.length === 0 ? (
-            <div className="glass-card rounded-xl p-4 text-center">
-              <CalendarDays className="w-8 h-8 text-slate-600 mx-auto mb-2" />
-              <p className="text-sm text-slate-400">Nema termina</p>
+        {/* Agenda: today, then the rest of the next 24h */}
+        <div className="rounded-xl surface-1 overflow-hidden self-start">
+          {[
+            { title: 'Danas', items: today },
+            { title: 'Sutra (sledećih 24h)', items: laterNext24 },
+          ].map(group => (
+            <div key={group.title} className="border-b border-white/[0.05] last:border-b-0">
+              <p className="px-3 pt-2.5 pb-1.5 text-[10.5px] font-bold uppercase tracking-[0.14em] text-zinc-500 flex items-baseline gap-2">
+                {group.title}<span className="tabular-nums text-zinc-600">{group.items.length}</span>
+              </p>
+              {loading ? (
+                <p className="px-3 pb-3 text-[12px] text-zinc-500">Učitavanje…</p>
+              ) : group.items.length === 0 ? (
+                <p className="px-3 pb-3 text-[12px] text-zinc-600">Nema termina.</p>
+              ) : group.items.map(a => {
+                const past = new Date(a.ends_at) < now
+                return (
+                  <button key={a.id} onClick={() => { setSelectedAppt(a); setDeleteConfirm(null) }}
+                    className={cn('w-full text-left px-3 py-1.5 flex items-start gap-2.5 hover:bg-white/[0.04] transition-colors',
+                      (a.status === 'cancelled') && 'line-through opacity-50', past && 'opacity-60')}>
+                    <span className="text-[12px] font-bold tabular-nums text-zinc-300 w-10 shrink-0 pt-px">{formatTime(a.starts_at)}</span>
+                    <span className="w-[3px] self-stretch rounded-full shrink-0" style={{ background: a.service_color ?? '#10b981' }} />
+                    <span className="min-w-0">
+                      <span className="block text-[13px] font-semibold text-white truncate">{a.customer_name}</span>
+                      <span className="block text-[11.5px] text-zinc-500 truncate">{a.service_name}</span>
+                    </span>
+                    {a.urgency === 'high' && <Sparkles className="w-3.5 h-3.5 text-amber-400 shrink-0 ml-auto" />}
+                  </button>
+                )
+              })}
+              <div className="h-1.5" />
             </div>
-          ) : next24h.map(a => (
-            <button
-              key={a.id}
-              onClick={() => { setSelectedAppt(a); setDeleteConfirm(null) }}
-              className={cn(
-                'w-full text-left rounded-xl border p-3 transition-all hover:scale-[1.01]',
-                a.status === 'cancelled' ? 'border-red-500/30 bg-red-500/5 line-through opacity-60' : 'border-white/10 bg-white/[0.04]'
-              )}
-            >
-              <div className="flex items-start justify-between gap-2">
-                <div className="min-w-0">
-                  <p className="text-sm font-medium text-white truncate">{a.customer_name}</p>
-                  <p className="text-xs text-slate-400 mt-0.5">{a.service_name}</p>
-                  <p className="text-xs text-slate-500">{formatTime(a.starts_at)}</p>
-                </div>
-                {a.urgency === 'high' && (
-                  <span className="shrink-0 flex items-center gap-1 text-xs text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full">
-                    <Sparkles className="w-3 h-3 animate-pulse" /> Hitno
-                  </span>
-                )}
-              </div>
-              {a.urgency_reason && (
-                <p className="text-[11px] text-amber-400/70 mt-1.5 line-clamp-2">{a.urgency_reason}</p>
-              )}
-            </button>
           ))}
         </div>
       </div>
-
-      {/* Service legend */}
-      {appointments.length > 0 && (
-        <div className="flex flex-wrap gap-2">
-          {Object.entries(serviceCount).sort((a, b) => b[1] - a[1]).slice(0, 6).map(([name]) => {
-            const color = appointments.find(a => a.service_name === name)?.service_color ?? '#6366f1'
-            return (
-              <span key={name} className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs text-slate-300 bg-white/5">
-                <span className="w-2 h-2 rounded-full" style={{ backgroundColor: color }} />
-                {name}
-              </span>
-            )
-          })}
-        </div>
-      )}
 
       {/* Detail drawer */}
       {selectedAppt && (

@@ -36,6 +36,7 @@ const BATCH_SIZE   = 200; // max leads to attempt
 
 const sb = createClient(SUPABASE_URL, SERVICE_KEY);
 const KAT_ORDER = { Vreo: 0, Topao: 1, Hladan: 2 };
+const isDryRun = process.argv.includes('--dry-run');
 
 const BOGUS_RE     = /\.(webp|png|jpg|jpeg|gif|svg)(@|$)/i;
 const BOGUS_DOMAIN = new Set(['instagram.com','facebook.com','temu.com','pubgmobile.com','api.whatsapp.com','maps.app.goo.gl','play.google.com']);
@@ -199,11 +200,23 @@ async function findEmailForLead(lead) {
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
 async function main() {
+  // Was `.eq('status', 'Novi Lead').gte('created_at', '2026-04-08...')` — a status value the
+  // current pipeline (novi/sourced/demo_building/email_ready via pipeline_stage) never
+  // writes anymore, and a stale date filter. Confirmed 0 rows match that old filter as of
+  // 2026-09-11. The enrichment logic + write-back (email + status: 'enriched') already
+  // matches the current pipeline exactly; only the query needed retargeting to what's
+  // actually stuck today — leads with no email sitting in the sourced/novi backlog.
+  // Caught in dry-run: this pool includes rows correctly Disqualified for reasons that
+  // have nothing to do with a missing email (e.g. Adoré Chocolat — AOV too low, ~2.000 RSD
+  // ticket). Writing status:'enriched' on those would silently un-disqualify a lead that
+  // was rejected correctly, the same mistake made on Wellness Spa earlier today — excluding
+  // dead statuses here is what stops that from happening again.
   const { data: leads, error } = await sb.from('contacts')
-    .select('id, company_name, website, instagram_handle, kategorija, instagram_followers, intake_data')
+    .select('id, company_name, website, instagram_handle, kategorija, instagram_followers, intake_data, status')
     .eq('client_id', CLIENT_ID)
-    .eq('status', 'Novi Lead')
-    .gte('created_at', '2026-04-08T00:00:00');
+    .in('pipeline_stage', ['sourced', 'novi'])
+    .is('email', null)
+    .not('status', 'in', '("Disqualified","Lost","Bounced")');
 
   if (error) { console.error(error.message); process.exit(1); }
 
@@ -226,10 +239,13 @@ async function main() {
     const result = await findEmailForLead(lead);
 
     if (result?.email) {
-      const update = { email: result.email, status: 'enriched' };
-      if (result.name) update.name = result.name;
-      if (result.domain && !lead.website) update.website = `https://${result.domain}`;
-      await sb.from('contacts').update(update).eq('id', lead.id);
+      console.log(`  ✓ found: ${result.email}`);
+      if (!isDryRun) {
+        const update = { email: result.email, status: 'enriched' };
+        if (result.name) update.name = result.name;
+        if (result.domain && !lead.website) update.website = `https://${result.domain}`;
+        await sb.from('contacts').update(update).eq('id', lead.id);
+      }
       enriched++;
     }
 

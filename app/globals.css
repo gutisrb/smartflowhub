@@ -319,3 +319,26 @@
   border: 1px solid rgba(16,185,129,0.2);
   box-shadow: 0 0 40px -10px rgba(16,185,129,0.15);
 }
+/* Onboarding tour: the dashboard is being shown, not used — clicks are swallowed in
+   app/page.tsx, so nothing under the tour should look clickable either. */
+.tour-locked * { cursor: default !important; }  /* dialogs portal outside the app root */
+.tour-locked [data-tour-ui] button,
+.tour-locked [data-tour-ui] a { cursor: pointer !important; }
+.tour-locked [data-tour-ui] button:disabled { cursor: not-allowed !important; }
+
+/* Tour card: CSS entrance (compositor) + one brand-colour pulse when a slide starts, so the
+   eye lands on it (2026-10-25: "the card is easily overlooked"). --tour-ink is set inline. */
+@keyframes tour-card-in { from { opacity: 0; transform: translateY(6px) scale(0.98) } to { opacity: 1; transform: none } }
+@keyframes tour-card-pulse { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--tour-ink) 55%, transparent), 0 30px 80px rgba(0,0,0,.65) } 100% { box-shadow: 0 0 0 18px transparent, 0 30px 80px rgba(0,0,0,.65) } }
+.tour-card-in { animation: tour-card-in 260ms cubic-bezier(.2,.8,.2,1) both, tour-card-pulse 1100ms ease-out 260ms 1; }
+@media (prefers-reduced-motion: reduce) { .tour-card-in { animation: none; } }
+
+
+/* ── Sidebar: one panel that widens on hover (components/dashboard/sidebar.tsx) ───────────
+   Labels are always laid out, so only opacity and the panel width change. :has(:focus-visible)
+   opens it for keyboard users; a mouse click leaves focus in the panel without opening it. */
+.sidebar-panel .label { opacity: 0; transition: opacity 100ms ease-out; }
+.sidebar-panel:not(.is-open):hover, .sidebar-panel:not(.is-open):has(:focus-visible) { width: var(--rail-open, 248px); }
+.sidebar-panel:hover .label, .sidebar-panel:has(:focus-visible) .label, .sidebar-panel.is-open .label {
+  opacity: 1; transition: opacity 140ms ease-out 80ms;
+}

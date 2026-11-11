@@ -23,6 +23,7 @@ import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { promises as dns } from 'dns';
 import { isPermabanned } from './lib/permaban.mjs';
+import { verifyTenant } from './lib/demo-gate-io.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -144,6 +145,50 @@ function stripMarkdown(text) {
   return text
     .replace(/\*\*(.+?)\*\*/g, '$1')
     .replace(/_(.+?)_/g, '$1');
+}
+
+/**
+ * The email exactly as the recipient gets it: { text, html } (html without the tracking pixel).
+ *
+ * E1 v15 (2026-11-04) places the demo link and login inside the text ("…provede kroz sve:\n{link}\n
+ * (prijava: {email} / {lozinka})"). A body that carries {link}/{email}/{lozinka} is filled in place and
+ * gets nothing appended. Older bodies get the login block at the bottom; its header used to say
+ * "Vaš sistem je live", which is false (it is a demo) and contradicted the email above it.
+ * A placeholder without a built demo login throws: no email goes out with "{link}" in it.
+ */
+function renderEmail(lead, body, isFollowUp) {
+  const hasDemo = !!(lead.demo_tenant_email && lead.demo_tenant_password);
+  const url = lead.demo_tenant_url || 'https://app.smartflow.rs';
+  if (/\{(link|email|lozinka)\}/.test(body)) {
+    if (!hasDemo) throw new Error('draft has {link}/{email}/{lozinka} but the lead has no demo login');
+    const fill = (s, link) => s.split('{link}').join(link)
+      .split('{email}').join(lead.demo_tenant_email).split('{lozinka}').join(lead.demo_tenant_password);
+    return {
+      text: fill(stripMarkdown(body), url),
+      html: fill(markdownToHtml(body), `<a href="${url}" style="color:#0ea5e9;font-weight:600">${url.replace('https://', '')}</a>`),
+    };
+  }
+  let html = markdownToHtml(body), text = stripMarkdown(body);
+  if (!isFollowUp && hasDemo) {
+    const loomHtml = LOOM_URL && LOOM_THUMB_URL
+      ? `<p style="margin:12px 0">
+           <a href="${LOOM_URL}" style="text-decoration:none">
+             <img src="${LOOM_THUMB_URL}" alt="Pogledajte 30-sek pregled" width="480" style="max-width:100%;border-radius:6px;border:1px solid #e5e7eb" />
+           </a>
+         </p>`
+      : '';
+    html += `
+<hr style="border:none;border-top:1px solid #e5e7eb;margin:24px 0">
+<p style="margin:0 0 8px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:14px;color:#6b7280;text-transform:uppercase;letter-spacing:.05em">Pristup demou →</p>
+<p style="margin:0 0 12px;font-family:'Courier New',Courier,monospace;font-size:14px;line-height:1.8;color:#111">
+  🔗 <a href="${url}" style="color:#0ea5e9;font-weight:600">${url.replace('https://', '')}</a><br>
+  Email: <strong>${lead.demo_tenant_email}</strong><br>
+  Lozinka: <strong>${lead.demo_tenant_password}</strong>
+</p>
+${loomHtml}`;
+    text += `\n\n─────────────────────────\nPristup demou:\n${url}\nEmail: ${lead.demo_tenant_email}\nLozinka: ${lead.demo_tenant_password}\n─────────────────────────`;
+  }
+  return { text, html };
 }
 
 function parseDraft(draft) {
@@ -338,12 +383,33 @@ async function main() {
     const parsed = parseDraft(lead[getDraftField(lead)]);
     if (!parsed) { console.warn(`⚠  ${lead.company_name} — unparseable draft (${getDraftField(lead)}), skipping`); failed++; continue; }
 
+    // Claims gate (2026-11-10): a demo that does not pass is never put in front of its owner. Live preflight: the business's site
+    // is fetched now, so a price that changed since the demo was built (390 EUR -> 370) blocks the send here. No override flag.
+    if (lead.demo_tenant_email && !getIsFollowUp(lead)) {
+      const g = await verifyTenant(sb, lead.demo_tenant_email, { live: true });
+      if (g.error || !g.ok) {
+        console.warn(`⛔ ${lead.company_name} — demo fails the claims gate (${g.error || `${g.failures.length} failure(s)`}); NOT sending. See: node verify_demo.mjs --email ${lead.demo_tenant_email}`);
+        failed++; continue;
+      }
+    }
+
     const to = TEST_EMAIL || lead.email;
     console.log(`[${i + 1}/${queue.length}] ${lead.company_name}`);
     console.log(`  To:      ${to}${TEST_EMAIL ? `  (real: ${lead.email})` : ''}`);
     console.log(`  Subject: ${parsed.subject}`);
 
-    if (isDryRun) { console.log(`  ✓ [DRY RUN]\n`); continue; }
+    if (isDryRun) {
+      // --preview prints the email exactly as it will arrive (password masked), so the copy is read
+      // in its final form, with the login where the recipient sees it.
+      if (process.argv.includes('--preview')) {
+        try {
+          const { text } = renderEmail(lead, parsed.body, getIsFollowUp(lead));
+          const shown = lead.demo_tenant_password ? text.split(lead.demo_tenant_password).join('••••••') : text;
+          console.log('  ' + '─'.repeat(60) + '\n' + shown.replace(/^/gm, '  │ ') + '\n  ' + '─'.repeat(60));
+        } catch (e) { console.log(`  ✗ ${e.message}`); }
+      }
+      console.log(`  ✓ [DRY RUN]\n`); continue;
+    }
 
     // Atomically claim this lead before sending — prevents double-send if two
     // script instances run concurrently (TOCTOU race on the initial bulk fetch).
@@ -362,47 +428,17 @@ async function main() {
     }
 
     try {
-      const textBody = stripMarkdown(parsed.body);
-
-      // ── Login block (injected when demo is available) ──────────────────────
-      let loginBlockHtml = '';
-      let loginBlockText = '';
-      if (!getIsFollowUp(lead) && lead.demo_tenant_email && lead.demo_tenant_password) {
-        const loginUrl   = lead.demo_tenant_url || 'https://app.smartflow.rs';
-        const loginEmail = lead.demo_tenant_email;
-        const loginPass  = lead.demo_tenant_password;
-
-        // Loom thumbnail (optional)
-        const loomHtml = LOOM_URL && LOOM_THUMB_URL
-          ? `<p style="margin:12px 0">
-               <a href="${LOOM_URL}" style="text-decoration:none">
-                 <img src="${LOOM_THUMB_URL}" alt="Pogledajte 30-sek pregled" width="480" style="max-width:100%;border-radius:6px;border:1px solid #e5e7eb" />
-               </a>
-             </p>`
-          : '';
-
-        loginBlockHtml = `
-<hr style="border:none;border-top:1px solid #e5e7eb;margin:24px 0">
-<p style="margin:0 0 8px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:14px;color:#6b7280;text-transform:uppercase;letter-spacing:.05em">Vaš sistem je live →</p>
-<p style="margin:0 0 12px;font-family:'Courier New',Courier,monospace;font-size:14px;line-height:1.8;color:#111">
-  🔗 <a href="${loginUrl}" style="color:#0ea5e9;font-weight:600">${loginUrl.replace('https://', '')}</a><br>
-  Email: <strong>${loginEmail}</strong><br>
-  Lozinka: <strong>${loginPass}</strong>
-</p>
-${loomHtml}`;
-
-        loginBlockText = `\n\n─────────────────────────\nVaš sistem je live:\n${loginUrl}\nEmail: ${loginEmail}\nLozinka: ${loginPass}\n─────────────────────────`;
-      }
+      const { text: textBody, html: bodyHtml } = renderEmail(lead, parsed.body, getIsFollowUp(lead));
 
       // Open-tracking pixel — served by Supabase edge function
       const trackingPixel = `<img src="${SUPABASE_URL}/functions/v1/track-open?id=${lead.id}" width="1" height="1" alt="" style="display:block;border:0;width:1px;height:1px" />`;
-      const htmlBody = `<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:15px;color:#1a1a1a;line-height:1.75">${markdownToHtml(parsed.body)}${loginBlockHtml}${trackingPixel}</div>`;
+      const htmlBody = `<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:15px;color:#1a1a1a;line-height:1.75">${bodyHtml}${trackingPixel}</div>`;
 
       const info = await transporter.sendMail({
         from:    `"${SENDER_NAME}" <${GMAIL_USER}>`,
         to,
         subject: parsed.subject,
-        text:    textBody + loginBlockText,
+        text:    textBody,
         html:    htmlBody,
         replyTo: GMAIL_USER,
         headers: {

@@ -1,0 +1,41 @@
+import { describe, it, expect } from 'vitest'
+import { profileFit } from './lead-profile.mjs'
+
+// The original batch Nikola likes must pass; the loose-tier leads and his "Plemenita ulja" scenario must not.
+const pass = (name: string, bio = '') => profileFit({ name, bio, followers: 50000 }).pass
+describe('profileFit (who is worth a demo)', () => {
+  it('passes the original batch’s kinds of business', () => {
+    expect(pass('Varmus', 'Montažni objekti i kontejnerske kuće')).toBe(true)
+    expect(pass('LOGERA TINY HOME', 'Tiny house proizvodnja')).toBe(true)
+    expect(pass('Tandem Skok Beograd', 'Tandem skokovi padobranom, Beograd')).toBe(true)
+    expect(pass('Stomatoloska ordinacija Cvejanovic', 'implantologija, estetska stomatologija')).toBe(true)
+    expect(pass('JetSet', 'Novi i polovni mobilni telefoni, otkup telefona')).toBe(true)
+    expect(pass('Luxor Furniture', 'Stolovi za šminkanje, nameštaj')).toBe(true)
+    expect(pass('Demart Serbia', 'Pergole, tende, klizni krov')).toBe(true)
+  })
+  it('passes quote-based furniture shops from the new batch (Vitax, SitForm, Linea, Furni)', () => {
+    for (const n of ['Nameštaj Vitax', 'Salon nameštaja SitForm', 'Linea Milanovic - luxury furniture & interiors', 'Nameštaj po meri | Furni Enterijeri']) expect(pass(n)).toBe(true)
+  })
+  it('rejects the low-ticket and appointment-commodity accounts that got in through loose tiers', () => {
+    expect(pass('Venčanice Sirena Beograd')).toBe(false)
+    expect(pass('Venčanice BRIDAL BOUTIQUE')).toBe(false)
+    expect(pass('mb_laser_estetic_centar', 'laser epilacija')).toBe(false)
+    expect(pass('LuxeHair Srbija', 'hair extensions')).toBe(false)
+  })
+  it('rejects the Plemenita ulja scenario (size and price passed, no pain)', () => {
+    const r = profileFit({ name: 'Plemenita ulja', bio: 'Prirodna kozmetička ulja', followers: 40000 })
+    expect(r.pass).toBe(false); expect(r.fails.join(' ')).toMatch(/low-ticket/)
+  })
+  it('rejects a vertical that is not on the list instead of letting it through by default', () => {
+    const r = profileFit({ name: 'Nešto d.o.o.', bio: 'Kreativna agencija', followers: 50000 })
+    expect(r.pass).toBe(false); expect(r.fails.join(' ')).toMatch(/not in the high-consideration list/)
+  })
+  it('rejects chains, wholesale groups and anything over 200k followers (not owner-run SMBs)', () => {
+    expect(profileFit({ name: 'Nameštaj Grupa', bio: 'veleprodaja nameštaja, grupa', followers: 60000 }).pass).toBe(false)
+    expect(profileFit({ name: 'Nameštaj Gigant', bio: 'nameštaj', followers: 300000 }).pass).toBe(false)
+    expect(profileFit({ name: 'Salon nameštaja', bio: 'preko 12 prodavnica širom Srbije', followers: 80000 }).pass).toBe(false)
+  })
+  it('lets a clinic through the low-ticket filter when it is dental or aesthetic surgery', () => {
+    expect(pass('Dental centar', 'stomatološka ordinacija, tretmani i wellness')).toBe(true)
+  })
+})

@@ -1,104 +1,125 @@
 "use client"
 
 /**
- * Six glyphs, one mechanism.
+ * Seven marks, one mechanism.
  *
- * Off-the-shelf icons (a chat bubble, a database can, a bar chart) label the
- * module the viewer is already looking at — they say nothing. These trace a
- * single object through the system instead: a message arrives, meets a boundary,
- * becomes a record, becomes a booked slot, becomes a pattern, becomes revenue.
- * Read in order they are one drawing in six frames, which is exactly what the
- * tour is claiming happens to every DM the clinic receives.
+ * Two earlier versions failed the same way: they were line DRAWINGS. Multiple
+ * strokes, a filled shape behind them, small interior detail — legible at 64px in
+ * a design tool, grey mush at the 28px the narration card actually renders.
  *
- * Drawn on a 24×24 grid, 1.6 stroke, inheriting currentColor.
+ * These are solid silhouettes with the detail KNOCKED OUT of the fill (evenodd),
+ * which is how real icon sets survive small sizes: one shape, one colour, holes
+ * where the meaning is. No strokes at all. Read in order they trace one message
+ * through the system — arrives, hits a boundary, gets a human reply, becomes a
+ * record, becomes a booked slot, becomes a pattern, becomes revenue.
  */
 
 type GlyphProps = { className?: string }
 
-const base = {
-  viewBox: "0 0 24 24",
-  fill: "none",
-  stroke: "currentColor",
-  strokeWidth: 1.6,
-  strokeLinecap: "round" as const,
-  strokeLinejoin: "round" as const,
-}
+const box = { viewBox: "0 0 32 32", fill: "currentColor", xmlns: "http://www.w3.org/2000/svg" }
 
-/** 1 — Intake: a message enters and is answered. */
+/** 1 — Intake: a message lands, already answered. */
 export function GlyphIntake({ className }: GlyphProps) {
   return (
-    <svg {...base} className={className}>
-      <path d="M2.5 12h4" strokeOpacity={0.5} />
-      <path d="M5 9.5 7.5 12 5 14.5" strokeOpacity={0.5} />
-      <path d="M10 5h9.5a1.5 1.5 0 0 1 1.5 1.5v8a1.5 1.5 0 0 1-1.5 1.5H14l-3.5 3v-3h-.5A1.5 1.5 0 0 1 8.5 14.5v-8A1.5 1.5 0 0 1 10 5Z" />
-      <path d="m12 10.6 1.8 1.9 3.4-3.6" strokeWidth={1.9} />
+    <svg {...box} className={className}>
+      <path
+        fillRule="evenodd" clipRule="evenodd"
+        d="M6 4h20a4 4 0 0 1 4 4v12a4 4 0 0 1-4 4h-8.7l-6.6 5.3A1.2 1.2 0 0 1 8.8 28.4V24H6a4 4 0 0 1-4-4V8a4 4 0 0 1 4-4Zm8.1 15.1 9-9.3-2.9-2.8-6.1 6.4-3.2-3.3L8 13.1l6.1 6Z"
+      />
     </svg>
   )
 }
 
-/** 2 — Boundary: the message stops at a line the agent will not cross. */
+/** 2 — Boundary: it stops, and tells you. */
 export function GlyphBoundary({ className }: GlyphProps) {
   return (
-    <svg {...base} className={className}>
-      <path d="M2.5 8.5h6.5a1.5 1.5 0 0 1 1.5 1.5v3a1.5 1.5 0 0 1-1.5 1.5H6l-2.5 2.2V15" strokeOpacity={0.55} />
-      <path d="M14 3v18" strokeDasharray="2.2 2.6" strokeOpacity={0.8} />
-      <path d="M18.6 8.2a1 1 0 0 1 1.7 0l3 5.4a1 1 0 0 1-.85 1.5h-6a1 1 0 0 1-.86-1.5Z" transform="translate(-4.2 0)" strokeWidth={1.75} />
-      <path d="M15.25 11.3v1.5M15.25 14.5v.05" strokeWidth={1.9} />
+    <svg {...box} className={className}>
+      <path
+        fillRule="evenodd" clipRule="evenodd"
+        d="M16 1.6 3.4 6.4v9.1c0 6.8 4.6 12.9 12.6 15.1 8-2.2 12.6-8.3 12.6-15.1V6.4L16 1.6Zm2 19.6h-4v-4h4v4Zm0-6.4h-4V8.4h4v6.4Z"
+      />
     </svg>
   )
 }
 
-/** 3 — Record: the conversation collapses into a filed card. */
+/** 3 — Reply: you take the thread over yourself. */
+export function GlyphHandover({ className }: GlyphProps) {
+  return (
+    <svg {...box} className={className}>
+      <path
+        fillRule="evenodd" clipRule="evenodd"
+        d="M6 3h20a4 4 0 0 1 4 4v9.6a4 4 0 0 1-4 4h-1.6a8.6 8.6 0 0 0-3.2-3.5 5.2 5.2 0 1 0-6.4 0 8.6 8.6 0 0 0-3.2 3.5H10l-5.7 4.6A1.1 1.1 0 0 1 2.5 24.4V20.4A4 4 0 0 1 2 18.6V7a4 4 0 0 1 4-4Z"
+      />
+      <path d="M18 19.4c3.8 0 6.9 2.9 7.2 6.6.1.9-.6 1.6-1.5 1.6h-11.4c-.9 0-1.6-.7-1.5-1.6.3-3.7 3.4-6.6 7.2-6.6Z" />
+      <circle cx="18" cy="13.4" r="3.4" />
+    </svg>
+  )
+}
+
+/** 4 — Record: the conversation files itself. */
 export function GlyphRecord({ className }: GlyphProps) {
   return (
-    <svg {...base} className={className}>
-      <path d="M7 3.4h10A1.6 1.6 0 0 1 18.6 5v14A1.6 1.6 0 0 1 17 20.6H7A1.6 1.6 0 0 1 5.4 19V5A1.6 1.6 0 0 1 7 3.4Z" />
-      <path d="M8.6 8.2h4.6" strokeWidth={2} />
-      <path d="M8.6 11.6h6.8" strokeOpacity={0.6} />
-      <path d="M8.6 14.8h5.2" strokeOpacity={0.6} />
-      <circle cx="16.4" cy="17.4" r="3" fill="currentColor" stroke="none" opacity={0.22} />
-      <path d="m15.1 17.4 1 1 2-2.2" strokeWidth={1.9} />
+    <svg {...box} className={className}>
+      <path
+        fillRule="evenodd" clipRule="evenodd"
+        d="M8 2h16a4 4 0 0 1 4 4v20a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4V6a4 4 0 0 1 4-4Zm2.4 8.4h11.2v-3H10.4v3Zm0 6.2h11.2v-3H10.4v3Zm0 6.2h6.4v-3h-6.4v3Z"
+      />
     </svg>
   )
 }
 
-/** 4 — Slot: one cell in the week turns solid. */
+/** 4b — Catalog: the shelf the agent quotes from, and the owner controls. */
+export function GlyphCatalog({ className }: GlyphProps) {
+  return (
+    <svg {...box} className={className}>
+      <path
+        fillRule="evenodd" clipRule="evenodd"
+        d="M3 3.5h26a1.6 1.6 0 0 1 1.6 1.6v3.4a1.6 1.6 0 0 1-1.6 1.6H3a1.6 1.6 0 0 1-1.6-1.6V5.1A1.6 1.6 0 0 1 3 3.5Zm0 9.4h26a1.6 1.6 0 0 1 1.6 1.6v3.4a1.6 1.6 0 0 1-1.6 1.6H3a1.6 1.6 0 0 1-1.6-1.6v-3.4A1.6 1.6 0 0 1 3 12.9Zm0 9.4h16.4a1.6 1.6 0 0 1 1.6 1.6v3.4a1.6 1.6 0 0 1-1.6 1.6H3a1.6 1.6 0 0 1-1.6-1.6v-3.4A1.6 1.6 0 0 1 3 22.3Z"
+      />
+      <circle cx="26.4" cy="25.6" r="4.4" />
+      <path d="M24.3 25.7l1.5 1.5 2.9-3.2" stroke="#05140d" strokeWidth={2} fill="none" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
+/** 5 — Slot: one cell in the week turns solid. */
 export function GlyphSlot({ className }: GlyphProps) {
   return (
-    <svg {...base} className={className}>
-      <path d="M4.4 5.6h15.2A1.4 1.4 0 0 1 21 7v12.6a1.4 1.4 0 0 1-1.4 1.4H4.4A1.4 1.4 0 0 1 3 19.6V7a1.4 1.4 0 0 1 1.4-1.4Z" />
-      <path d="M3 10h18" strokeOpacity={0.7} />
-      <path d="M7.6 3v4M16.4 3v4" strokeWidth={1.9} />
-      <rect x="12.6" y="12.4" width="6" height="5.4" rx="1.2" fill="currentColor" stroke="none" />
-      <path d="M6 13.6h3.4M6 16.6h3.4" strokeOpacity={0.4} />
+    <svg {...box} className={className}>
+      <path
+        fillRule="evenodd" clipRule="evenodd"
+        d="M9 2v3H7a4 4 0 0 0-4 4v3h26V9a4 4 0 0 0-4-4h-2V2h-4v3h-6V2H9ZM3 15v11a4 4 0 0 0 4 4h18a4 4 0 0 0 4-4V15H3Zm14.5 3.5h7.2v6.4h-7.2v-6.4Z"
+      />
     </svg>
   )
 }
 
-/** 5 — Pattern: scattered answers resolve into a readable shape. */
+/** 6 — Pattern: scattered answers resolve into a shape. */
 export function GlyphPattern({ className }: GlyphProps) {
   return (
-    <svg {...base} className={className}>
-      <circle cx="5" cy="6.4" r="1.05" fill="currentColor" stroke="none" opacity={0.45} />
-      <circle cx="9.4" cy="4.4" r="1.05" fill="currentColor" stroke="none" opacity={0.45} />
-      <circle cx="13.6" cy="7" r="1.05" fill="currentColor" stroke="none" opacity={0.45} />
-      <circle cx="18.4" cy="4.8" r="1.05" fill="currentColor" stroke="none" opacity={0.45} />
-      <path d="M4 20.6V16" strokeWidth={2.2} strokeOpacity={0.5} />
-      <path d="M9.4 20.6v-7.4" strokeWidth={2.2} strokeOpacity={0.7} />
-      <path d="M14.8 20.6v-4.2" strokeWidth={2.2} strokeOpacity={0.55} />
-      <path d="M20.2 20.6V10.4" strokeWidth={2.4} />
+    <svg {...box} className={className}>
+      <circle cx="6.5" cy="7" r="2.2" opacity={0.42} />
+      <circle cx="14" cy="4.2" r="2.2" opacity={0.42} />
+      <circle cx="21.5" cy="7.4" r="2.2" opacity={0.42} />
+      <rect x="3" y="19" width="6.4" height="10.4" rx="2" opacity={0.5} />
+      <rect x="12.8" y="13.6" width="6.4" height="15.8" rx="2" opacity={0.75} />
+      <rect x="22.6" y="8" width="6.4" height="21.4" rx="2" />
     </svg>
   )
 }
 
-/** 6 — Outlet: many messages in, one booked appointment out. */
+/** 7 — Outlet: many messages in, one closed sale out. */
 export function GlyphOutlet({ className }: GlyphProps) {
   return (
-    <svg {...base} className={className}>
-      <path d="M2.6 6.6h3.2M2.6 12h3.2M2.6 17.4h3.2" strokeOpacity={0.5} strokeWidth={1.9} />
-      <path d="M8.4 5.2h9.2l-4 6.8 4 6.8H8.4" strokeOpacity={0.85} />
-      <path d="M13.2 12h8.2" strokeWidth={2.1} />
-      <path d="m18.8 9.2 2.8 2.8-2.8 2.8" strokeWidth={2.1} />
+    <svg {...box} className={className}>
+      <rect x="1" y="6.4" width="6.4" height="3.4" rx="1.7" opacity={0.4} />
+      <rect x="1" y="14.3" width="6.4" height="3.4" rx="1.7" opacity={0.4} />
+      <rect x="1" y="22.2" width="6.4" height="3.4" rx="1.7" opacity={0.4} />
+      <path
+        fillRule="evenodd" clipRule="evenodd"
+        d="M10.4 3.6h11.8a1.5 1.5 0 0 1 1.3 2.2L19 14.4h-4.6l3.6-6.6h-7.6V3.6Zm0 24.8h11.8a1.5 1.5 0 0 0 1.3-2.2L19 17.6h-4.6l3.6 6.6h-7.6v4.2Z"
+      />
+      <path d="M17.6 13.9h8.9v-3.4l5.5 5.5-5.5 5.5v-3.4h-8.9v-4.2Z" />
     </svg>
   )
 }

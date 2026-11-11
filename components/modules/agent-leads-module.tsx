@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 import {
     TableCell,
     TableRow,
@@ -17,8 +17,7 @@ import {
     User,
     Sparkles,
     AlertTriangle,
-    Package,
-} from "lucide-react"
+    Package, Truck } from "lucide-react"
 import { getKandidatiByClientId, updateKandidat, getCrmHarmonijaByClientId, getCrmPublikByClientId, getCrmStelaByClientId, getCrmAleksandarMNByClientId, getCrmMagunaByClientId, getDemoCrmByClientId, updateDemoCrmStatus } from "@/lib/supabase/queries"
 import { NicheKey, NICHE_CONFIGS } from "@/lib/niche-config"
 import { getBookStoreConfig, BOOK_STORE_CLIENTS } from "@/lib/brand-configs"
@@ -29,6 +28,9 @@ import { cn } from "@/lib/utils"
 import { GlassCard } from "@/components/ui/glass-card"
 import { toast } from "sonner"
 import { LeadIntelligenceViewer } from "@/components/dashboard/lead-intelligence-viewer"
+import { ModuleHeader } from "@/components/ui/module-header"
+import { StatStrip } from "@/components/ui/stat-strip"
+import { bucketForRow, bucketLabel, displayStatus, BUCKET_STYLE, BUCKET_ORDER, type LeadBucket } from "@/lib/lead-status"
 
 interface AgentLeadsModuleProps {
     clientId: string | null;
@@ -45,6 +47,8 @@ interface AgentLeadsModuleProps {
     };
     demoMode?: boolean;
     nicheKey?: NicheKey;
+    /** the business ships its orders (Business Sheet): show each order's delivery stage */
+    orderTracking?: boolean;
     /** During onboarding tour: pulse-highlight the row whose full_name matches */
     tourHighlightName?: string;
     /** Onboarding tour: auto-open the lead-intelligence viewer on this row */
@@ -53,6 +57,13 @@ interface AgentLeadsModuleProps {
 
 // ── Delivery status options ────────────────────────────────────────────────────
 const ORDER_STATUS_OPTIONS = ["Obrađuje se", "Poslato", "Dostavljeno", "Reklamacija"]
+// delivery stages (lib/shop-story.mjs DELIVERY_STAGES): first amber, in transit blue, done green
+const DELIVERY_COLOR: Record<string, string> = {
+    'Obrađuje se': '#f59e0b', 'U pripremi': '#f59e0b',
+    'Poslato': '#38bdf8', 'Zakazana dostava': '#38bdf8',
+    'Dostavljeno': '#10b981', 'Isporučeno': '#10b981',
+    'Reklamacija': '#f43f5e',
+}
 
 // ── Razlog — why a Zainteresovan lead didn't order ────────────────────────────
 // Set manually by Marko or (later) inferred by n8n agent
@@ -125,22 +136,30 @@ const MOCK_BOOKSTORE_CRM_BY_CLIENT: Record<string, any[]> = {
     ],
 }
 
-export function AgentLeadsModule({ clientId, selectedBrandIds, terminology: propTerminology, demoMode, nicheKey, tourHighlightName, tourOpenLogName }: AgentLeadsModuleProps) {
+export function AgentLeadsModule({ clientId, selectedBrandIds, terminology: propTerminology, demoMode, nicheKey, orderTracking, tourHighlightName, tourOpenLogName }: AgentLeadsModuleProps) {
     const [leads, setLeads] = useState<any[]>([])
     const [loading, setLoading] = useState(true)
     const [searchTerm, setSearchTerm] = useState('')
     const [filter, setFilter] = useState('all')
+    const [bucketFilter, setBucketFilter] = useState<'all' | LeadBucket>('all')
     const [selectedLead, setSelectedLead] = useState<any | null>(null)
 
     // Onboarding tour: the CRM beat tells one story in two moves — the row lands
     // in the list, then the patient file opens on top of it. The pause is what
     // makes it read as a consequence rather than a screen change.
+    const prevTourFile = useRef(tourOpenLogName)
     useEffect(() => {
-        if (!tourOpenLogName) { setSelectedLead(null); return }
+        // Close whatever file is open first, so moving from Marija's beat to Nikola's
+        // reads as: her file shuts, his row lights up, his file opens. Only on a change
+        // of tour hero — a lead arriving in the list must not close a file someone opened.
+        const changed = prevTourFile.current !== tourOpenLogName
+        prevTourFile.current = tourOpenLogName
+        if (changed) setSelectedLead(null)
+        if (!tourOpenLogName) return
         if (leads.length === 0) return
         const hit = leads.find((l: any) => l.full_name === tourOpenLogName)
         if (!hit) return
-        const t = setTimeout(() => setSelectedLead(hit), 3800)
+        const t = setTimeout(() => setSelectedLead(hit), 1700)
         return () => clearTimeout(t)
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [tourOpenLogName, leads.length])
@@ -360,255 +379,182 @@ export function AgentLeadsModule({ clientId, selectedBrandIds, terminology: prop
     if (!clientId) return null
 
     // ── Demo CRM rendering (auto-generated demos) ──────────────────────────────
+    // Dense and status-first (2026-10-25): one-line header, the six lead statuses as a
+    // clickable strip above the table (they were four cards BELOW it, off-screen), ~52px rows.
     if (isDemoMode && nicheConfig) {
         const nc = nicheConfig
-        const dmColor = nc.brandColor
-        const dmFiltered = leads.filter(l => {
-            const matchSearch = !searchTerm ||
-                l.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                l.kategorija?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                l.proizvod?.toLowerCase().includes(searchTerm.toLowerCase())
-            const matchFilter = filter === 'all' || l.status?.toLowerCase() === filter.toLowerCase()
-            return matchSearch && matchFilter
+        const term = searchTerm.toLowerCase()
+        const withBucket = leads.map(l => ({ l, b: bucketForRow(l) }))
+        const counts = withBucket.reduce((acc: Record<string, number>, { b }) => { acc[b] = (acc[b] ?? 0) + 1; return acc }, {})
+        const dmFiltered = withBucket.filter(({ l, b }) => {
+            const matchSearch = !term ||
+                l.full_name?.toLowerCase().includes(term) ||
+                l.kategorija?.toLowerCase().includes(term) ||
+                l.proizvod?.toLowerCase().includes(term) ||
+                l.telefon?.toLowerCase().includes(term)
+            return matchSearch && (bucketFilter === 'all' || b === bucketFilter)
         })
-        const dmTotal = leads.length
-        const dmZakazano = leads.filter(l => ['zakazano', 'završeno'].includes(l.status?.toLowerCase() || '')).length
-        const dmReklamacije = leads.filter(l => l.status?.toLowerCase() === 'reklamacija').length
-        const dmIntervencije = leads.filter(l => l.status?.toLowerCase() === 'intervencija').length
 
         return (
-            <div className="space-y-6 pb-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
-                <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-                    <div>
-                        <h1 className="text-4xl font-bold tracking-tight text-white flex items-center gap-3">
-                            <span className="bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 to-cyan-400">
-                                {nc.crmLabel}
-                            </span>
-                            <div className="px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[10px] font-mono text-emerald-400 uppercase tracking-widest">
-                                Live Feed
-                            </div>
-                        </h1>
-                        <p className="text-slate-400 mt-2">
-                            {`${nc.terminology.plural} koji su kontaktirali agenta — praćenje u realnom vremenu`}
-                        </p>
-                    </div>
-                    <Button
-                        variant="ghost"
-                        onClick={loadCandidates}
-                        className={cn("h-12 px-6 rounded-2xl bg-white/5 border border-white/5 text-silver font-outfit transition-all hover:border-emerald/30", loading && "opacity-50")}
-                    >
-                        <RefreshCw className={cn("w-4 h-4 mr-2 text-emerald", loading && "animate-spin")} />
-                        Osveži
-                    </Button>
-                </div>
-
-                <div className="flex items-center gap-4">
-                    <div className="relative w-full sm:w-80">
-                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-emerald-500/50" />
+            <div className="space-y-3 pb-6 animate-in fade-in duration-500">
+                <ModuleHeader title={nc.crmLabel} subtitle={`Svi koji su pisali agentu · ${leads.length} ukupno`} live>
+                    <div className="relative">
+                        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-500" />
                         <Input
-                            placeholder={`Pretraži ${nc.terminology.plural.toLowerCase()}, usluge...`}
-                            className="pl-10 bg-black/40 border-white/10 text-white placeholder:text-white/20 focus:border-emerald-500/50 rounded-xl"
+                            placeholder="Pretražite po imenu, usluzi ili telefonu…"
+                            className="h-8 w-72 pl-8 text-[13px] bg-white/[0.03] border-white/10 text-white placeholder:text-zinc-600 focus:border-emerald-500/50 rounded-lg"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
                     </div>
-                    <select
-                        className="bg-black/40 border border-white/10 text-white rounded-xl px-4 py-2 outline-none focus:border-emerald-500/50 transition-colors"
-                        value={filter}
-                        onChange={(e) => setFilter(e.target.value)}
-                    >
-                        <option value="all">Svi statusi</option>
-                        {nc.terminology.statuses.map(s => (
-                            <option key={s} value={s.toLowerCase()}>{s}</option>
-                        ))}
-                    </select>
-                </div>
+                    <Button variant="ghost" onClick={loadCandidates} aria-label="Osveži"
+                        className={cn("h-8 px-2.5 rounded-lg surface-1 text-zinc-300 hover:text-white", loading && "opacity-50")}>
+                        <RefreshCw className={cn("w-3.5 h-3.5", loading && "animate-spin")} />
+                    </Button>
+                </ModuleHeader>
 
-                <GlassCard className="overflow-hidden border-white/5">
+                <StatStrip className="grid-cols-3 sm:grid-cols-4 lg:grid-cols-7" stats={[
+                    { key: 'all', label: 'Svi', value: leads.length, active: bucketFilter === 'all', onClick: () => setBucketFilter('all') },
+                    ...BUCKET_ORDER.map(b => ({
+                        key: b, label: bucketLabel(b, nicheKey), value: counts[b] ?? 0, color: BUCKET_STYLE[b].color,
+                        active: bucketFilter === b, urgent: b === 'needs_human' && (counts[b] ?? 0) > 0,
+                        onClick: () => setBucketFilter(bucketFilter === b ? 'all' : b),
+                    })),
+                ]} />
+
+                <div className="rounded-xl surface-1 overflow-hidden">
                     <div className="overflow-x-auto">
                         <table className="w-full text-left border-collapse">
                             <thead>
-                                <tr className="bg-white/5 border-b border-white/10">
-                                    <th className="p-4 text-xs font-mono uppercase tracking-widest" style={{ color: dmColor }}>{nc.terminology.singular}</th>
-                                    <th className="p-4 text-xs font-mono uppercase tracking-widest" style={{ color: dmColor }}>Kategorija</th>
-                                    <th className="p-4 text-xs font-mono uppercase tracking-widest" style={{ color: dmColor }}>Usluga / Interes</th>
-                                    <th className="p-4 text-xs font-mono uppercase tracking-widest" style={{ color: dmColor }}>Status</th>
-                                    <th className="p-4 text-xs font-mono uppercase tracking-widest" style={{ color: dmColor }}>Kontakt</th>
-                                    <th className="p-4 text-xs font-mono uppercase tracking-widest" style={{ color: dmColor }}>Kanal</th>
-                                    <th className="p-4" />
+                                <tr className="border-b border-white/[0.07] text-[10.5px] font-semibold uppercase tracking-[0.12em] text-zinc-500">
+                                    <th className="px-4 py-2.5">{nc.terminology.singular}</th>
+                                    <th className="px-3 py-2.5">Status</th>
+                                    <th className="px-3 py-2.5">{orderTracking ? 'Proizvod' : 'Usluga / interes'}</th>
+                                    <th className="px-3 py-2.5">{orderTracking ? 'Isporuka' : 'Kategorija'}</th>
+                                    <th className="px-3 py-2.5">Kontakt</th>
+                                    <th className="px-3 py-2.5">Kanal</th>
+                                    <th className="px-3 py-2.5 w-[84px]" />
                                 </tr>
                             </thead>
                             <tbody>
-                                <AnimatePresence mode="popLayout">
-                                    {loading ? (
-                                        <TableRow className="border-none">
-                                            <TableCell colSpan={7} className="h-80 text-center">
-                                                <div className="flex flex-col items-center gap-4">
-                                                    <RefreshCw className="w-10 h-10 text-emerald animate-spin opacity-20" />
-                                                    <span className="text-sm text-zinc-500 font-outfit font-light uppercase tracking-widest">Učitavanje...</span>
-                                                </div>
-                                            </TableCell>
-                                        </TableRow>
-                                    ) : dmFiltered.length === 0 ? (
-                                        <TableRow className="border-none">
-                                            <TableCell colSpan={7} className="h-80 text-center">
-                                                <p className="text-sm font-outfit text-zinc-500 italic">Nema {nc.terminology.plural.toLowerCase()}</p>
-                                            </TableCell>
-                                        </TableRow>
-                                    ) : (
-                                        dmFiltered.map((lead, idx) => {
-                                            const kanal = getKanal(lead)
-                                            const isIntervencija = lead.status?.toLowerCase() === 'intervencija'
-                                            const isZakazano = lead.status?.toLowerCase() === 'zakazano'
-                                            const isTourHero = !!tourHighlightName && lead.full_name === tourHighlightName
-                                            return (
-                                                <motion.tr
-                                                    key={lead.id}
-                                                    data-tour-focus={isTourHero ? "crm-hero-row" : undefined}
-                                                    initial={{ opacity: 0, scale: 0.98, y: 10 }}
-                                                    animate={isTourHero
-                                                        ? { opacity: 1, scale: 1, y: 0, boxShadow: ["0 0 0 0 rgba(16,185,129,0)", "inset 0 0 0 2px rgba(16,185,129,0.6), 0 0 28px -2px rgba(16,185,129,0.5)", "0 0 0 0 rgba(16,185,129,0)"] }
-                                                        : { opacity: 1, scale: 1, y: 0 }}
-                                                    transition={isTourHero
-                                                        ? { delay: 0.15, duration: 0.4, boxShadow: { delay: 0.5, duration: 1.8, repeat: Infinity, repeatDelay: 0.3 } }
-                                                        : { delay: Math.min(idx, 12) * 0.03, duration: 0.4 }}
-                                                    className="group border-b border-white/[0.03] transition-all duration-300 relative"
-                                                    style={{
-                                                        borderLeft: isTourHero ? '4px solid #10b981' : isIntervencija ? '3px solid rgba(239,68,68,0.53)' : '3px solid transparent',
-                                                        backgroundColor: isTourHero ? 'rgba(16,185,129,0.09)' : isIntervencija ? 'rgba(239,68,68,0.04)' : isZakazano ? 'rgba(16,185,129,0.02)' : undefined,
-                                                    }}
-                                                >
-                                                    <td className="p-4">
-                                                        <div className="flex items-center gap-3">
-                                                            <div className="h-10 w-10 rounded-xl border flex items-center justify-center font-bold text-sm shrink-0"
-                                                                style={{
-                                                                    background: `linear-gradient(135deg, ${dmColor}25, ${dmColor}10)`,
-                                                                    borderColor: `${dmColor}30`,
-                                                                    color: dmColor,
-                                                                }}>
-                                                                {lead.full_name?.[0] || 'K'}
-                                                            </div>
-                                                            <div>
-                                                                <div className="flex items-center gap-2">
-                                                                    <span className="font-semibold text-white">{lead.full_name}</span>
-                                                                    {isTourHero && (
-                                                                        <span className="text-[9px] font-extrabold uppercase tracking-wider px-1.5 py-0.5 rounded-md animate-pulse" style={{ background: '#10b981', color: '#05080c' }}>
-                                                                            ← upravo upisano
-                                                                        </span>
-                                                                    )}
-                                                                </div>
-                                                                <div className="text-[10px] text-white/30 mt-0.5 font-mono">{formatRelativeTime(lead.created_at)}</div>
-                                                            </div>
+                                {loading ? (
+                                    <TableRow className="border-none">
+                                        <TableCell colSpan={7} className="h-40 text-center">
+                                            <RefreshCw className="w-6 h-6 text-emerald animate-spin opacity-30 mx-auto" />
+                                        </TableCell>
+                                    </TableRow>
+                                ) : dmFiltered.length === 0 ? (
+                                    <TableRow className="border-none">
+                                        <TableCell colSpan={7} className="h-32 text-center">
+                                            <p className="text-sm text-zinc-500">Nema rezultata za ovaj filter.</p>
+                                        </TableCell>
+                                    </TableRow>
+                                ) : (
+                                    dmFiltered.map(({ l: lead, b }, idx) => {
+                                        const kanal = getKanal(lead)
+                                        const st = BUCKET_STYLE[b]
+                                        const label = bucketLabel(b, nicheKey, lead.status)
+                                        const isIntervencija = lead.status?.toLowerCase() === 'intervencija'
+                                        const isTourHero = !!tourHighlightName && lead.full_name === tourHighlightName
+                                        return (
+                                            <motion.tr
+                                                key={lead.id}
+                                                data-tour-focus={isTourHero ? "crm-hero-row" : undefined}
+                                                initial={{ opacity: 0 }}
+                                                animate={{ opacity: 1 }}
+                                                transition={{ delay: Math.min(idx, 12) * 0.015, duration: 0.25 }}
+                                                onClick={() => setSelectedLead(lead)}
+                                                className={cn("group border-b border-white/[0.04] cursor-pointer transition-colors hover:bg-white/[0.03]",
+                                                    isTourHero && "bg-emerald-500/[0.08]")}
+                                                style={{ boxShadow: `inset 3px 0 0 ${st.color}` }}
+                                            >
+                                                <td className="px-4 py-2.5">
+                                                    <div className="flex items-center gap-2.5">
+                                                        <div className="h-8 w-8 rounded-full flex items-center justify-center font-bold text-[12px] shrink-0 text-white"
+                                                            style={{ background: `${st.color}30` }}>
+                                                            {lead.full_name?.[0] || 'K'}
                                                         </div>
-                                                    </td>
-                                                    <td className="p-4">
-                                                        {lead.kategorija ? (
-                                                            <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full"
-                                                                style={{ background: `${dmColor}15`, border: `1px solid ${dmColor}30`, color: `${dmColor}cc` }}>
-                                                                {lead.kategorija}
+                                                        <div className="min-w-0">
+                                                            <div className="flex items-center gap-2">
+                                                                <span className="text-[14px] font-semibold text-white truncate">{lead.full_name}</span>
+                                                                {isTourHero && (
+                                                                    <span className="text-[9px] font-extrabold uppercase tracking-wider px-1.5 py-0.5 rounded bg-emerald-400 text-[#05080c]">upravo upisano</span>
+                                                                )}
+                                                            </div>
+                                                            <div className="text-[11px] text-zinc-500 tabular-nums">{formatRelativeTime(lead.created_at)}</div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td className="px-3 py-2.5" onClick={e => e.stopPropagation()}>
+                                                    {editingStatusId === lead.id ? (
+                                                        <select
+                                                            autoFocus
+                                                            defaultValue={lead.status || 'Novi'}
+                                                            onBlur={() => setEditingStatusId(null)}
+                                                            onChange={e => handleStatusChange(lead.id, e.target.value)}
+                                                            className="bg-black/60 border border-white/15 text-white text-xs rounded-md px-2 py-1 outline-none"
+                                                        >
+                                                            {nc.terminology.statuses.map(s => <option key={s} value={s}>{displayStatus(s, nicheKey)}</option>)}
+                                                        </select>
+                                                    ) : (
+                                                        <button onClick={() => setEditingStatusId(lead.id)} title="Kliknite za izmenu statusa"
+                                                            className="inline-flex items-center gap-1.5 text-[11.5px] font-bold px-2 py-0.5 rounded-md hover:brightness-125"
+                                                            style={{ color: st.color, background: `${st.color}1a` }}>
+                                                            <span className="w-1.5 h-1.5 rounded-full" style={{ background: st.color }} />
+                                                            {label}
+                                                        </button>
+                                                    )}
+                                                    {lead.status && label !== displayStatus(lead.status, nicheKey) && editingStatusId !== lead.id && (
+                                                        <span className="ml-1.5 text-[11px] text-zinc-500">{displayStatus(lead.status, nicheKey)}</span>
+                                                    )}
+                                                </td>
+                                                <td className="px-3 py-2.5 max-w-[260px]">
+                                                    <span className={cn("text-[13px] truncate block", lead.proizvod ? "text-zinc-200" : "text-zinc-600")}>{lead.proizvod || '—'}</span>
+                                                </td>
+                                                <td className="px-3 py-2.5">
+                                                    {orderTracking ? (
+                                                        // where the order is: the owner sees it here, the agent answers "gde je moja porudžbina" from it
+                                                        lead.status_porudzbine ? (
+                                                            <span className="inline-flex items-center gap-1.5 text-[11.5px] font-semibold px-2 py-0.5 rounded-md whitespace-nowrap"
+                                                                style={{ color: DELIVERY_COLOR[lead.status_porudzbine] ?? '#a1a1aa', background: `${DELIVERY_COLOR[lead.status_porudzbine] ?? '#a1a1aa'}1a` }}>
+                                                                <Truck className="w-3 h-3" /> {lead.status_porudzbine}
                                                             </span>
-                                                        ) : <span className="text-zinc-700">—</span>}
-                                                    </td>
-                                                    <td className="p-4 max-w-[200px]">
-                                                        {lead.proizvod ? (
-                                                            <span className="text-white/85 text-sm font-medium leading-snug line-clamp-2">{lead.proizvod}</span>
-                                                        ) : (
-                                                            <span className="text-zinc-600 text-xs italic">nije specifikovano</span>
-                                                        )}
-                                                    </td>
-                                                    <td className="p-4">
-                                                        {editingStatusId === lead.id ? (
-                                                            <select
-                                                                autoFocus
-                                                                defaultValue={lead.status || 'Novi'}
-                                                                onBlur={() => setEditingStatusId(null)}
-                                                                onChange={e => handleStatusChange(lead.id, e.target.value)}
-                                                                className="bg-black/60 border border-emerald/30 text-white text-xs rounded-lg px-2 py-1.5 outline-none"
-                                                            >
-                                                                {nc.terminology.statuses.map(s => (
-                                                                    <option key={s} value={s}>{s}</option>
-                                                                ))}
-                                                            </select>
-                                                        ) : (
-                                                            <Badge
-                                                                onClick={() => setEditingStatusId(lead.id)}
-                                                                title="Klikni za izmenu"
-                                                                className={cn(
-                                                                    "px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border cursor-pointer hover:brightness-125 transition-all w-fit",
-                                                                    getStatusColor(lead.status || 'Novi')
-                                                                )}
-                                                            >
-                                                                {isIntervencija && <AlertTriangle className="w-2.5 h-2.5 mr-1 inline" />}
-                                                                {lead.status || 'Novi'}
-                                                            </Badge>
-                                                        )}
-                                                    </td>
-                                                    <td className="p-4">
-                                                        <div className="flex flex-col gap-0.5 text-xs text-zinc-400">
-                                                            {lead.email && <span>{lead.email}</span>}
-                                                            {lead.telefon && <span>{lead.telefon}</span>}
-                                                            {!lead.email && !lead.telefon && <span className="text-zinc-600">—</span>}
-                                                        </div>
-                                                    </td>
-                                                    <td className="p-4">
-                                                        <div className="flex items-center gap-2">
-                                                            <KanalIcon type={kanal.icon} color={kanal.color} />
-                                                            <span className="text-[10px] uppercase tracking-widest font-bold font-outfit" style={{ color: kanal.color }}>{kanal.label}</span>
-                                                        </div>
-                                                    </td>
-                                                    <td className="p-4 text-right pr-6">
-                                                        <div className="flex items-center justify-end gap-1.5">
-                                                            <Button
-                                                                variant="ghost"
-                                                                size="icon"
-                                                                title={isIntervencija ? 'Ukloni intervenciju' : 'Označi za intervenciju'}
-                                                                onClick={() => handleStatusChange(lead.id, isIntervencija ? 'Novi' : 'Intervencija')}
-                                                                className={cn(
-                                                                    "w-8 h-8 rounded-xl transition-all",
-                                                                    isIntervencija
-                                                                        ? "bg-orange-500/20 text-orange-400 opacity-100"
-                                                                        : "opacity-0 group-hover:opacity-100 bg-white/5 hover:bg-orange-500/10 hover:text-orange-400 text-zinc-600"
-                                                                )}
-                                                            >
-                                                                <AlertTriangle className="w-3.5 h-3.5" />
-                                                            </Button>
-                                                            <Button
-                                                                variant="ghost"
-                                                                size="icon"
-                                                                onClick={() => setSelectedLead(lead)}
-                                                                className="w-8 h-8 rounded-xl bg-white/5 transition-all opacity-0 group-hover:opacity-100 hover:bg-emerald/10 hover:text-emerald"
-                                                            >
-                                                                <User className="w-3.5 h-3.5" />
-                                                            </Button>
-                                                        </div>
-                                                    </td>
-                                                </motion.tr>
-                                            )
-                                        })
-                                    )}
-                                </AnimatePresence>
+                                                        ) : <span className="text-[12.5px] text-zinc-600">—</span>
+                                                    ) : (
+                                                        <span className="text-[12.5px] text-zinc-400 truncate block max-w-[180px]">{lead.kategorija || '—'}</span>
+                                                    )}
+                                                </td>
+                                                <td className="px-3 py-2.5">
+                                                    <span className="text-[12.5px] text-zinc-400 tabular-nums whitespace-nowrap">
+                                                        {[lead.telefon, lead.email].filter(Boolean).join(' · ') || '—'}
+                                                    </span>
+                                                </td>
+                                                <td className="px-3 py-2.5">
+                                                    <span className="flex items-center gap-1.5 text-[12px]" style={{ color: kanal.color }}>
+                                                        <KanalIcon type={kanal.icon} color={kanal.color} /> {kanal.label}
+                                                    </span>
+                                                </td>
+                                                <td className="px-3 py-2.5 text-right" onClick={e => e.stopPropagation()}>
+                                                    <div className="flex items-center justify-end gap-1">
+                                                        <Button variant="ghost" size="icon"
+                                                            title={isIntervencija ? 'Ukloni intervenciju' : 'Označi za intervenciju'}
+                                                            onClick={() => handleStatusChange(lead.id, isIntervencija ? 'Novi' : 'Intervencija')}
+                                                            className={cn("w-7 h-7 rounded-md", isIntervencija ? "bg-amber-500/20 text-amber-400" : "text-zinc-500 hover:text-amber-400 hover:bg-amber-500/10")}>
+                                                            <AlertTriangle className="w-3.5 h-3.5" />
+                                                        </Button>
+                                                        <Button variant="ghost" size="icon" title="Otvori profil" onClick={() => setSelectedLead(lead)}
+                                                            className="w-7 h-7 rounded-md text-zinc-500 hover:text-white hover:bg-white/10">
+                                                            <User className="w-3.5 h-3.5" />
+                                                        </Button>
+                                                    </div>
+                                                </td>
+                                            </motion.tr>
+                                        )
+                                    })
+                                )}
                             </tbody>
                         </table>
                     </div>
-                </GlassCard>
-
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 px-1">
-                    {[
-                        { label: `Ukupno ${nc.terminology.plural}`, value: dmTotal, icon: Sparkles },
-                        { label: 'Zakazano / Završeno', value: dmZakazano, icon: UserCheck },
-                        { label: 'Reklamacije', value: dmReklamacije, icon: MessageSquare },
-                        { label: 'Intervencije', value: dmIntervencije, icon: AlertTriangle },
-                    ].map((stat, i) => (
-                        <GlassCard key={i} className="p-5 flex items-center gap-4 hover:border-emerald/20 transition-all duration-500 group">
-                            <div className="w-10 h-10 rounded-xl bg-emerald/5 border border-emerald/10 flex items-center justify-center group-hover:bg-emerald/10 transition-colors shrink-0">
-                                <stat.icon className="w-4 h-4 text-emerald-400" />
-                            </div>
-                            <div>
-                                <p className="text-[10px] text-zinc-500 uppercase tracking-widest font-bold mb-0.5 font-outfit">{stat.label}</p>
-                                <p className="text-2xl font-outfit font-bold text-silver">{stat.value}</p>
-                            </div>
-                        </GlassCard>
-                    ))}
                 </div>
 
                 <AnimatePresence>
@@ -619,7 +565,7 @@ export function AgentLeadsModule({ clientId, selectedBrandIds, terminology: prop
                             onClose={() => setSelectedLead(null)}
                             isRecruitment={false}
                             demoMode={isDemoMode}
-                            tourMode={!!tourOpenLogName}
+                            tourMode={!!tourOpenLogName} quoteMode={nicheKey === 'quote'}
                         />
                     )}
                 </AnimatePresence>
@@ -636,7 +582,7 @@ export function AgentLeadsModule({ clientId, selectedBrandIds, terminology: prop
                             <>
                                 <span className="bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 to-cyan-400">CRM</span>
                                 <div className="px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[10px] font-mono text-emerald-400 uppercase tracking-widest">
-                                    Live Feed
+                                    Uživo
                                 </div>
                             </>
                         ) : (
@@ -646,7 +592,7 @@ export function AgentLeadsModule({ clientId, selectedBrandIds, terminology: prop
                                 </span>
                                 <span className="text-white/90">{terminology.highlight}</span>
                                 <div className="px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[10px] font-mono text-emerald-400 uppercase tracking-widest">
-                                    Live Feed
+                                    Uživo
                                 </div>
                             </>
                         )}
@@ -1053,7 +999,7 @@ export function AgentLeadsModule({ clientId, selectedBrandIds, terminology: prop
                         onClose={() => setSelectedLead(null)}
                         isRecruitment={isRecruitment}
                         demoMode={isDemoMode}
-                        tourMode={!!tourOpenLogName}
+                        tourMode={!!tourOpenLogName} quoteMode={nicheKey === 'quote'}
                     />
                 )}
             </AnimatePresence>

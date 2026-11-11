@@ -1,5 +1,6 @@
 "use client"
 
+import { salesModelOf } from "@/lib/sales-model.mjs"
 import { useState, useEffect, useCallback } from "react"
 import { format, subDays, startOfDay } from "date-fns"
 import { motion, type Variants } from "framer-motion"
@@ -13,6 +14,8 @@ import { getBookStoreConfig, BookStoreConfig, BOOK_STORE_CLIENTS } from "@/lib/b
 import { getCrmHarmonijaByClientId, getCrmPublikByClientId, getCrmStelaByClientId, getCrmAleksandarMNByClientId, getCrmMagunaByClientId } from "@/lib/supabase/queries"
 import { createClient as createSupabaseClient } from "@/lib/supabase/client"
 import { getDemoShift, shiftRows, shiftRowsDays } from "@/lib/demo/time-shift"
+import { ModuleHeader } from "@/components/ui/module-header"
+import { bucketForRow, bucketLabel, BUCKET_STYLE, BUCKET_ORDER } from "@/lib/lead-status"
 
 interface ChatbotAnalyticsModuleProps {
     clientId: string
@@ -1105,7 +1108,6 @@ const STATUS_COLORS_MAP_DEMO: Record<string, string> = {
     Reklamacija: "#f97316", Intervencija: "#ef4444",
 }
 
-const SERVICE_NICHES_ANALYTICS = new Set(["dental", "medical", "beauty", "fitness", "services", "wellness", "real-estate"])
 
 // Keyword classifiers — derive question topics & objections from raw user messages.
 const QUESTION_TOPICS: { label: string; kw: string[] }[] = [
@@ -1142,7 +1144,11 @@ function DemoAnalytics({ clientId, demoNiche }: { clientId: string; demoNiche: s
     const [appts, setAppts] = useState<any[]>([])
     const [loading, setLoading] = useState(true)
     const [period, setPeriod] = useState<'danas' | 'sedmica' | 'mesec'>('mesec')
-    const isServiceNiche = SERVICE_NICHES_ANALYTICS.has((demoNiche || "").toLowerCase())
+    // booking = appointment-based (the calendar and its hour histogram exist); quote = made to
+    // order, an enquiry ends in "Ponuda" and later "Naručio". Anything else is an order shop.
+    const salesModel = salesModelOf(demoNiche)
+    const isServiceNiche = salesModel === "booking"
+    const isQuote = salesModel === "quote"
 
     useEffect(() => {
         const sb = createSupabaseClient()
@@ -1184,13 +1190,30 @@ function DemoAnalytics({ clientId, demoNiche }: { clientId: string; demoNiche: s
     const distinctConversations = new Set(filteredRazg.map(r => r.id_razgovora)).size
 
     const total = crmRows.length
-    const narucilo = crmRows.filter(r => ['Naručio', 'Zakazano'].includes(r.status)).length
-    const isporuceno = crmRows.filter(r => ['Isporučeno', 'Završeno'].includes(r.status)).length
+    const narucilo = crmRows.filter(r => (isQuote ? ['Zakazano'] : ['Naručio', 'Zakazano']).includes(r.status)).length
+    const isporuceno = crmRows.filter(r => (isQuote ? ['Naručio'] : ['Isporučeno', 'Završeno']).includes(r.status)).length
     const zainteresovano = crmRows.filter(r => r.status === 'Zainteresovan').length
     const intervencija = crmRows.filter(r => r.status === 'Intervencija').length
     // Both a booked appointment and a finished one are conversions — counting only
     // the still-open ones understated the agent's real close rate.
     const konverzija = total > 0 ? Math.round(((narucilo + isporuceno) / total) * 100) : 0
+    // The funnel is cumulative: everyone who booked also showed interest, everyone who was
+    // seen also booked. Counting each status on its own made the steps read 199 → 58 → 58 → 56
+    // next to a 57% total, which no owner can make sense of.
+    const fZakazali = narucilo + isporuceno
+    const fZainteresovani = zainteresovano + fZakazali
+    const bezIshoda = total - fZakazali
+    // who the business talks to, and Serbian count agreement: 1 pacijent, 2–4 pacijenta, 5+ pacijenata
+    const patientNiche = ['dental', 'medical'].includes((demoNiche || '').toLowerCase())
+    const forms = isQuote ? ['klijent', 'klijenta', 'klijenata'] : isServiceNiche
+        ? (patientNiche ? ['pacijent', 'pacijenta', 'pacijenata'] : ['klijent', 'klijenta', 'klijenata'])
+        : ['kupac', 'kupca', 'kupaca']
+    const people = (n: number) => {
+        const m10 = n % 10, m100 = n % 100
+        return m10 === 1 && m100 !== 11 ? forms[0] : m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14) ? forms[1] : forms[2]
+    }
+    const peopleGen = forms[2]
+    const peoplePl = isQuote ? 'klijenti' : isServiceNiche ? (patientNiche ? 'pacijenti' : 'klijenti') : 'kupci'
 
     // Top products
     const productCounts: Record<string, number> = {}
@@ -1229,6 +1252,12 @@ function DemoAnalytics({ clientId, demoNiche }: { clientId: string; demoNiche: s
         return { day: format(day, "d.M"), count: convIds.size }
     })
 
+    // Delivery stages of the orders (status_porudzbine), in the order an order moves through them
+    const STAGE_ORDER = ['Obrađuje se', 'U pripremi', 'Poslato', 'Zakazana dostava', 'Dostavljeno', 'Isporučeno', 'Reklamacija']
+    const stageCounts: Record<string, number> = {}
+    crmRows.forEach(r => { if (r.status_porudzbine) stageCounts[r.status_porudzbine] = (stageCounts[r.status_porudzbine] ?? 0) + 1 })
+    const deliveryStages = Object.entries(stageCounts).sort((a, b) => STAGE_ORDER.indexOf(a[0]) - STAGE_ORDER.indexOf(b[0]))
+
     // Status distribution
     const statusCounts: Record<string, number> = {}
     crmRows.forEach(r => { statusCounts[r.status] = (statusCounts[r.status] ?? 0) + 1 })
@@ -1266,45 +1295,43 @@ function DemoAnalytics({ clientId, demoNiche }: { clientId: string; demoNiche: s
     const MEDALS = ['🥇', '🥈', '🥉']
 
     return (
-        <motion.div variants={container} initial="hidden" animate="show" className="space-y-5 pb-16 p-6">
+        <motion.div variants={container} initial="hidden" animate="show" className="space-y-3 pb-6">
             {/* Header */}
-            <motion.div variants={fadeUp} className="flex items-center justify-between flex-wrap gap-3">
-                <div>
-                    <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-emerald-500 mb-1">AI Growth Intelligence</p>
-                    <h2 className="text-3xl font-black text-white">Agent <span className="text-emerald-400">Analitika</span></h2>
-                </div>
-                <div className="flex items-center gap-1 p-1 rounded-xl glass-card">
-                    {PERIODS.map(p => (
-                        <button key={p.key} onClick={() => setPeriod(p.key)}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold uppercase tracking-widest transition-all ${period === p.key ? 'bg-emerald-500/20 text-emerald-400' : 'text-zinc-600 hover:text-zinc-400'}`}>
-                            {p.label}
-                        </button>
-                    ))}
-                </div>
+            <motion.div variants={fadeUp}>
+                <ModuleHeader title="Analitika agenta" subtitle="Šta se dešava u razgovorima">
+                    <div className="flex items-center rounded-lg surface-1 p-0.5">
+                        {PERIODS.map(p => (
+                            <button key={p.key} onClick={() => setPeriod(p.key)}
+                                className={`px-2.5 py-1 rounded-md text-[12px] font-semibold transition-colors ${period === p.key ? 'bg-white/10 text-white' : 'text-zinc-500 hover:text-zinc-300'}`}>
+                                {p.label}
+                            </button>
+                        ))}
+                    </div>
+                </ModuleHeader>
             </motion.div>
 
             {/* Key metrics */}
-            <motion.div variants={fadeUp} data-tour-focus="analytics-metrics" className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <motion.div variants={fadeUp} data-tour-focus="analytics-metrics" className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 {[
                     { label: "Razgovora", value: distinctConversations, color: "#10b981", Icon: MessageSquare },
-                    { label: isServiceNiche ? "Zakazalo" : "Naručilo", value: narucilo, color: "#06b6d4", Icon: ShoppingBag },
-                    { label: isServiceNiche ? "Obavljeno" : "Isporučeno", value: isporuceno, color: "#8b5cf6", Icon: Users },
+                    { label: isServiceNiche ? "Zakazalo" : isQuote ? "Zatražilo ponudu" : "Naručilo", value: narucilo, color: "#06b6d4", Icon: ShoppingBag },
+                    { label: isServiceNiche ? "Obavljeno" : isQuote ? "Naručilo" : "Isporučeno", value: isporuceno, color: "#8b5cf6", Icon: Users },
                     { label: "Konverzija", value: `${konverzija}%`, color: "#f59e0b", Icon: TrendingUp },
                 ].map(m => (
-                    <div key={m.label} className="glass-card rounded-2xl p-5 relative overflow-hidden">
-                        <m.Icon className="absolute top-3 right-3 w-8 h-8 opacity-[0.07]" style={{ color: m.color }} />
-                        <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-2">{m.label}</p>
-                        <p className="text-4xl font-black" style={{ color: m.color }}>{m.value}</p>
+                    <div key={m.label} className="rounded-xl surface-1 px-4 py-3 relative overflow-hidden">
+                        <m.Icon className="absolute top-3 right-3 w-6 h-6 opacity-[0.08]" style={{ color: m.color }} />
+                        <p className="text-[11px] font-semibold uppercase tracking-wide text-zinc-500">{m.label}</p>
+                        <p className="text-[28px] font-bold font-outfit leading-tight tabular-nums" style={{ color: m.color }}>{m.value}</p>
                     </div>
                 ))}
             </motion.div>
 
             {/* Trend + Channels */}
-            <div className="grid grid-cols-12 gap-4">
-                <motion.div variants={fadeUp} className="col-span-12 lg:col-span-8 glass-card rounded-2xl p-6">
+            <div data-tour-focus="analytics-trend" className="grid grid-cols-12 gap-3">
+                <motion.div variants={fadeUp} className="col-span-12 lg:col-span-8 rounded-xl surface-1 p-4">
                     <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-1">Aktivnost</p>
                     <p className="text-sm font-semibold text-white mb-4">Razgovori po danu — poslednje 2 nedelje</p>
-                    <ResponsiveContainer width="100%" height={150}>
+                    <ResponsiveContainer width="100%" height={210}>
                         <AreaChart data={dailyData} margin={{ left: -16, right: 4, top: 4, bottom: 0 }}>
                             <defs>
                                 <linearGradient id="demoGrad" x1="0" y1="0" x2="0" y2="1">
@@ -1320,9 +1347,9 @@ function DemoAnalytics({ clientId, demoNiche }: { clientId: string; demoNiche: s
                     </ResponsiveContainer>
                 </motion.div>
 
-                <motion.div variants={fadeUp} className="col-span-12 lg:col-span-4 glass-card rounded-2xl p-6 flex flex-col">
+                <motion.div variants={fadeUp} className="col-span-12 lg:col-span-4 rounded-xl surface-1 p-4 flex flex-col">
                     <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-1">Kanali</p>
-                    <p className="text-sm font-semibold text-white mb-4">Odakle dolaze kupci</p>
+                    <p className="text-sm font-semibold text-white mb-4">Odakle dolaze {peoplePl}</p>
                     {channelData.length === 0 ? (
                         <p className="text-sm text-zinc-600 italic">Nema podataka za izabrani period</p>
                     ) : (
@@ -1374,40 +1401,40 @@ function DemoAnalytics({ clientId, demoNiche }: { clientId: string; demoNiche: s
             <motion.div
                 variants={fadeUp}
                 data-tour-focus="ai-insights"
-                className="relative rounded-3xl p-5 md:p-7 mt-2"
+                className="relative rounded-xl p-4"
                 style={{
                     background: "linear-gradient(160deg, rgba(16,185,129,0.07) 0%, rgba(16,185,129,0.015) 45%, transparent 100%)",
                     border: "1px solid rgba(16,185,129,0.22)",
                     boxShadow: "0 24px 70px -30px rgba(16,185,129,0.45)",
                 }}
             >
-                <div className="flex items-start gap-3.5 mb-5">
-                    <div className="w-11 h-11 rounded-2xl flex items-center justify-center shrink-0"
+                <div className="flex items-start gap-3 mb-3">
+                    <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
                         style={{ background: "rgba(16,185,129,0.16)", border: "1px solid rgba(16,185,129,0.35)" }}>
-                        <Sparkles className="w-5 h-5 text-emerald-400" />
+                        <Sparkles className="w-4 h-4 text-emerald-400" />
                     </div>
                     <div className="min-w-0">
-                        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-emerald-500 mb-1">AI Insights</p>
-                        <h3 className="text-xl md:text-2xl font-bold text-white font-outfit leading-tight">
-                            Šta Vaši kupci stvarno pitaju
+                        <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-emerald-500">AI uvidi</p>
+                        <h3 className="text-[17px] font-bold text-white font-outfit leading-tight">
+                            Šta Vaši {peoplePl} stvarno pitaju
                         </h3>
-                        <p className="text-[13px] md:text-sm text-zinc-400 leading-relaxed mt-1.5 max-w-2xl">
+                        <p className="text-[13px] text-zinc-400 leading-snug mt-1 max-w-3xl">
                             Agent čita svaki razgovor i izvlači ono što se inače nikad ne zapiše: koje pitanje se ponavlja,
-                            šta ljude zaustavi pred zakazivanje i u koje sate Vas najviše traže.
+                            šta ljude zaustavi pre {isServiceNiche ? "zakazivanja" : isQuote ? "traženja ponude" : "kupovine"} i u koje sate Vas najviše traže.
                             <span className="text-zinc-200 font-medium"> Ovo je Vaše tržište, rečeno njihovim rečima.</span>
                         </p>
                     </div>
                 </div>
 
-            <div className="grid grid-cols-12 gap-4">
+            <div className="grid grid-cols-12 gap-3">
                 {/* Hottest times */}
-                <motion.div variants={fadeUp} className="col-span-12 lg:col-span-5 glass-card rounded-2xl p-6">
+                <motion.div variants={fadeUp} className="col-span-12 lg:col-span-5 rounded-xl surface-1 p-4">
                     <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-1">Špic sati</p>
                     <p className="text-base font-bold text-white mb-1 font-outfit">{isServiceNiche ? "Najtraženiji termini" : "Najaktivniji sati"}</p>
                     {hotTimesSorted.length > 0 && (
                         <>
                             <p className="text-[13px] text-zinc-400 leading-snug mb-3">
-                                Kada Vas ljudi traže — pa znate gde da otvorite mesta.
+                                {isServiceNiche ? "Kada Vas ljudi najviše traže, pa znate kada da otvorite više termina." : "Kada Vas ljudi najviše traže, pa znate kada da objavljujete."}
                             </p>
                             <div className="inline-flex items-center gap-2 rounded-lg px-2.5 py-1.5 mb-3"
                                 style={{ background: "rgba(16,185,129,0.12)", border: "1px solid rgba(16,185,129,0.28)" }}>
@@ -1426,8 +1453,10 @@ function DemoAnalytics({ clientId, demoNiche }: { clientId: string; demoNiche: s
                                 const pct = Math.round(t.count / maxHot * 100)
                                 const isPeak = t.count === maxHot
                                 return (
-                                    <div key={t.hour} className="flex-1 flex flex-col items-center gap-1.5">
-                                        <motion.div initial={{ height: 0 }} animate={{ height: `${Math.max(pct, 6)}%` }}
+                                    <div key={t.hour} className="flex-1 h-full flex flex-col items-center justify-end gap-1.5" title={`${t.hour}h · ${t.count}`}>
+                                        {/* the column needs a definite height, or the bar's % height resolves to 0 */}
+                                        <span className={`text-[9px] tabular-nums ${isPeak ? 'text-emerald-300 font-bold' : 'text-zinc-500'}`}>{t.count}</span>
+                                        <motion.div initial={{ height: 0 }} animate={{ height: `${Math.max(pct, 6) * 0.78}%` }}
                                             transition={{ duration: 0.7, delay: 0.1 + i * 0.04, ease: 'easeOut' }}
                                             className="w-full rounded-t-md relative group"
                                             style={{ background: isPeak ? 'linear-gradient(180deg,#34d39e,#10b981)' : 'rgba(16,185,129,0.25)', boxShadow: isPeak ? '0 0 14px -2px rgba(16,185,129,0.6)' : 'none' }} />
@@ -1440,11 +1469,11 @@ function DemoAnalytics({ clientId, demoNiche }: { clientId: string; demoNiche: s
                 </motion.div>
 
                 {/* Top questions */}
-                <motion.div variants={fadeUp} className="col-span-12 lg:col-span-4 glass-card rounded-2xl p-6">
+                <motion.div variants={fadeUp} className="col-span-12 lg:col-span-4 rounded-xl surface-1 p-4">
                     <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-1">Potražnja</p>
-                    <p className="text-base font-bold text-white mb-1 font-outfit">Najčešća pitanja kupaca</p>
+                    <p className="text-base font-bold text-white mb-1 font-outfit">Najčešća pitanja {peopleGen}</p>
                     <p className="text-[13px] text-zinc-400 leading-snug mb-4">
-                        Ono što se ponavlja svaki dan — gotov spisak za Vaš sajt, story i cenovnik.
+                        Ono što se ponavlja svaki dan — gotov spisak za Vaš sajt, story i {isServiceNiche ? "cenovnik" : isQuote ? "ponudu" : "opise proizvoda"}.
                     </p>
                     {topQuestions.length === 0 ? (
                         <p className="text-xs italic text-zinc-600">Nema dovoljno podataka</p>
@@ -1471,9 +1500,9 @@ function DemoAnalytics({ clientId, demoNiche }: { clientId: string; demoNiche: s
                 </motion.div>
 
                 {/* Top objections */}
-                <motion.div variants={fadeUp} className="col-span-12 lg:col-span-3 glass-card rounded-2xl p-6">
+                <motion.div variants={fadeUp} className="col-span-12 lg:col-span-3 rounded-xl surface-1 p-4">
                     <p className="text-[10px] font-bold uppercase tracking-widest text-amber-500/80 mb-1">Prepreke</p>
-                    <p className="text-base font-bold text-white mb-1 font-outfit">Zašto ljudi ne zakažu</p>
+                    <p className="text-base font-bold text-white mb-1 font-outfit">{isServiceNiche ? "Zašto ljudi ne zakažu" : isQuote ? "Zašto ljudi ne traže ponudu" : "Zašto ljudi ne kupe"}</p>
                     <p className="text-[13px] text-zinc-400 leading-snug mb-4">
                         Razlog koji Vam niko ne kaže u lice — a agent ga čuje svaki dan.
                     </p>
@@ -1497,12 +1526,13 @@ function DemoAnalytics({ clientId, demoNiche }: { clientId: string; demoNiche: s
             </div>
             </motion.div>
 
-            {/* Most-requested services (service niches) */}
+            {/* Most-requested services and the funnel side by side: neither fills a full row on its own */}
+            <div className="grid grid-cols-12 gap-3">
             {isServiceNiche && topServices.length > 0 && (
-                <motion.div variants={fadeUp} className="glass-card rounded-2xl p-6">
+                <motion.div variants={fadeUp} data-tour-focus="analytics-demand" className="col-span-12 lg:col-span-5 rounded-xl surface-1 p-4">
                     <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-1">Usluge</p>
-                    <p className="text-sm font-semibold text-white mb-5">Najtraženije usluge (po zakazanim terminima)</p>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3.5">
+                    <p className="text-sm font-semibold text-white mb-3">Najtraženije usluge (po zakazanim terminima)</p>
+                    <div className="grid grid-cols-1 gap-y-3">
                         {topServices.map((s, i) => {
                             const pct = Math.round(s.count / maxSvc * 100)
                             const color = ['#06b6d4', '#8b5cf6', '#f59e0b', '#10b981', '#ec4899'][i] ?? '#52525b'
@@ -1528,15 +1558,15 @@ function DemoAnalytics({ clientId, demoNiche }: { clientId: string; demoNiche: s
             )}
 
             {/* Conversion funnel */}
-            <motion.div variants={fadeUp} data-tour-focus="analytics-funnel" className="glass-card rounded-2xl p-6">
+            <motion.div variants={fadeUp} data-tour-focus="analytics-funnel" className={`col-span-12 ${isServiceNiche && topServices.length > 0 ? "lg:col-span-7" : ""} rounded-xl surface-1 p-4`}>
                 <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-1">Konverzija</p>
-                <p className="text-sm font-semibold text-white mb-6">{isServiceNiche ? "Put do termina" : "Put do narudžbine"}</p>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                <p className="text-sm font-semibold text-white mb-4">{isServiceNiche ? "Put do termina" : isQuote ? "Put do ponude" : "Put do narudžbine"}</p>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     {[
                         { label: 'Razgovarali',    count: total,           pct: 100,                                                              color: '#10b981' },
-                        { label: 'Zainteresovani', count: zainteresovano,  pct: total > 0 ? Math.round(zainteresovano / total * 100) : 0,         color: '#f59e0b' },
-                        { label: isServiceNiche ? 'Zakazali' : 'Naručili',   count: narucilo,   pct: total > 0 ? Math.round(narucilo / total * 100) : 0,   color: '#06b6d4' },
-                        { label: isServiceNiche ? 'Obavljeno' : 'Isporučeno', count: isporuceno, pct: total > 0 ? Math.round(isporuceno / total * 100) : 0, color: '#8b5cf6' },
+                        { label: 'Zainteresovani', count: fZainteresovani, pct: total > 0 ? Math.round(fZainteresovani / total * 100) : 0,        color: '#f59e0b' },
+                        { label: isServiceNiche ? 'Zakazali' : isQuote ? 'Zatražili ponudu' : 'Naručili',   count: fZakazali,  pct: total > 0 ? Math.round(fZakazali / total * 100) : 0,  color: '#06b6d4' },
+                        { label: isServiceNiche ? 'Već došli' : isQuote ? 'Naručili' : 'Isporučeno', count: isporuceno, pct: total > 0 ? Math.round(isporuceno / total * 100) : 0, color: '#8b5cf6' },
                     ].map((s, i) => (
                         <div key={i} className="relative flex flex-col gap-3">
                             {i < 3 && (
@@ -1553,7 +1583,7 @@ function DemoAnalytics({ clientId, demoNiche }: { clientId: string; demoNiche: s
                                     style={{ background: s.color, boxShadow: `0 0 8px ${s.color}60` }} />
                             </div>
                             <div>
-                                <p className="text-3xl font-black leading-none" style={{ color: s.color }}>{s.count}</p>
+                                <p className="text-2xl font-black leading-none" style={{ color: s.color }}>{s.count}</p>
                                 <p className="text-xs font-medium text-white/60 mt-1">{s.label}</p>
                                 <p className="text-[10px] font-bold mt-0.5" style={{ color: s.color }}>{s.pct}%</p>
                             </div>
@@ -1564,15 +1594,20 @@ function DemoAnalytics({ clientId, demoNiche }: { clientId: string; demoNiche: s
                     style={{ background: "rgba(16,185,129,0.06)", border: "1px solid rgba(16,185,129,0.12)" }}>
                     <p className="text-3xl font-black text-white">{konverzija}<span className="text-sm font-medium text-zinc-500">%</span></p>
                     <div className="h-8 w-px bg-white/5" />
-                    <p className="text-xs leading-snug text-zinc-500">od svih razgovora završilo narudžbinom · {total - narucilo} kupaca otišlo bez narudžbine</p>
+                    <p className="text-xs leading-snug text-zinc-500">
+                        {isServiceNiche ? "razgovora završilo se zakazanim terminom." : isQuote ? "razgovora završilo se zahtevom za ponudu." : "razgovora završilo se porudžbinom."}{" "}
+                        {isServiceNiche ? "Bez termina" : isQuote ? "Bez ponude" : "Bez porudžbine"}: {bezIshoda} {people(bezIshoda)}.
+                    </p>
                 </div>
             </motion.div>
 
+            </div>
+
             {/* Top products + Category breakdown */}
-            <div className="grid grid-cols-12 gap-4">
-                <motion.div variants={fadeUp} className="col-span-12 lg:col-span-7 glass-card rounded-2xl p-6">
+            <div data-tour-focus="analytics-products" className="grid grid-cols-12 gap-3">
+                <motion.div variants={fadeUp} className="col-span-12 lg:col-span-7 rounded-xl surface-1 p-4">
                     <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-1">Potražnja</p>
-                    <p className="text-sm font-semibold text-white mb-5">Najtraženiji proizvodi</p>
+                    <p className="text-sm font-semibold text-white mb-5">{isServiceNiche ? "Za šta se najviše raspituju" : "Najtraženiji proizvodi"}</p>
                     {topProducts.length === 0 ? (
                         <p className="text-xs italic text-zinc-600">Nema dovoljno podataka</p>
                     ) : (
@@ -1601,9 +1636,9 @@ function DemoAnalytics({ clientId, demoNiche }: { clientId: string; demoNiche: s
                     )}
                 </motion.div>
 
-                <motion.div variants={fadeUp} className="col-span-12 lg:col-span-5 glass-card rounded-2xl p-6">
+                <motion.div variants={fadeUp} className="col-span-12 lg:col-span-5 rounded-xl surface-1 p-4">
                     <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-1">Kategorije</p>
-                    <p className="text-sm font-semibold text-white mb-5">Raspodela po tipu</p>
+                    <p className="text-sm font-semibold text-white mb-5">Po kategoriji</p>
                     <div className="space-y-2.5">
                         {categoryData.map((c, i) => {
                             const pct = Math.round(c.count / maxCat * 100)
@@ -1621,7 +1656,7 @@ function DemoAnalytics({ clientId, demoNiche }: { clientId: string; demoNiche: s
                                             className="h-full rounded-full" style={{ background: color }} />
                                     </div>
                                     <p className="text-[9px] mt-1 font-bold" style={{ color: `${color}90` }}>
-                                        {total > 0 ? Math.round(c.count / total * 100) : 0}% kupaca
+                                        {total > 0 ? Math.round(c.count / total * 100) : 0}% {peopleGen}
                                     </p>
                                 </div>
                             )
@@ -1630,37 +1665,49 @@ function DemoAnalytics({ clientId, demoNiche }: { clientId: string; demoNiche: s
                 </motion.div>
             </div>
 
-            {/* Status distribution */}
-            <motion.div variants={fadeUp} className="glass-card rounded-2xl p-6">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-1">CRM pregled</p>
-                <p className="text-sm font-semibold text-white mb-4">Status kupaca</p>
-                {intervencija > 0 && (
-                    <div className="mb-4 px-3 py-2 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center gap-2">
-                        <span className="w-2 h-2 rounded-full bg-red-400 animate-pulse" />
-                        <p className="text-xs text-red-300">{intervencija} intervencija čeka odgovor</p>
-                    </div>
-                )}
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                    {Object.entries(statusCounts).sort((a, b) => b[1] - a[1]).map(([status, count]) => {
-                        const color = STATUS_COLORS_MAP_DEMO[status] ?? '#6366f1'
-                        const pct = total > 0 ? Math.round((count / total) * 100) : 0
-                        return (
-                            <div key={status} className="rounded-xl p-3"
-                                style={{ background: `${color}10`, border: `1px solid ${color}25` }}>
-                                <div className="flex items-center justify-between mb-2">
-                                    <span className="text-xs font-medium" style={{ color }}>{status}</span>
-                                    <span className="text-lg font-black text-white">{count}</span>
-                                </div>
-                                <div className="h-1 rounded-full overflow-hidden bg-white/5">
-                                    <motion.div initial={{ width: 0 }} animate={{ width: `${pct}%` }}
-                                        transition={{ duration: 0.9, ease: 'easeOut' }}
-                                        className="h-full rounded-full" style={{ backgroundColor: color }} />
-                                </div>
-                                <p className="text-[10px] mt-1 font-mono text-zinc-600">{pct}%</p>
+            {/* Where the orders are — only for a shop that ships (delivery stages on its orders) */}
+            {deliveryStages.length > 0 && (
+                <motion.div variants={fadeUp} className="rounded-xl surface-1 p-4">
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-1">Isporuka</p>
+                    <p className="text-sm font-semibold text-white mb-3">Gde su porudžbine</p>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                        {deliveryStages.map(([stage, count]) => (
+                            <div key={stage} className="rounded-lg bg-black/20 border border-white/[0.06] px-3 py-2">
+                                <p className="text-[11px] text-zinc-400">{stage}</p>
+                                <p className="text-[20px] font-bold text-white tabular-nums leading-tight">{count}</p>
                             </div>
-                        )
-                    })}
-                </div>
+                        ))}
+                    </div>
+                </motion.div>
+            )}
+
+            {/* Status distribution — the same six lead statuses as the inbox and the CRM */}
+            <motion.div variants={fadeUp} data-tour-focus="analytics-status" className="rounded-xl surface-1 p-4">
+                {(() => {
+                    const bc = crmRows.reduce((acc: Record<string, number>, r: any) => { const b = bucketForRow(r); acc[b] = (acc[b] ?? 0) + 1; return acc }, {})
+                    return (
+                        <>
+                            <div className="flex items-baseline justify-between mb-3">
+                                <p className="text-sm font-semibold text-white">Status {peopleGen}</p>
+                                <p className="text-[12px] text-zinc-500 tabular-nums">{total} ukupno</p>
+                            </div>
+                            <div className="flex h-2.5 rounded-full overflow-hidden bg-white/5">
+                                {BUCKET_ORDER.map(b => (bc[b] ?? 0) > 0 && (
+                                    <div key={b} style={{ width: `${(bc[b] / Math.max(1, total)) * 100}%`, background: BUCKET_STYLE[b].color }} />
+                                ))}
+                            </div>
+                            <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
+                                {BUCKET_ORDER.map(b => (
+                                    <div key={b} className="flex items-center gap-2 text-[12.5px]">
+                                        <span className="w-2 h-2 rounded-full shrink-0" style={{ background: BUCKET_STYLE[b].color }} />
+                                        <span className="text-zinc-400 truncate">{bucketLabel(b, demoNiche)}</span>
+                                        <span className="ml-auto font-bold text-white tabular-nums">{bc[b] ?? 0}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </>
+                    )
+                })()}
             </motion.div>
         </motion.div>
     )

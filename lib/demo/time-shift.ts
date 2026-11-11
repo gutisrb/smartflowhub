@@ -76,16 +76,26 @@ export function shiftRows<T extends Record<string, any>>(
   })
 }
 
-/** Same, but whole days — keeps appointment clock times exact. */
+/** Marks the appointment booked in the hero conversation ("Upisani ste za danas u 15h"). */
+export const DEMO_HERO_APPT = 'demo:hero'
+
+/**
+ * Same, but whole days — keeps appointment clock times exact. The calendar also keeps its
+ * weekdays: everything moves by whole weeks, so a clinic closed on Sunday stays closed on Sunday
+ * and Tandem's jumps stay on Saturday and Sunday ("Tandem skokovi su isključivo subotom i
+ * nedeljom"). Only the hero booking moves by the exact number of days, so it is always today.
+ */
 export function shiftRowsDays<T extends Record<string, any>>(
   rows: T[],
   fields: string[],
   deltaDays: number,
 ): T[] {
   if (!deltaDays) return rows
+  const weeks = Math.round(deltaDays / 7) * 7
   return rows.map((r) => {
     const out: Record<string, any> = { ...r }
-    for (const f of fields) if (out[f]) out[f] = shiftIsoDays(out[f], deltaDays)
+    const by = r.urgency_reason === DEMO_HERO_APPT ? deltaDays : weeks
+    for (const f of fields) if (out[f]) out[f] = shiftIsoDays(out[f], by)
     return out as T
   })
 }

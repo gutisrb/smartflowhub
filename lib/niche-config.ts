@@ -6,6 +6,7 @@ export type NicheKey =
   | 'fitness'
   | 'beauty'
   | 'services'
+  | 'quote'
   | 'ecommerce'
   | 'furniture'
   | 'fashion'
@@ -112,6 +113,25 @@ export const NICHE_CONFIGS: Record<NicheKey, NicheConfig> = {
       plural: 'Klijenti',
       statusLabel: 'Status termina',
       statuses: ['Novi', 'Zainteresovan', 'Zakazano', 'Završeno', 'Reklamacija', 'Intervencija'],
+    },
+  },
+  quote: {
+    key: 'quote',
+    label: 'Upiti i ponude',
+    crmLabel: 'Klijenti',
+    catalogLabel: 'Katalog',
+    calendarLabel: 'Termini',
+    modules: ['business-crm', 'social-chatbot', 'agent-database', 'chatbot-analytics'],
+    useCalendar: false,
+    useCatalog: true,
+    isVisualNiche: true,
+    channels: ['WhatsApp', 'Instagram', 'Facebook', 'Web'],
+    brandColor: '#0ea5e9',
+    terminology: {
+      singular: 'Klijent',
+      plural: 'Klijenti',
+      statusLabel: 'Status',
+      statuses: ['Novi', 'Zainteresovan', 'Zakazano', 'Naručio', 'Reklamacija', 'Intervencija'],
     },
   },
   services: {
@@ -244,7 +264,7 @@ export const NICHE_CONFIGS: Record<NicheKey, NicheConfig> = {
       singular: 'Klijent',
       plural: 'Klijenti',
       statusLabel: 'Status',
-      statuses: ['Novi', 'Zainteresovan', 'Zakazano', 'Završeno', 'Reklamacija', 'Intervencija'],
+      statuses: ['Novi', 'Zainteresovan', 'Naručio', 'Završeno', 'Reklamacija', 'Intervencija'],
     },
   },
   auto: {
@@ -263,7 +283,7 @@ export const NICHE_CONFIGS: Record<NicheKey, NicheConfig> = {
       singular: 'Kupac',
       plural: 'Kupci',
       statusLabel: 'Status',
-      statuses: ['Novi', 'Zainteresovan', 'Zakazano', 'Završeno', 'Reklamacija', 'Intervencija'],
+      statuses: ['Novi', 'Zainteresovan', 'Naručio', 'Isporučeno', 'Reklamacija', 'Intervencija'],
     },
   },
   generic: {
@@ -282,7 +302,7 @@ export const NICHE_CONFIGS: Record<NicheKey, NicheConfig> = {
       singular: 'Klijent',
       plural: 'Klijenti',
       statusLabel: 'Status',
-      statuses: ['Novi', 'Zainteresovan', 'Zakazano', 'Završeno', 'Reklamacija', 'Intervencija'],
+      statuses: ['Novi', 'Zainteresovan', 'Naručio', 'Isporučeno', 'Reklamacija', 'Intervencija'],
     },
   },
 }

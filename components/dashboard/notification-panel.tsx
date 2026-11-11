@@ -152,6 +152,11 @@ export function NotificationPanel({ clientId, demoNiche, onNavigate }: Notificat
   const sb = createClient()
 
   const unread = notifications.filter((n) => !n.read).length
+  // A red "9+" fed by every unread message is noise on a dashboard whose whole
+  // claim is that nothing needs you. The alarm is reserved for the one thing that
+  // genuinely does — a conversation the agent escalated. Everything else is still
+  // in the panel; it just doesn't shout.
+  const needsYou = notifications.filter((n) => n.type === "intervencija" && !n.read).length
 
   const load = async () => {
     if (!clientId) return
@@ -200,13 +205,14 @@ export function NotificationPanel({ clientId, demoNiche, onNavigate }: Notificat
         className="p-2 md:p-2.5 rounded-xl bg-white/5 border border-white/10 text-zinc-400 hover:text-emerald hover:border-emerald/30 transition-all duration-300 relative group"
       >
         <Bell className="w-4 h-4 md:w-5 md:h-5" />
-        {unread > 0 ? (
+        {needsYou > 0 ? (
           <motion.span
-            key={unread}
+            key={needsYou}
             initial={{ scale: 0.6 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 400 }}
-            className="absolute -top-1 -right-1 min-w-[18px] h-[18px] bg-red-500 rounded-full text-[9px] font-black flex items-center justify-center text-white px-1 shadow-[0_0_8px_rgba(239,68,68,0.5)]"
+            title={`${needsYou} razgovor čeka Vas`}
+            className="absolute -top-1 -right-1 min-w-[18px] h-[18px] bg-amber-400 rounded-full text-[9px] font-black flex items-center justify-center text-[#221600] px-1 shadow-[0_0_8px_rgba(251,191,36,0.55)]"
           >
-            {unread > 9 ? "9+" : unread}
+            {needsYou > 9 ? "9+" : needsYou}
           </motion.span>
         ) : (
           <span className="absolute top-2 right-2 w-1.5 h-1.5 bg-emerald rounded-full shadow-[0_0_10px_rgba(16,185,129,0.8)]" />

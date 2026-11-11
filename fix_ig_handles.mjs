@@ -41,6 +41,7 @@ const SERVICE_KEY   = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const SMARTFLOW_ID  = '69acf7e9-557e-4ca3-85bd-a785ef39e351';
 const MIN_FOLLOWERS = 20000;
 
+const REVERIFY = process.argv.includes('--reverify');
 const isDryRun = process.argv.includes('--dry-run');
 
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
@@ -149,6 +150,12 @@ async function main() {
     const current = lead.instagram_handle;
 
     process.stdout.write(`  ${name.slice(0, 30).padEnd(30)} current: @${(current || '—').padEnd(25)} `);
+
+    // A lead that already has a handle costs a raw fetch AND a Firecrawl scrape to re-confirm
+    // something we already know — 180+ of those per run, for a handful of corrections. This was
+    // the quiet Firecrawl drain. Only handle-less leads are worth paying for; pass --reverify
+    // to deliberately re-check everything.
+    if (current && !REVERIFY) { console.log(`(kept, not re-checked)`); already++; continue; }
 
     let newHandle = null;
 

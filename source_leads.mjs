@@ -21,6 +21,7 @@
  */
 
 import { execFile } from 'child_process';
+import { pickApifyToken } from './lib/apify-key.mjs';
 import { promisify } from 'util';
 import { readFileSync, readdirSync, writeFileSync } from 'fs';
 import { resolve, dirname, join } from 'path';
@@ -34,16 +35,22 @@ function loadEnv() {
     const raw = readFileSync(resolve(__dirname, '.env.local'), 'utf8');
     for (const line of raw.split('\n')) {
       const m = line.match(/^([^#=]+)=(.*)$/);
-      if (m) process.env[m[1].trim()] = m[2].trim();
+      // Do NOT clobber a variable the caller already set. run_pipeline.mjs rotates Apify
+      // keys by injecting APIFY_TOKEN into the child env; this loader used to overwrite it
+      // straight back to whatever .env.local holds, so on 2026-09-15 a run that correctly
+      // *chose* the funded key still spent the exhausted one — pushing it to $5.36/$5 and
+      // failing every batch after qualifying 48 leads. Real env vars win over the file.
+      if (m && process.env[m[1].trim()] === undefined) process.env[m[1].trim()] = m[2].trim();
     }
   } catch {}
 }
 loadEnv();
 
 import { isPermabanned } from './lib/permaban.mjs';
+import { qualifyForQueue } from './lib/lead-queue.mjs';
 
 // ── Config ────────────────────────────────────────────────────────────────────
-const APIFY_TOKEN        = process.env.APIFY_TOKEN;
+let   APIFY_TOKEN        = process.env.APIFY_TOKEN;
 const FB_ADS_ACTOR       = 'XtaWFhbtfxyzqrFmd';
 const SCRAPECREATORS_KEY = process.env.SC_API_KEY || process.env.SCRAPECREATORS_KEY;
 
@@ -69,16 +76,32 @@ const ADS_BASE_URL = 'https://www.facebook.com/ads/library/?active_status=active
 // These terms are spoken almost exclusively by businesses selling something
 // expensive. Nobody offers interest-free instalments on a 2.000 RSD product, and
 // nobody sends a technician to your address to quote for one.
+// Measured head-to-head on 2026-09-15: the payment-term queries below ('na rate',
+// 'bez kamate', 'besplatna procena', 'izlazak na teren') returned 278 ads → 134 advertisers →
+// exactly 2 accounts inside the 30k-200k band, and both were national telecoms. The reason is
+// structural: a phrase like "na rate" describes a PAYMENT METHOD, and the advertisers who buy
+// those words at scale are banks, carriers and retail chains at one end and 500-follower local
+// contractors at the other. Neither is the ICP.
+//
+// The channel itself is worth keeping — an advertiser in this library is provably spending
+// money on customer acquisition right now, which is a stronger buying signal than any follower
+// count. What has to change is what we ask it for. Niche-anchored phrases only a business IN
+// that category would put in its own ad copy, mirroring what already works on the IG bio
+// search. Payment-term queries are retained at the end, demoted, because they are a genuine
+// high-ticket signal when combined with a niche word rather than used alone.
 const ADS_QUERIES  = [
-  'na rate',              // instalments — the sharpest high-ticket signal there is
-  'bez kamate',           // interest-free financing
-  'besplatna procena',    // free quote → a considered, quoted purchase
-  'izlazak na teren',     // site visit → installation business
-  'montaža',              // installation included
-  'po meri',              // made to measure
-  'garancija',            // warranty → durable goods
-  'besplatna konsultacija', // consultation-led services (clinics)
-  'zakažite pregled',     // booking-shaped medical
+  // Dental / medical — one client is worth thousands of euros
+  'stomatološka ordinacija', 'zubni implanti', 'ortodoncija', 'proteza zuba',
+  'estetska medicina', 'laserska epilacija', 'antiaging tretman',
+  // Furniture / interiors — the niche that has produced the most priced demos
+  'nameštaj po meri', 'kuhinje po meri', 'plakari po meri', 'ugaone garniture',
+  // Home improvement with a site visit — high ticket, inquiry-driven
+  'pvc stolarija', 'aluminijumska stolarija', 'solarni paneli', 'montažne kuće',
+  'pergole i tende', 'bazeni po meri',
+  // Hospitality / events — bookings come through DMs
+  'wellness paket', 'sala za venčanja', 'organizacija venčanja',
+  // Demoted: real high-ticket signals, but far too broad on their own
+  'na rate', 'bez kamate', 'besplatna procena',
 ];
 
 const isLocal    = process.argv.includes('--local');      // read from local JSON files, skip Apify Stage 1
@@ -86,6 +109,49 @@ const isTest     = process.argv.includes('--test');       // no DB writes
 const isYes      = process.argv.includes('--yes');        // live Apify run
 const isFindOnly = process.argv.includes('--find-only'); // stop after Stage 4, no enrich/insert
 const skipIg     = process.argv.includes('--skip-ig');   // skip parallel IG caption search (use when Apify memory is constrained)
+const queriesIdx = process.argv.indexOf('--queries');
+// Each query is one Apify batch, and on the free plan a batch queues 2-3 min before it even
+// starts. All 23 niche queries in one run would be ~an hour of wall clock. Run a bounded
+// subset per run and rotate, so coverage accumulates across runs instead of blowing one run up.
+const QUERY_BUDGET = queriesIdx !== -1 ? parseInt(process.argv[queriesIdx + 1]) : 9;
+const YIELD_FILE = resolve(__dirname, 'ads_query_yield.json');
+
+// Explore/exploit: spend most of the budget on queries that have actually produced qualified
+// 30k+ leads before, and the rest on queries never tried, so the list keeps improving itself
+// rather than being re-guessed by hand every time.
+function pickQueries(all, budget) {
+  let stats = {};
+  try { stats = JSON.parse(readFileSync(YIELD_FILE, 'utf8')); } catch {}
+  const tried   = all.filter(q => stats[q]);
+  const untried = all.filter(q => !stats[q]);
+  const scored  = tried
+    .map(q => ({ q, rate: (stats[q].qualified || 0) / Math.max(1, stats[q].runs || 1) }))
+    .sort((a, b) => b.rate - a.rate);
+  const exploreN = Math.max(2, Math.ceil(budget / 3));
+  const explore  = untried.slice(0, exploreN);
+  const exploit  = scored.filter(x => x.rate > 0).map(x => x.q).slice(0, budget - explore.length);
+  const picked   = [...exploit, ...explore];
+  // Still short (early runs, or everything scored zero) — top up with whatever is left,
+  // preferring queries tried least recently.
+  for (const q of [...untried, ...scored.map(x => x.q)]) {
+    if (picked.length >= budget) break;
+    if (!picked.includes(q)) picked.push(q);
+  }
+  return picked.slice(0, budget);
+}
+
+function recordQueryYield(perQuery) {
+  let stats = {};
+  try { stats = JSON.parse(readFileSync(YIELD_FILE, 'utf8')); } catch {}
+  for (const [q, qualified] of Object.entries(perQuery)) {
+    stats[q] = stats[q] || { runs: 0, qualified: 0 };
+    stats[q].runs += 1;
+    stats[q].qualified += qualified;
+    stats[q].last = new Date().toISOString().slice(0, 10);
+  }
+  try { writeFileSync(YIELD_FILE, JSON.stringify(stats, null, 2)); } catch {}
+}
+
 const limitIdx  = process.argv.indexOf('--limit');
 const budgetIdx = process.argv.indexOf('--budget');
 const fileIdx   = process.argv.indexOf('--file');
@@ -596,6 +662,20 @@ async function main() {
     process.exit(1);
   }
 
+  // A drained key does not degrade gracefully — the actor start throws "Monthly usage hard
+  // limit exceeded" and kills the run after all the free work is already done. Pick a funded
+  // key up front, the same way run_pipeline.mjs does, so standalone runs behave identically.
+  if (!isTest) {
+    const picked = await pickApifyToken(0.25);
+    if (!picked) {
+      console.error('✗ No Apify key has headroom left. Add APIFY_TOKEN_3 to .env.local or wait for the monthly reset.');
+      process.exit(1);
+    }
+    if (picked.token !== APIFY_TOKEN) console.log(`  🔑 Rotated to ${picked.label} ($${picked.left.toFixed(2)} left)`);
+    APIFY_TOKEN = picked.token;
+    process.env.APIFY_TOKEN = picked.token;
+  }
+
   // Load existing contacts for dedup — by page_id, email, and IG handle
   const existingRes = await fetch(
     `${SUPABASE_URL}/rest/v1/contacts?select=facebook_page_id,email,instagram_handle,status,kategorija&client_id=eq.${SMARTFLOW_ID}`,
@@ -606,7 +686,14 @@ async function main() {
   // Only block on email/IG if already contacted or disqualified — don't block enriched duplicates that haven't been sent yet
   const contactedEmails   = new Set(existingAll.filter(r => ['Kontaktiran','Disqualified','Follow Up','Odgovorio','Zakazan Sastanak'].includes(r.status)).map(r => r.email?.toLowerCase()).filter(Boolean));
   const contactedHandles  = new Set(existingAll.filter(r => ['Kontaktiran','Disqualified','Follow Up','Odgovorio','Zakazan Sastanak'].includes(r.status)).map(r => r.instagram_handle?.toLowerCase()).filter(Boolean));
-  console.log(`Existing in DB: ${existingPageIds.size} page IDs | ${contactedEmails.size} contacted emails | ${contactedHandles.size} contacted handles\n`);
+  // ANY existing IG handle, regardless of status — page_id dedup only catches repeats within the
+  // same channel (FB Ads). Bio search sources by handle directly and never has a facebook_page_id,
+  // so the same business found first by bio search and later by FB Ads sailed straight past the
+  // page_id check and got inserted twice (observed 2026-09-16: "BluDent" sourced by bio search,
+  // then re-inserted as "Stomatološka ord. Bludent" by FB Ads minutes later). This is the
+  // cross-channel dedup the narrower contactedHandles set above doesn't cover.
+  const allExistingHandles = new Set(existingAll.filter(r => r.instagram_handle).map(r => r.instagram_handle.toLowerCase()));
+  console.log(`Existing in DB: ${existingPageIds.size} page IDs | ${contactedEmails.size} contacted emails | ${contactedHandles.size} contacted handles | ${allExistingHandles.size} handles total\n`);
 
   // Launch IG caption search in parallel with FB ads (only on live --yes runs, unless --skip-ig)
   let igProcess = null, igOutput = '';
@@ -633,7 +720,7 @@ async function main() {
     const urlsToScrape = [];
     for (const country of ADS_COUNTRIES) {
       const base = ADS_BASE_URL.replace('country=RS', `country=${country}`);
-      for (const q of ADS_QUERIES) {
+      for (const q of pickQueries(ADS_QUERIES, QUERY_BUDGET)) {
         urlsToScrape.push({ url: `${base}&q=${encodeURIComponent(q)}`, country, q });
       }
     }
@@ -642,6 +729,11 @@ async function main() {
     const chargePerBatch = parseFloat((MAX_CHARGE / numBatches + 0.02).toFixed(2));
     console.log(`  ${numBatches} batch(es) × up to ${perBatch} records, $${chargePerBatch} cap each\n`);
     const allRawItems = [];
+    // Each batch is paid. A kill partway through (timeout, Ctrl-C) used to throw away every
+    // record bought so far — which is exactly what happened on 2026-09-15. Write after every
+    // batch so the spend is always replayable for free with --local --file.
+    const saveTag  = ADS_QUERIES.slice(0,2).join('_').replace(/[^a-z0-9]/gi, '');
+    const savePath = join(LOCAL_DATASETS_DIR, `${LOCAL_DATASET_GLOB}${new Date().toISOString().slice(0,10)}_${saveTag}.json`);
     for (const urlObj of urlsToScrape) {
       const label = `FB Ads [${urlObj.country}·q=${urlObj.q}]`;
       let items = [];
@@ -661,14 +753,13 @@ async function main() {
       } catch (e) {
         console.warn(`  ⚠ Batch ${label} failed (${e.message}) — skipping, continuing with other batches`);
       }
+      // Tag each record with the query that found it so Stage 2 can credit yield per query.
+      for (const it of items) { try { it.__q = urlObj.q } catch {} }
       allRawItems.push(...items);
+      writeFileSync(savePath, JSON.stringify(allRawItems, null, 2));
     }
     rawItems = allRawItems;
     console.log(`\n  Raw records (all batches): ${rawItems.length}`);
-    // Auto-save for replay with --local --file
-    const saveTag = ADS_QUERIES.slice(0,2).join('_').replace(/[^a-z0-9]/gi, '');
-    const savePath = join(LOCAL_DATASETS_DIR, `${LOCAL_DATASET_GLOB}${new Date().toISOString().slice(0,10)}_${saveTag}.json`);
-    writeFileSync(savePath, JSON.stringify(rawItems, null, 2));
     console.log(`  💾 Saved to ${savePath.split('/').pop()} (replay with --local --file ${savePath})\n`);
   }
 
@@ -815,9 +906,15 @@ async function main() {
     await sleep(100);
   }
 
-  const withHandles = qualified.filter(l => l.igHandle);
+  const handleCandidates = qualified.filter(l => l.igHandle);
   const noHandleLeads = qualified.filter(l => !l.igHandle);
-  console.log(`  Handle candidates: ${withHandles.length}/${qualified.length} (${noHandleLeads.length} have numeric FB IDs — no slug available)\n`);
+  const dupHandles = handleCandidates.filter(l => allExistingHandles.has(l.igHandle.toLowerCase()));
+  const withHandles = handleCandidates.filter(l => !allExistingHandles.has(l.igHandle.toLowerCase()));
+  console.log(`  Handle candidates: ${handleCandidates.length}/${qualified.length} (${noHandleLeads.length} have numeric FB IDs — no slug available)`);
+  if (dupHandles.length) {
+    console.log(`  Already in DB (cross-channel, by handle): ${dupHandles.length} — ${dupHandles.map(l => '@' + l.igHandle).join(', ')}`);
+  }
+  console.log('');
 
   // ── Stage 4: Apify IG Profile Scraper — confirm handles + follower count ──────
   // Batch call: one run for all handles. ~$0.005/profile, capped at 60 profiles ($0.30 max).
@@ -906,10 +1003,28 @@ async function main() {
     }
   }
 
-  // Strict gate: must have 15k–200k IG followers. No exceptions.
+  // National carriers and utilities sit squarely inside the 30k–200k follower band but are
+  // the opposite of the ICP — they run in-house contact centres and will never buy DM
+  // automation from a small agency. On 2026-09-15 a whole FB Ads batch produced exactly two
+  // in-band accounts and both were telecoms (A1 Srbija, Mts). Followers alone cannot see this;
+  // the IG business category can.
+  const EXCLUDE_IG_CATS = new Set([
+    'telecommunication company', 'internet company', 'internet service provider',
+    'bank', 'commercial bank', 'financial service', 'insurance company', 'insurance agent',
+    'energy company', 'public utility company', 'airline company', 'airport',
+    'supermarket', 'grocery store', 'media/news company', 'news & media website',
+    'government organization', 'political organization', 'university', 'college',
+  ].map(x => x.toLowerCase()));
+
+  let skippedMegaCorp = 0;
+
+  // Strict gate: must have 30k–200k IG followers and not be a mega-corp category.
   const igVerified = qualified.filter(lead => {
     const followers = lead.igFollowers ?? 0;
-    return followers >= MIN_FOLLOWERS && followers <= MAX_FOLLOWERS;
+    if (followers < MIN_FOLLOWERS || followers > MAX_FOLLOWERS) return false;
+    const cat = (lead.igProfile?.businessCategoryName || '').toLowerCase().trim();
+    if (cat && EXCLUDE_IG_CATS.has(cat)) { skippedMegaCorp++; return false; }
+    return true;
   });
 
   // Only proceed with IG-verified leads that passed the follower gate. No unverified no-handle leads.
@@ -920,8 +1035,28 @@ async function main() {
   console.log(`  Confirmed handles  : ${confirmed}/${uniqueHandles.length}`);
   if (rejectedMismatch > 0) console.log(`  Rejected (wrong account, domain mismatch): ${rejectedMismatch}`);
   console.log(`  ≥ ${MIN_FOLLOWERS/1000}k followers (IG verified) : ${igVerified.length}`);
+  if (skippedMegaCorp > 0) console.log(`  Rejected (telecom/bank/utility — out of ICP): ${skippedMegaCorp}`);
   console.log(`  Skipped (< ${MIN_FOLLOWERS/1000}k or unverified)  : ${skippedLowFollowers}`);
   console.log(`  Proceeding with ${toEnrich.length} leads total\n`);
+
+  // Credit each query with how many of its ads made it all the way to a 30k+ ICP-fit lead.
+  // Feeds pickQueries()'s explore/exploit rotation on the next run — queries that keep finding
+  // nothing get deprioritized, queries with no history yet get tried. Works for both live runs
+  // and --local --file replays, since __q is baked into the saved raw records either way.
+  {
+    const perQueryYield = {};
+    for (const it of rawItems) {
+      if (it.__q) perQueryYield[it.__q] = perQueryYield[it.__q] || 0;
+    }
+    for (const lead of igVerified) {
+      const q = lead.item.__q;
+      if (q) perQueryYield[q] = (perQueryYield[q] || 0) + 1;
+    }
+    if (Object.keys(perQueryYield).length) {
+      recordQueryYield(perQueryYield);
+      console.log(`  📊 Query yield recorded for ${Object.keys(perQueryYield).length} quer(ies) → ads_query_yield.json\n`);
+    }
+  }
 
   // ── --find-only: print leads, then fall through to DB insert (status = No Draft)
   if (isFindOnly) {
@@ -1101,11 +1236,20 @@ async function main() {
       status            : lead.contact?.email ? 'enriched' : 'No Draft',
       izvor             : 'meta_ads_scrape',
       kategorija        : followers >= 50000 ? 'Vreo' : followers >= 15000 ? 'Topao' : 'Hladan',
-      pipeline_stage    : 'novi',   // lands in the cockpit's "Novi leadovi" for approve/discard
+      pipeline_stage    : 'novi',   // overwritten just below by the qualification gate
       intake_data,
       client_id         : SMARTFLOW_ID,
       sledeca_akcija    : lead.contact?.email ? 'Generisati email draft i poslati' : 'Pronaći kontakt email',
     };
+
+    // The gate decides where this lands. 'novi' IS the cockpit's approval queue, so
+    // only a lead we can actually judge — reachable, audience measured, handle sane —
+    // belongs there. Everything else waits in 'sourced' for enrichment or a look.
+    const q = qualifyForQueue(record);
+    record.pipeline_stage = q.verdict === 'ready' ? 'novi' : 'sourced';
+    record.prioritet_skor = q.score;
+    record.sledeca_akcija = q.action;
+    if (q.verdict === 'reject') record.status = 'Disqualified';
 
     const res = await fetch(`${SUPABASE_URL}/rest/v1/contacts?on_conflict=client_id,facebook_page_id`, {
       method : 'POST',

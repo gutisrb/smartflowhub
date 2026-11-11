@@ -68,10 +68,11 @@ const VERTICALS = [
   { key: 'kuhinje',      queries: ['kuhinje po meri', 'nameštaj po meri'],            aov: '50.000–200.000' },
   { key: 'namestaj',     queries: ['salon nameštaja'],                                 aov: '25.000–100.000' },
   { key: 'stomatologija',queries: ['stomatološka ordinacija', 'zubni implanti'],      aov: '25.000–90.000'  },
-  { key: 'estetika',     queries: ['klinika estetske hirurgije', 'transplantacija kose'], aov: '80.000–300.000' },
+  // 2026-11-11: 'estetika' (hair transplant, aesthetic clinics) and 'vencanja' (wedding venues) removed from the default run. Nikola's
+  // bar is the original batch (prefab, pergolas, furniture, dental, phones, experiences); these two pulled in the weak leads
+  // (bridal, laser, aesthetic studios). lib/lead-profile.mjs rejects them downstream as well. Re-add one with evidence.
   { key: 'solarni',      queries: ['solarni paneli', 'toplotne pumpe'],               aov: '200.000+'       },
   { key: 'bazeni',       queries: ['bazeni i saune'],                                  aov: '150.000+'       },
-  { key: 'vencanja',     queries: ['sala za venčanja', 'restoran za svadbe'],          aov: '100.000+'       },
 ];
 
 const CITIES = ['Beograd', 'Novi Sad', 'Niš', 'Kragujevac', 'Subotica'];
@@ -94,8 +95,12 @@ function cleanDomain(url) {
 function isSerbian(item) {
   const dom = cleanDomain(item.website) || '';
   if (/\.rs$/.test(dom)) return true;
-  const addr = `${item.address || ''} ${item.city || ''}`;
-  return /srbij|beograd|novi sad|niš|nis|kragujevac|subotica|zrenjanin|pančevo|čačak|kraljevo|leskovac/i.test(addr);
+  if ((item.countryCode || '').toUpperCase() === 'RS') return true;
+  // Google Maps returns Serbian addresses in Cyrillic ("Гандијева, Београд, Србија"),
+  // which a Latin-only regex silently rejected — 17 real Belgrade and Niš businesses
+  // were discarded as "not Serbian" on the first run.
+  const addr = `${item.address || ''} ${item.city || ''} ${item.state || ''}`;
+  return /srbij|србиј|beograd|београд|novi sad|нови сад|niš|nis|ниш|kragujevac|крагујевац|subotica|суботица|zrenjanin|pančevo|čačak|kraljevo|leskovac/i.test(addr);
 }
 
 function buildPlan() {
@@ -181,7 +186,15 @@ async function main() {
   const seenNames   = new Set((existing || []).map(r => (r.company_name || '').toLowerCase().trim()).filter(Boolean));
   console.log(`\nAlready in DB: ${seenDomains.size} domains / ${seenNames.size} names\n`);
 
-  const items = await runActor(plan.map(p => p.query), MAX);
+  // --from-cache replays the last dataset already paid for, so fixing an insert bug
+  // costs nothing instead of re-running the scraper.
+  let items;
+  if (argv.includes('--from-cache')) {
+    items = JSON.parse(readFileSync(resolve(__dirname, '_maps_cache.json'), 'utf8'));
+    console.log(`Replaying ${items.length} cached places (no API cost)\n`);
+  } else {
+    items = await runActor(plan.map(p => p.query), MAX);
+  }
 
   const dbg = { noWebsite: 0, notSerbian: 0, dup: 0, excluded: 0, permaban: 0, inserted: 0 };
   for (const it of items) {
@@ -189,7 +202,7 @@ async function main() {
     const domain = cleanDomain(it.website);
 
     if (!name || EXCLUDE_NAME.test(name))            { dbg.excluded++;   continue; }
-    if (isPermabanned({ pageName: name, website: it.website })) { dbg.permaban++; continue; }
+    if (isPermabanned({ pageName: name, website: it.website, email: Array.isArray(it.emails) ? it.emails[0] : null })) { dbg.permaban++; continue; }
     // No website means no catalogue to scrape, which means no AOV, which means we
     // cannot qualify them and the demo would be generic. Those are worth 10x less.
     if (!domain)                                      { dbg.noWebsite++;  continue; }
@@ -197,24 +210,35 @@ async function main() {
     if (seenDomains.has(domain) || seenNames.has(name.toLowerCase())) { dbg.dup++; continue; }
 
     const match = plan.find(p => (it.searchString || '').includes(p.query.split(' ').slice(0, 2).join(' ')));
+    // compsy's scraper ships contact enrichment in the same result — an email and
+    // an Instagram handle here save an entire enrichment pass per lead.
+    const mapsEmail = Array.isArray(it.emails) ? it.emails.find(e => /@/.test(e)) : null;
+    const igUrl = Array.isArray(it.instagrams) ? it.instagrams[0] : null;
+    const igHandle = igUrl ? (igUrl.match(/instagram\.com\/([^/?#]+)/)?.[1] ?? null) : null;
+
     const record = {
       company_name       : name,
       name,
       website            : `https://${domain}`,
-      email              : null,
-      telefon            : it.phone || null,
-      lokacija           : it.city || it.address || null,
-      instagram_handle   : null,
-      instagram_followers: 0,
+      email              : mapsEmail || null,
+      phone              : it.phone || null,
+      instagram_handle   : igHandle,
+      // Maps never looks at Instagram. Writing 0 here claimed a measurement we
+      // never took, and 53 of these then sat in the approval queue looking like
+      // businesses with no audience. null is the honest value: not yet measured.
+      instagram_followers: null,
       niche              : match?.vertical || 'usluge',
       service            : 'social_media_system',
       // Maps gives no email and no ad data, so this lead is not qualified yet —
       // it goes to enrichment, never straight to a demo build.
-      status             : 'No Draft',
+      status             : mapsEmail ? 'enriched' : 'No Draft',
       izvor              : 'google_maps',
       kategorija         : 'Hladan',
-      pipeline_stage     : 'novi',
-      sledeca_akcija     : 'Pronaći kontakt email + proveriti aktivne oglase (MIS)',
+      // 'sourced', not 'novi': 'novi' IS the cockpit's approval queue, so inserting
+      // there put unqualified scraper output in front of Nikola as a decision.
+      // qualify_queue.mjs promotes a lead to 'novi' once it can actually be judged.
+      pipeline_stage     : 'sourced',
+      sledeca_akcija     : mapsEmail ? 'Proveriti aktivne oglase (MIS) + skenirati cenovnik (AOV)' : 'Pronaći kontakt email',
       comment            : `Google Maps · ${match?.vertical ?? '?'} · očekivani AOV ${match?.aov ?? '?'} RSD · ${it.totalScore ? `ocena ${it.totalScore} (${it.reviewsCount} recenzija)` : 'bez ocena'}`,
       intake_data: {
         scraped_at   : new Date().toISOString(),
@@ -226,6 +250,8 @@ async function main() {
           rating: it.totalScore ?? null,
           reviews: it.reviewsCount ?? null,
           address: it.address || null,
+          city: it.city || null,
+          instagram_url: igUrl || null,
           vertical: match?.vertical ?? null,
           expected_aov: match?.aov ?? null,
         },
