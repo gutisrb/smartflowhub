@@ -1,0 +1,392 @@
+{
+  "_note": "SLW Container (S-Logistic World, s-logistic.rs) — hand sheet written 2026-11-12 from s-logistic.rs/solucije/prodaja-i-najam-brodskih-kontejnera (20' DC and 40' HC dimensions, \"Odaberite vaš kontejner u 3 koraka: Veličina i tip / Stanje: Imamo kontejnera A, B, C klase / Dostava: Nakon što sve preciziramo, dostavljamo kontejner ili ga preuzimate u vlastitom aranžmanu\", \"vanstandardne specifične kontejnere … po posebnom zahtevu\", \"usluge za modifikacije ili prenamenu kontejnera\", \"fleksibilne opcije najma\") and its own Instagram captions (\"depoa u Beogradu i Nišu\", \"Organizovan transport i istovar širom Srbije i regiona\", \"Velike količine odmah na stanju 250+\", \"Pišite nam za ponudu i cene!\", \"Partizanska 45 - Ugrinovci\"). The site states NO price, NO delivery price, NO named countries, NO warranty or complaint rule, so the agent quotes none of them: it says the price comes in the offer and collects size, class, delivery place and a phone. Openers are real comments: \"Pozdrav koliko kosta veliki polovni sa prevozom?\" (DeRfQmCMUbm), \"Moze dimenzije i cene\" (DYKyN6os7gs, not tagged as a post reply: seed cuts that caption at 140 characters in the middle of an emoji and Postgres rejects the lone surrogate), \"Može li dostava za selo Jošanica kod Soko Banje I da li se istovar I prevoz naplacuje posebno\" (DeZM49CMQ1T, the hand-off: the business never states whether unloading and transport are charged separately). Filler questions are the real ones (\"Ima li u nisu?\", \"Moze li za Makedonija?\", \"Cena prevoza za CG\", \"Cijena? Transport u BiH?\" …) answered only with what the site and captions say. No complaint hero: the site has no complaint rule for containers.",
+  "hero": {
+    "channel": "instagram",
+    "customer": "Marija Jović",
+    "phone": "064 123 4567",
+    "msgs": [
+      [
+        "user",
+        "Pozdrav koliko kosta veliki polovni sa prevozom?",
+        {
+          "post": "DeRfQmCMUbm"
+        }
+      ],
+      [
+        "assistant",
+        "Pozdrav, Marija. Mislite li na 40FT HC (12 m)? Kontejnere imamo u klasama A, B i C, a transport radimo do Vaše adrese. Cenu šaljemo u ponudi, pa mi recite gde treba da stigne."
+      ],
+      [
+        "user",
+        "Da, 12 metara, polovni, klasa B. Treba mi u Rakovici, Beograd."
+      ],
+      [
+        "assistant",
+        "Beležim: 40FT HC, polovni, klasa B, isporuka u Rakovicu. Za ponudu mi pošaljite ime i broj telefona."
+      ],
+      [
+        "user",
+        "Marija Jović, 064 123 4567"
+      ],
+      [
+        "assistant",
+        "Hvala, Marija. Zahtev za ponudu je upisan i prosleđen."
+      ]
+    ],
+    "crm": {
+      "full_name": "Marija Jović",
+      "telefon": "064 123 4567",
+      "kategorija": "Prodaja kontejnera",
+      "proizvod": "Kontejner 40FT HC, polovni, klasa B",
+      "status": "Zakazano",
+      "razlog": "Pitala za cenu velikog polovnog kontejnera sa prevozom. Agent je proverio da li misli na 40FT HC, upisao klasu B i mesto isporuke i uzeo podatke za ponudu.",
+      "komentar": "Isporuka: Rakovica, Beograd · cena sa transportom",
+      "izvor": "Instagram"
+    },
+    "left": {
+      "msgs": [
+        [
+          "user",
+          "Moze dimenzije i cene"
+        ],
+        [
+          "assistant",
+          "Zdravo, Nikola. Unutrašnje mere (D x Š x V): 20FT DC 5898 x 2350 x 2350 mm, 40FT HC 12029 x 2350 x 2670 mm. Cenu šaljemo u ponudi, pa mi recite koji Vam treba i gde treba da stigne."
+        ],
+        [
+          "user",
+          "Hvala, javiću se."
+        ],
+        [
+          "assistant",
+          "Važi. Kad se odlučite za veličinu i mesto isporuke, pišite ovde i pripremamo ponudu."
+        ]
+      ],
+      "crm": {
+        "full_name": "Nikola Perić",
+        "telefon": "",
+        "kategorija": "Prodaja kontejnera",
+        "proizvod": "Kontejner 20FT / 40FT HC",
+        "status": "Zainteresovan",
+        "razlog": "Pitao za dimenzije i cene i otišao uz „Hvala, javiću se.“ Agent je dao unutrašnje mere sa sajta, rekao da se cena šalje u ponudi i ostavio razgovor otvoren.",
+        "izvor": "Instagram"
+      }
+    },
+    "intervention": {
+      "ask": "Može li dostava za selo Jošanica kod Soko Banje I da li se istovar I prevoz naplacuje posebno",
+      "answer": "Zdravo, Dragana. Transport i istovar organizujemo širom Srbije, ali da li se naplaćuju posebno, ne bih da nagađam. Prosleđujem Vaš upit. Mogu li da zabeležim Vaše ime i broj telefona?",
+      "razlog": "Pitala za dostavu do sela Jošanica kod Soko Banje i da li se istovar i prevoz naplaćuju posebno. Sajt i objave to ne navode, pa agent ne nagađa. Prosleđeno."
+    },
+    "qa": [
+      [
+        "Cena ?",
+        "Cenu dobijate u ponudi. Recite mi koji Vam kontejner treba (20FT ili 40FT HC, novi ili polovni) i gde treba da stigne."
+      ],
+      [
+        "Info o kontejnerima i cene molim",
+        "Imamo 20FT (6 m) i 40FT HC (12 m), nove i polovne. Cenu šaljemo u ponudi, pa mi recite koji Vam treba i gde treba da stigne."
+      ],
+      [
+        "Moze dimenzije i cene",
+        "Unutrašnje mere (D x Š x V): 20FT DC 5898 x 2350 x 2350 mm, 40FT HC 12029 x 2350 x 2670 mm. Cenu dobijate u ponudi, pa mi recite koji Vam treba."
+      ],
+      [
+        "Ima li u nisu?",
+        "Ima. Kontejneri su dostupni sa naših depoa u Beogradu i Nišu. Koji Vam treba, 20FT ili 40FT HC?"
+      ],
+      [
+        "Moze li za Makedonija?",
+        "Transport organizujemo širom Srbije i regiona. Napišite mi tačno mesto isporuke i koji kontejner Vam treba, pa pripremamo ponudu."
+      ],
+      [
+        "Cena prevoza za CG",
+        "Cenu transporta dobijate u ponudi. Transport organizujemo širom Srbije i regiona, pa mi recite mesto isporuke i koji kontejner Vam treba."
+      ],
+      [
+        "Cijena? Transport u BiH?",
+        "Transport organizujemo širom Srbije i regiona, a cenu sa transportom šaljemo u ponudi. Napišite mi mesto isporuke i koji kontejner Vam treba."
+      ],
+      [
+        "Zainteresovan može li malo informacija o kontejneru",
+        "Može. Imamo 20FT i 40FT HC kontejnere, nove i polovne, u klasama A, B i C. Recite mi za šta Vam treba, pa Vam pomažem da izaberete."
+      ],
+      [
+        "Pozdrav , posaljite mi cenu hvala",
+        "Pozdrav. Cenu šaljemo u ponudi. Recite mi koji Vam kontejner treba (20FT ili 40FT HC, novi ili polovni) i gde treba da stigne."
+      ],
+      [
+        "Cena dostave do 50 km?",
+        "Transport radimo do Vaše adrese, a cenu dobijate u ponudi. Pošaljite mi mesto isporuke i koji kontejner Vam treba."
+      ],
+      [
+        "Da li imate kontejnere i u drugoj boji?",
+        "Veličinu, tip i boju kontejnera birate prema svojim željama i potrebama. Recite mi šta Vam treba, pa pripremamo ponudu."
+      ],
+      [
+        "Polovni cena",
+        "Polovne imamo u klasama A, B i C. Cenu dobijate u ponudi, pa mi recite veličinu, klasu i gde treba da stigne."
+      ]
+    ],
+    "objections": [
+      [
+        "Razmisliću, pa ću se javiti.",
+        "Važi. Kad budete znali veličinu i mesto isporuke, pišite ovde i pripremamo ponudu."
+      ],
+      [
+        "Treba mi kontejner samo za nekoliko meseci.",
+        "Pored prodaje nudimo i najam kontejnera, sa fleksibilnim opcijama. Recite mi veličinu i gde treba da stoji, pa pripremamo ponudu."
+      ],
+      [
+        "Meni treba nešto što nije standardno.",
+        "Kod nas možete poručiti i vanstandardne kontejnere po posebnom zahtevu. Napišite mi šta Vam treba."
+      ],
+      [
+        "Hoću prvo da vidim kontejner uživo.",
+        "Posetite nas na adresi Partizanska 45, Ugrinovci. Radno vreme je pon–pet 8–17h, sub 8–13h."
+      ]
+    ],
+    "background": [
+      {
+        "name": "Ana Kovačević",
+        "ch": "instagram",
+        "st": "Novi",
+        "msgs": [
+          [
+            "user",
+            "Cene kontenhera"
+          ],
+          [
+            "assistant",
+            "Cenu šaljemo u ponudi. Imamo 20FT (6 m) i 40FT HC (12 m), nove i polovne. Koji Vam treba i gde treba da stigne?"
+          ]
+        ]
+      },
+      {
+        "name": "Petar Nikolić",
+        "ch": "instagram",
+        "st": "Zainteresovan",
+        "msgs": [
+          [
+            "user",
+            "Ima li u nisu?"
+          ],
+          [
+            "assistant",
+            "Ima. Kontejneri su dostupni sa naših depoa u Beogradu i Nišu. Koji Vam treba, 20FT ili 40FT HC?"
+          ],
+          [
+            "user",
+            "Javiću se."
+          ],
+          [
+            "assistant",
+            "Važi. Kad budete znali koji Vam treba, pišite ovde i pripremamo ponudu."
+          ]
+        ]
+      },
+      {
+        "name": "Jovana Ilić",
+        "ch": "facebook",
+        "st": "Zakazano",
+        "msgs": [
+          [
+            "user",
+            "Cena dostave do 50 km?"
+          ],
+          [
+            "assistant",
+            "Transport radimo do Vaše adrese, a cenu dobijate u ponudi. Pošaljite mi mesto isporuke, koji kontejner Vam treba, ime i broj telefona."
+          ],
+          [
+            "user",
+            "Jovana Ilić, 063 410 7721. Jedan 40FT HC, isporuka u Smederevo."
+          ],
+          [
+            "assistant",
+            "Hvala, Jovana. Zahtev za ponudu je upisan i prosleđen."
+          ]
+        ]
+      },
+      {
+        "name": "Marko Savić",
+        "ch": "website",
+        "st": "Zakazano",
+        "msgs": [
+          [
+            "user",
+            "Postovanje zanima me gdje se nalazite i jeli to blizu Beograda i kakva je isporuka za BiH koliko bi kostao kontenjer od 12 metara franko Doboj"
+          ],
+          [
+            "assistant",
+            "Poslovne kancelarije su nam na adresi Partizanska 45, Ugrinovci, a kontejneri su dostupni sa depoa u Beogradu i Nišu. Transport organizujemo širom Srbije i regiona, a cenu za 40FT HC sa transportom do Doboja šaljemo u ponudi. Pošaljite mi ime i broj telefona."
+          ],
+          [
+            "user",
+            "Marko Savić, 065 828 6764"
+          ],
+          [
+            "assistant",
+            "Hvala, Marko. Zahtev za ponudu je upisan i prosleđen."
+          ]
+        ]
+      },
+      {
+        "name": "Tamara Đorđević",
+        "ch": "instagram",
+        "st": "Naručio",
+        "msgs": [
+          [
+            "user",
+            "Prihvatamo ponudu za 20FT, polovni."
+          ],
+          [
+            "assistant",
+            "Hvala, Tamara. Potvrda je upisana i prosleđena. Isporuku ili preuzimanje u vlastitom aranžmanu dogovaramo kad sve precizirate."
+          ]
+        ]
+      },
+      {
+        "name": "Luka Pavlović",
+        "ch": "whatsapp",
+        "st": "Zainteresovan",
+        "msgs": [
+          [
+            "user",
+            "Treba mi samo na par meseci, da li iznajmljujete?"
+          ],
+          [
+            "assistant",
+            "Da, pored prodaje nudimo i najam kontejnera, sa fleksibilnim opcijama. Recite mi veličinu i gde treba da stoji, pa pripremamo ponudu."
+          ],
+          [
+            "user",
+            "Javiću se."
+          ],
+          [
+            "assistant",
+            "Važi. Pišite ovde kad budete spremni."
+          ]
+        ]
+      },
+      {
+        "name": "Milica Jovanović",
+        "ch": "instagram",
+        "st": "Zakazano",
+        "msgs": [
+          [
+            "user",
+            "Hoću kontejner da pretvorim u kancelariju na placu."
+          ],
+          [
+            "assistant",
+            "Nudimo i modifikaciju i prenamenu kontejnera, za kancelarije, vikendice i više. Pošaljite mi ime, broj telefona i šta Vam je potrebno."
+          ],
+          [
+            "user",
+            "Milica Jovanović, 063 410 7721. Kancelarija od 6 metara."
+          ],
+          [
+            "assistant",
+            "Hvala, Milice. Zahtev za ponudu je upisan i prosleđen."
+          ]
+        ]
+      },
+      {
+        "name": "Nemanja Ristić",
+        "ch": "website",
+        "st": "Zainteresovan",
+        "msgs": [
+          [
+            "user",
+            "Treba mi kontejner nestandardnih mera, može li?"
+          ],
+          [
+            "assistant",
+            "Može. Kod nas možete poručiti i vanstandardne kontejnere po posebnom zahtevu. Napišite mi mere i za šta Vam treba."
+          ]
+        ]
+      },
+      {
+        "name": "Katarina Lukić",
+        "ch": "instagram",
+        "st": "Zainteresovan",
+        "msgs": [
+          [
+            "user",
+            "Info neki"
+          ],
+          [
+            "assistant",
+            "Pozdrav. Prodajemo i iznajmljujemo brodske kontejnere. Za prodaju imamo 20FT (6 m) i 40FT HC (12 m), nove i polovne. Šta Vas zanima, kupovina ili najam?"
+          ]
+        ]
+      },
+      {
+        "name": "Stefan Petrović",
+        "ch": "facebook",
+        "st": "Novi",
+        "msgs": [
+          [
+            "user",
+            "Koja je cena?"
+          ],
+          [
+            "assistant",
+            "Cenu šaljemo u ponudi. Recite mi koji Vam kontejner treba (20FT ili 40FT HC, novi ili polovni) i gde treba da stigne."
+          ]
+        ]
+      },
+      {
+        "name": "Sara Marković",
+        "ch": "instagram",
+        "st": "Zainteresovan",
+        "msgs": [
+          [
+            "user",
+            "Cena prevoza za CG"
+          ],
+          [
+            "assistant",
+            "Cenu transporta dobijate u ponudi. Transport organizujemo širom Srbije i regiona, pa mi recite mesto isporuke i koji kontejner Vam treba."
+          ],
+          [
+            "user",
+            "Razmisliću."
+          ],
+          [
+            "assistant",
+            "Važi. Kad budete znali koji kontejner Vam treba, pišite ovde i pripremamo ponudu."
+          ]
+        ]
+      },
+      {
+        "name": "Filip Stojanović",
+        "ch": "whatsapp",
+        "st": "Naručio",
+        "msgs": [
+          [
+            "user",
+            "Slažemo se sa ponudom za 40FT HC, novi."
+          ],
+          [
+            "assistant",
+            "Hvala, Filipe. Potvrda je upisana i prosleđena. Isporuku ili preuzimanje u vlastitom aranžmanu dogovaramo kad sve precizirate."
+          ]
+        ]
+      }
+    ]
+  },
+  "e1": {
+    "_note": "E1 v20 (2026-11-12). Opens as a person: why he writes (his belief about where AI helps this kind of business most), why a demo (easier shown than explained), that it is theirs (built from the containers on its site + the comments under its posts), the honest catch. No scenario, no backstory. SLW sells by offer and states no price, so the subject asks why one visitor asks for an offer and another does not.",
+    "kind": "business",
+    "subject": "Zašto neko traži ponudu za kontejner kod SLW Containera, a neko ne",
+    "za": "SLW Container",
+    "not_done": "nije tražio ponudu",
+    "made_from": "kontejnera sa sajta",
+    "most_wanted": "koji kontejneri su najtraženiji",
+    "gap": "pre ponude",
+    "_site": "s-logistic.rs/solucije/prodaja-i-najam-brodskih-kontejnera",
+    "helps_whom": "firmama kao što je SLW Container",
+    "win": "zahtevom za ponudu"
+  }
+}

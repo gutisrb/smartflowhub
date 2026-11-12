@@ -1,0 +1,11 @@
+{
+  "_note": "Hotel Radan, Prolom Banja — only the handoff is hand-chosen (2026-10-27). Its site lists treatment programmes (\"Lečenje bubrega, mokraćnih puteva, reume, kože i gastro obolenja\", \"programe dijagnostike i tretmana\"), so the question the agent must not answer is a medical one, not the template \"specifična situacija\".",
+  "hero": {
+    "intervention": {
+      "ask": "Zdravo, imam kamen u bubregu. Da li mi Vaš program lečenja odgovara i treba li mi uput?",
+      "answer": "Zdravo, Dragana 😊 Na to odgovara naš lekar, pa ne bih da nagađam. Prosleđujem mu upit. Mogu li da zabeležim Vaše ime i broj telefona?",
+      "domainNom": "lekar",
+      "razlog": "Pita da li joj program lečenja odgovara (kamen u bubregu) i za uput — odgovara lekar. Prosleđeno."
+    }
+  }
+}

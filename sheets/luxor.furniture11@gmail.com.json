@@ -1,0 +1,105 @@
+{
+  "_note": "Luxor Furniture — hand sheet written 2026-11-10 from the fact-check against luxorfurniture.rs (product page LUX 14 MN.BB, /dostava/, /reklamacije/, /uslovi-koriscenja/, home). Opening = a real comment (\"Zdravo cena?\") under its vanity-table post. Every agent fact is a site sentence: 44.400,00 RSD and in stock (product page), \"Na sve naše proizvode obezbeđena je garancija od 2 godine\", \"Platite tek kada proizvod stigne na vašu adresu\", standard delivery 10 do 14 radnih dana, order needs ime i prezime, adresu, e-mail i broj telefona, then the customer is contacted by e-mail or phone with the exact delivery date. NOT claimed: \"besplatna dostava\" (the home badge says so, the terms say the price depends on location). Complaint = the site's own policy: report within 48 h, keep the fiscal receipt, photograph the damage.",
+  "hero": {
+    "channel": "instagram",
+    "customer": "Marija Jović",
+    "phone": "064 123 4567",
+    "msgs": [
+      [
+        "user",
+        "Zdravo cena?",
+        {
+          "post": "Dds43ZUAMGq"
+        }
+      ],
+      [
+        "assistant",
+        "Dobar dan, Marija. Koji model sa objave Vas zanima? Na primer, sto za šminkanje LUX 14 MN.BB košta 44.400 RSD i na stanju je."
+      ],
+      [
+        "user",
+        "Skupo je, iskreno."
+      ],
+      [
+        "assistant",
+        "Na sve naše proizvode imate garanciju od 2 godine, a plaćate tek kada proizvod stigne na Vašu adresu."
+      ],
+      [
+        "user",
+        "Dobro, uzimam. Koliki je rok isporuke?"
+      ],
+      [
+        "assistant",
+        "Standardni rok isporuke je 10 do 14 radnih dana. Pošaljite mi ime i prezime, adresu, e-mail i broj telefona."
+      ],
+      [
+        "user",
+        "Marija Jović, Kralja Petra 12, Novi Sad, marija.jovic@gmail.com, 064 123 4567"
+      ],
+      [
+        "assistant",
+        "Hvala, Marija. Porudžbina je upisana, a nakon potvrde bićete kontaktirani e-mailom ili telefonom sa tačnim datumom isporuke."
+      ]
+    ],
+    "crm": {
+      "full_name": "Marija Jović",
+      "telefon": "064 123 4567",
+      "kategorija": "Stolovi za šminkanje",
+      "proizvod": "Sto za šminkanje LUX 14 MN.BB",
+      "status": "Naručio",
+      "razlog": "Pitala za cenu i rekla da je skupo — agent je odgovorio garancijom od 2 godine i plaćanjem pri preuzimanju, i rekao rok isporuke.",
+      "komentar": "Adresa: Kralja Petra 12, Novi Sad",
+      "izvor": "Instagram"
+    },
+    "left": {
+      "msgs": [
+        [
+          "user",
+          "Cena?",
+          {
+            "post": "Dds43ZUAMGq"
+          }
+        ],
+        [
+          "assistant",
+          "Dobar dan. Koji model sa objave Vas zanima? Na primer, sto za šminkanje LUX 14 MN.BB košta 44.400 RSD i na stanju je."
+        ],
+        [
+          "user",
+          "Hvala, javiću se."
+        ],
+        [
+          "assistant",
+          "Važi. Ako Vam zatrebaju dimenzije ili cena drugog modela, samo pišite ovde."
+        ]
+      ],
+      "crm": {
+        "full_name": "Nikola Perić",
+        "telefon": "",
+        "kategorija": "Stolovi za šminkanje",
+        "proizvod": "Sto za šminkanje LUX 14 MN.BB",
+        "status": "Zainteresovan",
+        "razlog": "Pitao za cenu i otišao uz „Hvala, javiću se.“ Agent je ostavio razgovor otvoren.",
+        "izvor": "Instagram"
+      }
+    },
+    "complaint": {
+      "ask": "Dobar dan, sto mi je stigao oštećen. Šta da radim?",
+      "answer": "Žao mi je zbog toga. Reklamaciju prijavljujete u roku od 48h, uz fiskalni račun i fotografiju oštećenja. Ja upisujem slučaj, pa mi pošaljite ime i broj telefona.",
+      "razlog": "Reklamacija: sto je stigao oštećen. Agent je tražio fiskalni račun i fotografiju oštećenja, kako sajt propisuje. Prosleđeno na rešavanje (zamena, popravka ili povraćaj sredstava)."
+    }
+  },
+  "e1": {
+    "_note": "E1 v20 (2026-11-10), same structure as the other leads: why he writes, why a demo, that it is theirs, the honest catch.",
+    "kind": "business",
+    "subject": "Zašto neko naruči sto za šminkanje kod Luxora, a neko ne",
+    "za": "Luxor Furniture",
+    "not_done": "nije naručio",
+    "made_from": "stolova sa sajta",
+    "most_wanted": "koji stolovi su najtraženiji",
+    "gap": "pre porudžbine",
+    "_site": "product page LUX 14 MN.BB; luxorfurniture.rs",
+    "helps_whom": "firmama kao što je Luxor Furniture",
+    "win": "porudžbinom"
+  }
+}

@@ -55,3 +55,10 @@ describe('placeholder addresses', () => {
     expect(extractEmails('Kontakt: info@website.com, name@domain.com, youremail@gmail.com, prodaja@vacasa.rs')).toEqual(['prodaja@vacasa.rs'])
   })
 })
+
+describe('placeholder filter is exact, not a prefix', () => {
+  it('keeps real addresses that merely start with a placeholder word (namestajmdn@gmail.com was dropped, 2026-11-12)', () => {
+    expect(extractEmails('namestajmdn@gmail.com testera@firma.rs mailing@firma.rs')).toEqual(['namestajmdn@gmail.com', 'testera@firma.rs', 'mailing@firma.rs'])
+    expect(extractEmails('name@domain.com test@firma.rs user@firma.rs')).toEqual([])
+  })
+})

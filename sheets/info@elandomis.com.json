@@ -1,0 +1,415 @@
+{
+ "_note": "Elan Domis — hand sheet written 2026-11-12 from elandomis.com (home, O nama, category pages Tapetarija / Spavaće sobe / Dušeci / Trpezarija / Baštenski, Servisi with the \"Pravilnik kompanije\" and \"Česta pitanja\") and from the captions and real comments of its own Instagram. The business's own captions say \"Cena: Inbox\" and \"Dostava širom Srbije!\", so customers comment \"cena\" and are answered in the inbox: the agent does exactly that, with the prices the site shows. Opening = a real comment (\"Molim vas za cenu ANKARA seta,a i da li moze samo trosed i dvosed\") under the Set ANKARA post (DUBdvN8DLcK). The Tapetarija page shows Set ANKARA 239.990 din, Trosed ANKARA 99.990 din, Fotelja ANKARA 39.990 din (unit \"din\", as the site writes it), so the agent states those; no dvosed ANKARA is listed, so for it the agent says the price goes in an offer. Delivery is quoted from the Pravilnik: \"besplatnog prevoza do 50km u jednom pravcu ... i montaze, ali NE I UNOSENJE u stan\" (unošenje po spratovima se naknadno plaća). Left hero = \"Koja cena ugaone?\" under UG NOVAK (DbV4GyCKu3F): dimensions, sleeping space and colour choice come from its caption, no price is shown for it, so none is said. Complaint (hero.intervention, because a quote/enquiry business has no separate complaint thread in the seeder): the site's own rule is \"Račun je garancija na kupljenu robu u trajanju od 24 mjeseca\"; whether a given defect is covered is the team's call, so the agent states the rule, takes name and phone and does not decide. NOT used: any delivery time (the Pravilnik leaves the days blank: \"do dana\"), the 7% late-delivery discount, anything about prices for items the page does not list, the \"garantovano najniže cene\" claim.",
+ "hero": {
+  "channel": "instagram",
+  "customer": "Marija Jović",
+  "phone": "064 123 4567",
+  "msgs": [
+   [
+    "user",
+    "Molim vas za cenu ANKARA seta,a i da li moze samo trosed i dvosed",
+    {
+     "post": "DUBdvN8DLcK"
+    }
+   ],
+   [
+    "assistant",
+    "Dobar dan, Marija. Set ANKARA je 239.990 din. Trosed ANKARA možete da kupite i zasebno za 99.990 din, a fotelja je 39.990 din. Cenu dvoseda šaljemo u ponudi."
+   ],
+   [
+    "user",
+    "Trosed i dvosed bi mi odgovarali. Da li je dostava besplatna?"
+   ],
+   [
+    "assistant",
+    "Prevoz i montaža su besplatni do 50 km u jednom pravcu, a unošenje u stan se naknadno plaća. Pošaljite mi ime, broj telefona i mesto isporuke za ponudu."
+   ],
+   [
+    "user",
+    "Marija Jović, 064 123 4567, Novi Pazar"
+   ],
+   [
+    "assistant",
+    "Hvala, Marija. Zahtev za ponudu za trosed i dvosed ANKARA je upisan i prosleđen."
+   ]
+  ],
+  "crm": {
+   "full_name": "Marija Jović",
+   "telefon": "064 123 4567",
+   "kategorija": "Tapetarija i garniture",
+   "proizvod": "Trosed i dvosed ANKARA",
+   "status": "Zakazano",
+   "razlog": "Pitala za cenu seta ANKARA i da li može samo trosed i dvosed. Agent je rekao cenu seta (239.990 din) i troseda (99.990 din), rekao da se cena dvoseda šalje u ponudi, odgovorio na pitanje o dostavi i uzeo ime, broj telefona i mesto isporuke.",
+   "komentar": "Mesto isporuke: Novi Pazar",
+   "izvor": "Instagram"
+  },
+  "left": {
+   "msgs": [
+    [
+     "user",
+     "Koja cena ugaone?",
+     {
+      "post": "DbV4GyCKu3F"
+     }
+    ],
+    [
+     "assistant",
+     "Dobar dan. Ugaona garnitura NOVAK je dimenzija 330 x 330 x 100, sa prostorom za spavanje, a boju možete da birate. Cenu šaljemo u ponudi. Pišite mi mesto isporuke, pa je pripremamo."
+    ],
+    [
+     "user",
+     "Hvala, javiću se."
+    ],
+    [
+     "assistant",
+     "Važi. Saloni su u Tutinu i Novom Pazaru, a ponudu pripremamo čim kažete."
+    ]
+   ],
+   "crm": {
+    "full_name": "Nikola Perić",
+    "telefon": "",
+    "kategorija": "Ugaone garniture",
+    "proizvod": "Ugaona garnitura NOVAK",
+    "status": "Zainteresovan",
+    "razlog": "Pitao za cenu ugaone garniture sa objave i otišao uz „Hvala, javiću se.“ Agent je rekao dimenzije, prostor za spavanje i izbor boje, da se cena šalje u ponudi, i ostavio razgovor otvoren.",
+    "izvor": "Instagram"
+   }
+  },
+  "intervention": {
+   "ask": "Dobar dan, trosed koji smo kupili pre godinu dana ima manu na sedištu. Šta da radim?",
+   "answer": "Žao mi je zbog toga. Račun je garancija na kupljenu robu u trajanju od 24 meseca, pa Vam je potreban račun. Da li je mana pokrivena garancijom, procenjuje naš tim, pa ne bih da nagađam. Mogu li da zabeležim Vaše ime i broj telefona?",
+   "razlog": "Reklamacija troseda posle godinu dana. Agent je naveo pravilo sa sajta (račun je garancija 24 meseca), a procenu da li je mana pokrivena prepustio timu. Prosleđeno."
+  },
+  "qa": [
+   [
+    "Koja je cena?",
+    "Cenu šaljemo u ponudi. Recite mi koji set ili komad sa objave Vas zanima."
+   ],
+   [
+    "Koliko košta trosed ANKARA?",
+    "Trosed ANKARA je 99.990 din."
+   ],
+   [
+    "Koliko košta set ANKARA?",
+    "Set ANKARA je 239.990 din."
+   ],
+   [
+    "Cena fotelje DENIZ-classic?",
+    "Fotelja DENIZ-classic je 35.490 din."
+   ],
+   [
+    "Koliko košta spavaća soba YAREN?",
+    "Spavaća soba YAREN je 218.990 din."
+   ],
+   [
+    "Gde se nalazite?",
+    "Saloni su u Tutinu, Dubovo bb, i u Novom Pazaru, Kej 12. Srpske brigade 181. Radimo od ponedeljka do subote od 9 do 18h."
+   ],
+   [
+    "Da li je dostava besplatna?",
+    "Prevoz i montaža su besplatni do 50 km u jednom pravcu, a unošenje u stan se naknadno plaća."
+   ],
+   [
+    "Može li plaćanje pri isporuci?",
+    "Ne, nameštaj nije moguće platiti po isporuci. Prema pravilniku firme, pre isporuke mora biti uplaćen kompletan iznos sa predračuna."
+   ],
+   [
+    "Koliki je avans?",
+    "Za poručenu robu avans je najmanje 30 do 50% vrednosti, a ostatak se plaća po prispeću robe u magacin."
+   ],
+   [
+    "Da li isporučujete u Crnu Goru?",
+    "Da, isporuka u Crnu Goru je moguća ako kupac preuzima troškove carine, PDV-a i prevoza."
+   ],
+   [
+    "Da li radite po meri?",
+    "Da, bavimo se proizvodnjom nameštaja po meri za različite namene."
+   ],
+   [
+    "Kolika je garancija?",
+    "Račun je garancija na kupljenu robu u trajanju od 24 meseca."
+   ],
+   [
+    "Imate li nešto na rasklapanje?",
+    "Imamo. Na primer, set ANKARA ima prostor za spavanje dimenzija 210 x 90 cm."
+   ],
+   [
+    "Da li ima u drugoj boji?",
+    "Kod ugaone garniture NOVAK moguće je birati boju."
+   ]
+  ],
+  "objections": [
+   [
+    "Skupo mi je za sada.",
+    "Komade možete da kupite i zasebno, na primer trosed ANKARA je 99.990 din, a na sajtu imamo i popuste na odabrane komade."
+   ],
+   [
+    "Razmisliću, pa ću se javiti.",
+    "Važi. Možete i da svratite u salon u Tutinu ili Novom Pazaru, radimo od ponedeljka do subote od 9 do 18h."
+   ],
+   [
+    "Moram prvo da vidim uživo.",
+    "Naravno. Saloni su u Tutinu, Dubovo bb, i u Novom Pazaru, Kej 12. Srpske brigade 181, od ponedeljka do subote od 9 do 18h."
+   ],
+   [
+    "Ne znam da li će mi stati u prostor.",
+    "Dimenzije su navedene uz svaku objavu, a nameštaj izrađujemo i po meri."
+   ]
+  ],
+  "background": [
+   {
+    "name": "Ana Kovačević",
+    "ch": "instagram",
+    "st": "Novi",
+    "msgs": [
+     [
+      "user",
+      "Cena troseda?"
+     ],
+     [
+      "assistant",
+      "Dobar dan. Koji trosed sa objave Vas zanima? Na primer, trosed ANKARA je 99.990 din."
+     ]
+    ]
+   },
+   {
+    "name": "Petar Nikolić",
+    "ch": "whatsapp",
+    "st": "Zainteresovan",
+    "msgs": [
+     [
+      "user",
+      "Cena troseda i fotelje?"
+     ],
+     [
+      "assistant",
+      "Dobar dan. Koju garnituru sa objave želite? Za ANKARA trosed je 99.990 din, a fotelja 39.990 din."
+     ],
+     [
+      "user",
+      "Javiću se, hvala."
+     ],
+     [
+      "assistant",
+      "Važi. Pišite kad god želite da pripremimo ponudu."
+     ]
+    ]
+   },
+   {
+    "name": "Jovana Ilić",
+    "ch": "facebook",
+    "st": "Zainteresovan",
+    "msgs": [
+     [
+      "user",
+      "Koliko kosta i gde se nalazite"
+     ],
+     [
+      "assistant",
+      "Saloni su u Tutinu, Dubovo bb, i u Novom Pazaru, Kej 12. Srpske brigade 181. Cenu šaljemo u ponudi, pa mi recite koji komad Vas zanima."
+     ],
+     [
+      "user",
+      "Razmisliću."
+     ],
+     [
+      "assistant",
+      "Naravno. Ponudu pripremamo kad god kažete."
+     ]
+    ]
+   },
+   {
+    "name": "Marko Savić",
+    "ch": "website",
+    "st": "Zakazano",
+    "msgs": [
+     [
+      "user",
+      "Poštovani koja je cena ove garniture"
+     ],
+     [
+      "assistant",
+      "Dobar dan. Koja garnitura sa objave Vas zanima? Cenu šaljemo u ponudi, pa mi pošaljite ime i broj telefona."
+     ],
+     [
+      "user",
+      "Marko Savić, 065 828 6764."
+     ],
+     [
+      "assistant",
+      "Hvala, Marko. Zahtev za ponudu je upisan i prosleđen."
+     ]
+    ]
+   },
+   {
+    "name": "Tamara Đorđević",
+    "ch": "instagram",
+    "st": "Naručio",
+    "msgs": [
+     [
+      "user",
+      "Dogovorili smo se prošle nedelje, potvrđujem porudžbinu."
+     ],
+     [
+      "assistant",
+      "Hvala, Tamara. Porudžbina je upisana. Avans je najmanje 30 do 50% vrednosti poručene robe, a ostatak se plaća po prispeću robe u magacin."
+     ]
+    ]
+   },
+   {
+    "name": "Luka Pavlović",
+    "ch": "whatsapp",
+    "st": "Novi",
+    "msgs": [
+     [
+      "user",
+      "Koje bi cena bila garniture 200x200?"
+     ],
+     [
+      "assistant",
+      "Dobar dan. Garnitura BOHEM je modularna i može da se izradi po meri, pa cenu za tu dimenziju šaljemo u ponudi."
+     ]
+    ]
+   },
+   {
+    "name": "Milica Jovanović",
+    "ch": "instagram",
+    "st": "Zakazano",
+    "msgs": [
+     [
+      "user",
+      "Imate li nešto na rasklapanje?"
+     ],
+     [
+      "assistant",
+      "Imamo. Na primer, set ANKARA ima prostor za spavanje dimenzija 210 x 90 cm. Pošaljite mi ime i broj telefona, pa pripremamo ponudu."
+     ],
+     [
+      "user",
+      "Milica Jovanović, 063 410 7721."
+     ],
+     [
+      "assistant",
+      "Hvala, Milice. Zahtev za ponudu je upisan i prosleđen."
+     ]
+    ]
+   },
+   {
+    "name": "Nemanja Ristić",
+    "ch": "website",
+    "st": "Zainteresovan",
+    "msgs": [
+     [
+      "user",
+      "Da li je dostava besplatna?"
+     ],
+     [
+      "assistant",
+      "Prevoz i montaža su besplatni do 50 km u jednom pravcu, a unošenje u stan se naknadno plaća."
+     ],
+     [
+      "user",
+      "Javiću se uskoro."
+     ],
+     [
+      "assistant",
+      "Važi. Za ponudu mi je dovoljno da znam koji komad Vas zanima."
+     ]
+    ]
+   },
+   {
+    "name": "Sara Marković",
+    "ch": "whatsapp",
+    "st": "Naručio",
+    "msgs": [
+     [
+      "user",
+      "Hvala na ponudi, prihvatamo."
+     ],
+     [
+      "assistant",
+      "Hvala, Sara. Porudžbina je upisana. Avans je najmanje 30 do 50% vrednosti poručene robe."
+     ]
+    ]
+   },
+   {
+    "name": "Filip Stojanović",
+    "ch": "facebook",
+    "st": "Zakazano",
+    "msgs": [
+     [
+      "user",
+      "Opremamo restoran, da li radite i takve projekte?"
+     ],
+     [
+      "assistant",
+      "Da, naši proizvodi su prvenstveno namenjeni profesionalnoj upotrebi, za restorane, hotele, barove i kafiće. Pošaljite mi ime i broj telefona."
+     ],
+     [
+      "user",
+      "Filip Stojanović, 061 770 5540."
+     ],
+     [
+      "assistant",
+      "Hvala, Filipe. Upit je upisan i prosleđen."
+     ]
+    ]
+   },
+   {
+    "name": "Katarina Lukić",
+    "ch": "instagram",
+    "st": "Zainteresovan",
+    "msgs": [
+     [
+      "user",
+      "Mogu li da platim po isporuci?"
+     ],
+     [
+      "assistant",
+      "Ne, nameštaj nije moguće platiti po isporuci. Pre isporuke mora biti uplaćen kompletan iznos sa predračuna."
+     ],
+     [
+      "user",
+      "U redu, hvala."
+     ]
+    ]
+   },
+   {
+    "name": "Stefan Petrović",
+    "ch": "website",
+    "st": "Zakazano",
+    "msgs": [
+     [
+      "user",
+      "Postovani,moze li da se poruči ovakva ugaona garnitura,kao ovaj sivi dvosed?hvala"
+     ],
+     [
+      "assistant",
+      "Može. Nameštaj izrađujemo i po meri. Pošaljite mi ime i broj telefona, pa pripremamo ponudu."
+     ],
+     [
+      "user",
+      "Stefan Petrović, 062 114 9033."
+     ],
+     [
+      "assistant",
+      "Hvala, Stefane. Zahtev za ponudu je upisan i prosleđen."
+     ]
+    ]
+   }
+  ]
+ },
+ "e1": {
+  "_note": "E1 v20 (2026-11-12). Elan Domis's real comments are \"Cena troseda?\" under set posts whose own captions say \"Cena: Inbox\"; subject is that behaviour in the owner's words (the site itself declines the name: \"u Elan Domisu\").",
+  "kind": "business",
+  "subject": "Zašto neko zatraži ponudu za garnituru u Elan Domisu, a neko ne",
+  "za": "Elan Domis",
+  "not_done": "nije poručio",
+  "made_from": "modela sa sajta",
+  "most_wanted": "koji modeli su najtraženiji",
+  "gap": "pre porudžbine",
+  "_site": "elandomis.com: Tapetarija (Set ANKARA, Trosed ANKARA), Servisi (Pravilnik kompanije); Instagram captions",
+  "helps_whom": "salonima nameštaja kao što je Elan Domis",
+  "win": "porudžbinom"
+ }
+}

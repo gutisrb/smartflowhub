@@ -1,0 +1,391 @@
+{
+  "_note": "MK Steel (montazne-hale.com) — hand sheet written 2026-11-12 from the site (home, /ponuda-montaznih-hala/, /zahtev-za-ponudom/, /kontakt/) and its Instagram captions. A quote business with no calendar and no booking. Site facts: services (Projektovanje montažnih hala, Proizvodnja montažnih hala, Montaža čeličnih konstrukcija, Ugradnja sendvič panela, Ugradnja TR lima); \"PONUDU MOŽETE OČEKIVATI U ROKU OD 24H\"; form text \"odgovorićemo sa najadekvatnijom ponudom u roku od 24h. Ta ponuda biće informativnog karaktera a obavezujuća ponuda sledi nakon sastanka ili obavljenog telefonskog razgovora. Ukoliko vam je lakše… zajedno ćemo popuniti upit\"; form fields (lokacija, namena i dimenzije objekta, sa montažom / bez montaže); phone +381(65)66-04-424; akcijske ponude 50x20x5,5 / 50x20x6 / 100x20x6. The only price is on its own Instagram (DNDmMJ9iZiV): \"1000 m² gotove montažne hale — 50 × 20 × 5,5 m… Akcijska cena: 111 €/m² sa PDV-om. Cena uključuje proizvodnju, transport i montažu na teritoriji Srbiji\"; so the agent quotes 111 €/m² sa PDV-om ONLY for that hall and says no price is published for other dimensions. Sale hero opens with the real comment \"Cena ako nije problem za ovaj objekat po m2. Hvala unapred\" (DPn0GIFAi9b, a 30x14x5 m hall in Čačak with a 14x6 m gallery). Left = real \"Pozdrav, interesuje me hala identičnih dimenzija i šta spada u tu cenu\" (same post). Intervention = real \"Poštovani, koliko košta hala 20x10, 20x15m i da li radite i plocu na koju dolazi hala…\" (DUVv3dTiFqK): no price is published and the site never says whether the foundation slab is in scope, so the agent does not guess. NOT claimed: hours (header says Pon–Sub 08–16h, Kontakt says 07:30–16:00), a named person calling back, Viber replies (the site has none), any price for other dimensions, that the foundation slab is done by MK Steel, any timeline for construction. Business named MK Steel as the site names itself. No complaint hero: the seeder ignores hero.complaint for a quote model and the site states no complaint rule.",
+  "hero": {
+    "channel": "instagram",
+    "customer": "Marija Jović",
+    "phone": "064 123 4567",
+    "msgs": [
+      [
+        "user",
+        "Cena ako nije problem za ovaj objekat po m2. Hvala unapred",
+        {
+          "post": "DPn0GIFAi9b"
+        }
+      ],
+      [
+        "assistant",
+        "Dobar dan, Marija. Cenu po m² za taj objekat nemam objavljenu. Za gotovu montažnu halu 50 x 20 x 5,5 m akcijska cena je 111 €/m² sa PDV-om, a uključuje proizvodnju, transport i montažu na teritoriji Srbije. Za Vaše dimenzije šaljemo informativnu ponudu u roku od 24h."
+      ],
+      [
+        "user",
+        "Treba mi 30 x 14, za magacin, kod Čačka."
+      ],
+      [
+        "assistant",
+        "Hvala. Da li hala treba sa montažom ili bez nje? I pošaljite mi ime i broj telefona, pa zahtev za ponudu prosleđujem."
+      ],
+      [
+        "user",
+        "Sa montažom. Marija Jović, 064 123 4567"
+      ],
+      [
+        "assistant",
+        "Hvala, Marija. Zahtev za ponudu je upisan i prosleđen. Informativnu ponudu možete očekivati u roku od 24h, a obavezujuća ponuda sledi nakon sastanka ili telefonskog razgovora."
+      ]
+    ],
+    "crm": {
+      "full_name": "Marija Jović",
+      "telefon": "064 123 4567",
+      "kategorija": "Montažne hale",
+      "proizvod": "Montažna hala",
+      "status": "Zakazano",
+      "razlog": "Pitala za cenu po m² za halu sa objave — agent je rekao akcijsku cenu (111 €/m² sa PDV-om, za halu 50 x 20 x 5,5 m) i prikupio lokaciju, namenu, dimenzije i montažu za informativnu ponudu.",
+      "komentar": "Magacin, okolina Čačka, sa montažom",
+      "izvor": "Instagram"
+    },
+    "left": {
+      "msgs": [
+        [
+          "user",
+          "Pozdrav, interesuje me hala identičnih dimenzija i šta spada u tu cenu",
+          {
+            "post": "DPn0GIFAi9b"
+          }
+        ],
+        [
+          "assistant",
+          "Dobar dan. Cenu hale identičnih dimenzija nemam objavljenu. Za gotovu halu 50 x 20 x 5,5 m akcijska cena od 111 €/m² sa PDV-om uključuje proizvodnju, transport i montažu na teritoriji Srbije."
+        ],
+        [
+          "user",
+          "Hvala, javiću se."
+        ],
+        [
+          "assistant",
+          "Važi. Informativnu ponudu šaljemo u roku od 24h od zahteva, a ako Vam je lakše, upit možemo da popunimo zajedno telefonom, na +381 65 66 04 424."
+        ]
+      ],
+      "crm": {
+        "full_name": "Nikola Perić",
+        "telefon": "",
+        "kategorija": "Montažne hale",
+        "proizvod": "Montažna hala",
+        "status": "Zainteresovan",
+        "razlog": "Pitao šta spada u cenu hale identičnih dimenzija i otišao uz „Hvala, javiću se.“ Agent je rekao šta uključuje akcijska cena i ponudio da upit popune zajedno telefonom.",
+        "izvor": "Instagram"
+      }
+    },
+    "intervention": {
+      "ask": "Poštovani, koliko košta hala 20x10, 20x15m i da li radite i plocu na koju dolazi hala i koliko bi ona kostala za obe varijante?",
+      "answer": "Zdravo, Dragana. Cenu hala tih dimenzija nemam objavljenu, a da li ploču ispod hale radimo, ne mogu da potvrdim, pa ne bih da nagađam. Prosleđujem upit. Mogu li da zabeležim Vaše ime i broj telefona?",
+      "razlog": "Pitala za cenu hala 20x10 i 20x15 i za ploču ispod hale. Cena nije objavljena, a ploča nije navedena u uslugama — prosleđeno."
+    },
+    "qa": [
+      [
+        "Cena po m2",
+        "Za gotovu montažnu halu 50 x 20 x 5,5 m akcijska cena je 111 €/m² sa PDV-om. Cena uključuje proizvodnju, transport i montažu na teritoriji Srbije."
+      ],
+      [
+        "Šta spada u cenu?",
+        "Za gotovu halu 50 x 20 x 5,5 m cena uključuje proizvodnju, transport i montažu na teritoriji Srbije. Hala je čelična konstrukcija sa sendvič panelima, uz kompletne opšivke i stolariju."
+      ],
+      [
+        "Koliko traje da dobijem ponudu?",
+        "Informativnu ponudu šaljemo u roku od 24h. Obavezujuća ponuda sledi nakon sastanka ili telefonskog razgovora."
+      ],
+      [
+        "Šta treba da pošaljem za ponudu?",
+        "Ime i prezime, lokaciju, e-mail i mobilni telefon, namenu i dimenzije objekta, i da li je konstrukcija sa montažom ili bez nje. Možete i da dodate dokument."
+      ],
+      [
+        "Radite li i montažu?",
+        "Radimo. Proizvodimo čelične konstrukcije i montiramo ih, uz ugradnju sendvič panela i TR lima."
+      ],
+      [
+        "Da li radite i projektovanje?",
+        "Radimo. Projektovanje montažnih hala je deo naših usluga, uz proizvodnju i montažu."
+      ],
+      [
+        "Radite li i van Srbije?",
+        "Gradili smo i montirali širom regiona i Evrope: u Srbiji, Crnoj Gori, Hrvatskoj, Bosni i Hercegovini, Sloveniji, Mađarskoj i Nemačkoj."
+      ],
+      [
+        "Za šta se koriste montažne hale?",
+        "Za skladišta i magacine, proizvodne pogone, radionice i servise, pa i za restoran ili sportsku halu."
+      ],
+      [
+        "Koliko ste projekata uradili?",
+        "U 2025. godini više od 160 realizovanih projekata i preko 6.000 tona ugrađenog čelika."
+      ],
+      [
+        "Radite li po sistemu ključ u ruke?",
+        "Radimo. Nudimo kompletno rešenje po sistemu ključ u ruke: od projektovanja, proizvodnje i transporta do završne montaže."
+      ],
+      [
+        "Gde se nalazite?",
+        "Istočna obilaznica 4, Kruševac. Telefon je +381 65 66 04 424."
+      ],
+      [
+        "Radite li hale sa galerijom?",
+        "Radimo. Na primer, hala 30 x 14 x 5 m u Čačku ima dodatnu galeriju 14 x 6 m."
+      ]
+    ],
+    "objections": [
+      [
+        "Razmisliću, pa ću se javiti.",
+        "Važi. Kada budete spremni, popunite zahtev za ponudu na sajtu ili pozovite +381 65 66 04 424, pa upit popunjavamo zajedno."
+      ],
+      [
+        "Treba mi cena odmah, bez forme.",
+        "Informativnu ponudu šaljemo u roku od 24h, a ako Vam je lakše, upit možemo da popunimo zajedno telefonom."
+      ],
+      [
+        "Mogu li prvo da razgovaram sa nekim?",
+        "Možete. Pozovite +381 65 66 04 424, pa upit popunjavamo zajedno."
+      ],
+      [
+        "Nisam siguran da ste pouzdani.",
+        "U 2025. godini smo realizovali više od 160 projekata, sa preko 6.000 tona ugrađenog čelika."
+      ],
+      [
+        "Hoću prvo da vidim vaše hale.",
+        "Reference su na našem sajtu, na stranici Reference, i na Instagramu."
+      ]
+    ],
+    "background": [
+      {
+        "name": "Ana Kovačević",
+        "ch": "instagram",
+        "st": "Novi",
+        "msgs": [
+          [
+            "user",
+            "Cijena?"
+          ],
+          [
+            "assistant",
+            "Dobar dan, Ana. Cenu hale 56 x 20 x 6 m nemam objavljenu. Informativnu ponudu šaljemo u roku od 24h, a treba mi lokacija, namena i da li je sa montažom."
+          ]
+        ]
+      },
+      {
+        "name": "Petar Nikolić",
+        "ch": "whatsapp",
+        "st": "Zainteresovan",
+        "msgs": [
+          [
+            "user",
+            "Postovanje. Moze cijena hale bas tih dimenzija. Sve Vase Hvala i LP"
+          ],
+          [
+            "assistant",
+            "Poštovanje. Cenu hale tih dimenzija nemam objavljenu, pa šaljemo informativnu ponudu u roku od 24h. Pošaljite lokaciju i namenu objekta."
+          ],
+          [
+            "user",
+            "Poslaću sutra."
+          ],
+          [
+            "assistant",
+            "Važi. Telefon je +381 65 66 04 424, pa upit možemo da popunimo i zajedno."
+          ]
+        ]
+      },
+      {
+        "name": "Jovana Ilić",
+        "ch": "facebook",
+        "st": "Zainteresovan",
+        "msgs": [
+          [
+            "user",
+            "Koliko je m² za ovakav objekat"
+          ],
+          [
+            "assistant",
+            "Za gotovu halu 50 x 20 x 5,5 m akcijska cena je 111 €/m² sa PDV-om. Za druge dimenzije šaljemo informativnu ponudu u roku od 24h."
+          ]
+        ]
+      },
+      {
+        "name": "Marko Savić",
+        "ch": "website",
+        "st": "Zakazano",
+        "msgs": [
+          [
+            "user",
+            "Treba mi ponuda za halu, nameravam magacin."
+          ],
+          [
+            "assistant",
+            "Za ponudu mi trebaju lokacija, namena i dimenzije objekta, i da li je sa montažom. Treba mi i Vaše ime i broj telefona."
+          ],
+          [
+            "user",
+            "Marko Savić, 063 222 3344, Kruševac, 20x15, sa montažom"
+          ],
+          [
+            "assistant",
+            "Hvala, Marko. Zahtev za ponudu je upisan i prosleđen, a informativnu ponudu šaljemo u roku od 24h."
+          ]
+        ]
+      },
+      {
+        "name": "Tamara Đorđević",
+        "ch": "instagram",
+        "st": "Novi",
+        "msgs": [
+          [
+            "user",
+            "INTERESUJE ME HALA .20X15X5. NA DVIJE VODE SA DVA ULAZA NAPRIJED I NAZAD .ODGOVORITE NA VIBERU .sa svim detaljima .Hvala"
+          ],
+          [
+            "assistant",
+            "Dobar dan. Za informativnu ponudu mi trebaju lokacija, e-mail i mobilni telefon, i da li je hala sa montažom ili bez nje. Ponudu šaljemo u roku od 24h."
+          ]
+        ]
+      },
+      {
+        "name": "Luka Pavlović",
+        "ch": "whatsapp",
+        "st": "Novi",
+        "msgs": [
+          [
+            "user",
+            "Radite li i sendvič panele?"
+          ],
+          [
+            "assistant",
+            "Radimo. Ugradnja sendvič panela i TR lima je deo naših usluga."
+          ]
+        ]
+      },
+      {
+        "name": "Milica Jovanović",
+        "ch": "instagram",
+        "st": "Zainteresovan",
+        "msgs": [
+          [
+            "user",
+            "Da li je transport uključen u cenu?"
+          ],
+          [
+            "assistant",
+            "Za gotovu halu 50 x 20 x 5,5 m cena uključuje proizvodnju, transport i montažu na teritoriji Srbije."
+          ]
+        ]
+      },
+      {
+        "name": "Nemanja Ristić",
+        "ch": "website",
+        "st": "Zainteresovan",
+        "msgs": [
+          [
+            "user",
+            "Da li radite hale za restoran?"
+          ],
+          [
+            "assistant",
+            "Radimo. Montažne hale se koriste za magacine, proizvodne pogone, restorane i sportske hale."
+          ],
+          [
+            "user",
+            "Hvala, javiću se."
+          ],
+          [
+            "assistant",
+            "Važi. Zahtev za ponudu možete da popunite na sajtu kad Vam odgovara."
+          ]
+        ]
+      },
+      {
+        "name": "Sara Marković",
+        "ch": "whatsapp",
+        "st": "Zakazano",
+        "msgs": [
+          [
+            "user",
+            "Šaljem lokaciju i dimenzije, treba mi informativna ponuda za halu sa montažom."
+          ],
+          [
+            "assistant",
+            "Hvala, Sara. Zahtev za ponudu je upisan i prosleđen. Informativnu ponudu šaljemo u roku od 24h."
+          ]
+        ]
+      },
+      {
+        "name": "Filip Stojanović",
+        "ch": "facebook",
+        "st": "Zainteresovan",
+        "msgs": [
+          [
+            "user",
+            "Koliko ste projekata uradili?"
+          ],
+          [
+            "assistant",
+            "U 2025. godini više od 160 realizovanih projekata i preko 6.000 tona ugrađenog čelika."
+          ]
+        ]
+      },
+      {
+        "name": "Katarina Lukić",
+        "ch": "instagram",
+        "st": "Zainteresovan",
+        "msgs": [
+          [
+            "user",
+            "Da li radite i projektovanje?"
+          ],
+          [
+            "assistant",
+            "Radimo. Projektovanje montažnih hala je deo naših usluga, uz proizvodnju i montažu."
+          ],
+          [
+            "user",
+            "Razmisliću."
+          ],
+          [
+            "assistant",
+            "Važi. Kada budete spremni, popunite zahtev za ponudu na sajtu."
+          ]
+        ]
+      },
+      {
+        "name": "Stefan Petrović",
+        "ch": "website",
+        "st": "Zakazano",
+        "msgs": [
+          [
+            "user",
+            "Treba mi hala 30x14 sa galerijom."
+          ],
+          [
+            "assistant",
+            "Takvu halu smo izveli u Čačku: 30 x 14 x 5 m sa galerijom 14 x 6 m. Pošaljite lokaciju i namenu, pa šaljemo informativnu ponudu u roku od 24h. Treba mi i Vaše ime i broj telefona."
+          ],
+          [
+            "user",
+            "Stefan Petrović, 063 555 7788"
+          ],
+          [
+            "assistant",
+            "Hvala, Stefan. Zahtev za ponudu je upisan i prosleđen."
+          ]
+        ]
+      }
+    ]
+  },
+  "e1": {
+    "_note": "E1 v20 (2026-11-12). MK Steel's whole site is one funnel, Zahtev za ponudu, and the real comments under its posts are price and dimension questions: the owner's question is who asks for an offer and who does not.",
+    "kind": "business",
+    "subject": "Zašto neko zatraži ponudu za montažnu halu, a neko ne",
+    "za": "MK Steel",
+    "not_done": "nije tražio ponudu",
+    "made_from": "modela konstrukcija sa sajta",
+    "most_wanted": "koji modeli konstrukcija su najtraženiji",
+    "gap": "pre ponude",
+    "_site": "montazne-hale.com: Modeli konstrukcija, Zahtev za ponudu; Instagram posts",
+    "helps_whom": "firmama kao što je MK Steel",
+    "win": "zahtevom za ponudu"
+  }
+}

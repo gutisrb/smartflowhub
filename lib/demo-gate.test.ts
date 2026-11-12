@@ -124,3 +124,9 @@ describe('checkDemo: booking talk at a business with no calendar (Montažne hale
     expect(rules(r)).not.toContain('booking-talk')
   })
 })
+
+describe('checkDemo: an empty demo', () => {
+  it('fails when the seed left no conversations (SLW Container, 2026-11-12)', () => {
+    expect(rules(checkDemo(base({ threads: [] })))).toContain('no-threads')
+  })
+})

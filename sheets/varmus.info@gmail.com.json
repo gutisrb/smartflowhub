@@ -1,0 +1,110 @@
+{
+  "_note": "Varmus — only the hero is hand-chosen (2026-10-27); the rest of its sheet is built from its site. The opening is a real comment under its own 42 m² post, whose caption invites DMs for an offer; every agent fact is from that caption or the site. The one who left sends the DM keyword its own caption asks for (\"Pošalji nam „29“ u DM\") and is offered the bigger real model (\"Vikendica na sprat: prizemlje za dan, sprat za noć\"), not one option. The handoff is two real comments merged: \"Molim cenu samo donjeg objekta\" and \"Molim cenu za 'ključ u ruke' i nacrt\".",
+  "hero": {
+    "channel": "instagram",
+    "customer": "Marija Jović",
+    "phone": "064 123 4567",
+    "msgs": [
+      [
+        "user",
+        "Cena ovog objekta sa prevozom i montažom, 60km od Novog Sada",
+        {
+          "post": "Ddtbi_KsCOa"
+        }
+      ],
+      [
+        "assistant",
+        "Zdravo, Marija 😊 Taj objekat od 42 m² ima kupatilo, klimu, struju i priključak za kuhinju, bez zidanja, i gotov je za 15 radnih dana. Cenu sa prevozom i montažom računamo za Vašu lokaciju. Gde je tačno plac?"
+      ],
+      [
+        "user",
+        "Kod Bačkog Petrovca. A garancija?"
+      ],
+      [
+        "assistant",
+        "Proizvodnja prati ISO standarde kvaliteta, a uslove garancije dobijate u ponudi, zajedno sa prevozom i montažom do Bačkog Petrovca."
+      ],
+      [
+        "user",
+        "Može, pošaljite ponudu."
+      ],
+      [
+        "assistant",
+        "Pošaljite mi ime i broj telefona, pa ponudu dobijate na taj broj."
+      ],
+      [
+        "user",
+        "Marija Jović, 064 123 4567"
+      ],
+      [
+        "assistant",
+        "Hvala, Marija. Ponudu za Bački Petrovac dobijate na ovaj broj."
+      ]
+    ],
+    "crm": {
+      "full_name": "Marija Jović",
+      "telefon": "064 123 4567",
+      "kategorija": "Stambeni objekti",
+      "proizvod": "Objekat 42 m² (sa objave)",
+      "status": "Zakazano",
+      "razlog": "Pitala za objekat sa objave, sa prevozom i montažom do Bačkog Petrovca — agent je naveo šta objekat ima i uzeo podatke za ponudu.",
+      "komentar": "Lokacija: Bački Petrovac · pita za garanciju",
+      "izvor": "Instagram"
+    },
+    "left": {
+      "msgs": [
+        [
+          "user",
+          "29",
+          {
+            "post": "DeOtGZNMymm"
+          }
+        ],
+        [
+          "assistant",
+          "Zdravo, Nikola 😊 Vikendica od 29 m² ima dnevni boravak, kuhinju, spavaću sobu i kupatilo, zidove od panela debljine 8 cm, kosi limeni krov, ugaoni stakleni portal i inverter klimu."
+        ],
+        [
+          "assistant",
+          "Ponudu šaljemo sa prevozom i montažom do Vas. Gde bi bio plac?"
+        ],
+        [
+          "user",
+          "Hvala, javiću se."
+        ],
+        [
+          "assistant",
+          "Važi. Ako Vam treba više prostora, imamo i vikendicu na sprat: prizemlje za dan, sprat za noć. Kad znate lokaciju, pišite mi i šaljem ponudu."
+        ]
+      ],
+      "crm": {
+        "full_name": "Nikola Perić",
+        "telefon": "",
+        "kategorija": "Vikendice",
+        "proizvod": "Vikendica 29 m² (sa objave)",
+        "status": "Zainteresovan",
+        "razlog": "Poslao „29“ ispod objave vikendice i otišao uz „Hvala, javiću se.“ Agent je ponudio i veće modele i čeka lokaciju za ponudu.",
+        "izvor": "Instagram"
+      }
+    },
+    "intervention": {
+      "ask": "Da li može samo donji deo ovog objekta na sprat, i da dobijem nacrt pre ponude?",
+      "answer": "Zdravo, Dragana 😊 Izmene rasporeda i nacrt rade kolege koje prave ponude, pa ne bih da nagađam. Prosleđujem upit. Mogu li da zabeležim Vaše ime i broj telefona?",
+      "domainNom": "kolega",
+      "razlog": "Traži izmenu modela (samo prizemlje) i nacrt — odlučuje tim koji pravi ponude. Prosleđeno."
+    }
+  },
+  "e1": {
+    "_note": "E1 v20 (2026-11-09). Opens as a person: why he writes (his belief about where AI helps this kind of business most), why a demo (easier shown than explained), that it is theirs (built from their site + comments), the honest catch (before proposing anything). No scenario, no backstory.",
+    "kind": "business",
+    "subject": "Zašto neko naruči kod Varmusa, a neko ne",
+    "za": "Varmus",
+    "not_done": "nije naručio",
+    "made_from": "modela sa sajta",
+    "most_wanted": "koji modeli su najtraženiji",
+    "gap": "pre porudžbine",
+    "_site": "H1: Varmus – Modularni objekti svih tipova i namena",
+    "helps_whom": "firmama kao što je Varmus",
+    "win": "porudžbinom"
+  }
+}

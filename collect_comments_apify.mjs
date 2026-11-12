@@ -11,6 +11,7 @@ import { readFileSync } from 'fs'
 import { resolve, dirname } from 'path'
 import { fileURLToPath } from 'url'
 import { pickApifyToken } from './lib/apify-key.mjs'
+import { cut } from './lib/text-safe.mjs'
 import { BUYER_Q } from './lib/dm-demand.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
@@ -31,14 +32,14 @@ for (const t of tenants) {
   const { data: contact } = await sb.from('contacts').select('instagram_handle').eq('demo_tenant_email', t).limit(1).maybeSingle()
   if (!client || !contact?.instagram_handle) { console.log(`skip ${t}: no client or handle`); continue }
   const have = client.onboarding_copy?.customer_voice?.questions?.length || 0
-  if (have >= 3 && process.argv.includes('--all-pipeline')) { console.log(`skip ${client.name}: ${have} real questions already stored`); continue }
+  if (have >= 3 && process.argv.includes('--all-pipeline') && !arg('--reels')) { console.log(`skip ${client.name}: ${have} real questions already stored`); continue }
   const handle = contact.instagram_handle
   const key = await pickApifyToken(0.15, { quiet: true }) // per business: a key can run dry mid-batch
   if (!key) { console.log('no Apify key with budget left'); break }
-  const r = await fetch(`https://api.apify.com/v2/acts/apify~instagram-reel-scraper/run-sync-get-dataset-items?token=${key.token}&maxTotalChargeUsd=0.12&timeout=200`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ username: [handle], resultsLimit: 12 }), signal: AbortSignal.timeout(220000) })
+  const r = await fetch(`https://api.apify.com/v2/acts/apify~instagram-reel-scraper/run-sync-get-dataset-items?token=${key.token}&maxTotalChargeUsd=0.25&timeout=200`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ username: [handle], resultsLimit: Number(arg('--reels') || 12) }), signal: AbortSignal.timeout(220000) })
   if (!r.ok) { console.log(`${client.name}: apify ${r.status}`); continue }
   const items = (await r.json()).filter((x) => x.ownerUsername?.toLowerCase() === handle.toLowerCase())
-  const posts = items.map((x) => ({ shortcode: x.shortCode, caption: (x.caption || '').slice(0, 300), image: x.displayUrl || null })).slice(0, 12)
+  const posts = items.map((x) => ({ shortcode: x.shortCode, caption: cut(x.caption || '', 300), image: x.displayUrl || null })).slice(0, 12)
   const questions = []
   for (const x of items) for (const c of x.latestComments || []) {
     const text = String(c.text || '').replace(/\s+/g, ' ').trim()

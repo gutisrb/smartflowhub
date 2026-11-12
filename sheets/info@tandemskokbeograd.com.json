@@ -1,0 +1,422 @@
+{
+  "_note": "Tandem Skok Beograd — hand-chosen hero (2026-10-27). The opening is a real comment from its Instagram (\"Koja je cena tandema?\"). Every agent fact is from its site: package Small 250 € / 3000 m and what it includes (cena-tandem-skoka.html), payment in dinars, gift ticket valid one year, jumps only on Saturdays and Sundays with registration on the Thursday before, weather postponement, buying on the site with the ticket by email within 24h. No 'danas u 15h': a jump is not booked like a dental check-up. The intervention is grounded in \"Prvi smo i jedini u Srbiji koji rade tandem skok sa osobama koje imaju invaliditet\"; whether a given person can jump is the instructor's call. The catalogue tab is called Paketi, as on the site (\"Tandem skok Paketi\"). Background and filler conversations are its own too (weight limit, minimum age, weekend-only jumps, weather, gift ticket, 50% reservation, licensed instructors), every answer from tandemskokbeograd.com. 2026-11-10: fact-checked against the site; Gold is 370 € and Standard 280 € (390/300 are the struck-through prices), registration is by phone on Thursday 10–20h (no invented hour slots), minors need a parent, the invalid-access question says not to buy before contacting them.",
+  "booking": {
+    "state": "required",
+    "unit": "slot",
+    "days": [
+      6,
+      0
+    ],
+    "quote": "Tandem skokovi su isključivo subotom i nedeljom"
+  },
+  "status_labels": {
+    "Naručio": "Karta kupljena"
+  },
+  "hero": {
+    "channel": "instagram",
+    "customer": "Marija Jović",
+    "phone": "",
+    "msgs": [
+      [
+        "user",
+        "Zdravo, koja je cena tandema?"
+      ],
+      [
+        "assistant",
+        "Zdravo, Marija 😊 Paket Small, skok sa 3000 m, je 250 €, a plaća se u dinarima. U cenu ulaze lični instruktor, 15 minuta leta avionom, 40 sekundi slobodnog pada i 10 minuta leta padobranom."
+      ],
+      [
+        "user",
+        "Hoću da ga poklonim dečku za rođendan. Kada bi mogao da skoči?"
+      ],
+      [
+        "assistant",
+        "Poklon karta važi godinu dana, pa on bira vikend. Skače se subotom i nedeljom. Prijave za vikend su u četvrtak od 10 do 20h, pozivom na +381 60 029 2012, i tada dobijate tačan dan i vreme skoka."
+      ],
+      [
+        "user",
+        "A ako bude loše vreme?"
+      ],
+      [
+        "assistant",
+        "Onda se skok pomera na sledeći dan ili vikend koji on izabere. Karta i dalje važi."
+      ],
+      [
+        "user",
+        "Super, uzimam. Kako da platim?"
+      ],
+      [
+        "assistant",
+        "Karticom preko sajta: popunite podatke, štiklirajte da je poklon, a karta Vam stiže na mejl u roku od 24h."
+      ],
+      [
+        "assistant",
+        "Evo linka: tandemskokbeograd.com/rezervacije-za-tandem-skok.php"
+      ],
+      [
+        "user",
+        "Kupila sam 🙌"
+      ],
+      [
+        "assistant",
+        "Super, Marija 🎉 Neka mu je srećan rođendan. Kad izabere vikend, neka pozove u četvrtak od 10 do 20h na +381 60 029 2012, i tada dobija termin."
+      ]
+    ],
+    "crm": {
+      "full_name": "Marija Jović",
+      "telefon": "",
+      "kategorija": "Poklon karta",
+      "proizvod": "Tandem skok Small (3000 m)",
+      "status": "Naručio",
+      "razlog": "Pitala za cenu i kupila poklon kartu za dečka. Pitala šta ako bude loše vreme — agent je odgovorio pravilima karte i poslao link za kupovinu.",
+      "komentar": "Poklon za rođendan · skače dečko, termin u četvrtak pred izabrani vikend",
+      "izvor": "Instagram"
+    },
+    "intervention": {
+      "ask": "Zdravo, brat mi je u invalidskim kolicima. Da li bi i on mogao da skoči?",
+      "answer": "Zdravo, Dragana. Radimo tandem skokove i sa osobama sa invaliditetom. Da li može u njegovom slučaju, procenjuje instruktor, pa ne bih da nagađam. Kartu do tada ne kupujte. Prosleđujem upit. Mogu li da zabeležim Vaše ime i broj telefona?",
+      "domainNom": "instruktor",
+      "razlog": "Skok za osobu u invalidskim kolicima — procenu daje instruktor. Prosleđeno."
+    },
+    "left": {
+      "msgs": [
+        [
+          "user",
+          "Zdravo, koliko je skok sa 4000 metara?"
+        ],
+        [
+          "assistant",
+          "Zdravo, Nikola 😊 Paket Gold, skok sa 4000 m, je 370 €: 20 minuta leta avionom, 60 sekundi slobodnog pada i 4K video i slike sa GoPro kamerom."
+        ],
+        [
+          "user",
+          "Hvala, javiću se."
+        ],
+        [
+          "assistant",
+          "Važi. Karta važi godinu dana od kupovine, pa datum skoka ne morate da birate sada."
+        ]
+      ],
+      "crm": {
+        "full_name": "Nikola Perić",
+        "telefon": "063 555 1212",
+        "kategorija": "Tandem skok",
+        "proizvod": "Tandem skok Gold (4000 m)",
+        "status": "Zainteresovan",
+        "razlog": "Pitao za skok sa 4000 m (370 €) i otišao uz „Hvala, javiću se.“ Agent je rekao da karta važi godinu dana i čeka odgovor.",
+        "izvor": "Instagram"
+      }
+    },
+    "qa": [
+      [
+        "Koja je cena tandema?",
+        "Skok sa 3000 m je od 250 € (paket Small). Paketi sa 4K videom i slikama kreću od 280 €."
+      ],
+      [
+        "Koliko kila je maksimum?",
+        "Do 120 kg. Cena karte važi do 100 kg, a svaki kilogram preko toga doplaćuje se 3 € na dan skoka."
+      ],
+      [
+        "Koliko godina treba da imam?",
+        "Najmanje 14 godina. Za maloletne osobe obavezno je prisustvo barem jednog roditelja ili staratelja."
+      ],
+      [
+        "Kada se skače?",
+        "Subotom i nedeljom, kad vreme dozvoli. Prijave za vikend su u četvrtak od 10 do 20h, pozivom na +381 60 029 2012, i tada dobijate tačan dan i vreme skoka."
+      ],
+      [
+        "Mogu li da kupim kartu kao poklon?",
+        "Možete. Poklon karta važi godinu dana od kupovine i stiže na mejl u roku od 24h."
+      ],
+      [
+        "Šta ako bude loše vreme?",
+        "Skok se pomera na sledeći dan ili vikend koji izaberete. Karta i dalje važi."
+      ],
+      [
+        "Da li je uključen snimak?",
+        "U paketu Small nije. Standard ima 4K video i slike sa GoPro kamerom, a Standard 360 8K video sa Insta 360 kamerom."
+      ],
+      [
+        "Gde se skače?",
+        "Na aerodromu LYBJ u Beogradu."
+      ],
+      [
+        "Može li plaćanje pouzećem?",
+        "Može. Karta Vam stiže poštom i plaćate je kad stigne, a dostava se plaća po cenovniku Pošte Srbije."
+      ],
+      [
+        "Mogu li da rezervišem bez plaćanja cele karte?",
+        "Možete. Online platite 50% cene, a ostatak gotovinom na dan skoka, na aerodromu."
+      ],
+      [
+        "Koliko traje slobodan pad?",
+        "Sa 3000 m oko 40 sekundi, sa 3500 m 50, a sa 4000 m 60 sekundi."
+      ],
+      [
+        "Mogu li da otkažem prijavu?",
+        "Možete, najkasnije 24h pre skoka. Posle toga karta propada."
+      ]
+    ],
+    "objections": [
+      [
+        "Malo mi je skupo.",
+        "Shvatam. Rezervacijom online plaćate samo 50%, a ostatak na dan skoka."
+      ],
+      [
+        "Razmisliću, pa ću se javiti.",
+        "Važi. Karta važi godinu dana od kupovine, pa datum ne morate da birate sada."
+      ],
+      [
+        "Plašim se malo, iskreno.",
+        "Skačete u tandemu, vezani za instruktora celo vreme. Svi naši instruktori imaju licence priznate u celom svetu i hiljade skokova iza sebe."
+      ],
+      [
+        "Ne znam da li će vreme biti dobro.",
+        "Ako vreme ne dozvoli, skok se pomera na sledeći dan ili vikend koji izaberete."
+      ],
+      [
+        "Mogu samo radnim danima.",
+        "Skačemo samo subotom i nedeljom. Karta važi godinu dana, pa birate vikend koji Vam odgovara."
+      ]
+    ],
+    "background": [
+      {
+        "name": "Ana Kovačević",
+        "ch": "instagram",
+        "st": "Novi",
+        "msgs": [
+          [
+            "user",
+            "Zdravo, koliko je skok sa 3500 m?"
+          ],
+          [
+            "assistant",
+            "Zdravo, Ana 😊 Paket Super, skok sa 3500 m, je 310 €: 17 minuta leta avionom i 50 sekundi slobodnog pada."
+          ]
+        ]
+      },
+      {
+        "name": "Petar Nikolić",
+        "ch": "whatsapp",
+        "st": "Zainteresovan",
+        "msgs": [
+          [
+            "user",
+            "Imam kartu, hoću da skočim ove subote."
+          ],
+          [
+            "assistant",
+            "Super. Za ovu subotu prijave su u četvrtak od 10 do 20h, pozivom na +381 60 029 2012. Tada dobijate tačan dan i vreme skoka."
+          ]
+        ]
+      },
+      {
+        "name": "Jovana Ilić",
+        "ch": "facebook",
+        "st": "Zainteresovan",
+        "msgs": [
+          [
+            "user",
+            "Plašim se visine, ima li smisla da probam?"
+          ],
+          [
+            "assistant",
+            "Skačete u tandemu, vezani za instruktora celo vreme. Svi naši instruktori imaju licence priznate u celom svetu i hiljade skokova iza sebe."
+          ],
+          [
+            "user",
+            "Razmisliću."
+          ],
+          [
+            "assistant",
+            "Važi. Karta važi godinu dana, pa imate vremena da se odlučite."
+          ]
+        ]
+      },
+      {
+        "name": "Marko Savić",
+        "ch": "website",
+        "st": "Naručio",
+        "msgs": [
+          [
+            "user",
+            "Uzeo bih poklon kartu za ženu, kako ide?"
+          ],
+          [
+            "assistant",
+            "Kupujete online, štiklirate da je poklon i karta stiže na mejl u roku od 24h. Važi godinu dana."
+          ],
+          [
+            "user",
+            "Kupio sam, hvala!"
+          ],
+          [
+            "assistant",
+            "Hvala Vama, Marko 🎉 Kad izabere vikend, neka se javi u četvrtak i dobija termin."
+          ]
+        ]
+      },
+      {
+        "name": "Tamara Đorđević",
+        "ch": "instagram",
+        "st": "Zainteresovan",
+        "msgs": [
+          [
+            "user",
+            "Moram da pomerim skok sa subote."
+          ],
+          [
+            "assistant",
+            "Karta važi godinu dana, pa možete da izaberete sledeći vikend. Nakon toga pozovite u četvrtak od 10 do 20h na +381 60 029 2012."
+          ]
+        ]
+      },
+      {
+        "name": "Luka Pavlović",
+        "ch": "whatsapp",
+        "st": "Novi",
+        "msgs": [
+          [
+            "user",
+            "Može cenovnik?"
+          ],
+          [
+            "assistant",
+            "Može. Skok sa 3000 m je od 250 €, sa 3500 m od 310 €, a sa 4000 m od 370 €. Koja visina Vas zanima?"
+          ]
+        ]
+      },
+      {
+        "name": "Milica Jovanović",
+        "ch": "instagram",
+        "st": "Zainteresovan",
+        "msgs": [
+          [
+            "user",
+            "Nas dvoje bismo skakali zajedno, ima li mesta ove nedelje?"
+          ],
+          [
+            "assistant",
+            "Termin za vikend dobijate kada pozovete u četvrtak od 10 do 20h na +381 60 029 2012. Možete da se prijavite oboje."
+          ]
+        ]
+      },
+      {
+        "name": "Nemanja Ristić",
+        "ch": "website",
+        "st": "Zainteresovan",
+        "msgs": [
+          [
+            "user",
+            "Imam 108 kg, mogu li da skočim?"
+          ],
+          [
+            "assistant",
+            "Možete, dozvoljeno je do 120 kg. Cena karte važi do 100 kg, a za svaki kilogram preko toga doplaćuje se 3 € na dan skoka."
+          ],
+          [
+            "user",
+            "Javiću se."
+          ],
+          [
+            "assistant",
+            "Važi, Nemanja. Kad se odlučite, pišite mi ovde."
+          ]
+        ]
+      },
+      {
+        "name": "Sara Marković",
+        "ch": "whatsapp",
+        "st": "Završeno",
+        "msgs": [
+          [
+            "user",
+            "Hvala za subotu, ovo je bilo nestvarno!"
+          ],
+          [
+            "assistant",
+            "Hvala Vama, Sara! Drago nam je da Vam se svidelo 🙏"
+          ]
+        ]
+      },
+      {
+        "name": "Filip Stojanović",
+        "ch": "facebook",
+        "st": "Zainteresovan",
+        "msgs": [
+          [
+            "user",
+            "Kako da zakažem skok?"
+          ],
+          [
+            "assistant",
+            "Prijave za tandem skok su svakog četvrtka od 10 do 20h, pozivom na +381 60 029 2012. Tada dobijate tačan dan i vreme skoka."
+          ]
+        ]
+      },
+      {
+        "name": "Katarina Lukić",
+        "ch": "instagram",
+        "st": "Zainteresovan",
+        "msgs": [
+          [
+            "user",
+            "Može li plaćanje na rate?"
+          ],
+          [
+            "assistant",
+            "Na rate ne, ali online plaćate 50% cene, a ostatak gotovinom na dan skoka, na aerodromu."
+          ],
+          [
+            "user",
+            "U redu, hvala."
+          ]
+        ]
+      },
+      {
+        "name": "Stefan Petrović",
+        "ch": "website",
+        "st": "Zainteresovan",
+        "msgs": [
+          [
+            "user",
+            "Koliko godina mora da ima dete da skoči?"
+          ],
+          [
+            "assistant",
+            "Najmanje 14 godina. Za maloletne osobe obavezno je prisustvo barem jednog roditelja ili staratelja."
+          ],
+          [
+            "user",
+            "Ima 15, super. Javiću se."
+          ],
+          [
+            "assistant",
+            "Važi, Stefane. Kad budete birali vikend, pišite mi."
+          ]
+        ]
+      }
+    ]
+  },
+  "labels": {
+    "catalog": "Paketi"
+  },
+  "e1": {
+    "_note": "E1 v20 (2026-11-09). Opens as a person: why he writes (his belief about where AI helps this kind of business most), why a demo (easier shown than explained), that it is theirs (built from their site + comments), the honest catch (before proposing anything). No scenario, no backstory.",
+    "kind": "business",
+    "subject": "Zašto neko kupi tandem skok, a neko ne",
+    "za": "Tandem Skok Beograd",
+    "not_done": "nije kupio",
+    "made_from": "paketa sa sajta",
+    "most_wanted": "za koje pakete se najviše raspituju",
+    "gap": "pre kupovine",
+    "when": "koji termini su najtraženiji",
+    "_site": "cena-tandem-skoka.html: Tandem skok Paketi",
+    "helps_whom": "firmama kao što je Tandem Skok Beograd",
+    "win": "kupljenom kartom"
+  },
+  "expert": {
+    "nom": "instruktor",
+    "dat": "instruktoru"
+  }
+}

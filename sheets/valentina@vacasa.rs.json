@@ -1,0 +1,407 @@
+{
+ "_note": "VACASA — hand sheet written 2026-11-12 from vacasa.rs (home, O nama, Dizajn i proizvodnja, and the Cenovnik page: model, \"Cena (Standard)\", dimensions) and from the captions and real comments of its own Instagram. The site is thin: no address, no phone, no delivery, payment, warranty or complaint text (the contact on it is the placeholder info@website.com), so none of those is stated anywhere in the demo. What the site does give: a price list. Its amounts carry NO currency (\"MONDO 78000 235x177\"), so the agent says them exactly as shown, \"78.000 po cenovniku (cena Standard)\", and adds no unit. Opening = a real comment (\"Moze cena u DM i uslovi isporuke i montaze?\") under the MONDO post (DdYtBQiKwl0): the caption and the price list agree on 235 x 177 cm; the caption adds the pull-out to 160 x 200 cm, the storage space and \"Materijal i boju birate sami\". Delivery and assembly terms are on no page, so the agent says they come in the offer and asks for the place of delivery (a real customer asks about delivery to NS). Left hero = \"Cena 237×103\" under the Milano post (DfKoZu8IFKn): Milano is NOT in the price list, so no price is said; the four available sizes, the sofa-bed mechanism and the free choice of material and colour come from the caption. Intervention = a combination of sizes on Genova (a real customer asks for one side 180 cm and the other longer); the Genova caption says the customer chooses dimensions, elements and layout, and the stručni tim is the site's own word for who decides (O nama: \"Naš stručni tim izlazi u susret svakom Vašem zahtevu\"). NO complaint beat: the site states no warranty or complaint rule. Where to see a model live is also not on the site, so no \"vidite u salonu\" line exists; the agent names only the factories the site names (Osečina, Vranje). NOT used: delivery cost or time, warranty, composition (žičano jezgro / sunđer: the caption is cut before it), the \"najpovoljnije cene na tržištu\" claim beyond quoting the site's own sentence once.",
+ "hero": {
+  "channel": "instagram",
+  "customer": "Marija Jović",
+  "phone": "064 123 4567",
+  "msgs": [
+   [
+    "user",
+    "Moze cena u DM i uslovi isporuke i montaze?",
+    {
+     "post": "DdYtBQiKwl0"
+    }
+   ],
+   [
+    "assistant",
+    "Dobar dan, Marija. Garnitura MONDO, dimenzija 235 × 177 cm, je 78.000 po cenovniku (cena Standard). Razvlači se u ležaj dimenzija 160 × 200 cm, ima prostor za odlaganje, a materijal i boju birate sami."
+   ],
+   [
+    "user",
+    "Super. A isporuka i montaža?"
+   ],
+   [
+    "assistant",
+    "Uslove isporuke i montaže šaljemo u ponudi. Pošaljite mi ime, broj telefona i mesto isporuke."
+   ],
+   [
+    "user",
+    "Marija Jović, 064 123 4567, Novi Sad"
+   ],
+   [
+    "assistant",
+    "Hvala, Marija. Zahtev za ponudu za garnituru MONDO je upisan i prosleđen."
+   ]
+  ],
+  "crm": {
+   "full_name": "Marija Jović",
+   "telefon": "064 123 4567",
+   "kategorija": "Garniture",
+   "proizvod": "Garnitura MONDO",
+   "status": "Zakazano",
+   "razlog": "Pitala za cenu garniture sa objave i uslove isporuke i montaže. Agent je rekao cenu po cenovniku (78.000, cena Standard), dimenzije, razvlačenje u ležaj 160 × 200 cm i prostor za odlaganje, rekao da se uslovi isporuke i montaže šalju u ponudi i uzeo ime, broj telefona i mesto isporuke.",
+   "komentar": "Mesto isporuke: Novi Sad",
+   "izvor": "Instagram"
+  },
+  "left": {
+   "msgs": [
+    [
+     "user",
+     "Cena 237×103",
+     {
+      "post": "DfKoZu8IFKn"
+     }
+    ],
+    [
+     "assistant",
+     "Dobar dan. Trosed Milano je dostupan u dimenzijama 237 × 103, 217 × 103, 197 × 103 i 177 × 103 cm, sa italijanskim sofa-bed mehanizmom, a materijal i boju birate sami. Cenu za dimenziju koju želite šaljemo u ponudi."
+    ],
+    [
+     "user",
+     "Hvala, javiću se."
+    ],
+    [
+     "assistant",
+     "Važi. Pišite kad Vam zatreba ponuda za tačnu dimenziju."
+    ]
+   ],
+   "crm": {
+    "full_name": "Nikola Perić",
+    "telefon": "",
+    "kategorija": "Trosedi",
+    "proizvod": "Trosed Milano",
+    "status": "Zainteresovan",
+    "razlog": "Pitao za cenu troseda Milano sa objave i otišao uz „Hvala, javiću se.“ Agent je naveo dostupne dimenzije, sofa-bed mehanizam i slobodan izbor materijala i boje, rekao da se cena za izabranu dimenziju šalje u ponudi i ostavio razgovor otvoren.",
+    "izvor": "Instagram"
+   }
+  },
+  "intervention": {
+   "ask": "Dobar dan, da li može da se iskombinuje Genova tako da jedna strana bude 180 cm, a druga duža?",
+   "answer": "Genova omogućava da sami birate dimenzije, elemente i raspored. Da li je Vaša kombinacija izvodljiva, procenjuje naš stručni tim, pa ne bih da nagađam. Mogu li da zabeležim Vaše ime i broj telefona?",
+   "razlog": "Pitanje o kombinaciji dimenzija garniture Genova. Agent je rekao da Genova dozvoljava izbor dimenzija, elemenata i rasporeda, a procenu izvodljivosti prepustio stručnom timu. Prosleđeno."
+  },
+  "qa": [
+   [
+    "Cena?",
+    "Koja garnitura sa objave Vas zanima? Na primer, MONDO je 78.000 po cenovniku (cena Standard)."
+   ],
+   [
+    "Koja je cena garniture Genova?",
+    "Genova 2m+2+O velika je 140.000 po cenovniku (cena Standard), dimenzija 280x355x190."
+   ],
+   [
+    "Koliko košta ležaj Mona?",
+    "Ležaj Mona 160x200 je 48.000 po cenovniku (cena Standard)."
+   ],
+   [
+    "Cena Riviere?",
+    "Garnitura Riviera je 65.000 po cenovniku (cena Standard)."
+   ],
+   [
+    "Koliko košta trosed Bianca?",
+    "Trosed Bianca je 80.000, a dvosed 70.000 po cenovniku (cena Standard)."
+   ],
+   [
+    "Da li se razvlači?",
+    "Kod garnitura MONDO, STELLA, MONAKO i Verona moguće je razvlačenje u ležaj."
+   ],
+   [
+    "Ima li prostor za odlaganje?",
+    "MONDO, STELLA i Bellagio imaju prostor za odlaganje, a MONAKO ga nema."
+   ],
+   [
+    "Može li u drugoj boji?",
+    "Da, kod garnitura sa naših objava materijal i boju birate sami."
+   ],
+   [
+    "Gde se nalazite?",
+    "Fabrike su nam u Osečini i Vranju. Gde se modeli mogu videti uživo, prosleđujem našem timu. Mogu li da zabeležim Vaše ime i broj telefona?"
+   ],
+   [
+    "Da li radite po meri?",
+    "Da, Vacasa Design je proizvođač nameštaja po meri: projektujemo, uređujemo i opremamo enterijere po Vašoj želji."
+   ],
+   [
+    "Da li isporučujete u Novi Sad?",
+    "Nameštaj isporučujemo direktno iz naše fabrike, bez posrednika. Uslove i cenu isporuke za Vaše mesto šaljemo u ponudi."
+   ],
+   [
+    "Šta je u sastavu, žičano jezgro ili sunđer?",
+    "Sastav garniture šaljemo uz ponudu za tačan model. Koja garnitura Vas zanima?"
+   ],
+   [
+    "Koliko je naddušek?",
+    "Mona je dostupna u kompletu sa dušekom i naddušekom. Cenu naddušeka šaljemo u ponudi, a ležaj Mona 160x200 je 48.000 po cenovniku (cena Standard)."
+   ]
+  ],
+  "objections": [
+   [
+    "Skupo mi je za sada.",
+    "Nameštaj isporučujemo direktno iz naše fabrike, bez posrednika, što nam omogućava da ponudimo nameštaj vrhunskog kvaliteta po najpovoljnijim cenama na tržištu."
+   ],
+   [
+    "Razmisliću, pa ću se javiti.",
+    "Važi. Cenovnik sa dimenzijama je na sajtu, a ponudu pripremamo kad god kažete."
+   ],
+   [
+    "Ne znam da li će mi stati u prostor.",
+    "Pomažemo Vam da osmislite kompletan prostor, od izbora modela, dimenzija i materijala do rasporeda. Dimenzije garnitura su u cenovniku."
+   ]
+  ],
+  "background": [
+   {
+    "name": "Ana Kovačević",
+    "ch": "instagram",
+    "st": "Novi",
+    "msgs": [
+     [
+      "user",
+      "Cena?"
+     ],
+     [
+      "assistant",
+      "Dobar dan. Koja garnitura sa objave Vas zanima? Na primer, MONDO je 78.000 po cenovniku (cena Standard)."
+     ]
+    ]
+   },
+   {
+    "name": "Petar Nikolić",
+    "ch": "whatsapp",
+    "st": "Zainteresovan",
+    "msgs": [
+     [
+      "user",
+      "Cena garninture djenova"
+     ],
+     [
+      "assistant",
+      "Genova 2m+2+O velika je 140.000 po cenovniku (cena Standard), dimenzija 280x355x190. Genova Vam omogućava da sami birate dimenzije, elemente i raspored."
+     ],
+     [
+      "user",
+      "Javiću se, hvala."
+     ],
+     [
+      "assistant",
+      "Važi. Pišite kad god želite da pripremimo ponudu."
+     ]
+    ]
+   },
+   {
+    "name": "Jovana Ilić",
+    "ch": "facebook",
+    "st": "Zainteresovan",
+    "msgs": [
+     [
+      "user",
+      "Cena ove garniture i dali se rasklapa?"
+     ],
+     [
+      "assistant",
+      "Genova 2m+2+O velika je 140.000 po cenovniku (cena Standard). Da li se rasklapa, prosleđujem našem timu, pa mi pošaljite ime i broj telefona."
+     ],
+     [
+      "user",
+      "Razmisliću."
+     ],
+     [
+      "assistant",
+      "Naravno. Ponudu pripremamo kad god kažete."
+     ]
+    ]
+   },
+   {
+    "name": "Marko Savić",
+    "ch": "website",
+    "st": "Zakazano",
+    "msgs": [
+     [
+      "user",
+      "Cena,i ako ima rasklop za svakodnevno spavanje,koje su dimenzije?"
+     ],
+     [
+      "assistant",
+      "Garnitura STELLA je dimenzija 260 × 190 cm i ima mogućnost razvlačenja. Cenu šaljemo u ponudi, pa mi pošaljite ime i broj telefona."
+     ],
+     [
+      "user",
+      "Marko Savić, 065 828 6764."
+     ],
+     [
+      "assistant",
+      "Hvala, Marko. Zahtev za ponudu za garnituru STELLA je upisan i prosleđen."
+     ]
+    ]
+   },
+   {
+    "name": "Tamara Đorđević",
+    "ch": "instagram",
+    "st": "Naručio",
+    "msgs": [
+     [
+      "user",
+      "Dogovorili smo se prošle nedelje, potvrđujem porudžbinu."
+     ],
+     [
+      "assistant",
+      "Hvala, Tamara. Porudžbina je upisana i prosleđena našem timu."
+     ]
+    ]
+   },
+   {
+    "name": "Luka Pavlović",
+    "ch": "whatsapp",
+    "st": "Novi",
+    "msgs": [
+     [
+      "user",
+      "Koje su cene u zavisnosti od dužine."
+     ],
+     [
+      "assistant",
+      "Garnitura Bellagio je dostupna u dužinama 308, 288, 268 i 248 cm, širine 186 cm. Cenu za dužinu koju želite šaljemo u ponudi."
+     ]
+    ]
+   },
+   {
+    "name": "Milica Jovanović",
+    "ch": "instagram",
+    "st": "Zakazano",
+    "msgs": [
+     [
+      "user",
+      "Koliko je naddusek?"
+     ],
+     [
+      "assistant",
+      "Mona je dostupna u kompletu sa dušekom i naddušekom. Ležaj Mona 160x200 je 48.000 po cenovniku (cena Standard), a cenu naddušeka šaljemo u ponudi. Pošaljite mi ime i broj telefona."
+     ],
+     [
+      "user",
+      "Milica Jovanović, 063 410 7721."
+     ],
+     [
+      "assistant",
+      "Hvala, Milice. Zahtev za ponudu je upisan i prosleđen."
+     ]
+    ]
+   },
+   {
+    "name": "Nemanja Ristić",
+    "ch": "website",
+    "st": "Zainteresovan",
+    "msgs": [
+     [
+      "user",
+      "Moze cena i uslovi isporuke i montaze?"
+     ],
+     [
+      "assistant",
+      "Uslove isporuke i montaže šaljemo u ponudi. Recite mi koja garnitura Vas zanima i mesto isporuke."
+     ],
+     [
+      "user",
+      "Javiću se uskoro."
+     ],
+     [
+      "assistant",
+      "Važi. Za ponudu mi je dovoljno da znam model i mesto isporuke."
+     ]
+    ]
+   },
+   {
+    "name": "Sara Marković",
+    "ch": "whatsapp",
+    "st": "Naručio",
+    "msgs": [
+     [
+      "user",
+      "Hvala na ponudi, prihvatamo."
+     ],
+     [
+      "assistant",
+      "Hvala, Sara. Porudžbina je upisana i prosleđena našem timu."
+     ]
+    ]
+   },
+   {
+    "name": "Filip Stojanović",
+    "ch": "facebook",
+    "st": "Zakazano",
+    "msgs": [
+     [
+      "user",
+      "Opremamo stan, da li možete da osmislite ceo prostor?"
+     ],
+     [
+      "assistant",
+      "Da, pomažemo Vam da osmislite kompletan prostor, od izbora modela, dimenzija i materijala do uklapanja boja i rasporeda. Pošaljite mi ime i broj telefona."
+     ],
+     [
+      "user",
+      "Filip Stojanović, 061 770 5540."
+     ],
+     [
+      "assistant",
+      "Hvala, Filipe. Upit je upisan i prosleđen našem timu."
+     ]
+    ]
+   },
+   {
+    "name": "Katarina Lukić",
+    "ch": "instagram",
+    "st": "Zainteresovan",
+    "msgs": [
+     [
+      "user",
+      "Cena dvoseda"
+     ],
+     [
+      "assistant",
+      "Dvosed Bianca je 70.000, a dvosed Zara-Tena 79.000 po cenovniku (cena Standard). Koji model Vas zanima?"
+     ],
+     [
+      "user",
+      "U redu, hvala."
+     ]
+    ]
+   },
+   {
+    "name": "Stefan Petrović",
+    "ch": "website",
+    "st": "Zakazano",
+    "msgs": [
+     [
+      "user",
+      "Koja je cena ugaone?"
+     ],
+     [
+      "assistant",
+      "Verona ima mogućnost razvlačenja u ležaj i prostor za odlaganje, a materijal i boju birate sami. Cenu šaljemo u ponudi, pa mi pošaljite ime i broj telefona."
+     ],
+     [
+      "user",
+      "Stefan Petrović, 062 114 9033."
+     ],
+     [
+      "assistant",
+      "Hvala, Stefane. Zahtev za ponudu za Veronu je upisan i prosleđen."
+     ]
+    ]
+   }
+  ]
+ },
+ "e1": {
+  "_note": "E1 v20 (2026-11-12). VACASA's real comments are \"Cena?\" under garnitura posts (one even asks why the price is never written); the demo is built from its Cenovnik and its captions.",
+  "kind": "business",
+  "subject": "Zašto neko zatraži ponudu za garnituru kod Vacase, a neko ne",
+  "za": "Vacasa",
+  "not_done": "nije poručio",
+  "made_from": "modela iz cenovnika",
+  "most_wanted": "koji modeli su najtraženiji",
+  "gap": "pre porudžbine",
+  "_site": "vacasa.rs/cenovnik (MONDO, Genova, Mona); Instagram captions",
+  "helps_whom": "proizvođačima nameštaja kao što je Vacasa",
+  "win": "porudžbinom"
+ }
+}

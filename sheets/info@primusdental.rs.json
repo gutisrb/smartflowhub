@@ -1,0 +1,93 @@
+{
+  "_note": "Primus Dental — hand-chosen hero (2026-10-27). No customer comments on its Instagram. Every agent fact is from its site: \"Prvi pregled u Primus dental centru je besplatan\", \"Besplatni prvi pregled i plan terapije\", \"Pregledom ćete saznati sve o Vašem stomatološkom problemu i kako ga rešiti\". The objection is answered with that free first examination, not with a discount.",
+  "hero": {
+    "channel": "whatsapp",
+    "customer": "Marija Jović",
+    "phone": "064 123 4567",
+    "msgs": [
+      [
+        "user",
+        "Zdravo, koliko košta sinus lift?"
+      ],
+      [
+        "assistant",
+        "Zdravo, Marija 😊 Sinus lift je 96.000 RSD. Prvi pregled je kod nas besplatan, i na njemu dobijate plan terapije."
+      ],
+      [
+        "user",
+        "Malo mi je skupo, iskreno."
+      ],
+      [
+        "assistant",
+        "Shvatam. Zato i počinjemo od besplatnog pregleda: vidite šta je tačno potrebno u Vašem slučaju i koliko košta, pa onda odlučujete."
+      ],
+      [
+        "assistant",
+        "Za prvi pregled imam danas u 15h ili u 16h. Šta Vam više odgovara?"
+      ],
+      [
+        "user",
+        "Može u 15h."
+      ],
+      [
+        "assistant",
+        "Pošaljite mi ime i broj telefona, pa Vas upisujem."
+      ],
+      [
+        "user",
+        "Marija Jović, 064 123 4567"
+      ],
+      [
+        "assistant",
+        "Upisani ste za prvi pregled, danas u 15h ✅ Stiže Vam i podsetnik."
+      ]
+    ],
+    "appt": {
+      "service_name": "Prvi pregled",
+      "duration": 30
+    },
+    "crm": {
+      "full_name": "Marija Jović",
+      "telefon": "064 123 4567",
+      "kategorija": "Oralna hirurgija",
+      "proizvod": "Sinus lift",
+      "status": "Zakazano",
+      "razlog": "Pitala za cenu sinus lifta i rekla da je skupo — agent je ponudio besplatan prvi pregled sa planom terapije i zakazao ga.",
+      "izvor": "WhatsApp"
+    },
+    "left": {
+      "msgs": [
+        [
+          "user",
+          "Zdravo, koliko košta sinus lift?"
+        ],
+        [
+          "assistant",
+          "Zdravo, Nikola 😊 Sinus lift je 96.000 RSD."
+        ],
+        [
+          "user",
+          "Hvala, javiću se."
+        ],
+        [
+          "assistant",
+          "Važi. Prvi pregled je kod nas besplatan, pa možete prvo da dođete na njega i vidite plan terapije. Da Vam sačuvam termin?"
+        ]
+      ],
+      "crm": {
+        "full_name": "Nikola Perić",
+        "telefon": "063 555 1212",
+        "kategorija": "Oralna hirurgija",
+        "proizvod": "Sinus lift",
+        "status": "Zainteresovan",
+        "razlog": "Pitao za cenu (96.000 RSD) i otišao uz „Hvala, javiću se.“ Agent je ponudio besplatan prvi pregled i čeka odgovor.",
+        "izvor": "Instagram"
+      }
+    }
+  },
+  "booking": {
+    "state": "required",
+    "unit": "slot",
+    "quote": "Kontaktirajte nas i zakažite pregled."
+  }
+}

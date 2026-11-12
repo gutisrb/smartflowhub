@@ -1,0 +1,113 @@
+{
+  "_note": "Logera Tiny Home — hand-chosen hero (2026-10-27). The opening is a real comment under its own reel DVQAJKRCJ7m (24 m², fully equipped, available now, on your plot in 7 days). The follow-ups are real comments from its posts: \"Ima li neka veća?\", \"Koliko dajete garanciju na objekat...cena za opstinu Sremska Mitrovica?\". The site names its models (AIR, ANGOLO, NIDO, SILVA, TERRA, LUCIA, NOVA, ARDE) but no warranty term and no price for this model, so the agent quotes neither: the offer carries them. The plateau is in Ruma (captions). The one who left asks a real comment under the CH1 post (\"Koja je cena Ove CH 1\"); the handoff is two real comments from one customer (\"Dostavljate li i u Bosnu i Hercegovinu?\", \"Što je potrebno pripremiti kako bi se kontejner postavio?\").",
+  "status_labels": {
+    "Zakazano": "Ponuda"
+  },
+  "hero": {
+    "channel": "instagram",
+    "customer": "Marija Jović",
+    "phone": "064 123 4567",
+    "msgs": [
+      [
+        "user",
+        "Molim cenu ovog modela sa snimka, opremljenog?",
+        {
+          "post": "DVQAJKRCJ7m"
+        }
+      ],
+      [
+        "assistant",
+        "Zdravo, Marija 😊 Ovaj model ima 24 m², potpuno je opremljen i dostupan odmah, po specijalnoj ceni. Na Vašem placu može da bude za 7 dana."
+      ],
+      [
+        "assistant",
+        "Cenu sa prevozom i montažom računamo za Vašu lokaciju. Gde je plac?"
+      ],
+      [
+        "user",
+        "Sremska Mitrovica. Ima li neka veća?"
+      ],
+      [
+        "assistant",
+        "Ima. Pored ovog imamo modele AIR, ANGOLO, NIDO, SILVA, TERRA, LUCIA, NOVA i ARDE. U ponudu Vam stavimo ovaj i dva veća, sa merama i cenama, pa uporedite."
+      ],
+      [
+        "user",
+        "Može. Koliko dajete garanciju na objekat?"
+      ],
+      [
+        "assistant",
+        "Uslove garancije Vam kolege napišu u ponudi, uz prevoz i montažu do Sremske Mitrovice. Pošaljite mi ime i broj telefona, pa ponudu dobijate na taj broj."
+      ],
+      [
+        "user",
+        "Marija Jović, 064 123 4567"
+      ],
+      [
+        "assistant",
+        "Hvala, Marija. Ponudu dobijate na ovaj broj. Ako hoćete da vidite kuće uživo, plato nam je u Rumi, blizu Vas."
+      ]
+    ],
+    "crm": {
+      "full_name": "Marija Jović",
+      "telefon": "064 123 4567",
+      "kategorija": "Tiny home",
+      "proizvod": "Model 24 m² sa snimka + dva veća modela",
+      "status": "Zakazano",
+      "razlog": "Pitala za cenu opremljenog modela od 24 m² sa snimka i da li ima većih. Plac u Sremskoj Mitrovici — agent je uzeo podatke za ponudu sa tri modela, prevozom i montažom.",
+      "komentar": "Lokacija: Sremska Mitrovica · pita za garanciju · poziv da vidi kuće u Rumi",
+      "izvor": "Instagram"
+    },
+    "left": {
+      "msgs": [
+        [
+          "user",
+          "Koja je cena ove CH1?",
+          {
+            "post": "DW0hs51iPKO"
+          }
+        ],
+        [
+          "assistant",
+          "Zdravo, Nikola 😊 CH1 je drvena tiny home kuća od 26 m², kutak za celu porodicu. Cenu sa prevozom i montažom računamo za Vašu lokaciju. Gde bi bio plac?"
+        ],
+        [
+          "user",
+          "Hvala, javiću se."
+        ],
+        [
+          "assistant",
+          "Važi. Ako hoćete da je vidite uživo, plato nam je u Rumi. Kad znate lokaciju, pišite mi i šaljemo ponudu."
+        ]
+      ],
+      "crm": {
+        "full_name": "Nikola Perić",
+        "telefon": "",
+        "kategorija": "Tiny home",
+        "proizvod": "CH1, 26 m² (sa objave)",
+        "status": "Zainteresovan",
+        "razlog": "Pitao za cenu modela CH1 ispod objave i otišao uz „Hvala, javiću se.“ Agent ga je pozvao da kuću vidi u Rumi i čeka lokaciju za ponudu.",
+        "izvor": "Instagram"
+      }
+    },
+    "intervention": {
+      "ask": "Dostavljate li i u Bosnu i Hercegovinu? Šta je potrebno pripremiti da se kuća postavi?",
+      "answer": "Zdravo, Dragana 😊 Za dostavu u BiH i pripremu placa odgovaraju kolege iz montaže, pa ne bih da nagađam. Prosleđujem upit. Mogu li da zabeležim Vaše ime i broj telefona?",
+      "domainNom": "kolega iz montaže",
+      "razlog": "Pita za dostavu u BiH i pripremu placa — odgovaraju kolege iz montaže. Prosleđeno."
+    }
+  },
+  "e1": {
+    "_note": "E1 v20 (2026-11-09). Opens as a person: why he writes (his belief about where AI helps this kind of business most), why a demo (easier shown than explained), that it is theirs (built from their site + comments), the honest catch (before proposing anything). No scenario, no backstory.",
+    "kind": "business",
+    "subject": "Zašto neko naruči kod Logere, a neko ne",
+    "za": "Logeru",
+    "not_done": "nije naručio",
+    "made_from": "modela sa sajta",
+    "most_wanted": "koji modeli su najtraženiji",
+    "gap": "pre porudžbine",
+    "_site": "title: Tiny Homes modularne kuće - LOGERA",
+    "helps_whom": "firmama kao što je Logera",
+    "win": "porudžbinom"
+  }
+}

@@ -1,0 +1,399 @@
+{
+  "_note": "TopDek — hand sheet written 2026-11-12. Site text (topdek.rs: home, o-nama, kontakt, proizvodi, usluge) names the range (Premium WPC deking za terase, bazene i krovne prostore; WPC i ASA fasadni kit kat paneli; WPC ograde; dekorativne cigle; Ella akustični paneli; Ugradnja dekinga), hours (radnim danima 8–16h, \"Subotom i nedeljom ne radimo\") and the phone; it publishes NO prices. The only price is on its own Instagram: WPC ceiling panels, \"Cena po m2 je 45€ sa PDV-om. Isporuka i montaža za celu Srbiju\", and the same post got the real comment \"Cena kvadrata\", which opens the sale hero (the agent states 45 € po m² sa PDV-om, tied to the panels of that post, and nothing about what the price includes). Everything else: no price, the agent says the offer is prepared for the customer's space and asks for what the posts ask for: \"Pošalji nam kvadraturu i fotografiju\" (deking), dužinu ograde (rephrase for fences). Left customer = real comment \"Koliko je koštalo ovih 200m sa snimka?\" (200 m WPC fence in Boljevci, no price stated). Intervention = real comment \"Cena takvih dimenzija slicnih ?\" under the Zlatni Hrast aluminium fence panel post (\"Novo u ponudi!\"): no price or dimensions stated anywhere, so the agent does not guess. Guarantee 15 godina only where the captions state it (fasadni paneli, ograda). NOT used: the catalogue prices 6.143 / 8.190 / 5.850 RSD (no unit, not on the live pages), the stored \"included\" list (projektovanje, izlazak na teren…: not on the site), two different addresses (footer Autoput za Novi Sad 101, Kontakt Svetomira Đukića 24: no address quoted). No complaint hero: the seeder ignores hero.complaint for a quote model, and the site states no complaint rule.",
+  "hero": {
+    "channel": "instagram",
+    "customer": "Marija Jović",
+    "phone": "064 123 4567",
+    "msgs": [
+      [
+        "user",
+        "Cena kvadrata",
+        {
+          "post": "DdJ6-2YNeR8"
+        }
+      ],
+      [
+        "assistant",
+        "Dobar dan, Marija. Za WPC panele sa objave cena po m² je 45 € sa PDV-om. Isporuka i montaža su za celu Srbiju. Ako Vam treba ponuda za Vaš prostor, pošaljite mi kvadraturu i fotografiju prostora."
+      ],
+      [
+        "user",
+        "Plafon u stanu u Novom Sadu. Kvadraturu i sliku šaljem odmah."
+      ],
+      [
+        "assistant",
+        "Hvala. Pošaljite mi ime i broj telefona, pa zahtev za ponudu prosleđujem našem timu."
+      ],
+      [
+        "user",
+        "Marija Jović, 064 123 4567"
+      ],
+      [
+        "assistant",
+        "Hvala, Marija. Zahtev za ponudu je upisan i prosleđen. Naš tim Vam stoji na raspolaganju radnim danima od 8 do 16h."
+      ]
+    ],
+    "crm": {
+      "full_name": "Marija Jović",
+      "telefon": "064 123 4567",
+      "kategorija": "WPC paneli",
+      "proizvod": "WPC paneli za plafon",
+      "status": "Zakazano",
+      "razlog": "Pitala za cenu kvadrata sa objave — agent je rekao cenu sa objave (45 € po m² sa PDV-om) i zatražio kvadraturu i fotografiju prostora za ponudu.",
+      "komentar": "Plafon u stanu, Novi Sad",
+      "izvor": "Instagram"
+    },
+    "left": {
+      "msgs": [
+        [
+          "user",
+          "Koliko je koštalo ovih 200m sa snimka?",
+          {
+            "post": "DdpDg2ktDRo"
+          }
+        ],
+        [
+          "assistant",
+          "Dobar dan. Cenu tog projekta ne mogu da Vam kažem. Ponudu pripremamo za Vaš prostor, pa mi pošaljite dužinu ograde i fotografiju prostora."
+        ],
+        [
+          "user",
+          "Hvala, javiću se."
+        ],
+        [
+          "assistant",
+          "Važi. Premium ograda je po sistemu ključ u ruke, uz garanciju od 15 godina. Ako Vam zatreba ponuda, pišite ovde."
+        ]
+      ],
+      "crm": {
+        "full_name": "Nikola Perić",
+        "telefon": "",
+        "kategorija": "WPC ograde",
+        "proizvod": "WPC ograda",
+        "status": "Zainteresovan",
+        "razlog": "Pitao koliko je koštala ograda od 200 m sa objave i otišao uz „Hvala, javiću se.“ Agent je zatražio dužinu ograde i fotografiju prostora za ponudu.",
+        "izvor": "Instagram"
+      }
+    },
+    "intervention": {
+      "ask": "Cena takvih dimenzija slicnih ?",
+      "answer": "Zdravo, Dragana. Cenu i dimenzije aluminijumskog panela za ogradu Zlatni Hrast nemam objavljene, pa ne bih da nagađam. Prosleđujem upit našem timu. Mogu li da zabeležim Vaše ime i broj telefona?",
+      "razlog": "Pitala za cenu panela takvih dimenzija (Zlatni Hrast, aluminijumski panel za ogradu). Cena i dimenzije nisu objavljene — prosleđeno timu."
+    },
+    "qa": [
+      [
+        "Cena kvadrata",
+        "Za WPC panele na plafonu cena po m² je 45 € sa PDV-om. Za ostale proizvode pripremamo ponudu: pošaljite kvadraturu i fotografiju prostora."
+      ],
+      [
+        "Koliko košta WPC deking?",
+        "Cenu dekinga za Vaš prostor daje ponuda. Pošaljite mi kvadraturu i fotografiju terase, pa je prosleđujem timu."
+      ],
+      [
+        "Da li radite isporuku i montažu?",
+        "Radimo. Isporuka i montaža su za celu Srbiju."
+      ],
+      [
+        "Kolika je garancija na fasadne panele?",
+        "Garancija je 15 godina."
+      ],
+      [
+        "Imate li ograde?",
+        "Imamo WPC ograde, a novo u ponudi je aluminijumski panel za ogradu Zlatni Hrast. Premium ograda je po sistemu ključ u ruke, uz garanciju od 15 godina."
+      ],
+      [
+        "Da li je deking i za bazene?",
+        "Jeste. Premium WPC deking je za terase, bazene i krovne prostore."
+      ],
+      [
+        "Koje proizvode imate?",
+        "WPC deking, WPC i ASA fasadne kit kat panele, WPC ograde, dekorativne cigle i Ella akustične panele. Ponuda svih modela je na topdek.rs."
+      ],
+      [
+        "Do kada radite?",
+        "Radnim danima od 8 do 16h. Subotom i nedeljom ne radimo."
+      ],
+      [
+        "Šta treba da pošaljem za ponudu?",
+        "Kvadraturu i fotografiju prostora. Za konsultacije možete da pozovete 065 24 17 043."
+      ],
+      [
+        "Radite li ograde kao pregrade između stanova?",
+        "Radimo. Postavili smo WPC ogradu kao pregrade između stanova u Novom Sadu."
+      ],
+      [
+        "Radite li deking za terase restorana?",
+        "Radimo. Postavili smo deking na terasi jednog restorana u Zemunu, uz Dunav, u toploj boji drveta."
+      ],
+      [
+        "Kakvi su WPC fasadni paneli?",
+        "Donose toplinu prirodnog drveta, uz dugotrajnost i minimalno održavanje. Garancija je 15 godina."
+      ]
+    ],
+    "objections": [
+      [
+        "Razmisliću, pa ću se javiti.",
+        "Važi. Za ponudu je dovoljno da pošaljete kvadraturu i fotografiju prostora kad Vam bude odgovaralo."
+      ],
+      [
+        "Nisam siguran koliko traje WPC.",
+        "WPC fasadni paneli su dugotrajni i traže minimalno održavanje, a garancija je 15 godina."
+      ],
+      [
+        "Mogu li prvo da razgovaram sa nekim?",
+        "Možete. Za konsultacije pozovite 065 24 17 043, radnim danima od 8 do 16h."
+      ],
+      [
+        "Ne znam kako bi to izgledalo kod mene.",
+        "Ponuda svih modela je na topdek.rs, a postavljene terase i ograde možete da vidite na našem Instagramu."
+      ],
+      [
+        "Javiću se kad izmerim prostor.",
+        "Važi. Kad izmerite, pošaljite kvadraturu i fotografiju prostora, pa pripremamo ponudu."
+      ]
+    ],
+    "background": [
+      {
+        "name": "Ana Kovačević",
+        "ch": "instagram",
+        "st": "Novi",
+        "msgs": [
+          [
+            "user",
+            "Moze cena"
+          ],
+          [
+            "assistant",
+            "Dobar dan, Ana. Za koji proizvod Vam treba cena? Ponudu pripremamo za Vaš prostor, pa mi pošaljite i kvadraturu i fotografiju prostora."
+          ]
+        ]
+      },
+      {
+        "name": "Petar Nikolić",
+        "ch": "whatsapp",
+        "st": "Zainteresovan",
+        "msgs": [
+          [
+            "user",
+            "Treba mi deking za terasu, koliko košta?"
+          ],
+          [
+            "assistant",
+            "Cenu dekinga za Vašu terasu daje ponuda. Pošaljite mi kvadraturu i fotografiju terase, pa je prosleđujem timu."
+          ],
+          [
+            "user",
+            "Poslaću sutra."
+          ],
+          [
+            "assistant",
+            "Važi. Naš tim Vam stoji na raspolaganju radnim danima od 8 do 16h."
+          ]
+        ]
+      },
+      {
+        "name": "Jovana Ilić",
+        "ch": "facebook",
+        "st": "Zainteresovan",
+        "msgs": [
+          [
+            "user",
+            "Da li radite i montažu?"
+          ],
+          [
+            "assistant",
+            "Radimo. Isporuka i montaža su za celu Srbiju."
+          ],
+          [
+            "user",
+            "A garancija?"
+          ],
+          [
+            "assistant",
+            "Za WPC fasadne panele i ograde garancija je 15 godina."
+          ]
+        ]
+      },
+      {
+        "name": "Marko Savić",
+        "ch": "website",
+        "st": "Zakazano",
+        "msgs": [
+          [
+            "user",
+            "Treba mi ponuda za ogradu oko dvorišta."
+          ],
+          [
+            "assistant",
+            "Pošaljite mi dužinu ograde i fotografiju prostora, pa prosleđujem zahtev za ponudu. Treba mi i Vaše ime i broj telefona."
+          ],
+          [
+            "user",
+            "Marko Savić, 063 222 3344"
+          ],
+          [
+            "assistant",
+            "Hvala, Marko. Zahtev za ponudu je upisan i prosleđen."
+          ]
+        ]
+      },
+      {
+        "name": "Tamara Đorđević",
+        "ch": "instagram",
+        "st": "Zainteresovan",
+        "msgs": [
+          [
+            "user",
+            "Cena ovog panela?"
+          ],
+          [
+            "assistant",
+            "Dobar dan. Cenu panela za Vaš prostor daje ponuda. Pošaljite mi kvadraturu i fotografiju prostora, pa je prosleđujem timu."
+          ]
+        ]
+      },
+      {
+        "name": "Luka Pavlović",
+        "ch": "whatsapp",
+        "st": "Novi",
+        "msgs": [
+          [
+            "user",
+            "Imate li akustične panele?"
+          ],
+          [
+            "assistant",
+            "Imamo Ella akustične panele. Ponuda svih modela je na topdek.rs."
+          ]
+        ]
+      },
+      {
+        "name": "Milica Jovanović",
+        "ch": "instagram",
+        "st": "Zainteresovan",
+        "msgs": [
+          [
+            "user",
+            "Da li se fasadni paneli održavaju?"
+          ],
+          [
+            "assistant",
+            "WPC fasadni paneli donose toplinu prirodnog drveta, uz dugotrajnost i minimalno održavanje. Garancija je 15 godina."
+          ]
+        ]
+      },
+      {
+        "name": "Nemanja Ristić",
+        "ch": "website",
+        "st": "Zainteresovan",
+        "msgs": [
+          [
+            "user",
+            "Da li imate dekorativne cigle?"
+          ],
+          [
+            "assistant",
+            "Imamo. Dekorativne cigle su u našem asortimanu, a ponuda svih modela je na topdek.rs."
+          ],
+          [
+            "user",
+            "Hvala, javiću se."
+          ],
+          [
+            "assistant",
+            "Važi. Za ponudu je dovoljno da pošaljete kvadraturu i fotografiju prostora."
+          ]
+        ]
+      },
+      {
+        "name": "Sara Marković",
+        "ch": "whatsapp",
+        "st": "Zakazano",
+        "msgs": [
+          [
+            "user",
+            "Šaljem kvadraturu terase restorana na mejl, treba mi ponuda za deking."
+          ],
+          [
+            "assistant",
+            "Hvala, Sara. Zahtev za ponudu za deking je upisan i prosleđen našem timu."
+          ]
+        ]
+      },
+      {
+        "name": "Filip Stojanović",
+        "ch": "facebook",
+        "st": "Zainteresovan",
+        "msgs": [
+          [
+            "user",
+            "Radite li ograde kao pregrade između stanova?"
+          ],
+          [
+            "assistant",
+            "Radimo. Postavili smo WPC ogradu kao pregrade između stanova u Novom Sadu."
+          ]
+        ]
+      },
+      {
+        "name": "Katarina Lukić",
+        "ch": "instagram",
+        "st": "Zainteresovan",
+        "msgs": [
+          [
+            "user",
+            "Da li je deking za bazene?"
+          ],
+          [
+            "assistant",
+            "Jeste. Premium WPC deking je za terase, bazene i krovne prostore."
+          ],
+          [
+            "user",
+            "Razmisliću."
+          ],
+          [
+            "assistant",
+            "Važi. Za ponudu je dovoljno da pošaljete kvadraturu i fotografiju prostora."
+          ]
+        ]
+      },
+      {
+        "name": "Stefan Petrović",
+        "ch": "website",
+        "st": "Zakazano",
+        "msgs": [
+          [
+            "user",
+            "Zanima me Zlatni Hrast panel za ogradu."
+          ],
+          [
+            "assistant",
+            "To je novo u našoj ponudi: aluminijumski panel za ogradu. Pošaljite mi dužinu ograde i fotografiju prostora, pa prosleđujem zahtev za ponudu. Treba mi i Vaše ime i broj telefona."
+          ],
+          [
+            "user",
+            "Stefan Petrović, 063 555 7788"
+          ],
+          [
+            "assistant",
+            "Hvala, Stefan. Zahtev za ponudu je upisan i prosleđen."
+          ]
+        ]
+      }
+    ]
+  },
+  "e1": {
+    "_note": "E1 v20 (2026-11-12). Every post of TopDek ends in \"Za ponudu na topdeksrbija@gmail.com\" and the real comments ask for the price, so the owner's question is who asks for an offer and who does not.",
+    "kind": "business",
+    "subject": "Zašto neko zatraži ponudu od TopDeka, a neko ne",
+    "za": "TopDek",
+    "not_done": "nije tražio ponudu",
+    "made_from": "proizvoda sa sajta",
+    "most_wanted": "koji proizvodi su najtraženiji",
+    "gap": "pre ponude",
+    "_site": "topdek.rs: proizvodi, usluge; Instagram posts end with \"Za ponudu na …\"",
+    "helps_whom": "firmama kao što je TopDek",
+    "win": "zahtevom za ponudu"
+  }
+}

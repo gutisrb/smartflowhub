@@ -1,0 +1,407 @@
+{
+ "_note": "Nameštaj Modesta — hand sheet written 2026-11-12 from modesta.rs (home with its trust strip \"Plaćanje na rate / Dostava na teritoriji Srbije / Garancija na sve proizvode / Mogućnost montaže\", kontakt, način plaćanja, o nama, proizvodi, akcije) and from the captions and real comments of its own Instagram. Opening = a real comment (\"Cena i da li se razvlaci\") under its TDF Anja post (DY37gHoNd2R): the caption itself states the trosed has a sleeping surface of 185 x 115 cm, so the agent answers the half of the question the business has answered, says the price goes in an offer (the post's customers all ask the price and the caption gives none), gives both salon addresses and the weekday hours from the Kontakt page, and takes name and phone. The left hero is \"Koja je cena ove ugaone?\" under the corner-sofa post DY39wIKtHXo: its dimensions come from the caption, the only price said is one the home page shows (ugaona garnitura Naomi 94.990 RSD, said with \"na primer\"). Intervention = a sofa made to fit an awkward room: the caption says \"Mogućnost izbora materijala i nogara\" and \"Modularni dizajn omogućava uklapanje garniture prema vašem prostoru\" and o-nama says it makes products to the customer's wish, but whether a given room works is the team's call. NO complaint beat: the site's Reklamacije i povrat page is empty (no rule stated), so none is invented. NOT used: delivery time (180 days sits on Uslovi online kupovine, a page the gate does not fetch), the 36-month credit (same page), cheques (the page still says valid until 25.12.2023), Saturday/Sunday hours (blank on the Kontakt page), any price for the Anja garnitura (the caption is cut before it). Delivery is quoted only as the Način plaćanja page states it (\"prevoz: 45 RSD po km\"). The site also runs its own FAQ bot (\"Automatizovani bot MODDA\") and a post about answering the same questions once: Nikola should know before sending.",
+ "hero": {
+  "channel": "instagram",
+  "customer": "Marija Jović",
+  "phone": "064 123 4567",
+  "msgs": [
+   [
+    "user",
+    "Cena i da li se razvlaci",
+    {
+     "post": "DY37gHoNd2R"
+    }
+   ],
+   [
+    "assistant",
+    "Dobar dan, Marija. Da, trosed garniture Anja ima površinu za spavanje 185 x 115 cm. Cenu šaljemo u ponudi, pa mi recite koji komadi Vas zanimaju: trosed, dvosed ili fotelja?"
+   ],
+   [
+    "user",
+    "Trosed i dvosed, bez fotelja. Gde se nalazite?"
+   ],
+   [
+    "assistant",
+    "Salone imamo u Kragujevcu, Voje Manojlovića 6, i u Jagodini, Ćuprijski put 8, a radimo od ponedeljka do petka od 8 do 20h. Pošaljite mi ime i broj telefona za ponudu za trosed i dvosed."
+   ],
+   [
+    "user",
+    "Marija Jović, 064 123 4567"
+   ],
+   [
+    "assistant",
+    "Hvala, Marija. Zahtev za ponudu za trosed i dvosed Anja je upisan i prosleđen našoj službi prodaje."
+   ]
+  ],
+  "crm": {
+   "full_name": "Marija Jović",
+   "telefon": "064 123 4567",
+   "kategorija": "Fotelje i garniture",
+   "proizvod": "TDF garnitura Anja (trosed i dvosed)",
+   "status": "Zakazano",
+   "razlog": "Pitala za cenu garniture Anja i da li se razvlači. Agent je odgovorio da trosed ima površinu za spavanje 185 x 115 cm, rekao da se cena šalje u ponudi, dao adrese salona i radno vreme i uzeo ime i broj telefona za ponudu za trosed i dvosed.",
+   "komentar": "Bez fotelja",
+   "izvor": "Instagram"
+  },
+  "left": {
+   "msgs": [
+    [
+     "user",
+     "Koja je cena ove ugaone?",
+     {
+      "post": "DY39wIKtHXo"
+     }
+    ],
+    [
+     "assistant",
+     "Dobar dan. Ugaona garnitura sa objave je dimenzija 236x180 cm, sa prostorom za spavanje 180x120 cm. Cenu ove garniture šaljemo u ponudi, a cene drugih ugaonih garnitura vidite na sajtu, na primer Naomi je 94.990 RSD."
+    ],
+    [
+     "user",
+     "Hvala, javiću se."
+    ],
+    [
+     "assistant",
+     "Važi. Garniture možete da pogledate i u salonu u Kragujevcu ili Jagodini, a ponudu pripremamo čim kažete."
+    ]
+   ],
+   "crm": {
+    "full_name": "Nikola Perić",
+    "telefon": "",
+    "kategorija": "Ugaone garniture",
+    "proizvod": "Ugaona garnitura 236x180 cm",
+    "status": "Zainteresovan",
+    "razlog": "Pitao za cenu ugaone garniture sa objave i otišao uz „Hvala, javiću se.“ Agent je rekao dimenzije sa objave, da se cena šalje u ponudi, naveo primer sa sajta i ostavio razgovor otvoren.",
+    "izvor": "Instagram"
+   }
+  },
+  "intervention": {
+   "ask": "Dobar dan, imam nezgodan prostor i treba mi garnitura po meri. Da li to možete da napravite?",
+   "answer": "Kod garnitura sa naših objava moguć je izbor materijala i nogara, a modularni dizajn omogućava uklapanje garniture prema prostoru. Da li je to izvodljivo u Vašem prostoru, procenjuje naš tim, pa ne bih da nagađam. Mogu li da zabeležim Vaše ime i broj telefona?",
+   "razlog": "Garnitura po meri za nezgodan prostor. Agent je naveo šta se može prilagoditi (materijal, nogari, modularni dizajn), a procenu da li je izvodljivo prepustio timu. Prosleđeno."
+  },
+  "qa": [
+   [
+    "Cena za trosed i dvosed,Hvala",
+    "Cenu za trosed i dvosed šaljemo u ponudi. Recite mi koju garnituru sa objave želite, pa je pripremamo."
+   ],
+   [
+    "Gde se nalazite?",
+    "Salone imamo u Kragujevcu, Voje Manojlovića 6 (Trg mala Vaga), i u Jagodini, Ćuprijski put 8. Radimo od ponedeljka do petka od 8 do 20h."
+   ],
+   [
+    "Da li isporučujete?",
+    "Da, dostava je na teritoriji Srbije. Doplaćuje se prema udaljenosti od salona: prevoz je 45 RSD po km."
+   ],
+   [
+    "Da li ima u drugoj boji?",
+    "Kod garnitura sa naših objava moguć je izbor boje i materijala prema Vašim željama."
+   ],
+   [
+    "Da li može na rate?",
+    "Može, plaćanje na rate je moguće. Recite mi koji komad Vas zanima, pa Vam pripremamo ponudu."
+   ],
+   [
+    "Koliko košta unošenje i montaža?",
+    "Unošenje je 1.000 RSD po komadu, a u zgradama bez lifta 500 RSD po spratu. Montaža elemenata je 5% od ukupne cene komada koji se montiraju."
+   ],
+   [
+    "Kako se plaća?",
+    "Karticom, po predračunu ili gotovinom."
+   ],
+   [
+    "Da li dajete garanciju?",
+    "Da, garancija važi na sve proizvode."
+   ],
+   [
+    "Imate li fotelje od kože?",
+    "Imamo nameštaj od kože, na primer fotelja RICCO U108 je 124.000 RSD."
+   ],
+   [
+    "Da li izrađujete po meri?",
+    "Da, izrađujemo proizvode po želji kupaca."
+   ],
+   [
+    "Imate li neku akciju?",
+    "Imamo akcijsku ponudu: ušteda do 40% dok traju zalihe."
+   ],
+   [
+    "Koliko košta francuski ležaj Billy?",
+    "Francuski ležaj Billy 90×200 je 39.990 RSD."
+   ]
+  ],
+  "objections": [
+   [
+    "Skupo mi je za sada.",
+    "Imamo akcijsku ponudu, ušteda do 40% dok traju zalihe, a plaćanje na rate je moguće."
+   ],
+   [
+    "Razmisliću, pa ću se javiti.",
+    "Važi. Garniture možete da pogledate i u salonu u Kragujevcu ili Jagodini, a ponudu pripremamo kad god kažete."
+   ],
+   [
+    "Moram prvo da vidim uživo.",
+    "Naravno. Saloni su u Kragujevcu, Voje Manojlovića 6, i u Jagodini, Ćuprijski put 8, radnim danima od 8 do 20h."
+   ],
+   [
+    "Ne znam da li će mi stati u prostor.",
+    "Kod garnitura sa naših objava modularni dizajn omogućava uklapanje prema prostoru, a moguć je i izbor materijala i nogara."
+   ]
+  ],
+  "background": [
+   {
+    "name": "Ana Kovačević",
+    "ch": "instagram",
+    "st": "Novi",
+    "msgs": [
+     [
+      "user",
+      "Cena?"
+     ],
+     [
+      "assistant",
+      "Dobar dan. Koja garnitura sa objave Vas zanima? Cenu šaljemo u ponudi za tačan model."
+     ]
+    ]
+   },
+   {
+    "name": "Petar Nikolić",
+    "ch": "whatsapp",
+    "st": "Zainteresovan",
+    "msgs": [
+     [
+      "user",
+      "Cena za trosed,dvosed i fotelju,molim Hvala."
+     ],
+     [
+      "assistant",
+      "Dobar dan. Cenu za trosed, dvosed i fotelju šaljemo u ponudi. Recite mi koju garnituru sa objave želite."
+     ],
+     [
+      "user",
+      "Javiću se, hvala."
+     ],
+     [
+      "assistant",
+      "Važi. Pišite kad god želite da pripremimo ponudu."
+     ]
+    ]
+   },
+   {
+    "name": "Jovana Ilić",
+    "ch": "facebook",
+    "st": "Zainteresovan",
+    "msgs": [
+     [
+      "user",
+      "Da li isporučujete?"
+     ],
+     [
+      "assistant",
+      "Da, dostava je na teritoriji Srbije i doplaćuje se prema udaljenosti od salona: prevoz je 45 RSD po km."
+     ],
+     [
+      "user",
+      "Razmisliću."
+     ],
+     [
+      "assistant",
+      "Naravno. Ponudu pripremamo kad god kažete."
+     ]
+    ]
+   },
+   {
+    "name": "Marko Savić",
+    "ch": "website",
+    "st": "Zakazano",
+    "msgs": [
+     [
+      "user",
+      "Koliko košta fotelja RICCO U108?"
+     ],
+     [
+      "assistant",
+      "Fotelja RICCO U108 je 124.000 RSD. Ako želite ponudu, pošaljite mi ime i broj telefona."
+     ],
+     [
+      "user",
+      "Marko Savić, 065 828 6764."
+     ],
+     [
+      "assistant",
+      "Hvala, Marko. Zahtev za ponudu za fotelju RICCO U108 je upisan i prosleđen našoj službi prodaje."
+     ]
+    ]
+   },
+   {
+    "name": "Tamara Đorđević",
+    "ch": "instagram",
+    "st": "Naručio",
+    "msgs": [
+     [
+      "user",
+      "Dogovorili smo se prošle nedelje, potvrđujem porudžbinu."
+     ],
+     [
+      "assistant",
+      "Hvala, Tamara. Porudžbina je upisana i prosleđena našoj službi prodaje."
+     ]
+    ]
+   },
+   {
+    "name": "Luka Pavlović",
+    "ch": "whatsapp",
+    "st": "Novi",
+    "msgs": [
+     [
+      "user",
+      "Koja cena TDF?"
+     ],
+     [
+      "assistant",
+      "Dobar dan. Cenu TDF garniture šaljemo u ponudi. Da li Vas zanima trosed, dvosed ili fotelja?"
+     ]
+    ]
+   },
+   {
+    "name": "Milica Jovanović",
+    "ch": "instagram",
+    "st": "Zakazano",
+    "msgs": [
+     [
+      "user",
+      "Cena bez fotelja i gde se nalazite"
+     ],
+     [
+      "assistant",
+      "Salone imamo u Kragujevcu, Voje Manojlovića 6, i u Jagodini, Ćuprijski put 8. Cenu garniture bez fotelja šaljemo u ponudi, pa mi pošaljite ime i broj telefona."
+     ],
+     [
+      "user",
+      "Milica Jovanović, 063 410 7721."
+     ],
+     [
+      "assistant",
+      "Hvala, Milice. Zahtev za ponudu je upisan i prosleđen našoj službi prodaje."
+     ]
+    ]
+   },
+   {
+    "name": "Nemanja Ristić",
+    "ch": "website",
+    "st": "Zainteresovan",
+    "msgs": [
+     [
+      "user",
+      "Da li možete i da montirate?"
+     ],
+     [
+      "assistant",
+      "Možemo. Svim kupcima nudimo unošenje i montažu kupljenog nameštaja uz doplatu: unošenje je 1.000 RSD po komadu."
+     ],
+     [
+      "user",
+      "Javiću se uskoro."
+     ],
+     [
+      "assistant",
+      "Važi. Za ponudu mi je dovoljno da znam koji komad Vas zanima."
+     ]
+    ]
+   },
+   {
+    "name": "Sara Marković",
+    "ch": "whatsapp",
+    "st": "Naručio",
+    "msgs": [
+     [
+      "user",
+      "Hvala na ponudi, prihvatamo."
+     ],
+     [
+      "assistant",
+      "Hvala, Sara. Porudžbina je upisana i prosleđena našoj službi prodaje."
+     ]
+    ]
+   },
+   {
+    "name": "Filip Stojanović",
+    "ch": "facebook",
+    "st": "Zakazano",
+    "msgs": [
+     [
+      "user",
+      "Opremamo ugostiteljski objekat, radite li takve projekte?"
+     ],
+     [
+      "assistant",
+      "Da, radimo projekte za opremanje ugostiteljskih objekata. Pošaljite mi ime i broj telefona."
+     ],
+     [
+      "user",
+      "Filip Stojanović, 061 770 5540."
+     ],
+     [
+      "assistant",
+      "Hvala, Filipe. Upit je upisan i prosleđen našoj službi prodaje."
+     ]
+    ]
+   },
+   {
+    "name": "Katarina Lukić",
+    "ch": "instagram",
+    "st": "Zainteresovan",
+    "msgs": [
+     [
+      "user",
+      "Kako može da se plati?"
+     ],
+     [
+      "assistant",
+      "Karticom, po predračunu ili gotovinom, a moguće je i plaćanje na rate."
+     ],
+     [
+      "user",
+      "U redu, hvala."
+     ]
+    ]
+   },
+   {
+    "name": "Stefan Petrović",
+    "ch": "website",
+    "st": "Zakazano",
+    "msgs": [
+     [
+      "user",
+      "Cena ove garniture i da li ima u drugoj boji"
+     ],
+     [
+      "assistant",
+      "Kod garnitura sa naših objava moguć je izbor boje i materijala prema Vašim željama. Cenu šaljemo u ponudi, pa mi pošaljite ime i broj telefona."
+     ],
+     [
+      "user",
+      "Stefan Petrović, 062 114 9033."
+     ],
+     [
+      "assistant",
+      "Hvala, Stefane. Zahtev za ponudu je upisan i prosleđen našoj službi prodaje."
+     ]
+    ]
+   }
+  ]
+ },
+ "e1": {
+  "_note": "E1 v20 (2026-11-12). Modesta's real comments are almost all \"Cena?\" under garnitura posts, so the subject is that behaviour, in the owner's own terms.",
+  "kind": "business",
+  "subject": "Zašto neko zatraži ponudu za garnituru u Modesti, a neko ne",
+  "za": "Modesta",
+  "not_done": "nije kupio",
+  "made_from": "modela sa sajta",
+  "most_wanted": "koji modeli su najtraženiji",
+  "gap": "pre kupovine",
+  "_site": "modesta.rs: home (Fotelje i garniture, Ugaone garniture), proizvodi, akcije; Instagram captions",
+  "helps_whom": "salonima nameštaja kao što je Modesta",
+  "win": "kupovinom"
+ }
+}

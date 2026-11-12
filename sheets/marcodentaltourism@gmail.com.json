@@ -1,0 +1,401 @@
+{
+  "_note": "Marco Dental Tourism (marcodentaltourism.com) — hand sheet written 2026-11-12 from its Hollywood smile page (\"Kompletan Hollywood smile kod nas košta 6.000€: 12 gornjih i 12 donjih cirkonijum krunica, pregled i plan terapije, hotel i prevoz sa aerodroma. Isti rad u Austriji ili Nemačkoj košta 20.000€ i više\", \"Da li ste kandidat… saznajete na besplatnom online pregledu: pošaljete fotografije zuba ili ortopan snimak, a Dr Bojan Perduv vraća plan terapije sa fiksnom cenom\", \"Besplatno i bez obaveze\", \"Za kompletnu proceduru je potrebno ukupno 7 dana u Beogradu\", \"Ako traje duže od dve nedelje ili zub boli na zagrižaj, potrebna je kontrola\", \"Ukoliko je potrebno, zub će se lečiti … pre nego što se pripremi za krunicu\"), the price list, the All on 4/6 payment-in-two-phases text, \"Pacijentima iz inostranstva obezbeđujemo besplatan hotelski smeštaj … i prevoz od i do aerodroma\" and its Instagram (\"Besplatan plan terapije putem whatsAppa +381 61 6589540\"). Opener = the real comment under the Danijela post (DeR8riXIbtb): \"Da li je 6000 evra samo gornja strana ili obe strane??Da li ta cena obuhvata i lecenje zuba…\"; left = the real \"Koliko dugo traje (od prilike) od prvog dolazka i konačnog rezultata?\" (not tagged to its post: the post says 5 radnih dana, the site says 7 dana). The price objection is answered with the site's own sentence about Austria/Germany and the free online exam with a fixed-price plan, no discount. No slot, no appointment hour: the first step is the online exam from home, the arrival date comes in the plan (\"termin\"). Hand-off = the site's own aftercare rule (control after two weeks of pain on biting), a doctor's call. No emoji in any agent line. The site gives no instalment plan for Hollywood smile (only All on 4/6 are paid in two phases), so none is offered for it.",
+  "hero": {
+    "channel": "instagram",
+    "customer": "Marija Jović",
+    "phone": "+49 151 2345 6789",
+    "msgs": [
+      [
+        "user",
+        "Da li je 6000 evra samo gornja strana ili obe strane??Da li ta cena obuhvata i lecenje zuba ili je samo za holiwood smile?",
+        {
+          "post": "DeR8riXIbtb"
+        }
+      ],
+      [
+        "assistant",
+        "Dobar dan, Marija. 6.000 € je za obe vilice: 12 gornjih i 12 donjih cirkonijum krunica, pregled i plan terapije, hotel i prevoz sa aerodroma. Ako je potrebno, zub se leči pre krunica, a šta je potrebno u Vašem slučaju vidi se na besplatnom online pregledu."
+      ],
+      [
+        "user",
+        "Malo mi je skupo, iskreno."
+      ],
+      [
+        "assistant",
+        "Isti rad u Austriji ili Nemačkoj košta 20.000 € i više. Online pregled je besplatan i bez obaveze, a plan terapije stiže sa fiksnom cenom."
+      ],
+      [
+        "user",
+        "Dobro, to može. Kako da pošaljem snimak?"
+      ],
+      [
+        "assistant",
+        "Fotografije zuba ili ortopan snimak pošaljite na WhatsApp +381 61 6589540. Pošaljite mi i ime i broj telefona, da znamo čiji su snimci."
+      ],
+      [
+        "user",
+        "Marija Jović, +49 151 2345 6789"
+      ],
+      [
+        "assistant",
+        "Hvala, Marija. Kad snimci stignu, Dr Bojan Perduv vraća plan terapije sa brojem krunica, materijalom, terminom i cenom."
+      ]
+    ],
+    "crm": {
+      "full_name": "Marija Jović",
+      "telefon": "+49 151 2345 6789",
+      "kategorija": "Estetska stomatologija",
+      "proizvod": "Hollywood smile",
+      "status": "Zakazano",
+      "razlog": "Pitala da li je 6.000 € za obe vilice i da li cena obuhvata lečenje zuba. Rekla je da joj je skupo — agent je odgovorio da isti rad u Austriji ili Nemačkoj košta 20.000 € i više i ponudio besplatan online pregled sa planom terapije i fiksnom cenom. Šalje snimke.",
+      "komentar": "Online pregled · snimci na WhatsApp · pacijentkinja iz inostranstva",
+      "izvor": "Instagram"
+    },
+    "left": {
+      "msgs": [
+        [
+          "user",
+          "Koliko dugo traje ( od prilike) od prvog dolazka i konačnog rezultata? Hvala"
+        ],
+        [
+          "assistant",
+          "Dobar dan. Za kompletan Hollywood smile potrebno je sedam dana u Beogradu: pregled i priprema zuba prvih dana, izrada krunica u laboratoriji, proba i cementiranje na kraju. Tačan plan dobijate na besplatnom online pregledu."
+        ],
+        [
+          "user",
+          "Hvala, javiću se."
+        ],
+        [
+          "assistant",
+          "Važi. Online pregled je besplatan i bez obaveze, pa fotografije zuba možete da pošaljete kad Vam odgovara."
+        ]
+      ],
+      "crm": {
+        "full_name": "Nikola Perić",
+        "telefon": "",
+        "kategorija": "Estetska stomatologija",
+        "proizvod": "Hollywood smile",
+        "status": "Zainteresovan",
+        "razlog": "Pitao koliko traje od prvog dolaska do rezultata i otišao uz „Hvala, javiću se.“ Agent je rekao da je za kompletan Hollywood smile potrebno sedam dana u Beogradu i ostavio besplatan online pregled kao sledeći korak.",
+        "izvor": "Instagram"
+      }
+    },
+    "intervention": {
+      "ask": "Pre tri nedelje sam radila krunice kod Vas i zub me i dalje boli na zagrižaj.",
+      "answer": "Dobar dan, Dragana. Žao mi je zbog toga. Osetljivost je normalna prvih dana, a ako traje duže od dve nedelje ili zub boli na zagrižaj, potrebna je kontrola. Šta je potrebno u Vašem slučaju, procenjuje doktor, pa ne bih da nagađam. Prosleđujem upit. Mogu li da zabeležim Vaše ime i broj telefona?",
+      "razlog": "Pacijentkinja i tri nedelje posle krunica ima bol na zagrižaj. Sajt kaže da je tada potrebna kontrola, a da li i kakva, procenjuje doktor. Prosleđeno."
+    },
+    "qa": [
+      [
+        "1 cena?",
+        "Hollywood smile je 6.000 € za obe vilice: 12 gornjih i 12 donjih cirkonijum krunica, pregled i plan terapije, hotel i prevoz sa aerodroma."
+      ],
+      [
+        "Kolika bi bila cena za donju i gornju vilicu",
+        "Za obe vilice, 12 gornjih i 12 donjih cirkonijum krunica, Hollywood smile je 6.000 €. U cenu ulaze i pregled i plan terapije, hotel i prevoz sa aerodroma."
+      ],
+      [
+        "Cijena",
+        "Koju uslugu imate na umu? Hollywood smile je 6.000 € za obe vilice, cirkonijum krunica 250 € po zubu, a zubni implant 390 €."
+      ],
+      [
+        "Cijena ovih zuba?",
+        "Cirkonijum krunica je 250 € po zubu, a metalokeramička 200 €. Za most se plaća po krunici. Pregled i plan terapije su besplatni."
+      ],
+      [
+        "Kako su zubi izgledali prije, može li slika?",
+        "Fotografije pre i posle možete da vidite u galeriji Pre i posle na našem sajtu."
+      ],
+      [
+        "Da li boli?",
+        "Ne. Brušenje i cementiranje rade se u lokalnoj anesteziji i potpuno su bezbolni."
+      ],
+      [
+        "Da li je hotel stvarno besplatan?",
+        "Da. Pacijentima iz inostranstva obezbeđujemo besplatan hotelski smeštaj u Beogradu tokom terapije i prevoz od i do aerodroma."
+      ],
+      [
+        "Koliko košta All on 4?",
+        "All on 4 je 4.500 € po vilici, a All on 6 5.500 €. Plaća se u dve faze: prvu polovinu pre prve faze, a drugu tek za vreme druge faze, šest meseci nakon završetka prve."
+      ],
+      [
+        "Jako sam daleko vidim da su pacijenti prezadovoljni i puni pohvala..imam dosta problema...nije me strah da mi se bilo što radi...sretno vam u radu",
+        "Hvala Vam. Za sve pacijente online pregled je besplatan: pošaljete fotografije zuba ili ortopan snimak, a Dr Bojan Perduv vraća plan terapije sa fiksnom cenom."
+      ],
+      [
+        "Koliko dana treba da ostanem u Beogradu?",
+        "Za kompletan Hollywood smile potrebno je sedam dana u Beogradu: pregled i priprema zuba prvih dana, izrada krunica u laboratoriji, proba i cementiranje na kraju."
+      ],
+      [
+        "Imam parodontozu, mogu li da radim krunice?",
+        "Prvo se leče desni, tek onda idu krunice, jer krunice preko bolesnih desni ne radimo. Da li ste kandidat, saznajete na besplatnom online pregledu."
+      ],
+      [
+        "Da li dajete garanciju?",
+        "Uz rad dobijate sertifikat sa garancijom, a uslove garancije dobijate u pisanoj formi uz plan terapije."
+      ],
+      [
+        "Koliko košta zubni implant?",
+        "Zubni implant je 390 €. Pregled i plan terapije su besplatni."
+      ]
+    ],
+    "objections": [
+      [
+        "Malo mi je skupo, iskreno.",
+        "Isti rad u Austriji ili Nemačkoj košta 20.000 € i više. Pregled i plan terapije su kod nas besplatni, a tačnu cenu za Vaš slučaj dobijate pre dolaska."
+      ],
+      [
+        "Razmisliću, pa ću se javiti.",
+        "Važi. Online pregled je besplatan i bez obaveza, pa fotografije zuba možete da pošaljete kad Vam odgovara."
+      ],
+      [
+        "Plašim se zubara.",
+        "Strah od zubara nije prepreka: sve radimo u lokalnoj anesteziji, a procedure su bezbolne."
+      ],
+      [
+        "Ne mogu sada da dođem u Beograd.",
+        "Za prvi korak ne morate da dolazite. Online pregled radite sa daljine, a plan terapije sa terminom i cenom dobijate pre dolaska."
+      ],
+      [
+        "Nisam siguran da li je to za mene.",
+        "Da li ste kandidat i koji put je za Vas, saznajete na besplatnom online pregledu. Gotovo svako ko ima zdrave desni i dovoljno očuvane zube je kandidat."
+      ]
+    ],
+    "background": [
+      {
+        "name": "Ana Kovačević",
+        "ch": "instagram",
+        "st": "Novi",
+        "msgs": [
+          [
+            "user",
+            "Cijena ovih zuba?"
+          ],
+          [
+            "assistant",
+            "Cirkonijum krunica je 250 € po zubu, a metalokeramička 200 €. Za most se plaća po krunici. Pregled i plan terapije su besplatni."
+          ]
+        ]
+      },
+      {
+        "name": "Petar Nikolić",
+        "ch": "whatsapp",
+        "st": "Zainteresovan",
+        "msgs": [
+          [
+            "user",
+            "Koliko košta All on 6?"
+          ],
+          [
+            "assistant",
+            "All on 6 je 5.500 € po vilici: 6 implanata na koje se postavlja 12 keramičkih krunica. Plaća se u dve faze, a druga polovina šest meseci nakon završetka prve."
+          ],
+          [
+            "user",
+            "Javiću se."
+          ],
+          [
+            "assistant",
+            "Važi. Online pregled je besplatan i bez obaveza, pa možete da pošaljete snimak kad Vam odgovara."
+          ]
+        ]
+      },
+      {
+        "name": "Jovana Ilić",
+        "ch": "facebook",
+        "st": "Zakazano",
+        "msgs": [
+          [
+            "user",
+            "Imam ortopan snimak, šta dalje?"
+          ],
+          [
+            "assistant",
+            "Pošaljite ga na WhatsApp +381 61 6589540, a Dr Bojan Perduv vraća plan terapije sa brojem krunica, materijalom, terminom i cenom. Pošaljite mi i ime i broj telefona."
+          ],
+          [
+            "user",
+            "Jovana Ilić, +43 660 123 4567"
+          ],
+          [
+            "assistant",
+            "Hvala, Jovana. Zahtev za plan terapije je upisan i prosleđen."
+          ]
+        ]
+      },
+      {
+        "name": "Marko Savić",
+        "ch": "website",
+        "st": "Zakazano",
+        "msgs": [
+          [
+            "user",
+            "Hoću online pregled, kako se radi?"
+          ],
+          [
+            "assistant",
+            "Pošaljete fotografije zuba ili ortopan snimak, a Dr Bojan Perduv vraća plan terapije sa fiksnom cenom. Besplatno je i bez obaveza. Pošaljite mi ime i broj telefona."
+          ],
+          [
+            "user",
+            "Marko Savić, +381 64 220 1188"
+          ],
+          [
+            "assistant",
+            "Hvala, Marko. Zahtev za online pregled je upisan i prosleđen."
+          ]
+        ]
+      },
+      {
+        "name": "Tamara Đorđević",
+        "ch": "instagram",
+        "st": "Naručio",
+        "msgs": [
+          [
+            "user",
+            "Prihvatamo plan terapije."
+          ],
+          [
+            "assistant",
+            "Hvala, Tamara. Potvrda je upisana i prosleđena."
+          ]
+        ]
+      },
+      {
+        "name": "Luka Pavlović",
+        "ch": "whatsapp",
+        "st": "Zainteresovan",
+        "msgs": [
+          [
+            "user",
+            "Da li je hotel stvarno besplatan?"
+          ],
+          [
+            "assistant",
+            "Da. Pacijentima iz inostranstva obezbeđujemo besplatan hotelski smeštaj u Beogradu tokom terapije i prevoz od i do aerodroma."
+          ]
+        ]
+      },
+      {
+        "name": "Milica Jovanović",
+        "ch": "instagram",
+        "st": "Zainteresovan",
+        "msgs": [
+          [
+            "user",
+            "Plašim se zubara, ima li smisla da dođem?"
+          ],
+          [
+            "assistant",
+            "Ima. Strah od zubara nije prepreka: sve radimo u lokalnoj anesteziji, a procedure su bezbolne."
+          ],
+          [
+            "user",
+            "Razmisliću."
+          ],
+          [
+            "assistant",
+            "Važi. Online pregled je besplatan i bez obaveza."
+          ]
+        ]
+      },
+      {
+        "name": "Nemanja Ristić",
+        "ch": "website",
+        "st": "Zainteresovan",
+        "msgs": [
+          [
+            "user",
+            "Imam 62 godine, da li je kasno za krunice?"
+          ],
+          [
+            "assistant",
+            "Godine nisu prepreka. Da li ste kandidat, saznajete na besplatnom online pregledu."
+          ]
+        ]
+      },
+      {
+        "name": "Katarina Lukić",
+        "ch": "instagram",
+        "st": "Zainteresovan",
+        "msgs": [
+          [
+            "user",
+            "Da li dajete garanciju?"
+          ],
+          [
+            "assistant",
+            "Uz rad dobijate sertifikat sa garancijom, a uslove garancije dobijate u pisanoj formi uz plan terapije."
+          ]
+        ]
+      },
+      {
+        "name": "Stefan Petrović",
+        "ch": "facebook",
+        "st": "Novi",
+        "msgs": [
+          [
+            "user",
+            "1 cena?"
+          ],
+          [
+            "assistant",
+            "Hollywood smile je 6.000 € za obe vilice: 12 gornjih i 12 donjih cirkonijum krunica, pregled i plan terapije, hotel i prevoz sa aerodroma."
+          ]
+        ]
+      },
+      {
+        "name": "Sara Marković",
+        "ch": "instagram",
+        "st": "Zainteresovan",
+        "msgs": [
+          [
+            "user",
+            "Koliko traje cela procedura?"
+          ],
+          [
+            "assistant",
+            "Za kompletan Hollywood smile potrebno je sedam dana u Beogradu: pregled i priprema zuba prvih dana, izrada krunica u laboratoriji, proba i cementiranje na kraju."
+          ],
+          [
+            "user",
+            "Hvala, javiću se."
+          ],
+          [
+            "assistant",
+            "Važi. Online pregled je besplatan i bez obaveza."
+          ]
+        ]
+      },
+      {
+        "name": "Filip Stojanović",
+        "ch": "whatsapp",
+        "st": "Naručio",
+        "msgs": [
+          [
+            "user",
+            "Slažemo se sa planom terapije."
+          ],
+          [
+            "assistant",
+            "Hvala, Filipe. Potvrda je upisana i prosleđena."
+          ]
+        ]
+      }
+    ]
+  },
+  "e1": {
+    "_note": "E1 v20 (2026-11-12). Opens as a person: why he writes, why a demo, that it is theirs (built from the services and prices on its site + the comments under its posts), the honest catch. Clinic wording (pacijent, pregled). The sale ends at the free online exam, so the subject asks why one visitor books it and another does not.",
+    "kind": "clinic",
+    "subject": "Zašto neko zakaže besplatan online pregled u Marco Dentalu, a neko ne",
+    "za": "Marco Dental Tourism",
+    "not_done": "nije zakazao",
+    "made_from": "usluga i cena sa sajta",
+    "most_wanted": "za koje usluge se najviše raspituju",
+    "gap": "pre pregleda",
+    "when": "kada Vam najviše pišu",
+    "_site": "marcodentaltourism.com/usluge/hollywood-smile",
+    "helps_whom": "ordinacijama kao što je Vaša",
+    "win": "zakazanim pregledom"
+  }
+}

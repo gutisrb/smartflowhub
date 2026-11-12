@@ -1,0 +1,416 @@
+{
+  "_note": "Bee Bike — hand sheet written 2026-11-12 from beebike.rs (home: Crni novembar prices, 24 rate bez učešća, Test vožnja, FAQ; /pages/dostava-i-isporuka; /pages/o-nama; blog: 6 pitanja, nulti servis) and its Instagram captions (Fireman post: 25 km/h). Opening of the sale hero = a real comment verbatim, stray k included: \"Cena jedno i drugog?k\" under the Roma post (DeCXunrIB2e); the agent quotes both Crni novembar prices from the home page (Capuccino 92.999 RSD, Roma 92.500 RSD, \"Akcija traje do 30. novembra ili do isteka zaliha\"). Hesitation answered only with the site's own plan: \"Bez učešća, 24 rate, samo očitana lična karta. Postupak je online i traje oko 30 minuta\" (no monthly amount: the site shows \"od … RSD/mes\" blank). Test drive = the site's own \"Zakaži termin i model te čeka spreman, bez obaveze kupovine\"; salons open Pon–Sub 10–18h (Čačak 9–18h); NO slot time is offered by the agent, the customer says \"danas popodne\" and the agent only confirms the salon closes at 18h. Left customer = real comment \"Cena bajsa?\" under the Fireman post (Kene KN110 Fireman 186.999 RSD, 48V 20Ah, do 70 km). Intervention = real comment \"Koliko na sat ide mogu li kako da znam i ide li vozacka\" under the Fireman post: speed 25 km/h is in the post caption, whether a licence is needed is NOT stated anywhere, so the agent passes it on (\"naš tim\" is the site's own word). NOT claimed: monthly rate amount, any slot time, courier/tracking, that 50% applies to scooters (the home page says it applies to bicycles in salons), Politika povraćaja content (page not in the corpus, so no complaint hero; the seeder ignores hero.complaint for the booking model anyway).",
+  "booking": {
+    "state": "required",
+    "unit": "slot",
+    "quote": "Zakaži termin i model te čeka spreman, bez obaveze kupovine."
+  },
+  "hero": {
+    "channel": "instagram",
+    "customer": "Marija Jović",
+    "phone": "064 123 4567",
+    "msgs": [
+      [
+        "user",
+        "Cena jedno i drugog?k",
+        {
+          "post": "DeCXunrIB2e"
+        }
+      ],
+      [
+        "assistant",
+        "Dobar dan, Marija. Capuccino je 92.999 RSD, a Roma 92.500 RSD. To su Crni novembar cene, važe do 30. novembra ili do isteka zaliha."
+      ],
+      [
+        "user",
+        "Skupo mi je to trenutno."
+      ],
+      [
+        "assistant",
+        "Sve modele nudimo i na 24 rate, bez učešća, uz samo ličnu kartu. Postupak je online i traje oko 30 minuta."
+      ],
+      [
+        "user",
+        "Može. A mogu li prvo da probam Romu?"
+      ],
+      [
+        "assistant",
+        "Možete, test vožnja je bez obaveze kupovine, a model Vas čeka spreman. Saloni su u Novom Beogradu, Novom Sadu i Čačku. U kom salonu i kada Vam odgovara?"
+      ],
+      [
+        "user",
+        "Novi Beograd, danas popodne."
+      ],
+      [
+        "assistant",
+        "Može, salon radi do 18h. Pošaljite mi ime i broj telefona, pa Vas upisujem."
+      ],
+      [
+        "user",
+        "Marija Jović, 064 123 4567"
+      ],
+      [
+        "assistant",
+        "Hvala, Marija. Upisana je test vožnja za Romu u salonu na Novom Beogradu, a model Vas čeka spreman."
+      ]
+    ],
+    "appt": {
+      "service_name": "Roma",
+      "duration": 30
+    },
+    "crm": {
+      "full_name": "Marija Jović",
+      "telefon": "064 123 4567",
+      "kategorija": "Električni skuteri",
+      "proizvod": "Roma",
+      "status": "Zakazano",
+      "razlog": "Pitala za cenu Capuccina i Rome i rekla da je skupo — agent je odgovorio kupovinom na 24 rate bez učešća i upisao test vožnju za Romu.",
+      "komentar": "Test vožnja · salon Novi Beograd",
+      "izvor": "Instagram"
+    },
+    "left": {
+      "msgs": [
+        [
+          "user",
+          "Cena bajsa?",
+          {
+            "post": "DeHhXRWIklP"
+          }
+        ],
+        [
+          "assistant",
+          "Dobar dan. Kene KN110 Fireman košta 186.999 RSD, a to je Crni novembar cena do 30. novembra ili do isteka zaliha. Ima bateriju 48V 20Ah i domet do 70 km."
+        ],
+        [
+          "user",
+          "Hvala, javiću se."
+        ],
+        [
+          "assistant",
+          "Važi. Ako želite prvo da ga probate, test vožnja je bez obaveze kupovine, a model Vas čeka spreman."
+        ]
+      ],
+      "crm": {
+        "full_name": "Nikola Perić",
+        "telefon": "",
+        "kategorija": "Električni bicikli",
+        "proizvod": "Kene KN110 Fireman",
+        "status": "Zainteresovan",
+        "razlog": "Pitao za cenu Firemana (186.999 RSD) i otišao uz „Hvala, javiću se.“ Agent je ostavio test vožnju kao sledeći korak.",
+        "izvor": "Instagram"
+      }
+    },
+    "intervention": {
+      "ask": "Koliko na sat ide mogu li kako da znam i ide li vozacka",
+      "answer": "Zdravo, Dragana. Ako pitate za Kene KN110 Fireman sa objave, ide do 25 km/h. Da li je za njega potrebna vozačka, ne znam sigurno, pa ne bih da nagađam. Prosleđujem upit našem timu. Mogu li da zabeležim Vaše ime i broj telefona?",
+      "razlog": "Pitala koliko brzo ide Fireman i da li je potrebna vozačka. Agent je rekao 25 km/h, a za vozačku nije siguran — prosleđeno timu."
+    },
+    "qa": [
+      [
+        "Koliko košta Mickey?",
+        "Mickey je 52.999 RSD, najpovoljniji model: 250W, korpa napred, do 50 km. To je Crni novembar cena, do 30. novembra ili do isteka zaliha."
+      ],
+      [
+        "Lako je vama po Vojvodini, a koliko bi trajala baterija jednim punjenjem po brdovitim predelima?",
+        "Domet zavisi od modela: gradski modeli 40 do 55 km, FAT modeli 60 do 80 km. Na domet utiču uspon, težina vozača i temperatura, pa uzmite model čiji je deklarisani domet bar jedan i po put veći od Vaše dnevne rute."
+      ],
+      [
+        "Mogu li da probam pre kupovine?",
+        "Možete, u salonima na Novom Beogradu i u Novom Sadu (ponedeljak do subote, 10 do 18h) i u Čačku (ponedeljak do subote, 9 do 18h). Dođite, sedite i provozajte."
+      ],
+      [
+        "Kako funkcioniše kupovina na rate?",
+        "Bez učešća, 24 rate, samo očitana lična karta. Postupak je online i traje oko 30 minuta, a vozilo preuzimate čim stigne odobrenje."
+      ],
+      [
+        "Koliko traje dostava?",
+        "3 do 7 radnih dana, sopstvenim prevozom, na kućnu adresu širom Srbije. Plaćate kada vozilo stigne, ili ga preuzmete u salonu."
+      ],
+      [
+        "Kolika je garancija?",
+        "Dve godine garancije na svaki model. Servis i rezervni delovi su u našoj radionici."
+      ],
+      [
+        "Da li ide kaciga uz vozilo?",
+        "Da, uz svaki kupljeni artikal ide poklon kaciga."
+      ],
+      [
+        "Koliko košta Compass?",
+        "Compass je 112.999 RSD, model sa najjačom baterijom u ponudi: 60V 20Ah, do 70 km. Cena važi do 30. novembra ili do isteka zaliha."
+      ],
+      [
+        "Mogu li da naručim online, a da preuzmem u salonu?",
+        "Možete. Naručite online, a preuzmite u salonu u Novom Beogradu, Novom Sadu ili Čačku."
+      ],
+      [
+        "Imate li sklopive modele?",
+        "Imamo. Grom je sklopivi FAT bicikl koji staje u gepek, 169.000 RSD, a Folding Elek Drive je 154.000 RSD, 1000 W, baterija 840 Wh."
+      ],
+      [
+        "Koji je najlakši model?",
+        "El-Klasiko je najlakši u ponudi: 30 kg, Shimano 7 brzina, 119.000 RSD."
+      ],
+      [
+        "Šta je nulti servis?",
+        "To je prvo podešavanje posle prvih vožnji i kod nas je besplatan, bez obzira na to da li ste vozilo preuzeli u salonu ili je stiglo na adresu."
+      ]
+    ],
+    "objections": [
+      [
+        "Malo mi je skupo.",
+        "Sve modele nudimo i na 24 rate, bez učešća, uz samo ličnu kartu."
+      ],
+      [
+        "Razmisliću, pa ću se javiti.",
+        "Važi. Test vožnja je bez obaveze kupovine, a model Vas čeka spreman."
+      ],
+      [
+        "Nisam siguran da kupim bez da ga vidim.",
+        "Dođite u salon, sedite i provozajte model pre nego što odlučite."
+      ],
+      [
+        "A šta ako se pokvari?",
+        "Dve godine garancije na svaki model, a servis i rezervni delovi su u našoj radionici."
+      ],
+      [
+        "Ne znam koji model je za mene.",
+        "Na početnoj strani je kviz od sedam pitanja, traje minut, i predlaže koji model da probate u salonu."
+      ]
+    ],
+    "background": [
+      {
+        "name": "Ana Kovačević",
+        "ch": "instagram",
+        "st": "Novi",
+        "msgs": [
+          [
+            "user",
+            "Cena"
+          ],
+          [
+            "assistant",
+            "Dobar dan, Ana. Roma košta 92.500 RSD: pet boja, baterija 48V 20Ah, domet do 60 km. To je Crni novembar cena, do 30. novembra ili do isteka zaliha."
+          ]
+        ]
+      },
+      {
+        "name": "Petar Nikolić",
+        "ch": "whatsapp",
+        "st": "Zainteresovan",
+        "msgs": [
+          [
+            "user",
+            "Dobar dan, treba mi nešto za nošenje robe, za posao."
+          ],
+          [
+            "assistant",
+            "Za to je teretni tricikl. Cargo Plus ima nosivost 500 kg i domet do 100 km, 233.999 RSD, a Cargo Mini nosivost 250 kg, ali je trenutno rasprodat."
+          ],
+          [
+            "user",
+            "Razmisliću."
+          ],
+          [
+            "assistant",
+            "Važi. Ako želite da ga vidite uživo, test vožnja je bez obaveze kupovine."
+          ]
+        ]
+      },
+      {
+        "name": "Jovana Ilić",
+        "ch": "facebook",
+        "st": "Zainteresovan",
+        "msgs": [
+          [
+            "user",
+            "Da li je moguće na rate?"
+          ],
+          [
+            "assistant",
+            "Jeste. Sve modele nudimo i na 24 rate, bez učešća, uz samo ličnu kartu. Postupak je online i traje oko 30 minuta."
+          ],
+          [
+            "user",
+            "A koliko je rata za Mickey?"
+          ],
+          [
+            "assistant",
+            "Mickey je 52.999 RSD. Tačan iznos rate potvrđuje banka."
+          ]
+        ]
+      },
+      {
+        "name": "Marko Savić",
+        "ch": "website",
+        "st": "Zakazano",
+        "msgs": [
+          [
+            "user",
+            "Želim da probam Compass u Novom Sadu."
+          ],
+          [
+            "assistant",
+            "Može. Test vožnja je bez obaveze kupovine, a model Vas čeka spreman. Pošaljite mi ime i broj telefona, pa Vas upisujem."
+          ],
+          [
+            "user",
+            "Marko Savić, 063 222 3344"
+          ],
+          [
+            "assistant",
+            "Hvala, Marko. Test vožnja za Compass je upisana u salonu u Novom Sadu."
+          ]
+        ]
+      },
+      {
+        "name": "Tamara Đorđević",
+        "ch": "instagram",
+        "st": "Zainteresovan",
+        "msgs": [
+          [
+            "user",
+            "Koliko traje dostava do Niša?"
+          ],
+          [
+            "assistant",
+            "Dostava je 3 do 7 radnih dana, sopstvenim prevozom, na kućnu adresu širom Srbije. Plaćate kada vozilo stigne."
+          ]
+        ]
+      },
+      {
+        "name": "Luka Pavlović",
+        "ch": "whatsapp",
+        "st": "Novi",
+        "msgs": [
+          [
+            "user",
+            "Imate li nešto lagano za stan bez lifta?"
+          ],
+          [
+            "assistant",
+            "El-Klasiko je najlakši u ponudi: 30 kg, Shimano 7 brzina, 119.000 RSD. Ima i modela kojima se baterija vadi, pa uz stepenice nosite samo nju."
+          ]
+        ]
+      },
+      {
+        "name": "Milica Jovanović",
+        "ch": "instagram",
+        "st": "Zainteresovan",
+        "msgs": [
+          [
+            "user",
+            "Šta je nulti servis?"
+          ],
+          [
+            "assistant",
+            "To je prvo podešavanje posle prvih vožnji i kod nas je besplatan, bez obzira na to da li ste vozilo preuzeli u salonu ili je stiglo na adresu."
+          ]
+        ]
+      },
+      {
+        "name": "Nemanja Ristić",
+        "ch": "website",
+        "st": "Zainteresovan",
+        "msgs": [
+          [
+            "user",
+            "Koji model ima najveći domet?"
+          ],
+          [
+            "assistant",
+            "Ape Ryder FAT modeli imaju domet do 80 km, a Cargo Plus do 100 km. Compass ima najjaču bateriju, 60V 20Ah, do 70 km."
+          ],
+          [
+            "user",
+            "Hvala, javiću se."
+          ],
+          [
+            "assistant",
+            "Važi. Test vožnja je bez obaveze kupovine, a model Vas čeka spreman."
+          ]
+        ]
+      },
+      {
+        "name": "Sara Marković",
+        "ch": "whatsapp",
+        "st": "Završeno",
+        "msgs": [
+          [
+            "user",
+            "Kupila sam Mickey kod vas. Kada treba da dođem na nulti servis?"
+          ],
+          [
+            "assistant",
+            "Najbolje u prvih stotinak kilometara. Nulti servis je besplatan, a možete doći u salon u Novom Beogradu, Novom Sadu ili Čačku."
+          ]
+        ]
+      },
+      {
+        "name": "Filip Stojanović",
+        "ch": "facebook",
+        "st": "Zainteresovan",
+        "msgs": [
+          [
+            "user",
+            "Koliki je domet Kene Spark?"
+          ],
+          [
+            "assistant",
+            "Kene Spark ima bateriju 48V 20Ah i domet do 55 km. Košta 89.500 RSD, a Crni novembar cena važi do 30. novembra ili do isteka zaliha."
+          ]
+        ]
+      },
+      {
+        "name": "Katarina Lukić",
+        "ch": "instagram",
+        "st": "Zainteresovan",
+        "msgs": [
+          [
+            "user",
+            "Ne znam koji model da izaberem."
+          ],
+          [
+            "assistant",
+            "Na početnoj strani je kviz od sedam pitanja, traje minut, i predlaže koji model da probate u salonu. Možete i da mi napišete gde ćete najviše voziti i koliko kilometara dnevno."
+          ],
+          [
+            "user",
+            "Uglavnom po gradu, oko 12 km dnevno."
+          ],
+          [
+            "assistant",
+            "Domet modela treba da bude bar jedan i po put veći od dnevne rute. Mickey ima domet do 50 km, korpu napred i košta 52.999 RSD."
+          ]
+        ]
+      },
+      {
+        "name": "Stefan Petrović",
+        "ch": "website",
+        "st": "Zainteresovan",
+        "msgs": [
+          [
+            "user",
+            "Imate li nešto za off road?"
+          ],
+          [
+            "assistant",
+            "Kene KN110 Fireman je za off road: puna amortizacija, hidraulične disk kočnice, gume 20 x 4,0 inča. Košta 186.999 RSD, do 70 km po punjenju."
+          ]
+        ]
+      }
+    ]
+  },
+  "e1": {
+    "_note": "E1 v20 (2026-11-12), same structure as the other leads: why he writes, why a demo, that it is theirs, the honest catch. 'vozilo' is the site's own word (\"preuzimaš vozilo\", \"dostava vozila\").",
+    "kind": "business",
+    "subject": "Zašto neko kupi električno vozilo kod BeeBike-a, a neko ne",
+    "za": "BeeBike",
+    "not_done": "nije kupio",
+    "made_from": "modela sa sajta",
+    "most_wanted": "koji modeli su najtraženiji",
+    "gap": "pre kupovine",
+    "_site": "beebike.rs home (modeli, test vožnja, 24 rate); Instagram posts",
+    "helps_whom": "firmama kao što je BeeBike",
+    "win": "kupovinom"
+  }
+}

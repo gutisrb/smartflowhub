@@ -13,6 +13,7 @@
  */
 
 import { createClient } from '@supabase/supabase-js'
+import { vetNiche } from './lib/niche-vet.mjs'
 import { makeLlm } from './lib/llm.mjs'
 import { execFile } from 'child_process'
 import { promisify } from 'util'
@@ -1194,7 +1195,8 @@ async function buildDemoForLead(sb, lead) {
   // Determine niche
   const rawNiche = lead.niche_v2 || lead.niche || ''
   const igCategory = lead.intake_data?.enrichment?.instagram_profile?.business_category || ''
-  const nicheKey = inferNicheKey(rawNiche, `${igCategory} ${websiteContent.slice(0, 800)}`, lead.company_name || '')
+  // a keyword table picks the label; the business's own words must support a vertical one (lib/niche-vet.mjs, 2026-11-11: a bike shop became "beauty")
+  const nicheKey = vetNiche(inferNicheKey(rawNiche, `${igCategory} ${websiteContent.slice(0, 800)}`, lead.company_name || ''), `${websiteContent} ${lead.company_name || ''}`)
   const nicheConfig = NICHE_CONFIGS[nicheKey] || NICHE_CONFIGS.generic
   console.log(`│  Niche: ${nicheKey} (from "${rawNiche || 'unknown'}")`)
 

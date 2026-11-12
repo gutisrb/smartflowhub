@@ -1,0 +1,113 @@
+{
+  "_note": "Cvejanović — hand-chosen hero (rewritten 2026-10-27 after Nikola's review). Two common objections, each answered by the clinic's own terms: (1) \"too much\" for the headline package → its payment structure, word for word from the site (offer_terms.payment_schedule: \"rezervacija termina 500 €, drugi dolazak 2.550 €, treći dolazak 2.550 €\", applies to Hollywood smile); (2) the patient cannot come now (lives abroad) → the online review (\"Većini pacijenata koji nas kontaktiraju iz inostranstva zakazujemo online preglede\"; \"Pošaljite fotografije zuba i rendgenski snimak zuba, a mi ćemo vam dati procenu stanja i predlog terapije\"; offer_terms.free_consultation label \"besplatan online pregled\", outcome \"informativnu ponudu\"). No slot is booked: the first step is done from home. The earlier real comment \"Da li moze u 60 rata?\" was dropped: an extreme ask that made the answer a non-answer. Left and handoff added 2026-10-27: the left customer asks the same headline package in euros (the generic chat quoted 655.200 RSD next to 5.600 €); the handoff is a real comment under its own reel (Dd5wH18xkv-): \"Da li moze da se radi u totalnoj anesteziji s obzirom da pijem tablete za visoki pritisak\" — a doctor's call, so the agent forwards it and claims nothing about anaesthesia. Payment line 2026-10-27 (evening) quotes the site's \"Dinamika plaćanja\": rezervacija 500 € \"Po prihvatanju informativne ponude\", prvi dolazak pripremne radnje \"po važećem cenovniku\", drugi dolazak 2.550 € \"Na dan brušenja zuba\", treći dolazak 2.550 € \"Pre dobijanja definitivnog keramičkog rada\"; \"Važno: Pripremne intervencije — vađenje zuba, ugradnja implanata ili endodontsko lečenje — naplaćuju se dodatno\". The only instalment plan on the whole site is for fixed braces (50% + 100 € per monthly check, +100 €): NO 12/24-month plan for Hollywood smile, so the agent offers none. 2026-11-10 fact-check: no concession to \"dosta za mene\" (the customer asks the real \"Da li može na rate?\" and gets the site's staged payment); 5.600 € is for both jaws and preparatory work is extra (site); photos go to WhatsApp/Viber in full resolution (site); no emoji, no \"javlja lično\", status Zainteresovan.",
+  "hero": {
+    "channel": "instagram",
+    "customer": "Marija Jović",
+    "phone": "+49 151 2345 6789",
+    "msgs": [
+      [
+        "user",
+        "Cena?",
+        {
+          "post": "Dd8VTyckTL5"
+        }
+      ],
+      [
+        "assistant",
+        "Dobar dan, Marija. Hollywood smile je 5.600 € za obe vilice. U cenu ulaze pregled, plan terapije, brušenje zuba, privremene i definitivne keramičke bezmetalne krunice. Pripremne intervencije, poput vađenja zuba, ugradnje implanata ili endodontskog lečenja, naplaćuju se dodatno."
+      ],
+      [
+        "user",
+        "Da li može na rate?"
+      ],
+      [
+        "assistant",
+        "Plaćate kako rad napreduje: 500 € kad prihvatite informativnu ponudu, 2.550 € na dan brušenja zuba i 2.550 € pre definitivnih krunica."
+      ],
+      [
+        "user",
+        "To mi je već lakše. Ali ne mogu sada da dođem, živim u Nemačkoj."
+      ],
+      [
+        "assistant",
+        "Za prvi korak ne morate da dolazite. Većini pacijenata iz inostranstva prvo radimo besplatan online pregled: pošaljete fotografije zuba i rendgenski snimak, a mi Vam damo procenu stanja i predlog terapije."
+      ],
+      [
+        "user",
+        "To može. Gde da pošaljem?"
+      ],
+      [
+        "assistant",
+        "Fotografije šaljite na WhatsApp ili Viber na +381 65 3910 483, u punoj rezoluciji. Pošaljite mi i ime i broj telefona, da znamo čiji su snimci."
+      ],
+      [
+        "user",
+        "Marija Jović, +49 151 2345 6789"
+      ],
+      [
+        "assistant",
+        "Hvala, Marija. Kad pogledamo snimke, dobijate informativnu ponudu sa planom terapije: u njoj piše da li može odmah ili su potrebne pripremne radnje."
+      ]
+    ],
+    "crm": {
+      "full_name": "Marija Jović",
+      "telefon": "+49 151 2345 6789",
+      "kategorija": "Estetska stomatologija",
+      "proizvod": "Hollywood smile",
+      "status": "Zainteresovan",
+      "razlog": "Pitala za cenu, pa da li može na rate — agent je objasnio plaćanje po fazama rada. Pošto živi u Nemačkoj i ne može da dođe, dogovoren je besplatan online pregled. Šalje snimke.",
+      "komentar": "Online pregled · pacijentkinja iz inostranstva",
+      "izvor": "Instagram"
+    },
+    "left": {
+      "msgs": [
+        [
+          "user",
+          "Cena",
+          {
+            "post": "Dd8VTyckTL5"
+          }
+        ],
+        [
+          "assistant",
+          "Dobar dan. Hollywood smile je 5.600 € za obe vilice. U cenu ulaze pregled, plan terapije, brušenje zuba, privremene i definitivne keramičke bezmetalne krunice."
+        ],
+        [
+          "user",
+          "Hvala, javiću se."
+        ],
+        [
+          "assistant",
+          "Važi. Ako želite prvo da vidite plan, besplatan online pregled možete da obavite sa daljine: fotografije zuba i rendgenski snimak pošaljete na WhatsApp ili Viber na +381 65 3910 483, a mi Vam damo procenu stanja i predlog terapije."
+        ]
+      ],
+      "crm": {
+        "full_name": "Nikola Perić",
+        "telefon": "",
+        "kategorija": "Estetska stomatologija",
+        "proizvod": "Hollywood smile",
+        "status": "Zainteresovan",
+        "razlog": "Pitao za cenu Hollywood smile i otišao uz „Hvala, javiću se.“ Agent je ponudio besplatan online pregled i čeka odgovor.",
+        "izvor": "Instagram"
+      }
+    },
+    "intervention": {
+      "ask": "Da li može da se radi u totalnoj anesteziji, s obzirom da pijem tablete za visoki pritisak?",
+      "answer": "Dobar dan. Da li anestezija dolazi u obzir uz Vaše tablete, procenjuje lekar, pa ne bih da nagađam. Prosleđujem upit. Mogu li da zabeležim Vaše ime i broj telefona?",
+      "domainNom": "lekar",
+      "razlog": "Pita da li je moguća totalna anestezija uz tablete za visoki pritisak — procenu daje lekar. Prosleđeno."
+    }
+  },
+  "e1": {
+    "_note": "E1 v20 (2026-11-09). Opens as a person: why he writes (his belief about where AI helps this kind of business most), why a demo (easier shown than explained), that it is theirs (built from their site + comments), the honest catch (before proposing anything). No scenario, no backstory.",
+    "kind": "clinic",
+    "subject": "Zašto neko zakaže u ordinaciji Cvejanović, a neko ne",
+    "za": "ordinaciju Cvejanović",
+    "not_done": "nije zakazao",
+    "made_from": "usluga i cena sa sajta",
+    "most_wanted": "za koje usluge se najviše raspituju",
+    "gap": "pre zakazivanja",
+    "_site": "Stomatološka ordinacija Cvejanović",
+    "helps_whom": "ordinacijama kao što je Vaša"
+  }
+}

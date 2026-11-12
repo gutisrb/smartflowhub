@@ -1,0 +1,141 @@
+{
+  "_note": "JetSet — hand-written Business Sheet (OpenAI credits empty on 2026-10-26). Every quote is verified word for word against jetset.rs by build_sheets.mjs; a quote that is not on the site drops its offer. 2026-11-10 fact-check: iPhone 12 is outside the buyback/trade-in rule on its own FAQ; the iPhone 14 Plus was not in stock; the shop takes no bookings.",
+  "offers": [
+    {
+      "name": "Novi i polovni mobilni telefoni",
+      "kind": "product",
+      "how_bought": "reserve_for_pickup",
+      "fulfilment": "in_store",
+      "quote": "Plaćanje je u punom iznosu, gotovinom ili platnom karticom, pri preuzimanju uređaja",
+      "reply": "Telefoni sa sajta su na stanju u radnji. Plaća se gotovinom ili platnom karticom u radnji, a zakazivanje nije potrebno."
+    },
+    {
+      "name": "Otkup telefona",
+      "kind": "buyback",
+      "how_bought": "walk_in",
+      "fulfilment": "in_store",
+      "quote": "Procenu radimo pred tobom, konačnu cenu znaš odmah, a isplata je na licu mesta",
+      "reply": "Pošaljite tačan model, memoriju i stanje uređaja, pa dobijate okvirni raspon. Isplata kod otkupa se vrši u gotovini, odmah po prihvatanju ponude."
+    },
+    {
+      "name": "Zamena starog telefona za noviji",
+      "kind": "product",
+      "how_bought": "walk_in",
+      "fulfilment": "in_store",
+      "quote": "Najčešće korišćena alternativa je zamena starog telefona za noviji, gde se vrednost starog uređaja odbija",
+      "reply": "Stari telefon možete dati u zamenu za noviji, a vrednost starog uređaja se odbija od cene."
+    },
+    {
+      "name": "Servis mobilnih telefona",
+      "kind": "service",
+      "how_bought": "walk_in",
+      "fulfilment": "in_store",
+      "quote": "Tačnu cenu i rok dobićeš nakon što utvrdimo model, kvar i dostupnost odgovarajućeg dela",
+      "reply": "Tačnu cenu i rok dobijate kada utvrdimo model, kvar i dostupnost odgovarajućeg dela. Većinu standardnih servisa završavamo za 24 sata."
+    }
+  ],
+  "primary": 0,
+  "stages": [
+    "Upit",
+    "Najavio dolazak",
+    "Kupio u radnji"
+  ],
+  "strategy": {
+    "worries": [
+      {
+        "id": "price",
+        "customer_says": "Hmm, to mi je trenutno malo skupo.",
+        "approach": "split_decision",
+        "why": "A large one-off sum; the shop does not offer instalments, but it does take the old phone in trade.",
+        "agent_reply": "Stari telefon možete dati u zamenu za noviji, a vrednost starog uređaja se odbija od cene."
+      },
+      {
+        "id": "trust",
+        "customer_says": "A da li je polovan telefon ispravan?",
+        "approach": "lower_risk",
+        "why": "Used phones feel risky.",
+        "agent_reply": "Na polovne telefone koje prodajemo dajemo mesec dana garancije."
+      },
+      {
+        "id": "later",
+        "customer_says": "Razmisliću, pa ću se javiti.",
+        "approach": "next_step",
+        "why": "Wants to compare first.",
+        "agent_reply": "Zakazivanje nije potrebno ni za kupovinu ni za otkup, pa telefon možete da pogledate u radnji kad Vam odgovara."
+      }
+    ],
+    "call_prep": [
+      {
+        "lever": "Let Instagram buyers hold a listed phone for 24 hours in the store after a DM",
+        "why": "Stock moves fast; a held phone turns a DM into a visit"
+      },
+      {
+        "lever": "Quote a trade-in value range in the same DM when someone asks for a newer model",
+        "why": "The FAQ says trade-in is the most used alternative to instalments, which the shop does not offer"
+      }
+    ]
+  },
+  "hero": {
+    "_why": "JetSet's real customers ask what their old phone is worth (a real comment under its own buyback post: an iPhone 12). The site's own rule is that it buys only working phones up to three years old, so the agent says so and moves the customer to what the shop sells; the stock changes daily (its FAQ), so no model or price is quoted. Walk-in shop: no name-and-number to \"announce\" a visit.",
+    "channel": "instagram",
+    "customer": "Stefan Ilić",
+    "phone": "063 987 6543",
+    "msgs": [
+      [
+        "user",
+        "Dobar dan zanima me koliko bi ste mi dali novca za Iphone 12 u plavoj boji ima 75% battery health",
+        {
+          "post": "DBRzyhXxkYm"
+        }
+      ],
+      [
+        "assistant",
+        "Dobar dan, Stefane. Otkupljujemo samo ispravne telefone do tri godine starosti, a iPhone 12 je stariji, pa ga ne možemo otkupiti ni uzeti u zamenu."
+      ],
+      [
+        "user",
+        "Šteta. Zanima me onda neki noviji, na primer iPhone 14 Pro Max. Imate li ga?"
+      ],
+      [
+        "assistant",
+        "Ponuda se menja svakodnevno, jer svaki uređaj postoji u jednom primerku. Aktuelne telefone i cene vidite na jetset.rs. Radnja je u TC Piramida, Jurija Gagarina 151a, lokal 20, Novi Beograd, a radno vreme je pon–pet 10–20h, sub 10–15h. Zakazivanje nije potrebno."
+      ],
+      [
+        "user",
+        "Super, svratiću sutra posle posla."
+      ],
+      [
+        "assistant",
+        "Važi. Vidimo se u radnji."
+      ]
+    ],
+    "crm": {
+      "full_name": "Stefan Ilić",
+      "telefon": "063 987 6543",
+      "kategorija": "Prodaja polovnih mobilnih telefona",
+      "proizvod": "iPhone 14 Pro Max",
+      "status": "Zainteresovan",
+      "razlog": "Pitao koliko vredi njegov iPhone 12 — agent je rekao da otkupljuju samo ispravne telefone do tri godine starosti i uputio ga na aktuelnu ponudu i radnju.",
+      "komentar": "",
+      "izvor": "Instagram"
+    },
+    "complaint": {
+      "ask": "Dobar dan, kupio sam telefon kod Vas pre dve nedelje i ne radi mi kako treba.",
+      "answer": "Žao mi je zbog toga. Koji ste telefon kupili i šta tačno ne radi? Uređaj možete da donesete u radnju u roku od mesec dana od kupovine. Ja upisujem slučaj, pa mi pošaljite ime i broj telefona.",
+      "razlog": "Reklamacija na kupljen telefon. Agent je pitao koji je model i šta ne radi, i uputio da se uređaj donese u radnju u roku od mesec dana od kupovine (pravilo sa sajta). Prosleđeno na rešavanje."
+    }
+  },
+  "e1": {
+    "_note": "E1 v20 (2026-11-09). Opens as a person: why he writes (his belief about where AI helps this kind of business most), why a demo (easier shown than explained), that it is theirs (built from their site + comments), the honest catch (before proposing anything). No scenario, no backstory.",
+    "kind": "business",
+    "subject": "Zašto neko kupi telefon u JetSet-u, a neko ne",
+    "za": "JetSet",
+    "not_done": "nije kupio",
+    "made_from": "telefona sa sajta",
+    "most_wanted": "koji telefoni su najtraženiji",
+    "gap": "pre kupovine",
+    "_site": "business sheet: Novi i polovni mobilni telefoni",
+    "helps_whom": "firmama kao što je JetSet",
+    "win": "kupovinom"
+  }
+}

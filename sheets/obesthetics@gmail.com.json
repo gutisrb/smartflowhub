@@ -1,0 +1,89 @@
+{
+  "_note": "OB Esthetics (obcukicesthetics.com) — hand-chosen hero (2026-10-27). No customer comments. From its site: \"Pre svake intervencije potrebno je izvrsiti kontrolni pregled i u konsultaciji sa našim ekspertima doneti najbolju odluku jer nije svaka željena intervencija najbolja i jednaka za svaku osobu\", \"konsultacije ne naplaćujemo\", \"Zakažite konsultacije\". A face lift is never booked from a DM: the consultation is.",
+  "booking": {
+    "state": "required",
+    "unit": "slot",
+    "quote": "konsultacije ne naplaćujemo"
+  },
+  "hero": {
+    "channel": "instagram",
+    "customer": "Marija Jović",
+    "phone": "064 123 4567",
+    "msgs": [
+      [
+        "user",
+        "Zdravo, koliko košta face lift?"
+      ],
+      [
+        "assistant",
+        "Zdravo, Marija 😊 Face lift short scar je 192.000 RSD. Pre svake intervencije radi se pregled i konsultacija sa našim stručnjacima, jer nije svaka intervencija ista za svakoga."
+      ],
+      [
+        "user",
+        "A koliko košta konsultacija?"
+      ],
+      [
+        "assistant",
+        "Konsultacije ne naplaćujemo. Imam danas u 15h ili u 16h. Šta Vam više odgovara?"
+      ],
+      [
+        "user",
+        "Može u 15h."
+      ],
+      [
+        "assistant",
+        "Pošaljite mi ime i broj telefona, pa Vas upisujem."
+      ],
+      [
+        "user",
+        "Marija Jović, 064 123 4567"
+      ],
+      [
+        "assistant",
+        "Upisani ste za konsultacije, danas u 15h ✅ Stiže Vam i podsetnik."
+      ]
+    ],
+    "appt": {
+      "service_name": "Konsultacije",
+      "duration": 30
+    },
+    "crm": {
+      "full_name": "Marija Jović",
+      "telefon": "064 123 4567",
+      "kategorija": "Estetska hirurgija",
+      "proizvod": "Face lift short scar",
+      "status": "Zakazano",
+      "razlog": "Pitala za cenu face lifta — agent je rekao da se pre svake intervencije radi konsultacija, da je ne naplaćujete, i zakazao je.",
+      "izvor": "Instagram"
+    },
+    "left": {
+      "msgs": [
+        [
+          "user",
+          "Zdravo, koliko košta face lift?"
+        ],
+        [
+          "assistant",
+          "Zdravo, Nikola 😊 Face lift short scar je 192.000 RSD."
+        ],
+        [
+          "user",
+          "Hvala, javiću se."
+        ],
+        [
+          "assistant",
+          "Važi. Konsultacije ne naplaćujemo, pa možete prvo da dođete na razgovor sa našim stručnjacima. Da Vam sačuvam termin?"
+        ]
+      ],
+      "crm": {
+        "full_name": "Nikola Perić",
+        "telefon": "063 555 1212",
+        "kategorija": "Estetska hirurgija",
+        "proizvod": "Face lift short scar",
+        "status": "Zainteresovan",
+        "razlog": "Pitao za cenu (192.000 RSD) i otišao uz „Hvala, javiću se.“ Agent je ponudio besplatne konsultacije i čeka odgovor.",
+        "izvor": "Instagram"
+      }
+    }
+  }
+}

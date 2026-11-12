@@ -1,0 +1,388 @@
+{
+  "_note": "industrija_bg (Industrija BG, industrijabg.rs) — hand sheet written 2026-11-12 from its home page (\"Besplatno merenje i konsultacije. Dolazimo na teren i zajedno definišemo rešenje\", \"svaki projekat radimo prema vašem prostoru, ritmu života i budžetu\"), /kontakt/ FAQ (\"Prva konsultacija i merenje na teritoriji Beograda su besplatni i bez obaveza\", \"Nakon usaglašenog rešenja, izrada i montaža obično traju nekoliko nedelja\", \"Montaža je deo usluge\", \"Nakon prihvaćene ponude dogovara se avans za materijal i izradu, a ostatak po završetku montaže\", \"Beograd je naša baza, a projekte radimo i van grada po dogovoru. Troškovi dolaska zavise od lokacije\") and the services pages (\"Troškovi dolaska i montaže zavise od lokacije projekta\", \"Predlažemo kombinacije po budžetu, a vi birate izgled, boju i tip otvaranja\"). The site states NO price and NO complaint or warranty term (only \"garantujemo kvalitet\"), so the agent quotes no price (the price comes in the offer) and there is no complaint hero. Only five real comments exist; all five are used verbatim: \"I koliko je to sve kostalo?\" (hero opener, under the kitchen post C4a0Touopbn), \"Cena trpezarijskig stola?\" (left), \"Cena?\", \"Cena\", and the compliment on the two chairs (filler/background). The customer's follow-up lines (advance payment, how long it takes) are the site's own FAQ questions. Hand-off = a customer outside Belgrade asking what the visit costs: the site says it depends on the location and gives no amount.",
+  "hero": {
+    "channel": "instagram",
+    "customer": "Marija Jović",
+    "phone": "064 123 4567",
+    "msgs": [
+      [
+        "user",
+        "I koliko je to sve kostalo?",
+        {
+          "post": "C4a0Touopbn"
+        }
+      ],
+      [
+        "assistant",
+        "Dobar dan, Marija. Svaki projekat radimo prema Vašem prostoru, ritmu života i budžetu, pa cenu dobijate u ponudi. Prva konsultacija i merenje na teritoriji Beograda su besplatni i bez obaveza. Da li Vas zanima ovakva kuhinja?"
+      ],
+      [
+        "user",
+        "Da, ovakva kuhinja. Da li se plaća unapred?"
+      ],
+      [
+        "assistant",
+        "Nakon prihvaćene ponude dogovara se avans za materijal i izradu, a ostatak po završetku montaže."
+      ],
+      [
+        "user",
+        "A koliko dugo traje izrada?"
+      ],
+      [
+        "assistant",
+        "Nakon usaglašenog rešenja, izrada i montaža obično traju nekoliko nedelja, u zavisnosti od obima projekta i izbora materijala. Pošaljite mi ime, broj telefona i grad, pa upisujem zahtev za ponudu."
+      ],
+      [
+        "user",
+        "Marija Jović, 064 123 4567, Beograd"
+      ],
+      [
+        "assistant",
+        "Hvala, Marija. Zahtev za ponudu je upisan i prosleđen."
+      ]
+    ],
+    "crm": {
+      "full_name": "Marija Jović",
+      "telefon": "064 123 4567",
+      "kategorija": "Kuhinje po meri",
+      "proizvod": "Kuhinja po meri",
+      "status": "Zakazano",
+      "razlog": "Pitala koliko je koštala kuhinja sa objave. Agent je rekao da se cena dobija u ponudi, uz besplatnu konsultaciju i merenje u Beogradu, odgovorio na pitanja o avansu i trajanju izrade i uzeo podatke za ponudu.",
+      "komentar": "Grad: Beograd · besplatno merenje i konsultacija",
+      "izvor": "Instagram"
+    },
+    "left": {
+      "msgs": [
+        [
+          "user",
+          "Cena trpezarijskig stola?"
+        ],
+        [
+          "assistant",
+          "Dobar dan. Stolove radimo po meri, pa cenu dobijate u ponudi. Prva konsultacija i merenje na teritoriji Beograda su besplatni i bez obaveza. Recite mi šta Vam treba i u kom ste gradu."
+        ],
+        [
+          "user",
+          "Hvala, javiću se."
+        ],
+        [
+          "assistant",
+          "Važi. Kad budete spremni, pišite ovde i pripremamo ponudu."
+        ]
+      ],
+      "crm": {
+        "full_name": "Nikola Perić",
+        "telefon": "",
+        "kategorija": "Stolovi po meri",
+        "proizvod": "Trpezarijski sto po meri",
+        "status": "Zainteresovan",
+        "razlog": "Pitao za cenu trpezarijskog stola i otišao uz „Hvala, javiću se.“ Agent je rekao da se cena dobija u ponudi, da su prva konsultacija i merenje besplatni, i ostavio razgovor otvoren.",
+        "izvor": "Instagram"
+      }
+    },
+    "intervention": {
+      "ask": "Da li radite i u Kragujevcu i koliko košta dolazak?",
+      "answer": "Dobar dan, Dragana. Projekte radimo i van Beograda po dogovoru, a troškovi dolaska i montaže zavise od lokacije projekta. Koliko tačno iznose za Kragujevac, ne bih da nagađam. Prosleđujem upit. Mogu li da zabeležim Vaše ime i broj telefona?",
+      "razlog": "Pita da li radite u Kragujevcu i koliko košta dolazak. Sajt kaže da se van Beograda radi po dogovoru i da troškovi zavise od lokacije, a iznos ne navodi, pa agent ne nagađa. Prosleđeno."
+    },
+    "qa": [
+      [
+        "Cena?",
+        "Svaki projekat radimo prema Vašem prostoru, ritmu života i budžetu, pa cenu dobijate u ponudi. Recite mi šta Vam treba i u kom ste gradu."
+      ],
+      [
+        "Cena",
+        "Cenu dobijate u ponudi. Prva konsultacija i merenje na teritoriji Beograda su besplatni i bez obaveza. Šta Vam je potrebno?"
+      ],
+      [
+        "Cena trpezarijskig stola?",
+        "Stolove radimo po meri, pa cenu dobijate u ponudi. Prva konsultacija i merenje na teritoriji Beograda su besplatni i bez obaveza."
+      ],
+      [
+        "I koliko je to sve kostalo?",
+        "Cenu pravimo za svaki projekat posebno, prema prostoru i budžetu, i dobijate je u ponudi. Prva konsultacija i merenje su besplatni."
+      ],
+      [
+        "Najviše mi se dopao detalj ove dve stolicice 👏 koliko je simpatično i prakticno",
+        "Hvala Vam. Ako želite nešto slično, recite mi šta Vam treba, pa pripremamo ponudu."
+      ],
+      [
+        "Koliko traje izrada?",
+        "Nakon usaglašenog rešenja, izrada i montaža obično traju nekoliko nedelja, u zavisnosti od obima projekta i izbora materijala."
+      ],
+      [
+        "Da li je konsultacija besplatna?",
+        "Da. Prva konsultacija i merenje na teritoriji Beograda su besplatni i bez obaveza."
+      ],
+      [
+        "Da li radite montažu?",
+        "Da. Montaža je deo usluge: ugradnja na licu mesta i predaja spremnog prostora."
+      ],
+      [
+        "Koje materijale koristite?",
+        "Radimo sa proverenim pločama, furnirima, lakiranim frontovima i kvalitetnim okovima, u skladu sa budžetom i stilom prostora."
+      ],
+      [
+        "Da li je potreban avans?",
+        "Nakon prihvaćene ponude dogovara se avans za materijal i izradu, a ostatak po završetku montaže."
+      ],
+      [
+        "Radite li van Beograda?",
+        "Da, po dogovoru. Troškovi dolaska i montaže zavise od lokacije projekta."
+      ],
+      [
+        "Mogu li da vidim uzorke materijala?",
+        "Možete. Dođite da uživo vidite materijale, uzorke i realizovane projekte. Zakazivanje posete je besplatno i bez obaveza."
+      ]
+    ],
+    "objections": [
+      [
+        "Razmisliću, pa ću se javiti.",
+        "Važi. Prva konsultacija i merenje su besplatni i bez obaveza, pa kad budete spremni, pišite ovde."
+      ],
+      [
+        "Plašim se da se sve plaća unapred.",
+        "Ne plaća se sve unapred: nakon prihvaćene ponude dogovara se avans za materijal i izradu, a ostatak po završetku montaže."
+      ],
+      [
+        "To mi deluje kao velika investicija.",
+        "Svaki projekat radimo prema Vašem budžetu, a nakon ponude se dogovara avans za materijal i izradu. Ostatak se plaća po završetku montaže."
+      ],
+      [
+        "Nisam iz Beograda.",
+        "Beograd je naša baza, a projekte radimo i van grada po dogovoru. Troškovi dolaska i montaže zavise od lokacije projekta."
+      ],
+      [
+        "Ne znam tačne mere.",
+        "U Beogradu merenje radimo mi: dolazimo na teren i zajedno definišemo rešenje."
+      ]
+    ],
+    "background": [
+      {
+        "name": "Ana Kovačević",
+        "ch": "instagram",
+        "st": "Novi",
+        "msgs": [
+          [
+            "user",
+            "Cena?"
+          ],
+          [
+            "assistant",
+            "Svaki projekat radimo prema Vašem prostoru, ritmu života i budžetu, pa cenu dobijate u ponudi. Recite mi šta Vam treba i u kom ste gradu."
+          ]
+        ]
+      },
+      {
+        "name": "Petar Nikolić",
+        "ch": "whatsapp",
+        "st": "Zainteresovan",
+        "msgs": [
+          [
+            "user",
+            "Da li radite i plakare?"
+          ],
+          [
+            "assistant",
+            "Da. Radimo kuhinje, plakare i garderobere, sobe, predsoblja, kancelarije i stolove po meri."
+          ],
+          [
+            "user",
+            "Javiću se."
+          ],
+          [
+            "assistant",
+            "Važi. Prva konsultacija i merenje na teritoriji Beograda su besplatni i bez obaveza."
+          ]
+        ]
+      },
+      {
+        "name": "Jovana Ilić",
+        "ch": "facebook",
+        "st": "Zakazano",
+        "msgs": [
+          [
+            "user",
+            "Treba mi plakar po meri za spavaću sobu."
+          ],
+          [
+            "assistant",
+            "Radimo plakare i garderobere po meri. Pošaljite mi ime, broj telefona i grad, pa upisujem zahtev za ponudu."
+          ],
+          [
+            "user",
+            "Jovana Ilić, 063 410 7721, Novi Beograd"
+          ],
+          [
+            "assistant",
+            "Hvala, Jovana. Zahtev za ponudu je upisan i prosleđen."
+          ]
+        ]
+      },
+      {
+        "name": "Marko Savić",
+        "ch": "website",
+        "st": "Zakazano",
+        "msgs": [
+          [
+            "user",
+            "Treba nam enterijer za kancelariju, može li ponuda?"
+          ],
+          [
+            "assistant",
+            "Radimo kancelarije i poslovne prostore. Pošaljite mi ime, broj telefona i grad, pa upisujem zahtev za ponudu."
+          ],
+          [
+            "user",
+            "Marko Savić, 065 828 6764, Beograd"
+          ],
+          [
+            "assistant",
+            "Hvala, Marko. Zahtev za ponudu je upisan i prosleđen."
+          ]
+        ]
+      },
+      {
+        "name": "Tamara Đorđević",
+        "ch": "instagram",
+        "st": "Naručio",
+        "msgs": [
+          [
+            "user",
+            "Prihvatamo ponudu za kuhinju."
+          ],
+          [
+            "assistant",
+            "Hvala, Tamara. Potvrda je upisana i prosleđena. Avans za materijal i izradu dogovara se nakon prihvaćene ponude, a ostatak plaćate po završetku montaže."
+          ]
+        ]
+      },
+      {
+        "name": "Luka Pavlović",
+        "ch": "whatsapp",
+        "st": "Zainteresovan",
+        "msgs": [
+          [
+            "user",
+            "Da li radite montažu?"
+          ],
+          [
+            "assistant",
+            "Da. Montaža je deo usluge: ugradnja na licu mesta i predaja spremnog prostora."
+          ]
+        ]
+      },
+      {
+        "name": "Milica Jovanović",
+        "ch": "instagram",
+        "st": "Zainteresovan",
+        "msgs": [
+          [
+            "user",
+            "Koliko traje izrada kuhinje?"
+          ],
+          [
+            "assistant",
+            "Nakon usaglašenog rešenja, izrada i montaža obično traju nekoliko nedelja, u zavisnosti od obima projekta i izbora materijala."
+          ],
+          [
+            "user",
+            "Razmisliću."
+          ],
+          [
+            "assistant",
+            "Važi. Prva konsultacija i merenje na teritoriji Beograda su besplatni i bez obaveza."
+          ]
+        ]
+      },
+      {
+        "name": "Nemanja Ristić",
+        "ch": "website",
+        "st": "Zainteresovan",
+        "msgs": [
+          [
+            "user",
+            "Mogu li da biram okove i fronte?"
+          ],
+          [
+            "assistant",
+            "Naravno. Predlažemo kombinacije po budžetu, a Vi birate izgled, boju i tip otvaranja."
+          ]
+        ]
+      },
+      {
+        "name": "Katarina Lukić",
+        "ch": "instagram",
+        "st": "Zainteresovan",
+        "msgs": [
+          [
+            "user",
+            "Najviše mi se dopao detalj ove dve stolicice 👏 koliko je simpatično i prakticno"
+          ],
+          [
+            "assistant",
+            "Hvala Vam. Ako želite nešto slično, recite mi šta Vam treba, pa pripremamo ponudu."
+          ]
+        ]
+      },
+      {
+        "name": "Stefan Petrović",
+        "ch": "facebook",
+        "st": "Novi",
+        "msgs": [
+          [
+            "user",
+            "Cena trpezarijskig stola?"
+          ],
+          [
+            "assistant",
+            "Stolove radimo po meri, pa cenu dobijate u ponudi. Prva konsultacija i merenje na teritoriji Beograda su besplatni i bez obaveza."
+          ]
+        ]
+      },
+      {
+        "name": "Sara Marković",
+        "ch": "instagram",
+        "st": "Zainteresovan",
+        "msgs": [
+          [
+            "user",
+            "Radite li dečije sobe?"
+          ],
+          [
+            "assistant",
+            "Da. Dečija soba raste sa detetom: pametan raspored, bezbedni okovi i materijali koji podnose igru."
+          ]
+        ]
+      },
+      {
+        "name": "Filip Stojanović",
+        "ch": "whatsapp",
+        "st": "Naručio",
+        "msgs": [
+          [
+            "user",
+            "Slažemo se sa ponudom za plakar."
+          ],
+          [
+            "assistant",
+            "Hvala, Filipe. Potvrda je upisana i prosleđena."
+          ]
+        ]
+      }
+    ]
+  },
+  "e1": {
+    "_note": "E1 v20 (2026-11-12). Same skeleton as the other leads. Industrija BG sells by offer and states no price, so the subject asks why one visitor asks for an offer on a kitchen and another does not. Only 5 real comments exist, all of them questions or reactions under its posts.",
+    "kind": "business",
+    "subject": "Zašto neko zatraži ponudu za kuhinju kod Industrije BG, a neko ne",
+    "za": "Industrija BG",
+    "not_done": "nije tražio ponudu",
+    "made_from": "usluga sa sajta",
+    "most_wanted": "za koje usluge se najviše raspituju",
+    "gap": "pre ponude",
+    "_site": "industrijabg.rs: Nameštaj po meri Beograd",
+    "helps_whom": "firmama kao što je Industrija BG",
+    "win": "zahtevom za ponudu"
+  }
+}

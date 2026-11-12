@@ -1,0 +1,415 @@
+{
+  "_note": "Emmeti — hand sheet written 2026-11-12 from emmeti.rs (home, kontakt with the FAQ and the salon hours, opšti uslovi prodaje, uslovi garancije, product pages Riverstone / Aura / Bluna, the Rasprodaja category) and from real comments under its own Instagram posts. Opening = a real comment (\"Molim cenu sofe i dimenzije?\") under its post about the sofa with a pull-out mechanism (DfNXWtSkskO); the left hero is \"Mozete li mi reci cenu stola?\" under the Calligaris promotion (DblypNVOjet). The site publishes NO price on its product pages (a real customer says so: \"Ni na sajtu nema cene\"), so the agent never quotes one for a sofa: it says the price and dimensions go in an offer, asks which salon (the site's own enquiry form asks Beograd or Novi Sad), gives the salon's own hours and takes name and phone. The only price said is one the site shows: Mikado dining table \"Od 802 EUR\" (similar-products block on the Riverstone page), said with its unit. Facts used, all site sentences: \"Svaki je model prilagodljiv potrebama kupca i može da se radi u raznim materijalima\", \"Garancija na kupljeni proizvod je 2. godine\", \"Da, na teritoriji cele Srbije\", \"Da, na osnovu date ponude, ako se usaglasimo sa istom. Potom izlazimo na teren\", \"Isporuka na teritoriji Beograda i Novog Sada je besplatna\", \"Montaža je uvek u ceni\", 50% to start the contract and the rest within 5 radnih dana of the goods arriving, Rasprodaja = \"Nameštaj iz salona koji vam je odmah na raspolaganju sa sniženim cenama\", salon hours (Beograd pon-pet 10-18, Novi Sad pon-pet 9-19 and sub 10-15). NOT used: any delivery time (the FAQ says 45 do 90 dana, the terms say 60 do 120 dana: the site contradicts itself), the warranty length in months (25 on one page, 24 on another), any price for the sofa. The complaint beat lives in hero.intervention because a quote business has no separate complaint thread: the agent states the warranty and how a complaint is filed (salon, phone, written, e-mail, with the invoice) and hands the decision on whether the defect is covered to the team (the terms limit hidden defects to six months and visible damage to the day of delivery, so it is genuinely not the agent's call).",
+  "hero": {
+    "channel": "instagram",
+    "customer": "Marija Jović",
+    "phone": "064 123 4567",
+    "msgs": [
+      [
+        "user",
+        "Molim cenu sofe i dimenzije?",
+        {
+          "post": "DfNXWtSkskO"
+        }
+      ],
+      [
+        "assistant",
+        "Dobar dan, Marija. Cenu i dimenzije šaljemo u ponudi, jer svaki model može da se radi u raznim materijalima. Mislite na sofu sa objave, onu sa mehanizmom za razvlačenje?"
+      ],
+      [
+        "user",
+        "Da, ta."
+      ],
+      [
+        "assistant",
+        "Može. Za koji salon da pripremimo ponudu, Beograd ili Novi Sad?"
+      ],
+      [
+        "user",
+        "Beograd."
+      ],
+      [
+        "assistant",
+        "Salon u Beogradu je na Bulevaru Mihajla Pupina 165e i radi od ponedeljka do petka od 10 do 18h, pa modele možete da pogledate i uživo. Pošaljite mi ime i broj telefona za ponudu."
+      ],
+      [
+        "user",
+        "Marija Jović, 064 123 4567"
+      ],
+      [
+        "assistant",
+        "Hvala, Marija. Zahtev za ponudu za sofu sa mehanizmom je upisan i prosleđen salonu u Beogradu."
+      ]
+    ],
+    "crm": {
+      "full_name": "Marija Jović",
+      "telefon": "064 123 4567",
+      "kategorija": "Garniture",
+      "proizvod": "Sofa sa mehanizmom za razvlačenje",
+      "status": "Zakazano",
+      "razlog": "Pitala za cenu i dimenzije sofe sa objave. Agent je rekao da se cena i dimenzije šalju u ponudi, saznao da je u pitanju sofa sa mehanizmom i da joj je bliži salon u Beogradu, i uzeo ime i broj telefona.",
+      "komentar": "Salon: Beograd",
+      "izvor": "Instagram"
+    },
+    "left": {
+      "msgs": [
+        [
+          "user",
+          "Mozete li mi reci cenu stola?",
+          {
+            "post": "DblypNVOjet"
+          }
+        ],
+        [
+          "assistant",
+          "Dobar dan. Koji sto sa objave Vas zanima? Na primer, trpezarijski sto Mikado je od 802 €, a za ostale modele pripremamo ponudu."
+        ],
+        [
+          "user",
+          "Hvala, javiću se."
+        ],
+        [
+          "assistant",
+          "Važi. Modele možete da pogledate i u našim salonima u Beogradu i Novom Sadu, a ponudu pripremamo kad god kažete."
+        ]
+      ],
+      "crm": {
+        "full_name": "Nikola Perić",
+        "telefon": "",
+        "kategorija": "Trpezarijski stolovi",
+        "proizvod": "Trpezarijski sto",
+        "status": "Zainteresovan",
+        "razlog": "Pitao za cenu stola sa objave i otišao uz „Hvala, javiću se.“ Agent je rekao da je Mikado od 802 € i ostavio razgovor otvoren.",
+        "izvor": "Instagram"
+      }
+    },
+    "intervention": {
+      "ask": "Dobar dan, garnitura koju smo kupili kod vas pre osam meseci ima manu na jednom delu. Šta da radim?",
+      "answer": "Žao mi je zbog toga. Garancija na kupljeni proizvod je 2 godine, a reklamaciju možete da prijavite u salonu, telefonom ili mejlom, uz račun ili drugi dokaz o kupovini. Da li je mana pokrivena garancijom, procenjuje naš tim, pa ne bih da nagađam. Mogu li da zabeležim Vaše ime i broj telefona?",
+      "razlog": "Reklamacija garniture posle nekoliko meseci. Agent je naveo garanciju od 2 godine i kako se reklamacija prijavljuje, a procenu da li je mana pokrivena prepustio timu. Prosleđeno."
+    },
+    "qa": [
+      [
+        "Koja je cena i koje su dimenzije stola?",
+        "Cenu i dimenzije stola šaljemo u ponudi za tačan model. Recite mi koji sto sa objave Vas zanima i za koji salon da je pripremimo, Beograd ili Novi Sad."
+      ],
+      [
+        "Da li dostavljate i van Novog Sada?",
+        "Da, isporuka i montaža su na teritoriji cele Srbije. Isporuka u Beogradu i Novom Sadu je besplatna, a za druga mesta troškove isporuke snosi kupac."
+      ],
+      [
+        "Da li je montaža u ceni?",
+        "Montaža je uvek u ceni."
+      ],
+      [
+        "Kolika je garancija?",
+        "Garancija na kupljeni proizvod je 2 godine."
+      ],
+      [
+        "Može li garnitura u drugom materijalu?",
+        "Može. Svaki model je prilagodljiv potrebama kupca i može da se radi u raznim materijalima."
+      ],
+      [
+        "Kako se plaća?",
+        "Da bi ugovor stupio na snagu, uplaćuje se 50% ukupne cene. Drugu polovinu doplaćujete u roku od 5 radnih dana od obaveštenja da je roba stigla u naš magacin."
+      ],
+      [
+        "Do koliko radite?",
+        "Beograd radi od ponedeljka do petka od 10 do 18h. Novi Sad radi od ponedeljka do petka od 9 do 19h i subotom od 10 do 15h. Nedeljom saloni ne rade."
+      ],
+      [
+        "Imate li nešto na sniženju?",
+        "Imamo rasprodaju: nameštaj iz salona koji je odmah na raspolaganju, sa sniženim cenama."
+      ],
+      [
+        "Da li imate Calligaris?",
+        "Da, Calligaris je među brendovima u našim salonima, zajedno sa Cattelan, Bontempi, Nicoline i drugim italijanskim proizvođačima."
+      ],
+      [
+        "Imate li baštenski nameštaj?",
+        "Imamo. U ponudi su Fatboy, Nardi, Unopiu, Varaschin i Vermobil."
+      ],
+      [
+        "Da li izlazite na teren?",
+        "Da, na osnovu date ponude, ako se usaglasimo sa njom. Potom izlazimo na teren."
+      ],
+      [
+        "Radite li sa arhitektonskim biroima?",
+        "Da, sarađujemo sa arhitektonskim biroima."
+      ]
+    ],
+    "objections": [
+      [
+        "Moram prvo da vidim uživo.",
+        "Naravno. Saloni su u Beogradu i Novom Sadu: Beograd radi pon–pet od 10 do 18h, a Novi Sad pon–pet od 9 do 19h i subotom od 10 do 15h."
+      ],
+      [
+        "Razmisliću, pa ću se javiti.",
+        "Važi. Ponudu pripremamo kad god kažete, a modele možete da pogledate i u salonima u Beogradu i Novom Sadu."
+      ],
+      [
+        "Ne znam da li će mi stati u prostor.",
+        "Zato u salonima možete da čujete predloge naših dizajnera i arhitekata za uklapanje nameštaja u Vaš dom."
+      ],
+      [
+        "Preskupo mi je za sada.",
+        "Na rasprodaji imamo nameštaj iz salona koji je odmah na raspolaganju, sa sniženim cenama."
+      ]
+    ],
+    "background": [
+      {
+        "name": "Ana Kovačević",
+        "ch": "instagram",
+        "st": "Novi",
+        "msgs": [
+          [
+            "user",
+            "Cena?"
+          ],
+          [
+            "assistant",
+            "Dobar dan. Koji komad sa objave Vas zanima? Cenu šaljemo u ponudi za tačan model i materijal."
+          ]
+        ]
+      },
+      {
+        "name": "Petar Nikolić",
+        "ch": "whatsapp",
+        "st": "Zainteresovan",
+        "msgs": [
+          [
+            "user",
+            "Poštovani , koja je cena i koje su dimenzije"
+          ],
+          [
+            "assistant",
+            "Dobar dan. Cenu i dimenzije šaljemo u ponudi. Recite mi koji model Vas zanima i za koji salon da je pripremimo, Beograd ili Novi Sad."
+          ],
+          [
+            "user",
+            "Javiću se, hvala."
+          ],
+          [
+            "assistant",
+            "Važi. Pišite kad god želite da pripremimo ponudu."
+          ]
+        ]
+      },
+      {
+        "name": "Jovana Ilić",
+        "ch": "facebook",
+        "st": "Zainteresovan",
+        "msgs": [
+          [
+            "user",
+            "Da li dostavljate i van Novog Sada?"
+          ],
+          [
+            "assistant",
+            "Da, isporuka i montaža su na teritoriji cele Srbije. Isporuka u Beogradu i Novom Sadu je besplatna, a za druga mesta troškove isporuke snosi kupac."
+          ],
+          [
+            "user",
+            "Razmisliću."
+          ],
+          [
+            "assistant",
+            "Naravno. Ponudu pripremamo kad god kažete."
+          ]
+        ]
+      },
+      {
+        "name": "Marko Savić",
+        "ch": "website",
+        "st": "Zakazano",
+        "msgs": [
+          [
+            "user",
+            "Zanima me garnitura Aura u drugom materijalu, može li?"
+          ],
+          [
+            "assistant",
+            "Može. Svaki model je prilagodljiv potrebama kupca i može da se radi u raznim materijalima. Pošaljite mi ime i broj telefona, pa pripremamo ponudu."
+          ],
+          [
+            "user",
+            "Marko Savić, 065 828 6764."
+          ],
+          [
+            "assistant",
+            "Hvala, Marko. Zahtev za ponudu za garnituru Aura je upisan i prosleđen."
+          ]
+        ]
+      },
+      {
+        "name": "Tamara Đorđević",
+        "ch": "instagram",
+        "st": "Naručio",
+        "msgs": [
+          [
+            "user",
+            "Dogovorili smo se prošle nedelje, potvrđujem porudžbinu."
+          ],
+          [
+            "assistant",
+            "Hvala, Tamara. Porudžbina je upisana. Da bi ugovor stupio na snagu, uplaćuje se 50% ukupne cene."
+          ]
+        ]
+      },
+      {
+        "name": "Luka Pavlović",
+        "ch": "whatsapp",
+        "st": "Novi",
+        "msgs": [
+          [
+            "user",
+            "Koja je cena i koje su dimenzije stola?"
+          ],
+          [
+            "assistant",
+            "Dobar dan. Cenu i dimenzije stola šaljemo u ponudi. Za koji model sa objave Vam treba i koji salon Vam je bliži, Beograd ili Novi Sad?"
+          ]
+        ]
+      },
+      {
+        "name": "Milica Jovanović",
+        "ch": "instagram",
+        "st": "Zakazano",
+        "msgs": [
+          [
+            "user",
+            "Treba nam ponuda za trpezariju, sto i šest stolica."
+          ],
+          [
+            "assistant",
+            "Naravno. Pošaljite mi ime, broj telefona i za koji salon da pripremimo ponudu, Beograd ili Novi Sad."
+          ],
+          [
+            "user",
+            "Milica Jovanović, 063 410 7721, Novi Sad."
+          ],
+          [
+            "assistant",
+            "Hvala, Milice. Zahtev za ponudu za trpezariju je upisan i prosleđen salonu u Novom Sadu."
+          ]
+        ]
+      },
+      {
+        "name": "Nemanja Ristić",
+        "ch": "website",
+        "st": "Zainteresovan",
+        "msgs": [
+          [
+            "user",
+            "Da li izlazite na teren?"
+          ],
+          [
+            "assistant",
+            "Da, na osnovu date ponude, ako se usaglasimo sa njom. Potom izlazimo na teren."
+          ],
+          [
+            "user",
+            "Javiću se uskoro."
+          ],
+          [
+            "assistant",
+            "Važi. Za ponudu mi je dovoljno da znam koji model Vas zanima."
+          ]
+        ]
+      },
+      {
+        "name": "Sara Marković",
+        "ch": "whatsapp",
+        "st": "Naručio",
+        "msgs": [
+          [
+            "user",
+            "Hvala na ponudi, prihvatamo."
+          ],
+          [
+            "assistant",
+            "Hvala, Sara. Da bi ugovor stupio na snagu, uplaćuje se 50% ukupne cene, a drugu polovinu doplaćujete kad Vas obavestimo da je roba stigla u magacin."
+          ]
+        ]
+      },
+      {
+        "name": "Filip Stojanović",
+        "ch": "facebook",
+        "st": "Zakazano",
+        "msgs": [
+          [
+            "user",
+            "Opremamo restoran, da li radite i takve projekte?"
+          ],
+          [
+            "assistant",
+            "Da, imamo posebnu liniju nameštaja za hotele, restorane i ugostiteljske objekte. Pošaljite mi ime i broj telefona."
+          ],
+          [
+            "user",
+            "Filip Stojanović, 061 770 5540."
+          ],
+          [
+            "assistant",
+            "Hvala, Filipe. Upit je upisan i prosleđen."
+          ]
+        ]
+      },
+      {
+        "name": "Katarina Lukić",
+        "ch": "instagram",
+        "st": "Zainteresovan",
+        "msgs": [
+          [
+            "user",
+            "Kako može da se plati?"
+          ],
+          [
+            "assistant",
+            "Da bi ugovor stupio na snagu, uplaćuje se 50% ukupne cene. Drugu polovinu doplaćujete u roku od 5 radnih dana od obaveštenja da je roba stigla u naš magacin."
+          ],
+          [
+            "user",
+            "U redu, hvala."
+          ]
+        ]
+      },
+      {
+        "name": "Stefan Petrović",
+        "ch": "website",
+        "st": "Zakazano",
+        "msgs": [
+          [
+            "user",
+            "Radite li sa arhitektonskim biroima?"
+          ],
+          [
+            "assistant",
+            "Da, sarađujemo sa arhitektonskim biroima. Pošaljite mi ime i broj telefona."
+          ],
+          [
+            "user",
+            "Stefan Petrović, 062 114 9033."
+          ],
+          [
+            "assistant",
+            "Hvala, Stefane. Upit je upisan i prosleđen."
+          ]
+        ]
+      }
+    ]
+  },
+  "e1": {
+    "_note": "E1 v20 (2026-11-12), same structure as the other leads. Emmeti sells by offer (the site shows no price), so the sale ends in a request for an offer: not_done / gap / win say so. Subject avoids declining the name (the site itself writes \"Emmeti-ju\").",
+    "kind": "business",
+    "subject": "Zašto neko zatraži ponudu u salonima Emmeti, a neko ne",
+    "za": "Emmeti",
+    "not_done": "nije zatražio ponudu",
+    "made_from": "modela sa sajta",
+    "most_wanted": "koji modeli su najtraženiji",
+    "gap": "pre ponude",
+    "_site": "emmeti.rs: Moderan nameštaj, product pages (Riverstone, Aura, Bluna Maniglia Stone), Rasprodaja",
+    "helps_whom": "salonima nameštaja kao što je Emmeti",
+    "win": "zahtevom za ponudu"
+  }
+}

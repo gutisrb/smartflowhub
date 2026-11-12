@@ -1,0 +1,391 @@
+{
+  "_note": "OKTAVUS — hand sheet written 2026-11-12 from oktavus.rs (home: the \"Cena pergole po m2 - pošaljite upit\" block and FAQ \"Koliko košta pergola? / Kako se određuje cena pergole po m²? / Koliko traje izrada pergola i njena montaža?\", Kontakt: radno vreme 08–16h, subotom 10–14h; o-nama). The site publishes NO prices and says why: \"Cena pergole zavisi od dimenzija, vrste konstrukcije, načina montaže i izabrane dodatne opreme, zbog čega se svaka obračunava pojedinačno\"; its own process: \"U upitu navedite približne dimenzije, tip montaže, lokaciju i željene dodatke. Pošaljite 2–3 fotografije prostora i kratak opis namene… dobijate preporuku modela, koja je cena pergole po m2, kao i termin za merenje\"; montaža \"najčešće… u roku od jednog do nekoliko dana nakon pripreme konstrukcije\". Every agent line is one of those sentences or a model fact from the home page (Venera do 20 kvadratnih metara, Vitola boja po želji, Kalika viseća, balkon \"zavisi od statike i ugradnih tačaka\"). No price is ever given, no slot is offered (the site says the team offers a measuring appointment; the agent only says so). Sale hero opens with the real comment \"Koja je cena aluminijumske pergole?\" under the Ajola post (DU8PqtWDMDj); the customer's size (5 na 3) is the next real comment under the same post, rewritten as a reply. Left = real \"Cena 6*4\" (Vitola shoot). Intervention = real \"Koliko kosta da se zatvori terasa na potkrovlju dimenzije 12x4 m\" (Ajola post): the price depends on mounting conditions, so the team must assess it. Background customers use the real comments (Cena 3x5, Cena 5x4, Cena za 3x3 m sa led svetlom, 5×20 m Novi Sad bela konstrukcija, Cena po m2, …). No complaint hero: the seeder ignores hero.complaint for a quote model and the site states no complaint rule. NOT claimed: any amount, deadline for the reply, a measuring date, a guarantee.",
+  "hero": {
+    "channel": "instagram",
+    "customer": "Marija Jović",
+    "phone": "064 123 4567",
+    "msgs": [
+      [
+        "user",
+        "Koja je cena aluminijumske pergole?",
+        {
+          "post": "DU8PqtWDMDj"
+        }
+      ],
+      [
+        "assistant",
+        "Dobar dan, Marija. Cena pergole zavisi od dimenzija, vrste konstrukcije, načina montaže i dodatne opreme, pa se svaka obračunava pojedinačno. Pošaljite mi približne dimenzije i recite za koji prostor Vam treba, pa pripremamo konkretnu ponudu."
+      ],
+      [
+        "user",
+        "Terasa je 5 na 3 metra, u Novom Sadu."
+      ],
+      [
+        "assistant",
+        "Hvala. Pošaljite i 2–3 fotografije terase. Na osnovu dimenzija i fotografija dobijate preporuku modela, cenu po m² i termin za merenje."
+      ],
+      [
+        "user",
+        "Šaljem. A koliko traje montaža?"
+      ],
+      [
+        "assistant",
+        "Montaža se najčešće završava u roku od jednog do nekoliko dana nakon pripreme konstrukcije. Pošaljite mi ime i broj telefona, pa zahtev za ponudu prosleđujem našem timu."
+      ],
+      [
+        "user",
+        "Marija Jović, 064 123 4567"
+      ],
+      [
+        "assistant",
+        "Hvala, Marija. Zahtev za ponudu je upisan i prosleđen. Naš tim Vam pomaže pri izboru modela i računa cenu po m²."
+      ]
+    ],
+    "crm": {
+      "full_name": "Marija Jović",
+      "telefon": "064 123 4567",
+      "kategorija": "Pergole",
+      "proizvod": "Aluminijumska pergola",
+      "status": "Zakazano",
+      "razlog": "Pitala za cenu aluminijumske pergole — agent je objasnio od čega zavisi cena i prikupio dimenzije i fotografije terase za ponudu.",
+      "komentar": "Terasa u Novom Sadu",
+      "izvor": "Instagram"
+    },
+    "left": {
+      "msgs": [
+        [
+          "user",
+          "Cena 6*4",
+          {
+            "post": "DQrDiP2jE7k"
+          }
+        ],
+        [
+          "assistant",
+          "Dobar dan. Cena pergole se obračunava pojedinačno, pa mi pored dimenzija trebaju tip montaže, lokacija i željeni dodaci, na primer LED rasveta ili ZIP zavese."
+        ],
+        [
+          "user",
+          "Hvala, javiću se."
+        ],
+        [
+          "assistant",
+          "Važi. Kada budete spremni, pošaljite i 2–3 fotografije prostora, pa dobijate preporuku modela i cenu po m²."
+        ]
+      ],
+      "crm": {
+        "full_name": "Nikola Perić",
+        "telefon": "",
+        "kategorija": "Pergole",
+        "proizvod": "Klasična pergola Vitola",
+        "status": "Zainteresovan",
+        "razlog": "Pitao za cenu pergole 6*4 i otišao uz „Hvala, javiću se.“ Agent je zatražio tip montaže, lokaciju i željene dodatke za ponudu.",
+        "izvor": "Instagram"
+      }
+    },
+    "intervention": {
+      "ask": "Koliko kosta da se zatvori terasa na potkrovlju dimenzije 12x4 m",
+      "answer": "Zdravo, Dragana. Za zatvaranje terase na potkrovlju cena zavisi od dimenzija, konstrukcije i uslova montaže, a to mora da proceni naš tim, pa ne bih da nagađam. Prosleđujem upit. Mogu li da zabeležim Vaše ime i broj telefona?",
+      "razlog": "Pitala za cenu zatvaranja terase na potkrovlju. Uslovi montaže zahtevaju procenu tima — prosleđeno."
+    },
+    "qa": [
+      [
+        "Cena po m2",
+        "Cena pergole po m² nije ista za svaki projekat. Zavisi od dimenzija i tipa pergole, broja modula, načina montaže, lokacije i dodatne opreme."
+      ],
+      [
+        "Cena staklenog krova po m2? Hvala",
+        "Za stakleni krov pripremamo konkretnu ponudu: pošaljite približne dimenzije i fotografije prostora. Može biti pokretni ili fiksni, od kaljenog/laminiranog stakla i aluminijumske konstrukcije."
+      ],
+      [
+        "Koliko košta tenda 6*3m?",
+        "Radimo motorizovane kasetne i zglobne tende, uz izradu i montažu. Pošaljite mi lokaciju i 2–3 fotografije prostora, pa pripremamo konkretnu ponudu."
+      ],
+      [
+        "Koliko traje montaža?",
+        "Najčešće od jednog do nekoliko dana nakon pripreme konstrukcije."
+      ],
+      [
+        "Radite li montažu van Beograda?",
+        "Radimo. Montaža je širom Srbije."
+      ],
+      [
+        "Do kada radite?",
+        "Radnim danom od 8 do 16h, a subotom od 10 do 14h."
+      ],
+      [
+        "Šta je bioklimatska pergola?",
+        "Venera je bioklimatska pergola sa rotacionim aluminijumskim panelima za zaštitu od sunca, kiše i snega. Površina je do 20 kvadratnih metara, a opciono ima LED osvetljenje i daljinski upravljač."
+      ],
+      [
+        "Da li pergola štiti od kiše i snega?",
+        "Pergola je pokretni spoljašnji krovni sistem koji štiti od sunca, kiše i snega."
+      ],
+      [
+        "Imate li nešto za balkon?",
+        "Za balkon često biramo viseće modele, bez stubova. Rešenja zavise od statike i ugradnih tačaka, a viseća pergola Kalika se kači na zid."
+      ],
+      [
+        "Radite li staklene zidove za lokal?",
+        "Radimo. Nudimo i postavku staklenih kliznih zidova u poslovnim prostorima."
+      ],
+      [
+        "Mogu li da dodam grejalice i zavese?",
+        "Možete. Pergolama se dodaju infracrvene grejalice, screen zavese, komarnici, profesionalni ventilatori i LED rasveta."
+      ],
+      [
+        "Šta da pošaljem za ponudu?",
+        "Približne dimenzije, tip montaže, lokaciju i željene dodatke, uz 2–3 fotografije prostora i kratak opis namene."
+      ]
+    ],
+    "objections": [
+      [
+        "Razmisliću, pa ću se javiti.",
+        "Važi. Kada budete spremni, pošaljite približne dimenzije i fotografije prostora, pa pripremamo ponudu."
+      ],
+      [
+        "Samo da znam okvirnu cenu.",
+        "Cena zavisi od dimenzija, vrste konstrukcije, načina montaže i dodatne opreme, pa se svaka obračunava pojedinačno. Zato su mi potrebne približne dimenzije i fotografije prostora."
+      ],
+      [
+        "Nisam siguran da li je moj prostor za pergolu.",
+        "Pošaljite 2–3 fotografije prostora i kratak opis namene, pa dobijate preporuku modela."
+      ],
+      [
+        "Hoću prvo da vidim kako izgleda kod vas.",
+        "Primere postavljenih pergola i staklenih sistema vidite na stranici Reference na oktavus.rs."
+      ],
+      [
+        "Plašim se da će montaža dugo trajati.",
+        "Montaža se najčešće završava u roku od jednog do nekoliko dana nakon pripreme konstrukcije."
+      ]
+    ],
+    "background": [
+      {
+        "name": "Ana Kovačević",
+        "ch": "instagram",
+        "st": "Novi",
+        "msgs": [
+          [
+            "user",
+            "Cena 3x5"
+          ],
+          [
+            "assistant",
+            "Dobar dan, Ana. Cena se obračunava pojedinačno, pa mi pored dimenzija trebaju tip montaže, lokacija i željeni dodaci. Pošaljite i 2–3 fotografije prostora."
+          ]
+        ]
+      },
+      {
+        "name": "Petar Nikolić",
+        "ch": "whatsapp",
+        "st": "Zainteresovan",
+        "msgs": [
+          [
+            "user",
+            "Cena za 3x3 m sa led svetlom"
+          ],
+          [
+            "assistant",
+            "LED rasvetu možemo da dodamo, a cenu računamo za konkretan projekat. Pošaljite mi tip montaže, lokaciju i 2–3 fotografije prostora."
+          ],
+          [
+            "user",
+            "Poslaću sutra."
+          ],
+          [
+            "assistant",
+            "Važi. Radno vreme je radnim danom od 8 do 16h, a subotom od 10 do 14h."
+          ]
+        ]
+      },
+      {
+        "name": "Jovana Ilić",
+        "ch": "facebook",
+        "st": "Zainteresovan",
+        "msgs": [
+          [
+            "user",
+            "Koliko je cena za 6 metara puta cetiri metra"
+          ],
+          [
+            "assistant",
+            "Cena zavisi od dimenzija, vrste konstrukcije, načina montaže i dodatne opreme, pa se svaka obračunava pojedinačno. Koji tip pergole Vas zanima i gde je prostor?"
+          ]
+        ]
+      },
+      {
+        "name": "Marko Savić",
+        "ch": "website",
+        "st": "Zakazano",
+        "msgs": [
+          [
+            "user",
+            "Treba mi ponuda za bioklimatsku pergolu za baštu lokala."
+          ],
+          [
+            "assistant",
+            "Venera je bioklimatska pergola sa rotacionim aluminijumskim panelima za zaštitu od sunca, kiše i snega. Pošaljite približne dimenzije i fotografije prostora, a za ponudu mi trebaju ime i broj telefona."
+          ],
+          [
+            "user",
+            "Marko Savić, 063 222 3344"
+          ],
+          [
+            "assistant",
+            "Hvala, Marko. Zahtev za ponudu je upisan i prosleđen."
+          ]
+        ]
+      },
+      {
+        "name": "Tamara Đorđević",
+        "ch": "instagram",
+        "st": "Novi",
+        "msgs": [
+          [
+            "user",
+            "Cena"
+          ],
+          [
+            "assistant",
+            "Dobar dan. Cena pergole Vitola se obračunava pojedinačno. Pošaljite približne dimenzije, tip montaže, lokaciju i željene dodatke."
+          ]
+        ]
+      },
+      {
+        "name": "Luka Pavlović",
+        "ch": "whatsapp",
+        "st": "Novi",
+        "msgs": [
+          [
+            "user",
+            "Zanima me cena po m2"
+          ],
+          [
+            "assistant",
+            "Cena po m² nije ista za svaki projekat. Zavisi od dimenzija i tipa pergole, broja modula, načina montaže, lokacije i dodatne opreme."
+          ]
+        ]
+      },
+      {
+        "name": "Milica Jovanović",
+        "ch": "instagram",
+        "st": "Zainteresovan",
+        "msgs": [
+          [
+            "user",
+            "Koja je cena 5×20 m visina oko 3m Novi sad u beloj boji konstrukcija"
+          ],
+          [
+            "assistant",
+            "Dobar dan. Boju konstrukcije možete da birate po želji. Za cenu mi trebaju još tip montaže i željeni dodaci, uz 2–3 fotografije prostora. Lokacija je važna zbog logistike."
+          ]
+        ]
+      },
+      {
+        "name": "Nemanja Ristić",
+        "ch": "website",
+        "st": "Zainteresovan",
+        "msgs": [
+          [
+            "user",
+            "Cena 5x4"
+          ],
+          [
+            "assistant",
+            "Dobar dan. Cena se računa za svaki projekat posebno. Pošaljite tip montaže, lokaciju i željene dodatke."
+          ],
+          [
+            "user",
+            "Hvala, javiću se."
+          ],
+          [
+            "assistant",
+            "Važi. Kada budete spremni, pošaljite i 2–3 fotografije prostora."
+          ]
+        ]
+      },
+      {
+        "name": "Sara Marković",
+        "ch": "whatsapp",
+        "st": "Zakazano",
+        "msgs": [
+          [
+            "user",
+            "Šaljem dimenzije i slike terase restorana, treba mi ponuda za pergolu."
+          ],
+          [
+            "assistant",
+            "Hvala, Sara. Zahtev za ponudu je upisan i prosleđen našem timu."
+          ]
+        ]
+      },
+      {
+        "name": "Filip Stojanović",
+        "ch": "facebook",
+        "st": "Zainteresovan",
+        "msgs": [
+          [
+            "user",
+            "Cena ...360 x 220 x 4 komada ..Slike i Cena.."
+          ],
+          [
+            "assistant",
+            "Dobar dan. Slike projekata su na stranici Reference na oktavus.rs. Cenu računamo za konkretan projekat, pa mi pošaljite lokaciju i fotografije prostora."
+          ]
+        ]
+      },
+      {
+        "name": "Katarina Lukić",
+        "ch": "instagram",
+        "st": "Zainteresovan",
+        "msgs": [
+          [
+            "user",
+            "Cena..."
+          ],
+          [
+            "assistant",
+            "Dobar dan. Za koji proizvod Vam treba cena? Za pergole mi trebaju približne dimenzije, tip montaže, lokacija i željeni dodaci."
+          ],
+          [
+            "user",
+            "Razmisliću."
+          ],
+          [
+            "assistant",
+            "Važi. Kada budete spremni, pošaljite približne dimenzije i fotografije prostora."
+          ]
+        ]
+      },
+      {
+        "name": "Stefan Petrović",
+        "ch": "website",
+        "st": "Zainteresovan",
+        "msgs": [
+          [
+            "user",
+            "Da li radite i stakleni krov za baštu?"
+          ],
+          [
+            "assistant",
+            "Radimo. Stakleni krov može biti pokretni ili fiksni, a izrađujemo ga od kaljenog/laminiranog stakla i aluminijumske konstrukcije. Može se kombinovati sa senčenjem i LED rasvetom."
+          ]
+        ]
+      }
+    ]
+  },
+  "e1": {
+    "_note": "E1 v20 (2026-11-12). Oktavus's own site says every price is calculated per project from an upit, and the real comments under its posts are almost all \"Cena 6*4\": the owner's question is who asks for an offer and who does not.",
+    "kind": "business",
+    "subject": "Zašto neko zatraži ponudu od Oktavusa, a neko ne",
+    "za": "Oktavus",
+    "not_done": "nije tražio ponudu",
+    "made_from": "pergola, tendi i staklenih sistema sa sajta",
+    "most_wanted": "koji proizvodi su najtraženiji",
+    "gap": "pre ponude",
+    "_site": "oktavus.rs: pergole, tende, stakleni sistemi; \"Cena pergole po m2 - pošaljite upit\"",
+    "helps_whom": "firmama kao što je Oktavus",
+    "win": "zahtevom za ponudu"
+  }
+}

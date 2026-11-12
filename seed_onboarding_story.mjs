@@ -19,6 +19,7 @@ import { resolve, dirname } from "path"
 import { fileURLToPath } from "url"
 import { buildSaleMessages, buildHesitationMessages, normalizeOfferTerms, cleanServiceName, groundFirstStep } from "./lib/sales-playbook.mjs"
 import { vetNiche } from "./lib/niche-vet.mjs"
+import { cut, scrub } from "./lib/text-safe.mjs"
 import { derivePolicyComplaint } from "./lib/complaint-policy.mjs"
 import { salesModelOf, normalizeSalesModel } from "./lib/sales-model.mjs"
 import { stayStory, stayHesitation, stayQA, bgStayConvos } from "./lib/stay-story.mjs"
@@ -682,7 +683,8 @@ async function seedTenant(client) {
   const niche = vetNiche(nicheLabel, `${JSON.stringify(sheet0 || {})} ${(catalog || []).map((c) => `${c.name} ${c.category || ""}`).join(" ")} ${(client.onboarding_copy?.customer_voice?.posts || []).map((p) => p.caption).join(" ")}`)
   if (niche !== nicheLabel) {
     console.log(`  niche label "${nicheLabel}" has no support in the business's own words → neutral "${niche}"`)
-    await sb.from("clients").update({ demo_niche: niche }).eq("id", cid)
+    const cfg = JSON.parse(readFileSync(resolve(__dirname, "lib/niche-config.json"), "utf8"))[niche]
+    await sb.from("clients").update({ demo_niche: niche, ...(cfg?.brandColor ? { demo_brand_color: cfg.brandColor } : {}) }).eq("id", cid)
   }
   let terms = client.onboarding_copy?.offer_terms ? normalizeOfferTerms(client.onboarding_copy.offer_terms) : null
   // a hand sheet's wording is the lead's own; otherwise the first step's "how"/"outcome" must be on the site
@@ -726,7 +728,7 @@ async function seedTenant(client) {
   const post = (code) => (customerVoice?.posts || []).find((p) => p.shortcode === code)
   const withPosts = (msgs) => msgs.map(([role, text, meta]) => {
     const p = meta?.post ? post(meta.post) : null
-    return p ? [role, text, { type: "post_reply", image_url: p.image || null, post_caption: p.caption.slice(0, 140) }] : [role, text]
+    return p ? [role, text, { type: "post_reply", image_url: p.image || null, post_caption: cut(p.caption, 140) }] : [role, text]
   })
   const apptOf = (a) => a ? { service_name: a.service_name, color: a.color || "#10b981", service_id: catalog.find((x) => x.name === a.service_name)?.id ?? null, duration: a.duration || 30 } : null
   if (heroOverride?.msgs?.length) {
@@ -885,9 +887,9 @@ async function seedTenant(client) {
   if (["dental", "medical"].includes(String(niche).toLowerCase())) {
     for (const m of razgovori) if (m.role === "assistant") m.message = m.message.replace(/\s*[\p{Extended_Pictographic}\uFE0F\u200D]+/gu, "").replace(/\s{2,}/g, " ").trim()
   }
-  const r1 = await sb.from("razgovori").insert(razgovori)
-  const r2 = await sb.from("demo_crm").insert(crmRows)
-  const r3 = appts.length ? await sb.from("appointments").insert(appts) : { error: null }
+  const r1 = await sb.from("razgovori").insert(scrub(razgovori))
+  const r2 = await sb.from("demo_crm").insert(scrub(crmRows))
+  const r3 = appts.length ? await sb.from("appointments").insert(scrub(appts)) : { error: null }
   const errs = [r1.error, r2.error, r3.error].filter(Boolean).map((e) => e.message)
   const mix = crmRows.reduce((m, r) => ({ ...m, [r.status]: (m[r.status] ?? 0) + 1 }), {})
   const conv = crmRows.length ? Math.round((crmRows.filter(r => ["Zakazano","Završeno","Naručio","Isporučeno"].includes(r.status)).length / crmRows.length) * 100) : 0
