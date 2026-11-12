@@ -396,7 +396,7 @@ function InstagramBtn({ c }: { c: Contact }) {
   const handle = c.instagram_handle?.replace(/^@/, "")
   return (
     <a
-      href={handle ? `https://instagram.com/${handle}` : undefined}
+      href={handle ? `https://www.instagram.com/${handle}/` : undefined}
       target="_blank"
       rel="noopener noreferrer"
       aria-disabled={!handle}

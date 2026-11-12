@@ -662,7 +662,7 @@ export function EmailOutreachModule({
                                 <div className="flex flex-col gap-0.5">
                                   {handle && (
                                     <a
-                                      href={`https://instagram.com/${handle}`}
+                                      href={`https://www.instagram.com/${handle}/`}
                                       target="_blank"
                                       rel="noopener noreferrer"
                                       className="flex items-center gap-1 text-xs text-pink-400/80 hover:text-pink-400 transition-colors font-outfit"
@@ -912,7 +912,7 @@ export function EmailOutreachModule({
                 <div className="flex items-center gap-3 text-silver/40 text-sm">
                   {draftLead?.email && <span className="flex items-center gap-1.5"><Mail className="w-3.5 h-3.5" /> {draftLead.email}</span>}
                   {draftLead?.instagram_handle && (
-                    <a href={`https://instagram.com/${draftLead.instagram_handle}`} target="_blank" rel="noopener noreferrer" className="text-pink-400/60 hover:text-pink-400 transition-colors flex items-center gap-1.5">
+                    <a href={`https://www.instagram.com/${String(draftLead.instagram_handle).replace(/^@/, "")}/`} target="_blank" rel="noopener noreferrer" className="text-pink-400/60 hover:text-pink-400 transition-colors flex items-center gap-1.5">
                       <Instagram className="w-3.5 h-3.5" /> @{draftLead.instagram_handle}
                     </a>
                   )}
