@@ -86,7 +86,8 @@
     "intervention": {
       "ask": "Dobar dan, garnitura koju smo kupili kod vas pre osam meseci ima manu na jednom delu. Šta da radim?",
       "answer": "Žao mi je zbog toga!\nNa kupljeni proizvod imate 2 godine garancije, a reklamaciju prijavljujete u salonu, telefonom ili mejlom, uz račun ili drugi dokaz o kupovini.\n\nPošaljite mi ime i broj telefona, pa Vam se javljamo oko garancije.",
-      "razlog": "Reklamacija garniture posle nekoliko meseci. Agent je naveo garanciju od 2 godine i kako se reklamacija prijavljuje, a procenu da li je mana pokrivena prepustio timu. Prosleđeno."
+      "razlog": "Reklamacija garniture posle nekoliko meseci. Agent je naveo garanciju od 2 godine i kako se reklamacija prijavljuje, a procenu da li je mana pokrivena prepustio timu. Prosleđeno.",
+      "close": "Hvala Vam, Dragana!\nJavljamo Vam se da se dogovorimo oko garancije za garnituru."
     },
     "qa": [
       [

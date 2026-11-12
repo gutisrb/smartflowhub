@@ -57,3 +57,11 @@ After:
 ## Facts stay grounded
 Nothing here loosens the mirror rule: prices, terms, durations, delivery, guarantees, steps come only from the business's site; unknown stays
 unknown. Voice is the HOW, never a licence to add a WHAT.
+
+## How the read works (voice_read.mjs v2, 2026-11-12)
+v1 asked a model "flag what sounds off" once: it flagged 2-4 different lines per run, returned rewrites identical to the line, and flagged
+this page's own good example. Three writers chased it for an hour. A model read is only a measurement if it is calibrated:
+- every agent line is scored 1-5 (1 = bot/form/ticket, 5 = this business's best salesperson), three reads, line order shuffled;
+- known-bad control lines (the kind Nikola rejected) and known-good ones are mixed in; a read that misjudges a control is discarded;
+- at least 2 valid reads, else "inconclusive" (rerun, never "ok"); a line is flagged when its median is <= 2; a 3 is advice.
+Sensitivity check: the un-rewritten OKTAVUS demo is flagged on exactly its four system lines ("Prosleđujem upit", "upisan i prosleđen").

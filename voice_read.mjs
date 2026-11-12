@@ -65,6 +65,12 @@ Score every id:
 1 = obviously a bot, form, ticket system or legal text
 Return JSON: {"scores":[{"id":"<id>","score":<1-5>,"why":"<short reason, English>","rewrite":"<only when score <= 2: the same content as a person types it, Serbian, \\n allowed, no new facts, no new time promises>"}]}`
 
+/** Same text the read scored? readiness.mjs compares this with the stored voice_read.hash, so a chat edited after its read is not "ok". */
+export const chatHash = (lines) => createHash("sha1").update(JSON.stringify(lines.map((r) => r.message))).digest("hex").slice(0, 16)
+export async function heroLines(sb, clientId) {
+  const { data: rows } = await sb.from("razgovori").select("id_razgovora,role,message,created_at").eq("client_id", clientId).like("id_razgovora", "%_hero%").order("created_at")
+  return (rows || []).filter((r) => ["user", "assistant"].includes(r.role) && r.message)
+}
 const median = (a) => { const s = [...a].sort((x, y) => x - y); return s[Math.floor(s.length / 2)] }
 const shuffle = (a) => { const b = [...a]; for (let i = b.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [b[i], b[j]] = [b[j], b[i]] } return b }
 
@@ -101,8 +107,8 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   let total = 0
   for (const t of tenants) {
     const { data: c } = await sb.from('clients').select('id,name,onboarding_copy').eq('email', t).single()
-    const { data: rows } = await sb.from('razgovori').select('id_razgovora,role,message,created_at').eq('client_id', c.id).like('id_razgovora', '%_hero%').order('created_at')
-    const lines = (rows || []).filter((r) => ['user', 'assistant'].includes(r.role) && r.message)
+    if (!c) { console.log(`\n? ${t}: client row not found (lookup failed), skipped — rerun`); continue }
+    const lines = await heroLines(sb, c.id)
     const items = [], text = {}
     lines.forEach((r, i) => {
       if (r.role !== 'assistant') return
@@ -119,13 +125,14 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
       } catch (e) { console.log(`  ${c.name}: read ${k + 1} failed (${String(e.message || e).slice(0, 100)})`) }
     }
     const v = judge(reads, items.map((x) => x.id))
+    for (const [k, r] of reads.entries()) { const miss = CONTROLS.filter((cc) => { const s = r.find((x) => x.id === cc.id)?.score; return !(typeof s === "number" && (cc.want === "bad" ? s <= 2 : s >= 4)) }); if (miss.length) console.log(`  read ${k + 1} discarded: misjudged ${miss.map((cc) => `${cc.id}(${cc.want})=${r.find((x) => x.id === cc.id)?.score ?? "missing"}`).join(", ")}`) }
     if (v.inconclusive) { console.log(`\n? ${c.name}: inconclusive (${reads.length} read(s), fewer than ${MIN_VALID} scored the control lines right) — not ok`); if (SAVE) await sb.from('clients').update({ onboarding_copy: { ...(c.onboarding_copy || {}), voice_read: { ok: false, inconclusive: true, at: new Date().toISOString(), model: process.env.GEMINI_MODEL, reads: 0, flags: [], advisory: [] } } }).eq('id', c.id); continue }
     total += v.flags.length
     console.log(`\n${v.flags.length ? '✗' : '✓'} ${c.name}: ${v.flags.length} line(s) read like a machine · ${v.advisory.length} stiff · ${v.valid}/${READS} valid reads`)
     for (const f of v.flags) console.log(`   ✗ [${f.score}] ${f.id}: ${text[f.id].replace(/\n/g, ' / ')}\n       why: ${f.why}\n       → ${String(f.rewrite || '').replace(/\n/g, ' / ')}`)
     for (const a of v.advisory) console.log(`   ~ [3] ${a.id}: ${text[a.id].replace(/\n/g, ' / ')}  (${a.why})`)
     if (SAVE) {
-      const hash = createHash('sha1').update(JSON.stringify(lines.map((r) => r.message))).digest('hex').slice(0, 16)
+      const hash = chatHash(lines)
       await sb.from('clients').update({ onboarding_copy: { ...(c.onboarding_copy || {}), voice_read: { ok: v.flags.length === 0, at: new Date().toISOString(), model: process.env.GEMINI_MODEL, reads: v.valid, flags: v.flags.map((f) => ({ ...f, text: text[f.id] })), advisory: v.advisory.map((a) => ({ ...a, text: text[a.id] })), hash } } }).eq('id', c.id)
     }
   }

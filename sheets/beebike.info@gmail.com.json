@@ -87,7 +87,7 @@
         ],
         [
           "assistant",
-          "Naravno!\nA ako želite prvo da ga probate, test vožnja je bez obaveze kupovine, a Fireman Vas čeka spreman."
+          "Naravno!\nAko želite prvo da ga probate, test vožnja je bez obaveze kupovine."
         ]
       ],
       "crm": {
@@ -104,7 +104,7 @@
       "ask": "Koliko na sat ide mogu li kako da znam i ide li vozacka",
       "answer": "Zdravo, Dragana!\nAko pitate za Kene KN110 Fireman sa objave, ide do 25 km/h.\n\nPošaljite mi samo ime i broj telefona, pa Vam se javljamo sa odgovorom oko vozačke.",
       "razlog": "Pitala koliko brzo ide Fireman i da li je potrebna vozačka. Agent je rekao 25 km/h, a za vozačku nije siguran — prosleđeno timu.",
-      "close": "Super, hvala!\nZa vozačku Vam javljamo čim proverimo."
+      "close": "Hvala, Dragana!\nProveriću za vozačku, pa Vam javljam."
     },
     "qa": [
       [

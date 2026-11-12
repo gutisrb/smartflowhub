@@ -77,9 +77,9 @@
     },
     "intervention": {
       "ask": "Cena takvih dimenzija slicnih ?",
-      "answer": "Zdravo, Dragana.\nZlatni Hrast je novitet, pa cenu i dimenzije nemamo objavljene.\nOstavite mi ime i broj telefona, pa ćemo to proveriti.",
+      "answer": "Zdravo, Dragana.\nZlatni Hrast nam je novitet, pa cenu i dimenzije moram da proverim.\nOstavite mi ime i broj telefona, pa Vam javljam.",
       "razlog": "Pitala za cenu panela takvih dimenzija (Zlatni Hrast, aluminijumski panel za ogradu). Cena i dimenzije nisu objavljene — prosleđeno timu.",
-      "close": "Hvala, Dragana.\nJavljamo Vam se sa cenom i dimenzijama panela Zlatni Hrast."
+      "close": "Hvala, Dragana!\nJavljamo Vam se sa cenom i dimenzijama za Zlatni Hrast."
     },
     "qa": [
       [

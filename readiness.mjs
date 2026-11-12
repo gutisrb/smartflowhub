@@ -20,6 +20,7 @@ import { fileURLToPath } from 'url'
 import { redFlags, bodyWords } from './lib/copy-red-flags.mjs'
 import { extractEmails } from './lib/email-finder.mjs'
 import { investmentFit } from './lib/investment-fit.mjs'
+import { chatHash, heroLines } from './voice_read.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 for (const l of readFileSync(resolve(__dirname, '.env.local'), 'utf8').split('\n')) { const m = l.match(/^([^#=]+)=(.*)$/); if (m && process.env[m[1].trim()] === undefined) process.env[m[1].trim()] = m[2].trim().replace(/^['"]|['"]$/g, '') }
@@ -53,8 +54,10 @@ for (const l of leads || []) {
     try { const r = await (await fetch(`https://api.hunter.io/v2/email-verifier?email=${encodeURIComponent(l.email)}&api_key=${process.env.HUNTER_API_KEY}`)).json(); check = { status: r.data?.status, at: new Date().toISOString() }
       await sb.from('contacts').update({ intake_data: { ...(l.intake_data || {}), email_check: check } }).eq('id', l.id) } catch { /* unverified */ }
   }
+  // the voice read counts only for the chat it read: an edit after the read makes tone ✗ until it is read again
+  const toneOk = !!oc.voice_read?.ok && oc.voice_read.hash === chatHash(await heroLines(sb, c.id))
   const cell = {
-    fit: investmentFit(l.intake_data?.audit).pass, gate: !!oc.gate?.ok, sheet: !!(sheet?.hero?.msgs?.length && sheet?.e1), qs: (oc.customer_voice?.questions || []).length >= 3, tone: !!oc.voice_read?.ok,
+    fit: investmentFit(l.intake_data?.audit).pass, gate: !!oc.gate?.ok, sheet: !!(sheet?.hero?.msgs?.length && sheet?.e1) && [sheet?.hero?.intervention, sheet?.hero?.complaint].every((h) => !h?.ask || !!h.close) /* a hand-off names what the customer waits for (2026-11-12) */, qs: (oc.customer_voice?.questions || []).length >= 3, tone: toneOk,
     e1: !!draft && !lint?.flags?.length, art: !!oc.intro_art && existsSync(resolve(__dirname, 'public', oc.intro_art.replace(/^\//, ''))),
     login, mail: mailOk && check?.status !== 'invalid', stage: l.pipeline_stage === 'email_ready',
   }
