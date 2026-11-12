@@ -4,6 +4,8 @@
  *   node readiness.mjs [--json] [--verify-emails]
  *
  * Columns (all must be ✓ for a row to be READY):
+ *   fit     actively investing: active Meta ads, or ≥4 reels/30d at ≥20k median views (lib/investment-fit.mjs, audit_leads.mjs)
+ *   tone    voice read clean: no agent line reads like a machine (voice_read.mjs, docs/dm-voice.md)
  *   gate    claims gate verdict stored and ok          sheet   hand sheet with hero + e1 block (sheets/<tenant>.json)
  *   voice   ≥3 real customer questions stored          e1      E1 draft stored in contacts.email_draft and the copy lint is clean
  *   art     opening wallpaper file exists + linked     login   the demo login (email + password) really signs in
@@ -17,6 +19,7 @@ import { resolve, dirname } from 'path'
 import { fileURLToPath } from 'url'
 import { redFlags, bodyWords } from './lib/copy-red-flags.mjs'
 import { extractEmails } from './lib/email-finder.mjs'
+import { investmentFit } from './lib/investment-fit.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 for (const l of readFileSync(resolve(__dirname, '.env.local'), 'utf8').split('\n')) { const m = l.match(/^([^#=]+)=(.*)$/); if (m && process.env[m[1].trim()] === undefined) process.env[m[1].trim()] = m[2].trim().replace(/^['"]|['"]$/g, '') }
@@ -51,7 +54,7 @@ for (const l of leads || []) {
       await sb.from('contacts').update({ intake_data: { ...(l.intake_data || {}), email_check: check } }).eq('id', l.id) } catch { /* unverified */ }
   }
   const cell = {
-    gate: !!oc.gate?.ok, sheet: !!(sheet?.hero?.msgs?.length && sheet?.e1), voice: (oc.customer_voice?.questions || []).length >= 3,
+    fit: investmentFit(l.intake_data?.audit).pass, gate: !!oc.gate?.ok, sheet: !!(sheet?.hero?.msgs?.length && sheet?.e1), qs: (oc.customer_voice?.questions || []).length >= 3, tone: !!oc.voice_read?.ok,
     e1: !!draft && !lint?.flags?.length, art: !!oc.intro_art && existsSync(resolve(__dirname, 'public', oc.intro_art.replace(/^\//, ''))),
     login, mail: mailOk && check?.status !== 'invalid', stage: l.pipeline_stage === 'email_ready',
   }
@@ -59,7 +62,7 @@ for (const l of leads || []) {
 }
 if (process.argv.includes('--json')) console.log(JSON.stringify(rows, null, 1))
 else {
-  const cols = ['gate', 'sheet', 'voice', 'e1', 'art', 'login', 'mail', 'stage']
+  const cols = ['fit', 'gate', 'sheet', 'qs', 'tone', 'e1', 'art', 'login', 'mail', 'stage']
   console.log('lead'.padEnd(34) + cols.map((c) => c.padEnd(6)).join('') + 'ready  mail-check')
   for (const r of rows.sort((a, b) => Number(b.ready) - Number(a.ready) || a.name.localeCompare(b.name))) console.log(String(r.name).slice(0, 32).padEnd(34) + cols.map((c) => (r[c] ? '✓' : '✗').padEnd(6)).join('') + (r.ready ? 'READY ' : '      ') + (r.check || '') + (r.flags.length ? `  lint: ${r.flags.join('; ').slice(0, 80)}` : ''))
   console.log(`\n${rows.filter((r) => r.ready).length}/${rows.length} ready`)

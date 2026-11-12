@@ -1121,7 +1121,7 @@ export function SocialChatbotModule({ clientId, selectedBrandIds, clientName, ni
                                                 {!imageUrl && !msgText && (
                                                     <span className="text-[10px] font-mono uppercase tracking-widest opacity-40">📷 Slika</span>
                                                 )}
-                                                {msgText && <p className="leading-relaxed text-[13px]">{msgText}</p>}
+                                                {msgText && <p className="leading-relaxed text-[13px] whitespace-pre-line">{msgText}</p>}
                                                 <span className={cn("text-[10px] mt-1.5 block font-mono", isUser ? "opacity-35 text-zinc-400" : "opacity-50 text-[#05140d]")}>
                                                     {format(new Date(msg.created_at), "HH:mm")}
                                                 </span>
