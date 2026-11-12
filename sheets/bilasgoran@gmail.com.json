@@ -7,7 +7,7 @@
       "how_bought": "reserve_for_pickup",
       "fulfilment": "in_store",
       "quote": "Plaćanje je u punom iznosu, gotovinom ili platnom karticom, pri preuzimanju uređaja",
-      "reply": "Telefoni sa sajta su na stanju u radnji. Plaća se gotovinom ili platnom karticom u radnji, a zakazivanje nije potrebno."
+      "reply": "Telefoni sa sajta su kod nas u radnji.\nPlaćate gotovinom ili karticom u radnji, a zakazivanje nije potrebno."
     },
     {
       "name": "Otkup telefona",
@@ -15,7 +15,7 @@
       "how_bought": "walk_in",
       "fulfilment": "in_store",
       "quote": "Procenu radimo pred tobom, konačnu cenu znaš odmah, a isplata je na licu mesta",
-      "reply": "Pošaljite tačan model, memoriju i stanje uređaja, pa dobijate okvirni raspon. Isplata kod otkupa se vrši u gotovini, odmah po prihvatanju ponude."
+      "reply": "Pošaljite mi tačan model, memoriju i stanje telefona, pa Vam kažem okvirni raspon.\nKad prihvatite ponudu, isplata je odmah, u gotovini."
     },
     {
       "name": "Zamena starog telefona za noviji",
@@ -23,7 +23,7 @@
       "how_bought": "walk_in",
       "fulfilment": "in_store",
       "quote": "Najčešće korišćena alternativa je zamena starog telefona za noviji, gde se vrednost starog uređaja odbija",
-      "reply": "Stari telefon možete dati u zamenu za noviji, a vrednost starog uređaja se odbija od cene."
+      "reply": "Možete. Stari telefon dajete u zamenu za noviji, a njegova vrednost se odbija od cene."
     },
     {
       "name": "Servis mobilnih telefona",
@@ -31,7 +31,7 @@
       "how_bought": "walk_in",
       "fulfilment": "in_store",
       "quote": "Tačnu cenu i rok dobićeš nakon što utvrdimo model, kvar i dostupnost odgovarajućeg dela",
-      "reply": "Tačnu cenu i rok dobijate kada utvrdimo model, kvar i dostupnost odgovarajućeg dela. Većinu standardnih servisa završavamo za 24 sata."
+      "reply": "Tačnu cenu i rok kažemo čim vidimo koji je model, šta je kvar i da li imamo odgovarajući deo.\nVećinu servisa završavamo za 24 sata."
     }
   ],
   "primary": 0,
@@ -47,21 +47,21 @@
         "customer_says": "Hmm, to mi je trenutno malo skupo.",
         "approach": "split_decision",
         "why": "A large one-off sum; the shop does not offer instalments, but it does take the old phone in trade.",
-        "agent_reply": "Stari telefon možete dati u zamenu za noviji, a vrednost starog uređaja se odbija od cene."
+        "agent_reply": "Ako imate stari telefon, možete ga dati u zamenu za noviji: njegova vrednost se odbija od cene."
       },
       {
         "id": "trust",
         "customer_says": "A da li je polovan telefon ispravan?",
         "approach": "lower_risk",
         "why": "Used phones feel risky.",
-        "agent_reply": "Na polovne telefone koje prodajemo dajemo mesec dana garancije."
+        "agent_reply": "Za polovne telefone iz radnje imate mesec dana garancije."
       },
       {
         "id": "later",
         "customer_says": "Razmisliću, pa ću se javiti.",
         "approach": "next_step",
         "why": "Wants to compare first.",
-        "agent_reply": "Zakazivanje nije potrebno ni za kupovinu ni za otkup, pa telefon možete da pogledate u radnji kad Vam odgovara."
+        "agent_reply": "Važi. Ne morate da zakazujete ni za kupovinu ni za otkup: svratite kad Vam odgovara, pa telefon pogledajte uživo."
       }
     ],
     "call_prep": [
@@ -90,15 +90,19 @@
       ],
       [
         "assistant",
-        "Dobar dan, Stefane. Otkupljujemo samo ispravne telefone do tri godine starosti, a iPhone 12 je stariji, pa ga ne možemo otkupiti ni uzeti u zamenu."
+        "Dobar dan, Stefane! Nažalost, iPhone 12 ne možemo ni da otkupimo ni da uzmemo u zamenu, jer otkupljujemo samo ispravne telefone do tri godine starosti."
       ],
       [
         "user",
-        "Šteta. Zanima me onda neki noviji, na primer iPhone 14 Pro Max. Imate li ga?"
+        "Šteta. A neki noviji Pro Max, šta imate?"
       ],
       [
         "assistant",
-        "Ponuda se menja svakodnevno, jer svaki uređaj postoji u jednom primerku. Aktuelne telefone i cene vidite na jetset.rs. Radnja je u TC Piramida, Jurija Gagarina 151a, lokal 20, Novi Beograd, a radno vreme je pon–pet 10–20h, sub 10–15h. Zakazivanje nije potrebno."
+        "Trenutno imamo iPhone 15 Pro Max, 256GB, Blue Titanium, top stanje, ekran menjan (original), 550 €.\nSvaki telefon imamo u jednom primerku, pa ako Vam se dopada, bolje da ne čekate."
+      ],
+      [
+        "assistant",
+        "A ako Vam je lakše da svratite: radnja je u TC Piramida, Jurija Gagarina 151a, lokal 20, Novi Beograd.\nRadimo pon–pet 10–20h i subotom 10–15h, a zakazivati ne morate."
       ],
       [
         "user",
@@ -106,24 +110,323 @@
       ],
       [
         "assistant",
-        "Važi. Vidimo se u radnji."
+        "Odlično, vidimo se u radnji!"
       ]
     ],
     "crm": {
       "full_name": "Stefan Ilić",
       "telefon": "063 987 6543",
       "kategorija": "Prodaja polovnih mobilnih telefona",
-      "proizvod": "iPhone 14 Pro Max",
+      "proizvod": "iPhone 15 Pro Max",
       "status": "Zainteresovan",
-      "razlog": "Pitao koliko vredi njegov iPhone 12 — agent je rekao da otkupljuju samo ispravne telefone do tri godine starosti i uputio ga na aktuelnu ponudu i radnju.",
+      "razlog": "Pitao koliko vredi njegov iPhone 12 — otkupljuju samo ispravne telefone do tri godine starosti. Agent mu je ponudio iPhone 15 Pro Max iz trenutne ponude (550 €); dolazi u radnju sutra posle posla.",
       "komentar": "",
       "izvor": "Instagram"
     },
     "complaint": {
       "ask": "Dobar dan, kupio sam telefon kod Vas pre dve nedelje i ne radi mi kako treba.",
-      "answer": "Žao mi je zbog toga. Koji ste telefon kupili i šta tačno ne radi? Uređaj možete da donesete u radnju u roku od mesec dana od kupovine. Ja upisujem slučaj, pa mi pošaljite ime i broj telefona.",
-      "razlog": "Reklamacija na kupljen telefon. Agent je pitao koji je model i šta ne radi, i uputio da se uređaj donese u radnju u roku od mesec dana od kupovine (pravilo sa sajta). Prosleđeno na rešavanje."
-    }
+      "answer": "Joj, žao mi je. Kod nas telefon možete da reklamirate u roku od mesec dana od kupovine, a Vi ste još u tom roku.\nPošaljite mi samo ime i broj telefona, pa Vam se javljamo.",
+      "razlog": "Reklamacija na kupljen telefon (kupljen pre dve nedelje, ne radi kako treba). Agent je rekao da se reklamira u roku od mesec dana od kupovine (pravilo sa sajta) i uzeo ime i broj telefona. Prosleđeno na rešavanje.",
+      "close": "Hvala, Jelena!\nJavljamo Vam se da se dogovorimo oko reklamacije."
+    },
+    "qa": [
+      [
+        "Da li polovni telefoni imaju garanciju?",
+        "Imaju, mesec dana.\nTelefon proveravamo pre nego što uđe u ponudu, a Vi ga u radnji uključite i isprobate pre nego što platite."
+      ],
+      [
+        "Mogu li da dam stari telefon u zamenu?",
+        "Možete. Stari telefon dajete u zamenu za noviji, a njegova vrednost se odbija od cene."
+      ],
+      [
+        "Kako mogu da platim?",
+        "Plaćate ceo iznos, gotovinom ili karticom, kad preuzmete telefon u radnji."
+      ],
+      [
+        "Kako ide otkup telefona?",
+        "Pošaljite mi tačan model, memoriju i stanje telefona, pa Vam kažem okvirni raspon.\nKad prihvatite ponudu, isplata je odmah, u gotovini."
+      ],
+      [
+        "Da li otkupljujete telefon sa napuklim ekranom?",
+        "Nažalost ne, otkupljujemo samo ispravne telefone do tri godine starosti.\nAli ga možemo popraviti u servisu."
+      ],
+      [
+        "Koliko traje servis?",
+        "Većinu servisa završavamo za 24 sata.\nTačnu cenu i rok kažemo čim vidimo koji je model, šta je kvar i da li imamo odgovarajući deo."
+      ],
+      [
+        "Da li je iPhone 17 Pro Max još na stanju?",
+        "Ponuda se menja iz dana u dan, jer svaki telefon imamo u jednom primerku.\nŠta je trenutno kod nas i po kojoj ceni, vidite na jetset.rs."
+      ],
+      [
+        "Da li treba da zakažem?",
+        "Ne morate, ni za kupovinu ni za otkup. Samo svratite u toku radnog vremena."
+      ],
+      [
+        "Gde se nalazite?",
+        "U TC Piramida na Novom Beogradu, Jurija Gagarina 151a, lokal 20.\nRadimo pon–pet 10–20h i subotom 10–15h."
+      ]
+    ],
+    "objections": [
+      [
+        "Malo mi je skupo.",
+        "Ako imate stari telefon, možete ga dati u zamenu za noviji: njegova vrednost se odbija od cene."
+      ],
+      [
+        "Razmisliću, pa ću se javiti.",
+        "Važi. Ne morate ništa da zakazujete: svratite kad Vam odgovara, pa telefon pogledajte uživo."
+      ],
+      [
+        "Hvala, javiću se.",
+        "Slobodno. Kad budete spremni, svratite ili pišite ovde."
+      ],
+      [
+        "Još ću da pogledam ponudu.",
+        "Naravno. Aktuelna ponuda je na jetset.rs, a menja se iz dana u dan."
+      ]
+    ],
+    "background": [
+      {
+        "name": "Ana Kovačević",
+        "ch": "instagram",
+        "st": "Novi",
+        "msgs": [
+          [
+            "user",
+            "Da li radite subotom?"
+          ],
+          [
+            "assistant",
+            "Radimo, subotom od 10 do 15h.\nPon–pet smo od 10 do 20h."
+          ]
+        ]
+      },
+      {
+        "name": "Petar Nikolić",
+        "ch": "whatsapp",
+        "st": "Naručio",
+        "msgs": [
+          [
+            "user",
+            "Koliko traje servis ekrana?"
+          ],
+          [
+            "assistant",
+            "Većinu servisa završavamo za 24 sata.\nTačnu cenu i rok kažemo čim vidimo model i kvar."
+          ],
+          [
+            "user",
+            "Važi, svraćam sutra."
+          ],
+          [
+            "assistant",
+            "Super, vidimo se u radnji."
+          ]
+        ]
+      },
+      {
+        "name": "Jovana Ilić",
+        "ch": "facebook",
+        "st": "Zainteresovan",
+        "msgs": [
+          [
+            "user",
+            "Da li polovni telefoni imaju garanciju?"
+          ],
+          [
+            "assistant",
+            "Imaju, mesec dana.\nTelefon proveravamo pre nego što uđe u ponudu, a Vi ga u radnji uključite i isprobate pre nego što platite."
+          ],
+          [
+            "user",
+            "Razmisliću."
+          ],
+          [
+            "assistant",
+            "Važi, pišite ako Vas još nešto zanima."
+          ]
+        ]
+      },
+      {
+        "name": "Marko Savić",
+        "ch": "instagram",
+        "st": "Naručio",
+        "msgs": [
+          [
+            "user",
+            "Mogu li da dam stari telefon za noviji?"
+          ],
+          [
+            "assistant",
+            "Možete. Stari telefon dajete u zamenu, a njegova vrednost se odbija od cene novijeg."
+          ],
+          [
+            "user",
+            "Dobro, dolazim u subotu."
+          ],
+          [
+            "assistant",
+            "Odlično, subotom radimo do 15h. Vidimo se!"
+          ]
+        ]
+      },
+      {
+        "name": "Tamara Đorđević",
+        "ch": "instagram",
+        "st": "Isporučeno",
+        "msgs": [
+          [
+            "user",
+            "Hvala, bila sam juče, sve ste mi lepo objasnili."
+          ],
+          [
+            "assistant",
+            "Drago nam je, hvala Vama!"
+          ]
+        ]
+      },
+      {
+        "name": "Luka Pavlović",
+        "ch": "whatsapp",
+        "st": "Novi",
+        "msgs": [
+          [
+            "user",
+            "Kupujete li telefone?"
+          ],
+          [
+            "assistant",
+            "Kupujemo, ispravne telefone do tri godine starosti.\nKoji telefon imate?"
+          ]
+        ]
+      },
+      {
+        "name": "Milica Jovanović",
+        "ch": "instagram",
+        "st": "Naručio",
+        "msgs": [
+          [
+            "user",
+            "Imam iPhone 16, ispravan je. Koliko biste dali za njega?"
+          ],
+          [
+            "assistant",
+            "Pošaljite mi memoriju i stanje telefona, pa Vam kažem okvirni raspon.\nKonačnu cenu znate čim ga pogledamo u radnji, a isplata je odmah."
+          ],
+          [
+            "user",
+            "Dolazim sutra."
+          ],
+          [
+            "assistant",
+            "Važi, vidimo se."
+          ]
+        ]
+      },
+      {
+        "name": "Nemanja Ristić",
+        "ch": "facebook",
+        "st": "Zainteresovan",
+        "msgs": [
+          [
+            "user",
+            "Da li je iPhone 17 Pro Max još na stanju?"
+          ],
+          [
+            "assistant",
+            "Ponuda se menja iz dana u dan, jer svaki telefon imamo u jednom primerku.\nŠta je trenutno kod nas, vidite na jetset.rs."
+          ],
+          [
+            "user",
+            "Razmisliću."
+          ],
+          [
+            "assistant",
+            "Važi."
+          ]
+        ]
+      },
+      {
+        "name": "Sara Marković",
+        "ch": "whatsapp",
+        "st": "Isporučeno",
+        "msgs": [
+          [
+            "user",
+            "Hvala, bio sam juče, sve je super."
+          ],
+          [
+            "assistant",
+            "Drago nam je, hvala Vam!"
+          ]
+        ]
+      },
+      {
+        "name": "Filip Stojanović",
+        "ch": "instagram",
+        "st": "Naručio",
+        "msgs": [
+          [
+            "user",
+            "Da li treba da zakažem otkup?"
+          ],
+          [
+            "assistant",
+            "Ne morate, samo svratite u toku radnog vremena.\nProcena traje nekoliko minuta i radi se pred Vama."
+          ],
+          [
+            "user",
+            "Super, svraćam posle posla."
+          ],
+          [
+            "assistant",
+            "Odlično, vidimo se!"
+          ]
+        ]
+      },
+      {
+        "name": "Katarina Lukić",
+        "ch": "instagram",
+        "st": "Zainteresovan",
+        "msgs": [
+          [
+            "user",
+            "Kako mogu da platim?"
+          ],
+          [
+            "assistant",
+            "Plaćate ceo iznos, gotovinom ili karticom, kad preuzmete telefon u radnji."
+          ],
+          [
+            "user",
+            "U redu, hvala."
+          ]
+        ]
+      },
+      {
+        "name": "Stefan Petrović",
+        "ch": "facebook",
+        "st": "Naručio",
+        "msgs": [
+          [
+            "user",
+            "Da li popravljate baterije?"
+          ],
+          [
+            "assistant",
+            "Da, popravljamo ekrane, baterije i konektore.\nTačnu cenu i rok kažemo čim vidimo model i kvar."
+          ],
+          [
+            "user",
+            "Dolazim sutra."
+          ],
+          [
+            "assistant",
+            "Važi, vidimo se u radnji."
+          ]
+        ]
+      }
+    ]
   },
   "e1": {
     "_note": "E1 v20 (2026-11-09). Opens as a person: why he writes (his belief about where AI helps this kind of business most), why a demo (easier shown than explained), that it is theirs (built from their site + comments), the honest catch (before proposing anything). No scenario, no backstory.",

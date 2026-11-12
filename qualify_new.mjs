@@ -20,6 +20,8 @@ import { measureReach, followersFree, measureDmPrompt } from './lib/reach-apify.
 import { INVITE } from './lib/dm-demand.mjs'
 import { findEmail, findWebsite, ownDomain, siteAlive } from './lib/email-finder.mjs'
 import { pickApifyToken } from './lib/apify-key.mjs'
+import { auditLead } from './lib/lead-audit.mjs'
+import { investmentFit } from './lib/investment-fit.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 for (const l of readFileSync(resolve(__dirname, '.env.local'), 'utf8').split('\n')) { const m = l.match(/^([^#=]+)=(.*)$/); if (m && process.env[m[1].trim()] === undefined) process.env[m[1].trim()] = m[2].trim().replace(/^['"]|['"]$/g, '') }
@@ -83,7 +85,13 @@ for (const r of stage2) {
   const fit = leadFit({ followers: r._followers, medViews: m.medViews ?? null, viewsPerFollower: r._followers && m.medViews != null ? +(m.medViews / r._followers).toFixed(3) : null, reels12: m.reels12 ?? null, p75Views: m.p75Views ?? null, daysSincePost: m.daysSincePost ?? null, email: r.email, paidAds: isPaid(r), dmPrompt: dmPromptOf(r, m), activeAds: r.intake_data?.active_ads_count ? Number(r.intake_data.active_ads_count) : null })
   r._reach = m; r._fit = fit; r._dm = dmPromptOf(r, m)
   const emailOnly = fit.fails.length === 1 && /email/.test(fit.fails[0])
-  if (fit.pass || emailOnly) { r._verdict = fit.pass ? 'PASS' : 'PASS (needs an email)'; passed.push(r) } else r._verdict = `reach: ${fit.fails.join(' | ').slice(0, 90)}`
+  if (fit.pass || emailOnly) {
+    // the investment bar (2026-11-12): a demo only for a business actively paying for attention now (Meta ads) or publishing high-reach reels weekly
+    const key = await pickApifyToken(0.1, { quiet: true })
+    r._audit = key ? await auditLead({ ...r, instagram_followers: r._followers ?? r.instagram_followers }, key.token) : null
+    const inv = investmentFit(r._audit)
+    if (inv.pass) { r._verdict = (fit.pass ? 'PASS' : 'PASS (needs an email)') + ` · ${inv.reason}`; passed.push(r) } else r._verdict = `not investing: ${inv.reason}`
+  } else r._verdict = `reach: ${fit.fails.join(' | ').slice(0, 90)}`
 }
 const pad = (s, n) => String(s ?? '').slice(0, n).padEnd(n)
 for (const r of cands.sort((a, b) => (b._verdict?.startsWith('PASS') ? 1 : 0) - (a._verdict?.startsWith('PASS') ? 1 : 0))) {
@@ -96,7 +104,7 @@ if (APPLY) {
     const ok = r._verdict?.startsWith('PASS')
     const note = ok ? `2026-11-11 qualified (reels ${r._reach?.medViews} median over ${r._reach?.reels12} reels, ${r._followers} followers)` : `2026-11-11 archived by qualify_new: ${r._verdict}`
     await sb.from('contacts').update({ pipeline_stage: ok ? 'demo_building' : 'archived', ...(r._emailFound ? { email: r.email, status: 'enriched' } : {}), ...(r._websiteFound ? { website: r._websiteFound } : {}), instagram_followers: r._followers ?? r.instagram_followers, comment: ((r.comment ? r.comment + ' | ' : '') + note).slice(0, 900),
-      intake_data: { ...(r.intake_data || {}), ...(r._emailSource ? { email_source: r._emailSource } : {}), dm_demand: r._reach ? { dm_prompt: !!r._dm, paid_ads: isPaid(r), checked_at: new Date().toISOString().slice(0, 10), median_views: r._reach.medViews, views_per_follower: r._followers ? +(r._reach.medViews / r._followers).toFixed(3) : null, days_since_post: r._reach.daysSincePost, reels12: r._reach.reels12, source: 'apify-reel-scraper-12' } : r.intake_data?.dm_demand } }).eq('id', r.id)
+      intake_data: { ...(r.intake_data || {}), ...(r._emailSource ? { email_source: r._emailSource } : {}), ...(r._audit ? { audit: r._audit } : {}), dm_demand: r._reach ? { dm_prompt: !!r._dm, paid_ads: isPaid(r), checked_at: new Date().toISOString().slice(0, 10), median_views: r._reach.medViews, views_per_follower: r._followers ? +(r._reach.medViews / r._followers).toFixed(3) : null, days_since_post: r._reach.daysSincePost, reels12: r._reach.reels12, source: 'apify-reel-scraper-12' } : r.intake_data?.dm_demand } }).eq('id', r.id)
   }
   console.log('applied: passed → demo_building, the rest → archived')
 }

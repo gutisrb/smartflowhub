@@ -14,7 +14,7 @@
       ],
       [
         "assistant",
-        "Dobar dan, Marija. Za WPC panele sa objave cena po m² je 45 € sa PDV-om. Isporuka i montaža su za celu Srbiju. Ako Vam treba ponuda za Vaš prostor, pošaljite mi kvadraturu i fotografiju prostora."
+        "Dobar dan, Marija!\nZa WPC panele sa objave cena je 45 € po m² sa PDV-om, a isporuka i montaža su za celu Srbiju.\nAko želite ponudu za Vaš prostor, pošaljite mi kvadraturu i fotografiju prostora."
       ],
       [
         "user",
@@ -22,7 +22,7 @@
       ],
       [
         "assistant",
-        "Hvala. Pošaljite mi ime i broj telefona, pa zahtev za ponudu prosleđujem našem timu."
+        "Super, čekam.\nPošaljite mi samo još ime i broj telefona."
       ],
       [
         "user",
@@ -30,7 +30,7 @@
       ],
       [
         "assistant",
-        "Hvala, Marija. Zahtev za ponudu je upisan i prosleđen. Naš tim Vam stoji na raspolaganju radnim danima od 8 do 16h."
+        "Hvala, Marija!\nČim stigne slika plafona, spremam Vam ponudu."
       ]
     ],
     "crm": {
@@ -54,7 +54,7 @@
         ],
         [
           "assistant",
-          "Dobar dan. Cenu tog projekta ne mogu da Vam kažem. Ponudu pripremamo za Vaš prostor, pa mi pošaljite dužinu ograde i fotografiju prostora."
+          "Dobar dan.\nCenu tog projekta ne mogu da Vam kažem, jer ponudu pripremamo za Vaš prostor.\nPošaljite mi dužinu ograde i fotografiju prostora, pa Vam šaljem ponudu."
         ],
         [
           "user",
@@ -62,7 +62,7 @@
         ],
         [
           "assistant",
-          "Važi. Premium ograda je po sistemu ključ u ruke, uz garanciju od 15 godina. Ako Vam zatreba ponuda, pišite ovde."
+          "Važi, nema žurbe.\nSamo da znate, premium ograda ide po sistemu ključ u ruke, a garancija je 15 godina.\nKad Vam zatreba ponuda, pišite ovde."
         ]
       ],
       "crm": {
@@ -77,79 +77,80 @@
     },
     "intervention": {
       "ask": "Cena takvih dimenzija slicnih ?",
-      "answer": "Zdravo, Dragana. Cenu i dimenzije aluminijumskog panela za ogradu Zlatni Hrast nemam objavljene, pa ne bih da nagađam. Prosleđujem upit našem timu. Mogu li da zabeležim Vaše ime i broj telefona?",
-      "razlog": "Pitala za cenu panela takvih dimenzija (Zlatni Hrast, aluminijumski panel za ogradu). Cena i dimenzije nisu objavljene — prosleđeno timu."
+      "answer": "Zdravo, Dragana.\nZlatni Hrast je novitet, pa cenu i dimenzije nemamo objavljene.\nOstavite mi ime i broj telefona, pa ćemo to proveriti.",
+      "razlog": "Pitala za cenu panela takvih dimenzija (Zlatni Hrast, aluminijumski panel za ogradu). Cena i dimenzije nisu objavljene — prosleđeno timu.",
+      "close": "Hvala, Dragana.\nJavljamo Vam se sa cenom i dimenzijama panela Zlatni Hrast."
     },
     "qa": [
       [
         "Cena kvadrata",
-        "Za WPC panele na plafonu cena po m² je 45 € sa PDV-om. Za ostale proizvode pripremamo ponudu: pošaljite kvadraturu i fotografiju prostora."
+        "Za WPC panele na plafonu cena po m² je 45 € sa PDV-om.\nZa ostale proizvode pripremamo ponudu, pa pošaljite kvadraturu i fotografiju prostora."
       ],
       [
         "Koliko košta WPC deking?",
-        "Cenu dekinga za Vaš prostor daje ponuda. Pošaljite mi kvadraturu i fotografiju terase, pa je prosleđujem timu."
+        "Cenu dekinga dobijate u ponudi za Vaš prostor.\nPošaljite mi kvadraturu i fotografiju terase, pa je pripremamo."
       ],
       [
         "Da li radite isporuku i montažu?",
-        "Radimo. Isporuka i montaža su za celu Srbiju."
+        "Radimo, isporuka i montaža su za celu Srbiju."
       ],
       [
         "Kolika je garancija na fasadne panele?",
-        "Garancija je 15 godina."
+        "Na fasadne panele garancija je 15 godina."
       ],
       [
         "Imate li ograde?",
-        "Imamo WPC ograde, a novo u ponudi je aluminijumski panel za ogradu Zlatni Hrast. Premium ograda je po sistemu ključ u ruke, uz garanciju od 15 godina."
+        "Imamo WPC ograde, a novo u ponudi je aluminijumski panel za ogradu Zlatni Hrast.\nPremium ograda je po sistemu ključ u ruke, uz garanciju od 15 godina."
       ],
       [
         "Da li je deking i za bazene?",
-        "Jeste. Premium WPC deking je za terase, bazene i krovne prostore."
+        "Jeste.\nPremium WPC deking je za terase, bazene i krovne prostore."
       ],
       [
         "Koje proizvode imate?",
-        "WPC deking, WPC i ASA fasadne kit kat panele, WPC ograde, dekorativne cigle i Ella akustične panele. Ponuda svih modela je na topdek.rs."
+        "WPC deking, WPC i ASA fasadne kit kat panele, WPC ograde, dekorativne cigle i Ella akustične panele.\nKompletnu ponudu modela imate na topdek.rs."
       ],
       [
         "Do kada radite?",
-        "Radnim danima od 8 do 16h. Subotom i nedeljom ne radimo."
+        "Radnim danima od 8 do 16h.\nSubotom i nedeljom ne radimo."
       ],
       [
         "Šta treba da pošaljem za ponudu?",
-        "Kvadraturu i fotografiju prostora. Za konsultacije možete da pozovete 065 24 17 043."
+        "Kvadraturu i fotografiju prostora.\nZa konsultacije možete da pozovete 065 24 17 043."
       ],
       [
         "Radite li ograde kao pregrade između stanova?",
-        "Radimo. Postavili smo WPC ogradu kao pregrade između stanova u Novom Sadu."
+        "Radimo.\nPostavili smo WPC ogradu kao pregrade između stanova u Novom Sadu."
       ],
       [
         "Radite li deking za terase restorana?",
-        "Radimo. Postavili smo deking na terasi jednog restorana u Zemunu, uz Dunav, u toploj boji drveta."
+        "Radimo.\nPostavili smo deking na terasi jednog restorana u Zemunu, uz Dunav, u toploj boji drveta."
       ],
       [
         "Kakvi su WPC fasadni paneli?",
-        "Donose toplinu prirodnog drveta, uz dugotrajnost i minimalno održavanje. Garancija je 15 godina."
+        "Imaju toplinu prirodnog drveta, a dugotrajni su i traže minimalno održavanje.\nGarancija je 15 godina."
       ]
     ],
     "objections": [
       [
         "Razmisliću, pa ću se javiti.",
-        "Važi. Za ponudu je dovoljno da pošaljete kvadraturu i fotografiju prostora kad Vam bude odgovaralo."
+        "Važi, nema žurbe.\nZa ponudu je dovoljno da pošaljete kvadraturu i fotografiju prostora kad Vam bude odgovaralo."
       ],
       [
         "Nisam siguran koliko traje WPC.",
-        "WPC fasadni paneli su dugotrajni i traže minimalno održavanje, a garancija je 15 godina."
+        "WPC fasadni paneli su dugotrajni i traže minimalno održavanje.\nGarancija je 15 godina."
       ],
       [
         "Mogu li prvo da razgovaram sa nekim?",
-        "Možete. Za konsultacije pozovite 065 24 17 043, radnim danima od 8 do 16h."
+        "Možete, naravno.\nZa konsultacije pozovite 065 24 17 043, radnim danima od 8 do 16h."
       ],
       [
         "Ne znam kako bi to izgledalo kod mene.",
-        "Ponuda svih modela je na topdek.rs, a postavljene terase i ograde možete da vidite na našem Instagramu."
+        "Modele možete da pogledate na topdek.rs.\nA postavljene terase i ograde su na našem Instagramu."
       ],
       [
         "Javiću se kad izmerim prostor.",
-        "Važi. Kad izmerite, pošaljite kvadraturu i fotografiju prostora, pa pripremamo ponudu."
+        "Slobodno.\nKad izmerite, pošaljite kvadraturu i fotografiju prostora, pa Vam pripremamo ponudu."
       ]
     ],
     "background": [
@@ -164,7 +165,7 @@
           ],
           [
             "assistant",
-            "Dobar dan, Ana. Za koji proizvod Vam treba cena? Ponudu pripremamo za Vaš prostor, pa mi pošaljite i kvadraturu i fotografiju prostora."
+            "Dobar dan, Ana. Koji proizvod Vas zanima?\nPonudu pripremamo za Vaš prostor, pa mi uz to pošaljite kvadraturu i fotografiju prostora."
           ]
         ]
       },
@@ -179,7 +180,7 @@
           ],
           [
             "assistant",
-            "Cenu dekinga za Vašu terasu daje ponuda. Pošaljite mi kvadraturu i fotografiju terase, pa je prosleđujem timu."
+            "Cenu dekinga dobijate u ponudi za Vašu terasu.\nPošaljite mi kvadraturu i fotografiju terase, pa je pripremamo."
           ],
           [
             "user",
@@ -187,7 +188,7 @@
           ],
           [
             "assistant",
-            "Važi. Naš tim Vam stoji na raspolaganju radnim danima od 8 do 16h."
+            "Važi, pošaljite kad Vam odgovara.\nRadnim danima smo tu od 8 do 16h."
           ]
         ]
       },
@@ -202,7 +203,7 @@
           ],
           [
             "assistant",
-            "Radimo. Isporuka i montaža su za celu Srbiju."
+            "Radimo, isporuka i montaža su za celu Srbiju."
           ],
           [
             "user",
@@ -225,7 +226,7 @@
           ],
           [
             "assistant",
-            "Pošaljite mi dužinu ograde i fotografiju prostora, pa prosleđujem zahtev za ponudu. Treba mi i Vaše ime i broj telefona."
+            "Dobar dan.\nZa ponudu mi pošaljite dužinu ograde i fotografiju prostora, a uz to i ime i broj telefona."
           ],
           [
             "user",
@@ -233,7 +234,7 @@
           ],
           [
             "assistant",
-            "Hvala, Marko. Zahtev za ponudu je upisan i prosleđen."
+            "Hvala Vam, Marko!\nKad stignu dužina ograde i fotografija prostora, pripremamo ponudu."
           ]
         ]
       },
@@ -248,7 +249,7 @@
           ],
           [
             "assistant",
-            "Dobar dan. Cenu panela za Vaš prostor daje ponuda. Pošaljite mi kvadraturu i fotografiju prostora, pa je prosleđujem timu."
+            "Dobar dan.\nCenu panela dobijate u ponudi za Vaš prostor.\nPošaljite mi kvadraturu i fotografiju prostora, pa je pripremamo."
           ]
         ]
       },
@@ -263,7 +264,7 @@
           ],
           [
             "assistant",
-            "Imamo Ella akustične panele. Ponuda svih modela je na topdek.rs."
+            "Imamo, Ella akustične panele.\nKompletnu ponudu modela imate na topdek.rs."
           ]
         ]
       },
@@ -278,7 +279,7 @@
           ],
           [
             "assistant",
-            "WPC fasadni paneli donose toplinu prirodnog drveta, uz dugotrajnost i minimalno održavanje. Garancija je 15 godina."
+            "Minimalno. WPC fasadni paneli su dugotrajni i traže minimalno održavanje.\nGarancija je 15 godina."
           ]
         ]
       },
@@ -293,7 +294,7 @@
           ],
           [
             "assistant",
-            "Imamo. Dekorativne cigle su u našem asortimanu, a ponuda svih modela je na topdek.rs."
+            "Imamo.\nKompletnu ponudu modela imate na topdek.rs."
           ],
           [
             "user",
@@ -301,7 +302,7 @@
           ],
           [
             "assistant",
-            "Važi. Za ponudu je dovoljno da pošaljete kvadraturu i fotografiju prostora."
+            "Slobodno.\nZa ponudu je dovoljno da pošaljete kvadraturu i fotografiju prostora."
           ]
         ]
       },
@@ -316,7 +317,7 @@
           ],
           [
             "assistant",
-            "Hvala, Sara. Zahtev za ponudu za deking je upisan i prosleđen našem timu."
+            "Hvala Vam, Saro.\nKad stigne kvadratura terase, pripremamo ponudu za deking."
           ]
         ]
       },
@@ -331,7 +332,7 @@
           ],
           [
             "assistant",
-            "Radimo. Postavili smo WPC ogradu kao pregrade između stanova u Novom Sadu."
+            "Radimo.\nPostavili smo WPC ogradu kao pregrade između stanova u Novom Sadu."
           ]
         ]
       },
@@ -346,7 +347,7 @@
           ],
           [
             "assistant",
-            "Jeste. Premium WPC deking je za terase, bazene i krovne prostore."
+            "Jeste.\nPremium WPC deking je za terase, bazene i krovne prostore."
           ],
           [
             "user",
@@ -354,7 +355,7 @@
           ],
           [
             "assistant",
-            "Važi. Za ponudu je dovoljno da pošaljete kvadraturu i fotografiju prostora."
+            "Naravno.\nKad budete spremni, pošaljite kvadraturu i fotografiju prostora, pa pripremamo ponudu."
           ]
         ]
       },
@@ -369,7 +370,7 @@
           ],
           [
             "assistant",
-            "To je novo u našoj ponudi: aluminijumski panel za ogradu. Pošaljite mi dužinu ograde i fotografiju prostora, pa prosleđujem zahtev za ponudu. Treba mi i Vaše ime i broj telefona."
+            "Zlatni Hrast je novo u našoj ponudi, aluminijumski panel za ogradu.\nZa ponudu mi pošaljite dužinu ograde i fotografiju prostora, a uz to i ime i broj telefona."
           ],
           [
             "user",
@@ -377,7 +378,7 @@
           ],
           [
             "assistant",
-            "Hvala, Stefan. Zahtev za ponudu je upisan i prosleđen."
+            "Hvala, Stefane.\nJavljamo Vam se sa ponudom čim pošaljete dužinu ograde i fotografiju prostora."
           ]
         ]
       }

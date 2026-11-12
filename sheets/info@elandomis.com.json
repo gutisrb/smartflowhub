@@ -14,7 +14,7 @@
    ],
    [
     "assistant",
-    "Dobar dan, Marija. Set ANKARA je 239.990 din. Trosed ANKARA možete da kupite i zasebno za 99.990 din, a fotelja je 39.990 din. Cenu dvoseda šaljemo u ponudi."
+    "Dobar dan, Marija.\nSet ANKARA je 239.990 din. Trosed ANKARA možete da kupite i zasebno za 99.990 din, a fotelja je 39.990 din.\nZa dvosed ću proveriti cenu i javiti Vam se."
    ],
    [
     "user",
@@ -22,7 +22,7 @@
    ],
    [
     "assistant",
-    "Prevoz i montaža su besplatni do 50 km u jednom pravcu, a unošenje u stan se naknadno plaća. Pošaljite mi ime, broj telefona i mesto isporuke za ponudu."
+    "Do 50 km u jednom pravcu, da, prevoz i montaža su besplatni.\nUnošenje u stan se naknadno plaća.\nPošaljite mi ime, broj telefona i mesto isporuke, pa Vam spremam ponudu."
    ],
    [
     "user",
@@ -30,7 +30,7 @@
    ],
    [
     "assistant",
-    "Hvala, Marija. Zahtev za ponudu za trosed i dvosed ANKARA je upisan i prosleđen."
+    "Važi, Marija, hvala!\nNovi Pazar, tu nam je jedan od salona.\nSpremam Vam ponudu za trosed i dvosed ANKARA, pa Vam se javljam."
    ]
   ],
   "crm": {
@@ -54,7 +54,7 @@
     ],
     [
      "assistant",
-     "Dobar dan. Ugaona garnitura NOVAK je dimenzija 330 x 330 x 100, sa prostorom za spavanje, a boju možete da birate. Cenu šaljemo u ponudi. Pišite mi mesto isporuke, pa je pripremamo."
+     "Dobar dan!\nUgaona NOVAK je 330 x 330 x 100, ima prostor za spavanje, a boju možete da birate.\nNapišite mi mesto isporuke, pa Vam šaljem ponudu sa cenom."
     ],
     [
      "user",
@@ -62,7 +62,7 @@
     ],
     [
      "assistant",
-     "Važi. Saloni su u Tutinu i Novom Pazaru, a ponudu pripremamo čim kažete."
+     "Važi, slobodno pišite kad budete spremni.\nSaloni su nam u Tutinu i Novom Pazaru."
     ]
    ],
    "crm": {
@@ -77,13 +77,14 @@
   },
   "intervention": {
    "ask": "Dobar dan, trosed koji smo kupili pre godinu dana ima manu na sedištu. Šta da radim?",
-   "answer": "Žao mi je zbog toga. Račun je garancija na kupljenu robu u trajanju od 24 meseca, pa Vam je potreban račun. Da li je mana pokrivena garancijom, procenjuje naš tim, pa ne bih da nagađam. Mogu li da zabeležim Vaše ime i broj telefona?",
-   "razlog": "Reklamacija troseda posle godinu dana. Agent je naveo pravilo sa sajta (račun je garancija 24 meseca), a procenu da li je mana pokrivena prepustio timu. Prosleđeno."
+   "answer": "Žao mi je što to čujem.\nNa kupljenu robu imate garanciju 24 meseca, a Vaš račun je ujedno i garancija.\nPošaljite mi ime i broj telefona, pa ćemo proveriti da li je mana pokrivena.",
+   "razlog": "Reklamacija troseda posle godinu dana. Agent je naveo pravilo sa sajta (račun je garancija 24 meseca), a procenu da li je mana pokrivena prepustio timu. Prosleđeno.",
+   "close": "Hvala Vam, Dragana!\nJavljamo Vam se čim proverimo da li je mana na sedištu pokrivena garancijom."
   },
   "qa": [
    [
     "Koja je cena?",
-    "Cenu šaljemo u ponudi. Recite mi koji set ili komad sa objave Vas zanima."
+    "Cenu šaljemo u ponudi.\nKoji set ili komad sa objave Vas zanima?"
    ],
    [
     "Koliko košta trosed ANKARA?",
@@ -103,57 +104,57 @@
    ],
    [
     "Gde se nalazite?",
-    "Saloni su u Tutinu, Dubovo bb, i u Novom Pazaru, Kej 12. Srpske brigade 181. Radimo od ponedeljka do subote od 9 do 18h."
+    "Imamo dva salona: u Tutinu, Dubovo bb, i u Novom Pazaru, Kej 12. Srpske brigade 181.\nRadimo od ponedeljka do subote, od 9 do 18h."
    ],
    [
     "Da li je dostava besplatna?",
-    "Prevoz i montaža su besplatni do 50 km u jednom pravcu, a unošenje u stan se naknadno plaća."
+    "Prevoz i montaža su besplatni do 50 km u jednom pravcu.\nUnošenje u stan se naknadno plaća."
    ],
    [
     "Može li plaćanje pri isporuci?",
-    "Ne, nameštaj nije moguće platiti po isporuci. Prema pravilniku firme, pre isporuke mora biti uplaćen kompletan iznos sa predračuna."
+    "Nažalost ne, nameštaj ne može da se plati po isporuci.\nPre isporuke se uplaćuje ceo iznos sa predračuna."
    ],
    [
     "Koliki je avans?",
-    "Za poručenu robu avans je najmanje 30 do 50% vrednosti, a ostatak se plaća po prispeću robe u magacin."
+    "Avans je najmanje 30 do 50% vrednosti poručene robe.\nOstatak se plaća kad roba stigne u magacin."
    ],
    [
     "Da li isporučujete u Crnu Goru?",
-    "Da, isporuka u Crnu Goru je moguća ako kupac preuzima troškove carine, PDV-a i prevoza."
+    "Da, možemo, s tim da kupac preuzima troškove carine, PDV-a i prevoza."
    ],
    [
     "Da li radite po meri?",
-    "Da, bavimo se proizvodnjom nameštaja po meri za različite namene."
+    "Da, radimo nameštaj po meri, za različite namene."
    ],
    [
     "Kolika je garancija?",
-    "Račun je garancija na kupljenu robu u trajanju od 24 meseca."
+    "Kod nas je račun garancija na kupljenu robu, 24 meseca."
    ],
    [
     "Imate li nešto na rasklapanje?",
-    "Imamo. Na primer, set ANKARA ima prostor za spavanje dimenzija 210 x 90 cm."
+    "Imamo.\nNa primer, set ANKARA ima prostor za spavanje 210 x 90 cm."
    ],
    [
     "Da li ima u drugoj boji?",
-    "Kod ugaone garniture NOVAK moguće je birati boju."
+    "Kod ugaone garniture NOVAK možete da birate boju."
    ]
   ],
   "objections": [
    [
     "Skupo mi je za sada.",
-    "Komade možete da kupite i zasebno, na primer trosed ANKARA je 99.990 din, a na sajtu imamo i popuste na odabrane komade."
+    "Komade možete da kupite i zasebno, na primer trosed ANKARA je 99.990 din.\nNa sajtu imamo i popuste na odabrane komade."
    ],
    [
     "Razmisliću, pa ću se javiti.",
-    "Važi. Možete i da svratite u salon u Tutinu ili Novom Pazaru, radimo od ponedeljka do subote od 9 do 18h."
+    "Važi, bez žurbe.\nAko Vam je lakše, svratite u salon u Tutinu ili Novom Pazaru. Radimo od ponedeljka do subote, od 9 do 18h."
    ],
    [
     "Moram prvo da vidim uživo.",
-    "Naravno. Saloni su u Tutinu, Dubovo bb, i u Novom Pazaru, Kej 12. Srpske brigade 181, od ponedeljka do subote od 9 do 18h."
+    "Naravno, svratite.\nSaloni su u Tutinu, Dubovo bb, i u Novom Pazaru, Kej 12. Srpske brigade 181, od ponedeljka do subote od 9 do 18h."
    ],
    [
     "Ne znam da li će mi stati u prostor.",
-    "Dimenzije su navedene uz svaku objavu, a nameštaj izrađujemo i po meri."
+    "Dimenzije su navedene uz svaku objavu.\nA ako Vam treba drugačije, nameštaj izrađujemo i po meri."
    ]
   ],
   "background": [
@@ -168,7 +169,7 @@
      ],
      [
       "assistant",
-      "Dobar dan. Koji trosed sa objave Vas zanima? Na primer, trosed ANKARA je 99.990 din."
+      "Dobar dan. Na primer, trosed ANKARA je 99.990 din.\nKoji trosed sa objave Vas zanima?"
      ]
     ]
    },
@@ -183,7 +184,7 @@
      ],
      [
       "assistant",
-      "Dobar dan. Koju garnituru sa objave želite? Za ANKARA trosed je 99.990 din, a fotelja 39.990 din."
+      "Dobar dan.\nZa ANKARA je trosed 99.990 din, a fotelja 39.990 din.\nKoja Vas garnitura sa objave zanima?"
      ],
      [
       "user",
@@ -191,7 +192,7 @@
      ],
      [
       "assistant",
-      "Važi. Pišite kad god želite da pripremimo ponudu."
+      "Slobodno.\nPišite kad god želite ponudu."
      ]
     ]
    },
@@ -206,7 +207,7 @@
      ],
      [
       "assistant",
-      "Saloni su u Tutinu, Dubovo bb, i u Novom Pazaru, Kej 12. Srpske brigade 181. Cenu šaljemo u ponudi, pa mi recite koji komad Vas zanima."
+      "Saloni su nam u Tutinu, Dubovo bb, i u Novom Pazaru, Kej 12. Srpske brigade 181.\nCenu šaljemo u ponudi, pa mi recite koji komad Vas zanima."
      ],
      [
       "user",
@@ -214,7 +215,7 @@
      ],
      [
       "assistant",
-      "Naravno. Ponudu pripremamo kad god kažete."
+      "Naravno, nema žurbe.\nPonudu pripremamo kad god kažete."
      ]
     ]
    },
@@ -229,7 +230,7 @@
      ],
      [
       "assistant",
-      "Dobar dan. Koja garnitura sa objave Vas zanima? Cenu šaljemo u ponudi, pa mi pošaljite ime i broj telefona."
+      "Dobar dan.\nCenu šaljemo u ponudi, pa mi pošaljite ime i broj telefona."
      ],
      [
       "user",
@@ -237,7 +238,7 @@
      ],
      [
       "assistant",
-      "Hvala, Marko. Zahtev za ponudu je upisan i prosleđen."
+      "Hvala Vam, Marko!\nPonudu Vam šaljemo čim je pripremimo."
      ]
     ]
    },
@@ -252,7 +253,7 @@
      ],
      [
       "assistant",
-      "Hvala, Tamara. Porudžbina je upisana. Avans je najmanje 30 do 50% vrednosti poručene robe, a ostatak se plaća po prispeću robe u magacin."
+      "Odlično, hvala Vam, Tamara!\nAvans je najmanje 30 do 50% vrednosti poručene robe, a ostatak plaćate kad roba stigne u magacin."
      ]
     ]
    },
@@ -267,7 +268,7 @@
      ],
      [
       "assistant",
-      "Dobar dan. Garnitura BOHEM je modularna i može da se izradi po meri, pa cenu za tu dimenziju šaljemo u ponudi."
+      "Dobar dan.\nGarnituru BOHEM možemo da izradimo po meri, jer je modularna, pa Vam cenu za tu dimenziju šaljemo u ponudi."
      ]
     ]
    },
@@ -282,7 +283,7 @@
      ],
      [
       "assistant",
-      "Imamo. Na primer, set ANKARA ima prostor za spavanje dimenzija 210 x 90 cm. Pošaljite mi ime i broj telefona, pa pripremamo ponudu."
+      "Imamo.\nNa primer, set ANKARA ima prostor za spavanje 210 x 90 cm.\nPošaljite mi ime i broj telefona, pa Vam pripremamo ponudu."
      ],
      [
       "user",
@@ -290,7 +291,7 @@
      ],
      [
       "assistant",
-      "Hvala, Milice. Zahtev za ponudu je upisan i prosleđen."
+      "Milice, hvala Vam!\nPripremamo ponudu i javljamo se."
      ]
     ]
    },
@@ -305,7 +306,7 @@
      ],
      [
       "assistant",
-      "Prevoz i montaža su besplatni do 50 km u jednom pravcu, a unošenje u stan se naknadno plaća."
+      "Do 50 km u jednom pravcu, da: prevoz i montaža su besplatni. Unošenje u stan se naknadno plaća."
      ],
      [
       "user",
@@ -313,7 +314,7 @@
      ],
      [
       "assistant",
-      "Važi. Za ponudu mi je dovoljno da znam koji komad Vas zanima."
+      "Važi.\nZa ponudu mi je dovoljno da znam koji komad Vas zanima."
      ]
     ]
    },
@@ -328,7 +329,7 @@
      ],
      [
       "assistant",
-      "Hvala, Sara. Porudžbina je upisana. Avans je najmanje 30 do 50% vrednosti poručene robe."
+      "Hvala Vam, Saro!\nAvans je najmanje 30 do 50% vrednosti poručene robe."
      ]
     ]
    },
@@ -343,7 +344,7 @@
      ],
      [
       "assistant",
-      "Da, naši proizvodi su prvenstveno namenjeni profesionalnoj upotrebi, za restorane, hotele, barove i kafiće. Pošaljite mi ime i broj telefona."
+      "Da, naš nameštaj je prvenstveno namenjen profesionalnoj upotrebi: restoranima, hotelima, barovima i kafićima.\nPošaljite mi ime i broj telefona."
      ],
      [
       "user",
@@ -351,7 +352,7 @@
      ],
      [
       "assistant",
-      "Hvala, Filipe. Upit je upisan i prosleđen."
+      "Hvala Vam, Filipe.\nJavljamo Vam se."
      ]
     ]
    },
@@ -366,7 +367,7 @@
      ],
      [
       "assistant",
-      "Ne, nameštaj nije moguće platiti po isporuci. Pre isporuke mora biti uplaćen kompletan iznos sa predračuna."
+      "Nažalost ne, nameštaj ne može da se plati po isporuci.\nPre isporuke se uplaćuje ceo iznos sa predračuna."
      ],
      [
       "user",
@@ -385,7 +386,7 @@
      ],
      [
       "assistant",
-      "Može. Nameštaj izrađujemo i po meri. Pošaljite mi ime i broj telefona, pa pripremamo ponudu."
+      "Može, nameštaj izrađujemo i po meri.\nPošaljite mi ime i broj telefona, pa Vam pripremamo ponudu."
      ],
      [
       "user",
@@ -393,7 +394,7 @@
      ],
      [
       "assistant",
-      "Hvala, Stefane. Zahtev za ponudu je upisan i prosleđen."
+      "Stefane, hvala Vam.\nPripremamo ponudu i javljamo Vam se."
      ]
     ]
    }

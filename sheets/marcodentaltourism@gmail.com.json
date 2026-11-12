@@ -14,7 +14,7 @@
       ],
       [
         "assistant",
-        "Dobar dan, Marija. 6.000 € je za obe vilice: 12 gornjih i 12 donjih cirkonijum krunica, pregled i plan terapije, hotel i prevoz sa aerodroma. Ako je potrebno, zub se leči pre krunica, a šta je potrebno u Vašem slučaju vidi se na besplatnom online pregledu."
+        "Dobar dan, Marija.\nCena od 6.000 € je za obe vilice: 12 gornjih i 12 donjih cirkonijum krunica, pregled i plan terapije, hotel i prevoz sa aerodroma.\nAko je potrebno, zub se leči pre krunica. Šta je potrebno u Vašem slučaju, vidi se na besplatnom online pregledu."
       ],
       [
         "user",
@@ -22,7 +22,7 @@
       ],
       [
         "assistant",
-        "Isti rad u Austriji ili Nemačkoj košta 20.000 € i više. Online pregled je besplatan i bez obaveze, a plan terapije stiže sa fiksnom cenom."
+        "Isti rad u Austriji ili Nemačkoj košta 20.000 € i više.\nOnline pregled je besplatan i bez obaveze, a plan terapije stiže sa fiksnom cenom."
       ],
       [
         "user",
@@ -30,7 +30,7 @@
       ],
       [
         "assistant",
-        "Fotografije zuba ili ortopan snimak pošaljite na WhatsApp +381 61 6589540. Pošaljite mi i ime i broj telefona, da znamo čiji su snimci."
+        "Odlično.\nFotografije zuba ili ortopan snimak pošaljite na WhatsApp +381 61 6589540, a Dr Bojan Perduv Vam vraća plan terapije sa cenom i terminom.\nPošaljite mi i ime i broj telefona, da znamo čiji su snimci."
       ],
       [
         "user",
@@ -38,7 +38,7 @@
       ],
       [
         "assistant",
-        "Hvala, Marija. Kad snimci stignu, Dr Bojan Perduv vraća plan terapije sa brojem krunica, materijalom, terminom i cenom."
+        "Hvala Vam, Marija!\nČekamo snimke na WhatsApp-u, pa se čujemo."
       ]
     ],
     "crm": {
@@ -59,7 +59,7 @@
         ],
         [
           "assistant",
-          "Dobar dan. Za kompletan Hollywood smile potrebno je sedam dana u Beogradu: pregled i priprema zuba prvih dana, izrada krunica u laboratoriji, proba i cementiranje na kraju. Tačan plan dobijate na besplatnom online pregledu."
+          "Dobar dan.\nZa kompletan Hollywood smile ukupno je potrebno sedam dana u Beogradu.\nPrvih dana su pregled i priprema zuba, zatim izrada krunica u laboratoriji, a na kraju proba i cementiranje.\nTačan plan dobijate na besplatnom online pregledu."
         ],
         [
           "user",
@@ -67,7 +67,7 @@
         ],
         [
           "assistant",
-          "Važi. Online pregled je besplatan i bez obaveze, pa fotografije zuba možete da pošaljete kad Vam odgovara."
+          "Naravno, bez žurbe.\nOnline pregled je besplatan i bez obaveze, pa fotografije zuba možete da pošaljete kad Vam odgovara."
         ]
       ],
       "crm": {
@@ -82,25 +82,26 @@
     },
     "intervention": {
       "ask": "Pre tri nedelje sam radila krunice kod Vas i zub me i dalje boli na zagrižaj.",
-      "answer": "Dobar dan, Dragana. Žao mi je zbog toga. Osetljivost je normalna prvih dana, a ako traje duže od dve nedelje ili zub boli na zagrižaj, potrebna je kontrola. Šta je potrebno u Vašem slučaju, procenjuje doktor, pa ne bih da nagađam. Prosleđujem upit. Mogu li da zabeležim Vaše ime i broj telefona?",
-      "razlog": "Pacijentkinja i tri nedelje posle krunica ima bol na zagrižaj. Sajt kaže da je tada potrebna kontrola, a da li i kakva, procenjuje doktor. Prosleđeno."
+      "answer": "Dobar dan, Dragana.\nŽao mi je što Vas zub i dalje boli.\nOsetljivost je normalna prvih dana, ali ako traje duže od dve nedelje ili zub boli na zagrižaj, potrebna je kontrola.\nOstavite mi ime i broj telefona, pa ću to proveriti sa doktorom.",
+      "razlog": "Pacijentkinja i tri nedelje posle krunica ima bol na zagrižaj. Sajt kaže da je tada potrebna kontrola, a da li i kakva, procenjuje doktor. Prosleđeno.",
+      "close": "Hvala Vam, Dragana.\nJavljamo Vam se čim doktor pogleda Vaš zub."
     },
     "qa": [
       [
         "1 cena?",
-        "Hollywood smile je 6.000 € za obe vilice: 12 gornjih i 12 donjih cirkonijum krunica, pregled i plan terapije, hotel i prevoz sa aerodroma."
+        "Hollywood smile je 6.000 € za obe vilice.\nU to ulazi 12 gornjih i 12 donjih cirkonijum krunica, pregled i plan terapije, hotel i prevoz sa aerodroma."
       ],
       [
         "Kolika bi bila cena za donju i gornju vilicu",
-        "Za obe vilice, 12 gornjih i 12 donjih cirkonijum krunica, Hollywood smile je 6.000 €. U cenu ulaze i pregled i plan terapije, hotel i prevoz sa aerodroma."
+        "Za obe vilice, 12 gornjih i 12 donjih cirkonijum krunica, Hollywood smile je 6.000 €.\nU cenu ulaze i pregled i plan terapije, hotel i prevoz sa aerodroma."
       ],
       [
         "Cijena",
-        "Koju uslugu imate na umu? Hollywood smile je 6.000 € za obe vilice, cirkonijum krunica 250 € po zubu, a zubni implant 390 €."
+        "Hollywood smile je 6.000 € za obe vilice, cirkonijum krunica 250 € po zubu, a zubni implant 390 €.\nKoja usluga Vas zanima?"
       ],
       [
         "Cijena ovih zuba?",
-        "Cirkonijum krunica je 250 € po zubu, a metalokeramička 200 €. Za most se plaća po krunici. Pregled i plan terapije su besplatni."
+        "Cirkonijum krunica je 250 € po zubu, a metalokeramička 200 €.\nZa most se plaća po krunici, a pregled i plan terapije su besplatni."
       ],
       [
         "Kako su zubi izgledali prije, može li slika?",
@@ -108,57 +109,57 @@
       ],
       [
         "Da li boli?",
-        "Ne. Brušenje i cementiranje rade se u lokalnoj anesteziji i potpuno su bezbolni."
+        "Ne.\nBrušenje i cementiranje rade se u lokalnoj anesteziji i potpuno su bezbolni."
       ],
       [
         "Da li je hotel stvarno besplatan?",
-        "Da. Pacijentima iz inostranstva obezbeđujemo besplatan hotelski smeštaj u Beogradu tokom terapije i prevoz od i do aerodroma."
+        "Da, besplatan je.\nPacijenti iz inostranstva imaju besplatan hotelski smeštaj u Beogradu tokom terapije, kao i prevoz od i do aerodroma."
       ],
       [
         "Koliko košta All on 4?",
-        "All on 4 je 4.500 € po vilici, a All on 6 5.500 €. Plaća se u dve faze: prvu polovinu pre prve faze, a drugu tek za vreme druge faze, šest meseci nakon završetka prve."
+        "All on 4 je 4.500 € po vilici, a All on 6 5.500 €.\nPlaćanje je u dve faze: polovina pre prve faze, a druga polovina tek za vreme druge faze, šest meseci nakon završetka prve."
       ],
       [
         "Jako sam daleko vidim da su pacijenti prezadovoljni i puni pohvala..imam dosta problema...nije me strah da mi se bilo što radi...sretno vam u radu",
-        "Hvala Vam. Za sve pacijente online pregled je besplatan: pošaljete fotografije zuba ili ortopan snimak, a Dr Bojan Perduv vraća plan terapije sa fiksnom cenom."
+        "Hvala Vam na lepim rečima.\nZa prvi korak ne morate da dolazite: online pregled je besplatan, dovoljno je da pošaljete fotografije zuba ili ortopan snimak, a Dr Bojan Perduv vraća plan terapije sa fiksnom cenom."
       ],
       [
         "Koliko dana treba da ostanem u Beogradu?",
-        "Za kompletan Hollywood smile potrebno je sedam dana u Beogradu: pregled i priprema zuba prvih dana, izrada krunica u laboratoriji, proba i cementiranje na kraju."
+        "Za kompletan Hollywood smile potrebno je ukupno sedam dana u Beogradu.\nPrvih dana su pregled i priprema zuba, zatim izrada krunica u laboratoriji, a na kraju proba i cementiranje."
       ],
       [
         "Imam parodontozu, mogu li da radim krunice?",
-        "Prvo se leče desni, tek onda idu krunice, jer krunice preko bolesnih desni ne radimo. Da li ste kandidat, saznajete na besplatnom online pregledu."
+        "Prvo se leče desni, pa tek onda idu krunice. Preko bolesnih desni krunice ne radimo.\nDa li ste kandidat, saznajete na besplatnom online pregledu."
       ],
       [
         "Da li dajete garanciju?",
-        "Uz rad dobijate sertifikat sa garancijom, a uslove garancije dobijate u pisanoj formi uz plan terapije."
+        "Da. Uz rad dobijate sertifikat sa garancijom.\nUslove garancije dobijate u pisanoj formi, uz plan terapije."
       ],
       [
         "Koliko košta zubni implant?",
-        "Zubni implant je 390 €. Pregled i plan terapije su besplatni."
+        "Zubni implant je 390 €.\nPregled i plan terapije su besplatni."
       ]
     ],
     "objections": [
       [
         "Malo mi je skupo, iskreno.",
-        "Isti rad u Austriji ili Nemačkoj košta 20.000 € i više. Pregled i plan terapije su kod nas besplatni, a tačnu cenu za Vaš slučaj dobijate pre dolaska."
+        "Isti rad u Austriji ili Nemačkoj košta 20.000 € i više.\nPregled i plan terapije su kod nas besplatni, a tačnu cenu za Vaš slučaj dobijate pre dolaska."
       ],
       [
         "Razmisliću, pa ću se javiti.",
-        "Važi. Online pregled je besplatan i bez obaveza, pa fotografije zuba možete da pošaljete kad Vam odgovara."
+        "Naravno, bez žurbe.\nOnline pregled je besplatan i bez obaveza, pa fotografije zuba možete da pošaljete kad Vam odgovara."
       ],
       [
         "Plašim se zubara.",
-        "Strah od zubara nije prepreka: sve radimo u lokalnoj anesteziji, a procedure su bezbolne."
+        "Nema brige.\nStrah od zubara nije prepreka: sve radimo u lokalnoj anesteziji, a procedure su bezbolne."
       ],
       [
         "Ne mogu sada da dođem u Beograd.",
-        "Za prvi korak ne morate da dolazite. Online pregled radite sa daljine, a plan terapije sa terminom i cenom dobijate pre dolaska."
+        "Za prvi korak ne morate da dolazite.\nOnline pregled radite sa daljine, a plan terapije sa terminom i cenom dobijate pre dolaska."
       ],
       [
         "Nisam siguran da li je to za mene.",
-        "Da li ste kandidat i koji put je za Vas, saznajete na besplatnom online pregledu. Gotovo svako ko ima zdrave desni i dovoljno očuvane zube je kandidat."
+        "To se najbolje vidi na besplatnom online pregledu.\nGotovo svako ko ima zdrave desni i dovoljno očuvane zube je kandidat."
       ]
     ],
     "background": [
@@ -173,7 +174,7 @@
           ],
           [
             "assistant",
-            "Cirkonijum krunica je 250 € po zubu, a metalokeramička 200 €. Za most se plaća po krunici. Pregled i plan terapije su besplatni."
+            "Cirkonijum krunica je 250 € po zubu, a metalokeramička 200 €.\nZa most se plaća po krunici, a pregled i plan terapije su besplatni."
           ]
         ]
       },
@@ -188,7 +189,7 @@
           ],
           [
             "assistant",
-            "All on 6 je 5.500 € po vilici: 6 implanata na koje se postavlja 12 keramičkih krunica. Plaća se u dve faze, a druga polovina šest meseci nakon završetka prve."
+            "All on 6 je 5.500 € po vilici: 6 implanata na koje se postavlja 12 keramičkih krunica.\nPlaćanje je u dve faze, a druga polovina tek šest meseci nakon završetka prve."
           ],
           [
             "user",
@@ -196,7 +197,7 @@
           ],
           [
             "assistant",
-            "Važi. Online pregled je besplatan i bez obaveza, pa možete da pošaljete snimak kad Vam odgovara."
+            "Naravno, bez žurbe.\nOnline pregled je besplatan i bez obaveza, pa snimak možete da pošaljete kad Vam odgovara."
           ]
         ]
       },
@@ -211,7 +212,7 @@
           ],
           [
             "assistant",
-            "Pošaljite ga na WhatsApp +381 61 6589540, a Dr Bojan Perduv vraća plan terapije sa brojem krunica, materijalom, terminom i cenom. Pošaljite mi i ime i broj telefona."
+            "Pošaljite ga na WhatsApp +381 61 6589540, a Dr Bojan Perduv vraća plan terapije sa terminom i cenom.\nPošaljite mi i ime i broj telefona."
           ],
           [
             "user",
@@ -219,7 +220,7 @@
           ],
           [
             "assistant",
-            "Hvala, Jovana. Zahtev za plan terapije je upisan i prosleđen."
+            "Hvala Vam, Jovana.\nJavljamo Vam se sa planom terapije."
           ]
         ]
       },
@@ -234,7 +235,7 @@
           ],
           [
             "assistant",
-            "Pošaljete fotografije zuba ili ortopan snimak, a Dr Bojan Perduv vraća plan terapije sa fiksnom cenom. Besplatno je i bez obaveza. Pošaljite mi ime i broj telefona."
+            "Dovoljno je da pošaljete fotografije zuba ili ortopan snimak na WhatsApp +381 61 6589540, a Dr Bojan Perduv vraća plan terapije sa fiksnom cenom.\nBesplatno je i bez obaveze.\nPošaljite mi i ime i broj telefona."
           ],
           [
             "user",
@@ -242,7 +243,7 @@
           ],
           [
             "assistant",
-            "Hvala, Marko. Zahtev za online pregled je upisan i prosleđen."
+            "Hvala Vam, Marko.\nČim stignu fotografije ili snimak, Dr Bojan Perduv vraća plan terapije."
           ]
         ]
       },
@@ -257,7 +258,7 @@
           ],
           [
             "assistant",
-            "Hvala, Tamara. Potvrda je upisana i prosleđena."
+            "Hvala Vam na poverenju, Tamara.\nJavljamo Vam se."
           ]
         ]
       },
@@ -272,7 +273,7 @@
           ],
           [
             "assistant",
-            "Da. Pacijentima iz inostranstva obezbeđujemo besplatan hotelski smeštaj u Beogradu tokom terapije i prevoz od i do aerodroma."
+            "Da, besplatan je.\nPacijenti iz inostranstva imaju besplatan hotelski smeštaj u Beogradu tokom terapije, kao i prevoz od i do aerodroma."
           ]
         ]
       },
@@ -287,7 +288,7 @@
           ],
           [
             "assistant",
-            "Ima. Strah od zubara nije prepreka: sve radimo u lokalnoj anesteziji, a procedure su bezbolne."
+            "Ima, naravno.\nStrah od zubara nije prepreka: sve radimo u lokalnoj anesteziji, a procedure su bezbolne."
           ],
           [
             "user",
@@ -295,7 +296,7 @@
           ],
           [
             "assistant",
-            "Važi. Online pregled je besplatan i bez obaveza."
+            "Naravno, bez žurbe.\nOnline pregled je besplatan i bez obaveza."
           ]
         ]
       },
@@ -310,7 +311,7 @@
           ],
           [
             "assistant",
-            "Godine nisu prepreka. Da li ste kandidat, saznajete na besplatnom online pregledu."
+            "Godine nisu prepreka.\nDa li ste kandidat, saznajete na besplatnom online pregledu."
           ]
         ]
       },
@@ -325,7 +326,7 @@
           ],
           [
             "assistant",
-            "Uz rad dobijate sertifikat sa garancijom, a uslove garancije dobijate u pisanoj formi uz plan terapije."
+            "Da. Uz rad dobijate sertifikat sa garancijom.\nUslove garancije dobijate u pisanoj formi, uz plan terapije."
           ]
         ]
       },
@@ -340,7 +341,7 @@
           ],
           [
             "assistant",
-            "Hollywood smile je 6.000 € za obe vilice: 12 gornjih i 12 donjih cirkonijum krunica, pregled i plan terapije, hotel i prevoz sa aerodroma."
+            "Hollywood smile je 6.000 € za obe vilice.\nU to ulazi 12 gornjih i 12 donjih cirkonijum krunica, pregled i plan terapije, hotel i prevoz sa aerodroma."
           ]
         ]
       },
@@ -355,7 +356,7 @@
           ],
           [
             "assistant",
-            "Za kompletan Hollywood smile potrebno je sedam dana u Beogradu: pregled i priprema zuba prvih dana, izrada krunica u laboratoriji, proba i cementiranje na kraju."
+            "Za kompletan Hollywood smile potrebno je ukupno sedam dana u Beogradu.\nPrvih dana su pregled i priprema zuba, zatim izrada krunica u laboratoriji, a na kraju proba i cementiranje."
           ],
           [
             "user",
@@ -363,7 +364,7 @@
           ],
           [
             "assistant",
-            "Važi. Online pregled je besplatan i bez obaveza."
+            "Važi.\nOnline pregled je besplatan i bez obaveza, kad Vam odgovara."
           ]
         ]
       },
@@ -378,7 +379,7 @@
           ],
           [
             "assistant",
-            "Hvala, Filipe. Potvrda je upisana i prosleđena."
+            "Hvala Vam, Filipe!\nJavljamo Vam se."
           ]
         ]
       }

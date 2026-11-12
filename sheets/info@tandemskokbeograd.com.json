@@ -23,7 +23,7 @@
       ],
       [
         "assistant",
-        "Zdravo, Marija 😊 Paket Small, skok sa 3000 m, je 250 €, a plaća se u dinarima. U cenu ulaze lični instruktor, 15 minuta leta avionom, 40 sekundi slobodnog pada i 10 minuta leta padobranom."
+        "Zdravo, Marija 😊 Paket Small, skok sa 3000 m, košta 250 €, a plaća se u dinarima.\nU cenu ulaze lični instruktor, 15 minuta leta avionom, 40 sekundi slobodnog pada i 10 minuta leta padobranom."
       ],
       [
         "user",
@@ -31,7 +31,7 @@
       ],
       [
         "assistant",
-        "Poklon karta važi godinu dana, pa on bira vikend. Skače se subotom i nedeljom. Prijave za vikend su u četvrtak od 10 do 20h, pozivom na +381 60 029 2012, i tada dobijate tačan dan i vreme skoka."
+        "Divan poklon! Karta važi godinu dana, pa on sam bira vikend. Skače se subotom i nedeljom.\nPrijave za vikend su u četvrtak od 10 do 20h, pozivom na +381 60 029 2012, i tada on dobija tačan dan i vreme skoka."
       ],
       [
         "user",
@@ -39,7 +39,7 @@
       ],
       [
         "assistant",
-        "Onda se skok pomera na sledeći dan ili vikend koji on izabere. Karta i dalje važi."
+        "Tada se skok pomera na sledeći dan ili vikend koji on izabere, a karta i dalje važi."
       ],
       [
         "user",
@@ -47,7 +47,7 @@
       ],
       [
         "assistant",
-        "Karticom preko sajta: popunite podatke, štiklirajte da je poklon, a karta Vam stiže na mejl u roku od 24h."
+        "Plaća se karticom preko sajta: popunite podatke, štiklirajte da je poklon, a karta Vam stiže na mejl u roku od 24h."
       ],
       [
         "assistant",
@@ -59,7 +59,7 @@
       ],
       [
         "assistant",
-        "Super, Marija 🎉 Neka mu je srećan rođendan. Kad izabere vikend, neka pozove u četvrtak od 10 do 20h na +381 60 029 2012, i tada dobija termin."
+        "Hvala Vam, Marija 🎉 Neka mu je srećan rođendan!\nKad izabere vikend, neka pozove u četvrtak od 10 do 20h na +381 60 029 2012, i tada dobija termin."
       ]
     ],
     "crm": {
@@ -74,9 +74,10 @@
     },
     "intervention": {
       "ask": "Zdravo, brat mi je u invalidskim kolicima. Da li bi i on mogao da skoči?",
-      "answer": "Zdravo, Dragana. Radimo tandem skokove i sa osobama sa invaliditetom. Da li može u njegovom slučaju, procenjuje instruktor, pa ne bih da nagađam. Kartu do tada ne kupujte. Prosleđujem upit. Mogu li da zabeležim Vaše ime i broj telefona?",
+      "answer": "Zdravo, Dragana. Da, skačemo i sa osobama sa invaliditetom.\nDa li može baš kod Vašeg brata, procenjuje instruktor, pa to ne bih da nagađam. Kartu do tada nemojte da kupujete.\n\nPošaljite mi ime i broj telefona, pa ćemo to proveriti sa instruktorom.",
       "domainNom": "instruktor",
-      "razlog": "Skok za osobu u invalidskim kolicima — procenu daje instruktor. Prosleđeno."
+      "razlog": "Skok za osobu u invalidskim kolicima — procenu daje instruktor. Prosleđeno.",
+      "close": "Hvala, Dragana!\nJavljamo Vam se sa odgovorom instruktora za Vašeg brata."
     },
     "left": {
       "msgs": [
@@ -86,7 +87,7 @@
         ],
         [
           "assistant",
-          "Zdravo, Nikola 😊 Paket Gold, skok sa 4000 m, je 370 €: 20 minuta leta avionom, 60 sekundi slobodnog pada i 4K video i slike sa GoPro kamerom."
+          "Zdravo, Nikola 😊 Paket Gold, skok sa 4000 m, košta 370 €.\nU cenu ulaze 20 minuta leta avionom, 60 sekundi slobodnog pada i 4K video i slike sa GoPro kamerom."
         ],
         [
           "user",
@@ -94,7 +95,7 @@
         ],
         [
           "assistant",
-          "Važi. Karta važi godinu dana od kupovine, pa datum skoka ne morate da birate sada."
+          "Važi! Karta važi godinu dana od kupovine, pa datum skoka ne morate da birate sada."
         ]
       ],
       "crm": {
@@ -114,15 +115,15 @@
       ],
       [
         "Koliko kila je maksimum?",
-        "Do 120 kg. Cena karte važi do 100 kg, a svaki kilogram preko toga doplaćuje se 3 € na dan skoka."
+        "Do 120 kg.\nCena karte važi do 100 kg, a za svaki kilogram preko toga doplaćujete 3 € na dan skoka."
       ],
       [
         "Koliko godina treba da imam?",
-        "Najmanje 14 godina. Za maloletne osobe obavezno je prisustvo barem jednog roditelja ili staratelja."
+        "Najmanje 14 godina, a uz maloletnu osobu mora da bude barem jedan roditelj ili staratelj."
       ],
       [
         "Kada se skače?",
-        "Subotom i nedeljom, kad vreme dozvoli. Prijave za vikend su u četvrtak od 10 do 20h, pozivom na +381 60 029 2012, i tada dobijate tačan dan i vreme skoka."
+        "Subotom i nedeljom, kad vreme dozvoli.\nPrijave za vikend su u četvrtak od 10 do 20h, pozivom na +381 60 029 2012, i tada dobijate tačan dan i vreme skoka."
       ],
       [
         "Mogu li da kupim kartu kao poklon?",
@@ -160,15 +161,15 @@
     "objections": [
       [
         "Malo mi je skupo.",
-        "Shvatam. Rezervacijom online plaćate samo 50%, a ostatak na dan skoka."
+        "Ne morate odjednom: online rezervišete sa 50% cene, a ostatak platite na dan skoka."
       ],
       [
         "Razmisliću, pa ću se javiti.",
-        "Važi. Karta važi godinu dana od kupovine, pa datum ne morate da birate sada."
+        "Važi, nema žurbe: karta važi godinu dana od kupovine, pa datum ne morate da birate sada."
       ],
       [
         "Plašim se malo, iskreno.",
-        "Skačete u tandemu, vezani za instruktora celo vreme. Svi naši instruktori imaju licence priznate u celom svetu i hiljade skokova iza sebe."
+        "Sasvim normalno. Skačete u tandemu, vezani ste za instruktora celo vreme, a svi naši instruktori imaju licence priznate u celom svetu i hiljade skokova iza sebe."
       ],
       [
         "Ne znam da li će vreme biti dobro.",
@@ -176,7 +177,7 @@
       ],
       [
         "Mogu samo radnim danima.",
-        "Skačemo samo subotom i nedeljom. Karta važi godinu dana, pa birate vikend koji Vam odgovara."
+        "Nažalost, skačemo samo subotom i nedeljom. Ali karta važi godinu dana, pa možete da izaberete vikend koji Vam odgovara."
       ]
     ],
     "background": [
@@ -191,7 +192,7 @@
           ],
           [
             "assistant",
-            "Zdravo, Ana 😊 Paket Super, skok sa 3500 m, je 310 €: 17 minuta leta avionom i 50 sekundi slobodnog pada."
+            "Zdravo, Ana 😊 Paket Super, skok sa 3500 m, košta 310 €: 17 minuta leta avionom i 50 sekundi slobodnog pada."
           ]
         ]
       },
@@ -206,7 +207,7 @@
           ],
           [
             "assistant",
-            "Super. Za ovu subotu prijave su u četvrtak od 10 do 20h, pozivom na +381 60 029 2012. Tada dobijate tačan dan i vreme skoka."
+            "Odlično! Prijave za ovu subotu su u četvrtak od 10 do 20h, pozivom na +381 60 029 2012.\nTada dobijate tačan dan i vreme skoka."
           ]
         ]
       },
@@ -221,7 +222,7 @@
           ],
           [
             "assistant",
-            "Skačete u tandemu, vezani za instruktora celo vreme. Svi naši instruktori imaju licence priznate u celom svetu i hiljade skokova iza sebe."
+            "Sasvim normalno. Skačete u tandemu, vezani ste za instruktora celo vreme, a svi naši instruktori imaju licence priznate u celom svetu i hiljade skokova iza sebe."
           ],
           [
             "user",
@@ -267,7 +268,7 @@
           ],
           [
             "assistant",
-            "Karta važi godinu dana, pa možete da izaberete sledeći vikend. Nakon toga pozovite u četvrtak od 10 do 20h na +381 60 029 2012."
+            "Nema problema, karta važi godinu dana, pa izaberite sledeći vikend koji Vam odgovara.\nZa njega pozovite u četvrtak od 10 do 20h na +381 60 029 2012."
           ]
         ]
       },
@@ -297,7 +298,7 @@
           ],
           [
             "assistant",
-            "Termin za vikend dobijate kada pozovete u četvrtak od 10 do 20h na +381 60 029 2012. Možete da se prijavite oboje."
+            "Možete da se prijavite oboje.\nTermin za vikend dobijate kad pozovete u četvrtak od 10 do 20h na +381 60 029 2012."
           ]
         ]
       },
@@ -312,7 +313,7 @@
           ],
           [
             "assistant",
-            "Možete, dozvoljeno je do 120 kg. Cena karte važi do 100 kg, a za svaki kilogram preko toga doplaćuje se 3 € na dan skoka."
+            "Možete, dozvoljeno je do 120 kg.\nCena karte važi do 100 kg, a za svaki kilogram preko toga doplaćujete 3 € na dan skoka."
           ],
           [
             "user",
@@ -350,7 +351,7 @@
           ],
           [
             "assistant",
-            "Prijave za tandem skok su svakog četvrtka od 10 do 20h, pozivom na +381 60 029 2012. Tada dobijate tačan dan i vreme skoka."
+            "Prijave za tandem skok su svakog četvrtka od 10 do 20h, pozivom na +381 60 029 2012.\nTada dobijate tačan dan i vreme skoka."
           ]
         ]
       },
@@ -384,7 +385,7 @@
           ],
           [
             "assistant",
-            "Najmanje 14 godina. Za maloletne osobe obavezno je prisustvo barem jednog roditelja ili staratelja."
+            "Najmanje 14 godina, a uz maloletnu osobu mora da bude barem jedan roditelj ili staratelj."
           ],
           [
             "user",

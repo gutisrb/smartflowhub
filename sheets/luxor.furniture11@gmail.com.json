@@ -14,7 +14,7 @@
       ],
       [
         "assistant",
-        "Dobar dan, Marija. Koji model sa objave Vas zanima? Na primer, sto za šminkanje LUX 14 MN.BB košta 44.400 RSD i na stanju je."
+        "Dobar dan, Marija! Cena zavisi od modela, koji Vas zanima sa objave?\nSto za šminkanje LUX 14 MN.BB, na primer, košta 44.400 RSD i na stanju je."
       ],
       [
         "user",
@@ -22,7 +22,7 @@
       ],
       [
         "assistant",
-        "Na sve naše proizvode imate garanciju od 2 godine, a plaćate tek kada proizvod stigne na Vašu adresu."
+        "Na svaki naš proizvod imate 2 godine garancije.\nA plaćate tek kad Vam proizvod stigne na adresu."
       ],
       [
         "user",
@@ -30,7 +30,7 @@
       ],
       [
         "assistant",
-        "Standardni rok isporuke je 10 do 14 radnih dana. Pošaljite mi ime i prezime, adresu, e-mail i broj telefona."
+        "Odlično, Marija! Standardni rok isporuke je 10 do 14 radnih dana.\nPošaljite mi ime i prezime, adresu, e-mail i broj telefona, pa Vam pripremam porudžbinu."
       ],
       [
         "user",
@@ -38,7 +38,7 @@
       ],
       [
         "assistant",
-        "Hvala, Marija. Porudžbina je upisana, a nakon potvrde bićete kontaktirani e-mailom ili telefonom sa tačnim datumom isporuke."
+        "Hvala Vam, Marija!\nČim potvrdimo porudžbinu, javljamo Vam se e-mailom ili telefonom sa tačnim datumom isporuke."
       ]
     ],
     "crm": {
@@ -62,7 +62,7 @@
         ],
         [
           "assistant",
-          "Dobar dan. Koji model sa objave Vas zanima? Na primer, sto za šminkanje LUX 14 MN.BB košta 44.400 RSD i na stanju je."
+          "Dobar dan! Koji model sa objave Vas zanima?\nSto za šminkanje LUX 14 MN.BB, na primer, košta 44.400 RSD i na stanju je."
         ],
         [
           "user",
@@ -70,7 +70,7 @@
         ],
         [
           "assistant",
-          "Važi. Ako Vam zatrebaju dimenzije ili cena drugog modela, samo pišite ovde."
+          "Važi! Ako Vam zatrebaju dimenzije ili cena nekog drugog modela, samo pišite ovde."
         ]
       ],
       "crm": {
@@ -85,9 +85,348 @@
     },
     "complaint": {
       "ask": "Dobar dan, sto mi je stigao oštećen. Šta da radim?",
-      "answer": "Žao mi je zbog toga. Reklamaciju prijavljujete u roku od 48h, uz fiskalni račun i fotografiju oštećenja. Ja upisujem slučaj, pa mi pošaljite ime i broj telefona.",
-      "razlog": "Reklamacija: sto je stigao oštećen. Agent je tražio fiskalni račun i fotografiju oštećenja, kako sajt propisuje. Prosleđeno na rešavanje (zamena, popravka ili povraćaj sredstava)."
-    }
+      "answer": "Joj, žao mi je zbog toga.\nSačuvajte fiskalni račun i fotografišite oštećenje, a reklamaciju prijavite u roku od 48h od prijema.\n\nPošaljite mi ime i broj telefona, pa Vam se javljamo.",
+      "razlog": "Reklamacija: sto je stigao oštećen. Agent je rekao da se sačuva fiskalni račun, fotografiše oštećenje i reklamacija prijavi u roku od 48h, kako sajt propisuje, i uzeo ime i broj telefona. Prosleđeno na rešavanje (zamena, popravka ili povraćaj sredstava).",
+      "close": "Hvala Vam, Jelena!\nJavljamo Vam se sa rešenjem za oštećen sto."
+    },
+    "qa": [
+      [
+        "Koliko košta LUX 96?",
+        "Sto za šminkanje LUX 96 košta 21.000 RSD."
+      ],
+      [
+        "Kako mogu da platim?",
+        "Pouzećem: plaćate tek kad sto stigne na Vašu adresu."
+      ],
+      [
+        "Da li imate garanciju?",
+        "Imamo, 2 godine na sve naše proizvode."
+      ],
+      [
+        "Koliko traje isporuka?",
+        "Standardni rok je 10 do 14 radnih dana, a za neke modele koje imamo na stanju može i brže."
+      ],
+      [
+        "Koliko je LUX 75N?",
+        "Sto za šminkanje LUX 75N košta 42.100 RSD."
+      ],
+      [
+        "Dostavljate li u Niš?",
+        "Dostavljamo širom Srbije, pa i u Niš: kurirskom službom ili našom ličnom dostavom, zavisno od lokacije."
+      ],
+      [
+        "Koliko košta dostava?",
+        "Cena zavisi od lokacije i načina isporuke, a iznos Vam kažemo pre nego što potvrdite porudžbinu."
+      ],
+      [
+        "Šta ako sto stigne oštećen?",
+        "Javite dostavljaču odmah, a nama u roku od 48h. Ponudićemo zamenu, popravku ili povraćaj sredstava, zavisno od situacije."
+      ],
+      [
+        "Koliko košta LUX 14N?",
+        "Sto za šminkanje LUX 14N košta 31.600 RSD."
+      ]
+    ],
+    "objections": [
+      [
+        "Malo mi je skupo.",
+        "Na svaki naš proizvod imate 2 godine garancije, a plaćate tek kad Vam stigne na adresu."
+      ],
+      [
+        "Razmisliću, pa ću se javiti.",
+        "Važi, slobodno. Pišite ovde kad budete spremni."
+      ],
+      [
+        "Hvala, javiću se.",
+        "Slobodno, tu sam ako Vam zatreba još nešto."
+      ],
+      [
+        "Još ću da razmislim.",
+        "Naravno, bez žurbe."
+      ]
+    ],
+    "background": [
+      {
+        "name": "Ivana Petrović",
+        "ch": "instagram",
+        "st": "Naručio",
+        "msgs": [
+          [
+            "user",
+            "Zdravo, koliko košta LUX 14N?"
+          ],
+          [
+            "assistant",
+            "Zdravo! Sto za šminkanje LUX 14N košta 31.600 RSD."
+          ],
+          [
+            "user",
+            "Naručila bih ga."
+          ],
+          [
+            "assistant",
+            "Odlično! Pošaljite mi ime i prezime, adresu, e-mail i broj telefona."
+          ],
+          [
+            "user",
+            "Ivana Petrović, Cara Dušana 8, Niš, ivana.petrovic@gmail.com, 063 555 0101"
+          ],
+          [
+            "assistant",
+            "Hvala Vam, Ivana!\nKad potvrdimo porudžbinu, javljamo Vam se e-mailom ili telefonom sa tačnim datumom isporuke."
+          ]
+        ]
+      },
+      {
+        "name": "Dragan Tomić",
+        "ch": "facebook",
+        "st": "Novi",
+        "msgs": [
+          [
+            "user",
+            "Dobar dan, da li dostavljate u Niš?"
+          ],
+          [
+            "assistant",
+            "Dobar dan! Dostavljamo širom Srbije, pa i u Niš: kurirskom službom ili našom ličnom dostavom, zavisno od lokacije."
+          ]
+        ]
+      },
+      {
+        "name": "Jelena Marinović",
+        "ch": "instagram",
+        "st": "Zainteresovan",
+        "msgs": [
+          [
+            "user",
+            "Koliko traje isporuka?"
+          ],
+          [
+            "assistant",
+            "Standardni rok je 10 do 14 radnih dana, a za neke modele koje imamo na stanju može i brže."
+          ],
+          [
+            "user",
+            "Razmisliću."
+          ],
+          [
+            "assistant",
+            "Važi, pišite kad budete spremni."
+          ]
+        ]
+      },
+      {
+        "name": "Vesna Đorđević",
+        "ch": "whatsapp",
+        "st": "Naručio",
+        "msgs": [
+          [
+            "user",
+            "Kako mogu da platim?"
+          ],
+          [
+            "assistant",
+            "Pouzećem: plaćate tek kad sto stigne na Vašu adresu."
+          ],
+          [
+            "user",
+            "Super, onda uzimam LUX 96."
+          ],
+          [
+            "assistant",
+            "Odlično! Pošaljite mi ime i prezime, adresu, e-mail i broj telefona."
+          ],
+          [
+            "user",
+            "Vesna Đorđević, Njegoševa 5, Beograd, vesna.djordjevic@gmail.com, 064 555 0102"
+          ],
+          [
+            "assistant",
+            "Primili smo, Vesna.\nKad potvrdimo porudžbinu, javljamo Vam se e-mailom ili telefonom sa tačnim datumom isporuke."
+          ]
+        ]
+      },
+      {
+        "name": "Miloš Jovanović",
+        "ch": "instagram",
+        "st": "Isporučeno",
+        "msgs": [
+          [
+            "user",
+            "Sto je stigao, sve je super, hvala!"
+          ],
+          [
+            "assistant",
+            "Drago nam je, hvala Vam!"
+          ]
+        ]
+      },
+      {
+        "name": "Tijana Kostić",
+        "ch": "website",
+        "st": "Naručio",
+        "msgs": [
+          [
+            "user",
+            "Koliko košta dostava?"
+          ],
+          [
+            "assistant",
+            "Cena zavisi od lokacije i načina isporuke, a iznos Vam kažemo pre nego što potvrdite porudžbinu."
+          ],
+          [
+            "user",
+            "Može, naručujem LUX 75N."
+          ],
+          [
+            "assistant",
+            "Super! Pošaljite mi ime i prezime, adresu, e-mail i broj telefona."
+          ],
+          [
+            "user",
+            "Tijana Kostić, Bulevar oslobođenja 20, Novi Sad, tijana.kostic@gmail.com, 065 555 0103"
+          ],
+          [
+            "assistant",
+            "Hvala, Tijana!\nPorudžbinu potvrđujemo, a zatim Vam se javljamo e-mailom ili telefonom sa tačnim datumom isporuke."
+          ]
+        ]
+      },
+      {
+        "name": "Bojan Lukić",
+        "ch": "facebook",
+        "st": "Zainteresovan",
+        "msgs": [
+          [
+            "user",
+            "Da li imate garanciju?"
+          ],
+          [
+            "assistant",
+            "Imamo, 2 godine na sve naše proizvode."
+          ],
+          [
+            "user",
+            "Hvala, javiću se."
+          ],
+          [
+            "assistant",
+            "Slobodno, tu sam ako Vam zatreba još nešto."
+          ]
+        ]
+      },
+      {
+        "name": "Marija Stanković",
+        "ch": "whatsapp",
+        "st": "Naručio",
+        "msgs": [
+          [
+            "user",
+            "Koliko je LUX 75N?"
+          ],
+          [
+            "assistant",
+            "Sto za šminkanje LUX 75N košta 42.100 RSD."
+          ],
+          [
+            "user",
+            "Naručujem."
+          ],
+          [
+            "assistant",
+            "Odlično! Pošaljite mi ime i prezime, adresu, e-mail i broj telefona."
+          ],
+          [
+            "user",
+            "Marija Stanković, Zmaj Jovina 3, Subotica, marija.stankovic@gmail.com, 062 555 0104"
+          ],
+          [
+            "assistant",
+            "Hvala Vam, Marija!\nKad potvrdimo porudžbinu, javljamo Vam se e-mailom ili telefonom sa tačnim datumom isporuke."
+          ]
+        ]
+      },
+      {
+        "name": "Aleksandar Mitić",
+        "ch": "instagram",
+        "st": "Novi",
+        "msgs": [
+          [
+            "user",
+            "Koliko košta LUX 96?"
+          ],
+          [
+            "assistant",
+            "Sto za šminkanje LUX 96 košta 21.000 RSD."
+          ]
+        ]
+      },
+      {
+        "name": "Sofija Ilić",
+        "ch": "website",
+        "st": "Isporučeno",
+        "msgs": [
+          [
+            "user",
+            "Stiglo je sve u redu, hvala!"
+          ],
+          [
+            "assistant",
+            "Drago nam je, hvala Vam!"
+          ]
+        ]
+      },
+      {
+        "name": "Vuk Pavlović",
+        "ch": "facebook",
+        "st": "Zainteresovan",
+        "msgs": [
+          [
+            "user",
+            "Šta ako sto stigne oštećen?"
+          ],
+          [
+            "assistant",
+            "Javite dostavljaču odmah, a nama u roku od 48h. Ponudićemo zamenu, popravku ili povraćaj sredstava, zavisno od situacije."
+          ],
+          [
+            "user",
+            "U redu, hvala."
+          ]
+        ]
+      },
+      {
+        "name": "Nina Ristić",
+        "ch": "instagram",
+        "st": "Naručio",
+        "msgs": [
+          [
+            "user",
+            "Kolika je cena za LUX 14N i koliko se čeka?"
+          ],
+          [
+            "assistant",
+            "Sto za šminkanje LUX 14N košta 31.600 RSD, a standardni rok isporuke je 10 do 14 radnih dana."
+          ],
+          [
+            "user",
+            "Dobro, naručujem."
+          ],
+          [
+            "assistant",
+            "Odlično! Pošaljite mi ime i prezime, adresu, e-mail i broj telefona."
+          ],
+          [
+            "user",
+            "Nina Ristić, Vojvode Stepe 12, Beograd, nina.ristic@gmail.com, 061 555 0105"
+          ],
+          [
+            "assistant",
+            "Primili smo, Nina.\nKad potvrdimo porudžbinu, javljamo Vam se e-mailom ili telefonom sa tačnim datumom isporuke."
+          ]
+        ]
+      }
+    ]
   },
   "e1": {
     "_note": "E1 v20 (2026-11-10), same structure as the other leads: why he writes, why a demo, that it is theirs, the honest catch.",

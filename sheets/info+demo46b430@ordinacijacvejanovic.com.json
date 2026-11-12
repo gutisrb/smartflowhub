@@ -14,7 +14,7 @@
       ],
       [
         "assistant",
-        "Dobar dan, Marija. Hollywood smile je 5.600 € za obe vilice. U cenu ulaze pregled, plan terapije, brušenje zuba, privremene i definitivne keramičke bezmetalne krunice. Pripremne intervencije, poput vađenja zuba, ugradnje implanata ili endodontskog lečenja, naplaćuju se dodatno."
+        "Dobar dan, Marija! Hollywood smile je 5.600 € za obe vilice.\nU cenu ulaze pregled, plan terapije, brušenje zuba, privremene i definitivne keramičke bezmetalne krunice.\n\nPripremne intervencije, kao što su vađenje zuba, ugradnja implanata ili endodontsko lečenje, plaćaju se dodatno."
       ],
       [
         "user",
@@ -22,7 +22,7 @@
       ],
       [
         "assistant",
-        "Plaćate kako rad napreduje: 500 € kad prihvatite informativnu ponudu, 2.550 € na dan brušenja zuba i 2.550 € pre definitivnih krunica."
+        "Ne plaća se sve odjednom, već kako rad napreduje:\n500 € kad prihvatite informativnu ponudu\n2.550 € na dan brušenja zuba\n2.550 € pre definitivnih krunica"
       ],
       [
         "user",
@@ -30,7 +30,7 @@
       ],
       [
         "assistant",
-        "Za prvi korak ne morate da dolazite. Većini pacijenata iz inostranstva prvo radimo besplatan online pregled: pošaljete fotografije zuba i rendgenski snimak, a mi Vam damo procenu stanja i predlog terapije."
+        "Razumem. Za prvi korak ne morate da dolazite.\nVećini pacijenata iz inostranstva prvo radimo besplatan online pregled: pošaljete fotografije zuba i rendgenski snimak, a mi Vam damo procenu stanja i predlog terapije."
       ],
       [
         "user",
@@ -38,7 +38,7 @@
       ],
       [
         "assistant",
-        "Fotografije šaljite na WhatsApp ili Viber na +381 65 3910 483, u punoj rezoluciji. Pošaljite mi i ime i broj telefona, da znamo čiji su snimci."
+        "Na WhatsApp ili Viber, na +381 65 3910 483, u punoj rezoluciji.\nPošaljite mi i ime i broj telefona, da znamo kome da se javimo."
       ],
       [
         "user",
@@ -46,7 +46,7 @@
       ],
       [
         "assistant",
-        "Hvala, Marija. Kad pogledamo snimke, dobijate informativnu ponudu sa planom terapije: u njoj piše da li može odmah ili su potrebne pripremne radnje."
+        "Hvala Vam, Marija!\nČim pogledamo snimke, javljamo Vam se sa informativnom ponudom i planom terapije."
       ]
     ],
     "crm": {
@@ -70,7 +70,7 @@
         ],
         [
           "assistant",
-          "Dobar dan. Hollywood smile je 5.600 € za obe vilice. U cenu ulaze pregled, plan terapije, brušenje zuba, privremene i definitivne keramičke bezmetalne krunice."
+          "Dobar dan! Hollywood smile je 5.600 € za obe vilice.\nU cenu ulaze pregled, plan terapije, brušenje zuba, privremene i definitivne keramičke bezmetalne krunice."
         ],
         [
           "user",
@@ -78,7 +78,7 @@
         ],
         [
           "assistant",
-          "Važi. Ako želite prvo da vidite plan, besplatan online pregled možete da obavite sa daljine: fotografije zuba i rendgenski snimak pošaljete na WhatsApp ili Viber na +381 65 3910 483, a mi Vam damo procenu stanja i predlog terapije."
+          "Slobodno. Ako želite prvo da vidite plan, besplatan online pregled možete da obavite sa daljine.\nFotografije zuba i rendgenski snimak pošaljete na WhatsApp ili Viber na +381 65 3910 483, a mi Vam damo procenu stanja i predlog terapije."
         ]
       ],
       "crm": {
@@ -93,10 +93,285 @@
     },
     "intervention": {
       "ask": "Da li može da se radi u totalnoj anesteziji, s obzirom da pijem tablete za visoki pritisak?",
-      "answer": "Dobar dan. Da li anestezija dolazi u obzir uz Vaše tablete, procenjuje lekar, pa ne bih da nagađam. Prosleđujem upit. Mogu li da zabeležim Vaše ime i broj telefona?",
+      "answer": "Dobar dan. Dobro je što pitate unapred.\nO tome da li anestezija dolazi u obzir uz Vaše tablete može da odluči samo lekar.\n\nPošaljite mi ime i broj telefona, pa ćemo ga pitati.",
       "domainNom": "lekar",
-      "razlog": "Pita da li je moguća totalna anestezija uz tablete za visoki pritisak — procenu daje lekar. Prosleđeno."
-    }
+      "razlog": "Pita da li je moguća totalna anestezija uz tablete za visoki pritisak — procenu daje lekar. Prosleđeno.",
+      "close": "Hvala, Dragana.\nJavljamo Vam se sa odgovorom lekara."
+    },
+    "qa": [
+      [
+        "Da li je online pregled besplatan?",
+        "Da, besplatan je.\nPošaljite fotografije zuba i rendgenski snimak, a mi Vam damo procenu stanja i predlog terapije."
+      ],
+      [
+        "Koliko košta Hollywood smile?",
+        "Hollywood smile je 5.600 € za obe vilice.\nU cenu ulaze pregled, plan terapije, brušenje zuba, privremene i definitivne keramičke bezmetalne krunice."
+      ],
+      [
+        "Da li dajete garanciju?",
+        "Dajemo. Na krunice 5 godina, a na zubne implante doživotnu."
+      ],
+      [
+        "Da li može na rate?",
+        "Ne plaća se sve odjednom, već kako rad napreduje:\n500 € kad prihvatite informativnu ponudu\n2.550 € na dan brušenja zuba\n2.550 € pre definitivnih krunica"
+      ],
+      [
+        "Živim u inostranstvu, mogu li prvo online?",
+        "Možete. Većini pacijenata iz inostranstva prvo radimo besplatan online pregled, pa procenu stanja i predlog terapije dobijate na osnovu fotografija zuba i rendgenskog snimka."
+      ],
+      [
+        "Gde se nalazite?",
+        "Triše Kaclerovića 6a, Voždovac, Beograd."
+      ],
+      [
+        "Da li se pripremne intervencije plaćaju posebno?",
+        "Da. Vađenje zuba, ugradnja implanata i endodontsko lečenje plaćaju se dodatno."
+      ],
+      [
+        "Može li aparat za zube na rate?",
+        "Može, kod fiksnog aparata: 50% na dan postavke, a zatim 100 € na mesečnim kontrolama do otplate.\nCena aparata se tada uvećava za 100 €."
+      ]
+    ],
+    "objections": [
+      [
+        "Malo mi je skupo.",
+        "Ne plaća se sve odjednom, već kako rad napreduje:\n500 € kad prihvatite informativnu ponudu\n2.550 € na dan brušenja zuba\n2.550 € pre definitivnih krunica"
+      ],
+      [
+        "Razmisliću, pa ću se javiti.",
+        "Naravno, bez žurbe. Ako želite, prvo možete da obavite besplatan online pregled."
+      ],
+      [
+        "Hvala, javiću se.",
+        "Slobodno. Tu smo ako Vam zatreba još nešto."
+      ],
+      [
+        "Ne znam da li mogu da dođem.",
+        "Za prvi korak ne morate da dolazite: besplatan online pregled se radi na osnovu fotografija zuba i rendgenskog snimka."
+      ]
+    ],
+    "background": [
+      {
+        "name": "Ana Kovačević",
+        "ch": "instagram",
+        "st": "Novi",
+        "msgs": [
+          [
+            "user",
+            "Dobar dan, gde se nalazite?"
+          ],
+          [
+            "assistant",
+            "Dobar dan. Nalazimo se u Voždovcu, u Beogradu, na adresi Triše Kaclerovića 6a."
+          ]
+        ]
+      },
+      {
+        "name": "Petar Nikolić",
+        "ch": "whatsapp",
+        "st": "Zainteresovan",
+        "msgs": [
+          [
+            "user",
+            "Da li je online pregled besplatan?"
+          ],
+          [
+            "assistant",
+            "Da, besplatan je.\nPošaljite fotografije zuba i rendgenski snimak, a mi Vam damo procenu stanja i predlog terapije."
+          ],
+          [
+            "user",
+            "Poslaću vam snimke večeras."
+          ],
+          [
+            "assistant",
+            "Važi, kad Vam odgovara."
+          ]
+        ]
+      },
+      {
+        "name": "Jovana Ilić",
+        "ch": "facebook",
+        "st": "Zainteresovan",
+        "msgs": [
+          [
+            "user",
+            "Da li dajete garanciju na krunice?"
+          ],
+          [
+            "assistant",
+            "Dajemo. Na krunice 5 godina, a na zubne implante doživotnu."
+          ],
+          [
+            "user",
+            "Razmisliću."
+          ],
+          [
+            "assistant",
+            "Naravno, bez žurbe."
+          ]
+        ]
+      },
+      {
+        "name": "Marko Savić",
+        "ch": "website",
+        "st": "Završeno",
+        "msgs": [
+          [
+            "user",
+            "Hvala na današnjem pregledu, sve je bilo odlično."
+          ],
+          [
+            "assistant",
+            "Hvala Vama, Marko. Drago nam je da ste zadovoljni."
+          ]
+        ]
+      },
+      {
+        "name": "Tamara Đorđević",
+        "ch": "instagram",
+        "st": "Zainteresovan",
+        "msgs": [
+          [
+            "user",
+            "Koliko košta Hollywood smile?"
+          ],
+          [
+            "assistant",
+            "Hollywood smile je 5.600 € za obe vilice.\nU cenu ulaze pregled, plan terapije, brušenje zuba, privremene i definitivne keramičke bezmetalne krunice."
+          ],
+          [
+            "user",
+            "Hvala, javiću se."
+          ],
+          [
+            "assistant",
+            "Slobodno. Ako želite prvo da vidite plan, možete da obavite besplatan online pregled."
+          ]
+        ]
+      },
+      {
+        "name": "Luka Pavlović",
+        "ch": "whatsapp",
+        "st": "Novi",
+        "msgs": [
+          [
+            "user",
+            "Može cenovnik?"
+          ],
+          [
+            "assistant",
+            "Može. Koja usluga Vas zanima? Pa Vam šaljem cenu i šta je u nju uključeno."
+          ]
+        ]
+      },
+      {
+        "name": "Milica Jovanović",
+        "ch": "instagram",
+        "st": "Zainteresovan",
+        "msgs": [
+          [
+            "user",
+            "Da li može plaćanje na rate?"
+          ],
+          [
+            "assistant",
+            "Ne plaća se sve odjednom, već kako rad napreduje:\n500 € kad prihvatite informativnu ponudu\n2.550 € na dan brušenja zuba\n2.550 € pre definitivnih krunica"
+          ],
+          [
+            "user",
+            "U redu, hvala."
+          ]
+        ]
+      },
+      {
+        "name": "Nemanja Ristić",
+        "ch": "website",
+        "st": "Zainteresovan",
+        "msgs": [
+          [
+            "user",
+            "Živim u inostranstvu, mogu li prvo online?"
+          ],
+          [
+            "assistant",
+            "Možete. Većini pacijenata iz inostranstva prvo radimo besplatan online pregled."
+          ],
+          [
+            "user",
+            "Super, javiću se uskoro."
+          ],
+          [
+            "assistant",
+            "Važi, pišite kad Vam odgovara."
+          ]
+        ]
+      },
+      {
+        "name": "Sara Marković",
+        "ch": "whatsapp",
+        "st": "Završeno",
+        "msgs": [
+          [
+            "user",
+            "Hvala na današnjem terminu!"
+          ],
+          [
+            "assistant",
+            "Hvala Vama, Sara. Tu smo ako Vam zatreba još nešto."
+          ]
+        ]
+      },
+      {
+        "name": "Filip Stojanović",
+        "ch": "facebook",
+        "st": "Novi",
+        "msgs": [
+          [
+            "user",
+            "Da li se pripremne intervencije plaćaju posebno?"
+          ],
+          [
+            "assistant",
+            "Da. Vađenje zuba, ugradnja implanata i endodontsko lečenje plaćaju se dodatno."
+          ]
+        ]
+      },
+      {
+        "name": "Katarina Lukić",
+        "ch": "instagram",
+        "st": "Zainteresovan",
+        "msgs": [
+          [
+            "user",
+            "Može li aparat za zube na rate?"
+          ],
+          [
+            "assistant",
+            "Može, kod fiksnog aparata: 50% na dan postavke, a zatim 100 € na mesečnim kontrolama do otplate.\nCena aparata se tada uvećava za 100 €."
+          ],
+          [
+            "user",
+            "U redu, hvala."
+          ]
+        ]
+      },
+      {
+        "name": "Stefan Petrović",
+        "ch": "website",
+        "st": "Zainteresovan",
+        "msgs": [
+          [
+            "user",
+            "Kako da pošaljem snimke?"
+          ],
+          [
+            "assistant",
+            "Na WhatsApp ili Viber, na +381 65 3910 483, u punoj rezoluciji.\nPošaljite mi i ime i broj telefona, da znamo čiji su snimci."
+          ]
+        ]
+      }
+    ]
   },
   "e1": {
     "_note": "E1 v20 (2026-11-09). Opens as a person: why he writes (his belief about where AI helps this kind of business most), why a demo (easier shown than explained), that it is theirs (built from their site + comments), the honest catch (before proposing anything). No scenario, no backstory.",

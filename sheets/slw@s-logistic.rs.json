@@ -14,7 +14,7 @@
       ],
       [
         "assistant",
-        "Pozdrav, Marija. Mislite li na 40FT HC (12 m)? Kontejnere imamo u klasama A, B i C, a transport radimo do Vaše adrese. Cenu šaljemo u ponudi, pa mi recite gde treba da stigne."
+        "Pozdrav, Marija! Mislite na 40FT HC od 12 m?\nPolovne imamo u klasama A, B i C, a prevoz organizujemo do Vas.\n\nCena sa prevozom ide u ponudi, pa mi samo recite gde treba da stigne."
       ],
       [
         "user",
@@ -22,7 +22,7 @@
       ],
       [
         "assistant",
-        "Beležim: 40FT HC, polovni, klasa B, isporuka u Rakovicu. Za ponudu mi pošaljite ime i broj telefona."
+        "Odlično, polovne 40FT HC u klasi B imamo.\nPošaljite mi ime i broj telefona, pa Vam spremam ponudu sa prevozom do Rakovice."
       ],
       [
         "user",
@@ -30,7 +30,7 @@
       ],
       [
         "assistant",
-        "Hvala, Marija. Zahtev za ponudu je upisan i prosleđen."
+        "Hvala Vam, Marija!\nJavljamo Vam se sa cenom."
       ]
     ],
     "crm": {
@@ -51,7 +51,7 @@
         ],
         [
           "assistant",
-          "Zdravo, Nikola. Unutrašnje mere (D x Š x V): 20FT DC 5898 x 2350 x 2350 mm, 40FT HC 12029 x 2350 x 2670 mm. Cenu šaljemo u ponudi, pa mi recite koji Vam treba i gde treba da stigne."
+          "Zdravo, Nikola!\nUnutrašnje mere (dužina x širina x visina):\n20FT DC: 5898 x 2350 x 2350 mm\n40FT HC: 12029 x 2350 x 2670 mm\n\nCena ide u ponudi, pa mi recite koji Vam treba i gde da ga dostavimo."
         ],
         [
           "user",
@@ -59,7 +59,7 @@
         ],
         [
           "assistant",
-          "Važi. Kad se odlučite za veličinu i mesto isporuke, pišite ovde i pripremamo ponudu."
+          "Može, naravno!\nKad se odlučite, pišite ovde pa Vam spremamo ponudu."
         ]
       ],
       "crm": {
@@ -74,75 +74,76 @@
     },
     "intervention": {
       "ask": "Može li dostava za selo Jošanica kod Soko Banje I da li se istovar I prevoz naplacuje posebno",
-      "answer": "Zdravo, Dragana. Transport i istovar organizujemo širom Srbije, ali da li se naplaćuju posebno, ne bih da nagađam. Prosleđujem Vaš upit. Mogu li da zabeležim Vaše ime i broj telefona?",
-      "razlog": "Pitala za dostavu do sela Jošanica kod Soko Banje i da li se istovar i prevoz naplaćuju posebno. Sajt i objave to ne navode, pa agent ne nagađa. Prosleđeno."
+      "answer": "Zdravo, Dragana!\nTransport i istovar organizujemo širom Srbije.\n\nPošaljite mi samo ime i broj telefona, pa Vam se javljamo sa ponudom i odgovorom oko istovara i prevoza.",
+      "razlog": "Pitala za dostavu do sela Jošanica kod Soko Banje i da li se istovar i prevoz naplaćuju posebno. Sajt i objave to ne navode, pa agent ne nagađa. Prosleđeno.",
+      "close": "Hvala Vam, Dragana!\nJavljamo Vam se sa cenom za Jošanicu, zajedno sa istovarom."
     },
     "qa": [
       [
         "Cena ?",
-        "Cenu dobijate u ponudi. Recite mi koji Vam kontejner treba (20FT ili 40FT HC, novi ili polovni) i gde treba da stigne."
+        "Cenu šaljemo u ponudi.\nKoji Vam kontejner treba, 20FT ili 40FT HC?"
       ],
       [
         "Info o kontejnerima i cene molim",
-        "Imamo 20FT (6 m) i 40FT HC (12 m), nove i polovne. Cenu šaljemo u ponudi, pa mi recite koji Vam treba i gde treba da stigne."
+        "Imamo 20FT (6 m) i 40FT HC (12 m), i nove i polovne.\nCene šaljemo u ponudi, pa mi samo recite koji Vam treba."
       ],
       [
         "Moze dimenzije i cene",
-        "Unutrašnje mere (D x Š x V): 20FT DC 5898 x 2350 x 2350 mm, 40FT HC 12029 x 2350 x 2670 mm. Cenu dobijate u ponudi, pa mi recite koji Vam treba."
+        "Unutrašnje mere (dužina x širina x visina):\n20FT DC: 5898 x 2350 x 2350 mm\n40FT HC: 12029 x 2350 x 2670 mm\n\nCenu dobijate u ponudi, pa mi recite koji Vam treba."
       ],
       [
         "Ima li u nisu?",
-        "Ima. Kontejneri su dostupni sa naših depoa u Beogradu i Nišu. Koji Vam treba, 20FT ili 40FT HC?"
+        "Ima, kontejneri su dostupni iz depoa u Nišu i Beogradu.\nKoji Vam treba, 20FT ili 40FT HC?"
       ],
       [
         "Moze li za Makedonija?",
-        "Transport organizujemo širom Srbije i regiona. Napišite mi tačno mesto isporuke i koji kontejner Vam treba, pa pripremamo ponudu."
+        "Transport organizujemo širom Srbije i regiona.\nZa Makedoniju mi pošaljite tačno mesto isporuke i koji kontejner Vam treba, pa pripremamo ponudu."
       ],
       [
         "Cena prevoza za CG",
-        "Cenu transporta dobijate u ponudi. Transport organizujemo širom Srbije i regiona, pa mi recite mesto isporuke i koji kontejner Vam treba."
+        "Cenu prevoza dobijate zajedno sa ponudom, a transport organizujemo širom Srbije i regiona.\nZa koje mesto Vam treba?"
       ],
       [
         "Cijena? Transport u BiH?",
-        "Transport organizujemo širom Srbije i regiona, a cenu sa transportom šaljemo u ponudi. Napišite mi mesto isporuke i koji kontejner Vam treba."
+        "Cena sa transportom ide u ponudi. Prevoz organizujemo širom Srbije i regiona.\n\nNapišite mi mesto isporuke i koji kontejner Vam treba, pa Vam šaljemo ponudu."
       ],
       [
         "Zainteresovan može li malo informacija o kontejneru",
-        "Može. Imamo 20FT i 40FT HC kontejnere, nove i polovne, u klasama A, B i C. Recite mi za šta Vam treba, pa Vam pomažem da izaberete."
+        "Može, naravno! Imamo 20FT i 40FT HC kontejnere, nove i polovne, u klasama A, B i C.\nZa šta Vam treba, da Vam pomognem da izaberete?"
       ],
       [
         "Pozdrav , posaljite mi cenu hvala",
-        "Pozdrav. Cenu šaljemo u ponudi. Recite mi koji Vam kontejner treba (20FT ili 40FT HC, novi ili polovni) i gde treba da stigne."
+        "Pozdrav! Rado, cenu šaljemo u ponudi.\nKoji kontejner Vam treba, 20FT ili 40FT HC?"
       ],
       [
         "Cena dostave do 50 km?",
-        "Transport radimo do Vaše adrese, a cenu dobijate u ponudi. Pošaljite mi mesto isporuke i koji kontejner Vam treba."
+        "Prevoz radimo do Vaše adrese, a njegovu cenu dobijate u ponudi.\nU koje mesto treba da stigne?"
       ],
       [
         "Da li imate kontejnere i u drugoj boji?",
-        "Veličinu, tip i boju kontejnera birate prema svojim željama i potrebama. Recite mi šta Vam treba, pa pripremamo ponudu."
+        "Boju možete da birate, kao i veličinu i tip.\nKoju boju tražite?"
       ],
       [
         "Polovni cena",
-        "Polovne imamo u klasama A, B i C. Cenu dobijate u ponudi, pa mi recite veličinu, klasu i gde treba da stigne."
+        "Polovne imamo u klasama A, B i C, a cenu šaljemo u ponudi.\nKoju veličinu i klasu tražite?"
       ]
     ],
     "objections": [
       [
         "Razmisliću, pa ću se javiti.",
-        "Važi. Kad budete znali veličinu i mesto isporuke, pišite ovde i pripremamo ponudu."
+        "Važi, nema žurbe.\nKad budete znali veličinu i mesto isporuke, pišite ovde pa pripremamo ponudu."
       ],
       [
         "Treba mi kontejner samo za nekoliko meseci.",
-        "Pored prodaje nudimo i najam kontejnera, sa fleksibilnim opcijama. Recite mi veličinu i gde treba da stoji, pa pripremamo ponudu."
+        "Može, uz prodaju imamo i najam, sa fleksibilnim opcijama.\nRecite mi koja Vam veličina treba i gde bi stajao, pa Vam pripremam ponudu."
       ],
       [
         "Meni treba nešto što nije standardno.",
-        "Kod nas možete poručiti i vanstandardne kontejnere po posebnom zahtevu. Napišite mi šta Vam treba."
+        "Može i to, vanstandardne kontejnere možete poručiti po posebnom zahtevu.\nŠta Vam tačno treba?"
       ],
       [
         "Hoću prvo da vidim kontejner uživo.",
-        "Posetite nas na adresi Partizanska 45, Ugrinovci. Radno vreme je pon–pet 8–17h, sub 8–13h."
+        "Slobodno nas posetite, Partizanska 45 u Ugrinovcima.\nRadimo pon–pet 8–17h, subotom 8–13h."
       ]
     ],
     "background": [
@@ -157,7 +158,7 @@
           ],
           [
             "assistant",
-            "Cenu šaljemo u ponudi. Imamo 20FT (6 m) i 40FT HC (12 m), nove i polovne. Koji Vam treba i gde treba da stigne?"
+            "Imamo 20FT (6 m) i 40FT HC (12 m), nove i polovne, a cene šaljemo u ponudi.\nKoji Vam treba?"
           ]
         ]
       },
@@ -172,7 +173,7 @@
           ],
           [
             "assistant",
-            "Ima. Kontejneri su dostupni sa naših depoa u Beogradu i Nišu. Koji Vam treba, 20FT ili 40FT HC?"
+            "Ima, imamo depo i u Nišu.\nKoji Vam treba, 20FT ili 40FT HC?"
           ],
           [
             "user",
@@ -180,7 +181,7 @@
           ],
           [
             "assistant",
-            "Važi. Kad budete znali koji Vam treba, pišite ovde i pripremamo ponudu."
+            "U redu, pišite ovde kad budete znali koji Vam treba pa Vam pripremamo ponudu."
           ]
         ]
       },
@@ -195,7 +196,7 @@
           ],
           [
             "assistant",
-            "Transport radimo do Vaše adrese, a cenu dobijate u ponudi. Pošaljite mi mesto isporuke, koji kontejner Vam treba, ime i broj telefona."
+            "Prevoz radimo do Vaše adrese, a cena ide u ponudi.\nPošaljite mi mesto isporuke, koji kontejner Vam treba, ime i broj telefona, pa Vam spremam ponudu."
           ],
           [
             "user",
@@ -203,7 +204,7 @@
           ],
           [
             "assistant",
-            "Hvala, Jovana. Zahtev za ponudu je upisan i prosleđen."
+            "Odlično, Jovana, hvala Vam!\nJavljamo Vam se sa ponudom za Smederevo."
           ]
         ]
       },
@@ -218,7 +219,7 @@
           ],
           [
             "assistant",
-            "Poslovne kancelarije su nam na adresi Partizanska 45, Ugrinovci, a kontejneri su dostupni sa depoa u Beogradu i Nišu. Transport organizujemo širom Srbije i regiona, a cenu za 40FT HC sa transportom do Doboja šaljemo u ponudi. Pošaljite mi ime i broj telefona."
+            "Pozdrav!\nKancelarije su nam na Partizanskoj 45 u Ugrinovcima, a kontejneri su dostupni iz depoa u Beogradu i Nišu.\nTransport organizujemo širom Srbije i regiona, a cenu za 40FT HC do Doboja šaljemo u ponudi.\n\nPošaljite mi ime i broj telefona, pa Vam spremamo ponudu."
           ],
           [
             "user",
@@ -226,7 +227,7 @@
           ],
           [
             "assistant",
-            "Hvala, Marko. Zahtev za ponudu je upisan i prosleđen."
+            "Hvala, Marko!\nJavljamo Vam se sa ponudom do Doboja."
           ]
         ]
       },
@@ -241,7 +242,7 @@
           ],
           [
             "assistant",
-            "Hvala, Tamara. Potvrda je upisana i prosleđena. Isporuku ili preuzimanje u vlastitom aranžmanu dogovaramo kad sve precizirate."
+            "Odlično, Tamara, hvala Vam što ste prihvatili ponudu!\nKad dogovorimo detalje, dostavljamo Vam kontejner ili ga preuzimate u vlastitom aranžmanu."
           ]
         ]
       },
@@ -256,7 +257,7 @@
           ],
           [
             "assistant",
-            "Da, pored prodaje nudimo i najam kontejnera, sa fleksibilnim opcijama. Recite mi veličinu i gde treba da stoji, pa pripremamo ponudu."
+            "Da, uz prodaju imamo i najam, sa fleksibilnim opcijama.\nKoja Vam veličina treba i gde bi stajao?"
           ],
           [
             "user",
@@ -264,7 +265,7 @@
           ],
           [
             "assistant",
-            "Važi. Pišite ovde kad budete spremni."
+            "Naravno, pišite ovde kad budete spremni."
           ]
         ]
       },
@@ -279,7 +280,7 @@
           ],
           [
             "assistant",
-            "Nudimo i modifikaciju i prenamenu kontejnera, za kancelarije, vikendice i više. Pošaljite mi ime, broj telefona i šta Vam je potrebno."
+            "Može, to radimo. Nudimo modifikaciju i prenamenu kontejnera, za kancelarije, vikendice i više.\nPošaljite mi ime, broj telefona i kakvu kancelariju zamišljate, pa Vam spremam ponudu."
           ],
           [
             "user",
@@ -287,7 +288,7 @@
           ],
           [
             "assistant",
-            "Hvala, Milice. Zahtev za ponudu je upisan i prosleđen."
+            "Super, Milice, hvala Vam!\nJavljamo Vam se sa ponudom za kancelariju."
           ]
         ]
       },
@@ -302,7 +303,7 @@
           ],
           [
             "assistant",
-            "Može. Kod nas možete poručiti i vanstandardne kontejnere po posebnom zahtevu. Napišite mi mere i za šta Vam treba."
+            "Može, vanstandardni kontejneri idu po posebnom zahtevu.\nKoje mere Vam trebaju i za šta Vam treba?"
           ]
         ]
       },
@@ -317,7 +318,7 @@
           ],
           [
             "assistant",
-            "Pozdrav. Prodajemo i iznajmljujemo brodske kontejnere. Za prodaju imamo 20FT (6 m) i 40FT HC (12 m), nove i polovne. Šta Vas zanima, kupovina ili najam?"
+            "Pozdrav!\nProdajemo i iznajmljujemo brodske kontejnere. Za prodaju imamo 20FT (6 m) i 40FT HC (12 m), nove i polovne.\n\nŠta Vas zanima, kupovina ili najam?"
           ]
         ]
       },
@@ -332,7 +333,7 @@
           ],
           [
             "assistant",
-            "Cenu šaljemo u ponudi. Recite mi koji Vam kontejner treba (20FT ili 40FT HC, novi ili polovni) i gde treba da stigne."
+            "Cena ide u ponudi, pa mi recite koji kontejner tražite.\n20FT ili 40FT HC, novi ili polovni?"
           ]
         ]
       },
@@ -347,7 +348,7 @@
           ],
           [
             "assistant",
-            "Cenu transporta dobijate u ponudi. Transport organizujemo širom Srbije i regiona, pa mi recite mesto isporuke i koji kontejner Vam treba."
+            "Cenu transporta dobijate u ponudi, a prevoz organizujemo širom Srbije i regiona.\nZa koje mesto Vam treba?"
           ],
           [
             "user",
@@ -355,7 +356,7 @@
           ],
           [
             "assistant",
-            "Važi. Kad budete znali koji kontejner Vam treba, pišite ovde i pripremamo ponudu."
+            "Naravno. Kad budete znali koji kontejner Vam treba, pišite ovde."
           ]
         ]
       },
@@ -370,7 +371,7 @@
           ],
           [
             "assistant",
-            "Hvala, Filipe. Potvrda je upisana i prosleđena. Isporuku ili preuzimanje u vlastitom aranžmanu dogovaramo kad sve precizirate."
+            "Odlično, Filipe, hvala Vam!\nKad dogovorimo detalje, dostavljamo Vam kontejner ili ga preuzimate u vlastitom aranžmanu."
           ]
         ]
       }

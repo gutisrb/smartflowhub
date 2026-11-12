@@ -14,7 +14,7 @@
       ],
       [
         "assistant",
-        "Dobar dan, Marija. Cenu i dimenzije šaljemo u ponudi, jer svaki model može da se radi u raznim materijalima. Mislite na sofu sa objave, onu sa mehanizmom za razvlačenje?"
+        "Dobar dan, Marija! Svaki model može da se radi u raznim materijalima, pa Vam cenu i dimenzije rado pripremamo u ponudi.\n\nMislite na sofu sa objave, onu sa mehanizmom za razvlačenje?"
       ],
       [
         "user",
@@ -22,7 +22,7 @@
       ],
       [
         "assistant",
-        "Može. Za koji salon da pripremimo ponudu, Beograd ili Novi Sad?"
+        "Odlično!\nZa koji salon da Vam pripremimo ponudu, Beograd ili Novi Sad?"
       ],
       [
         "user",
@@ -30,7 +30,7 @@
       ],
       [
         "assistant",
-        "Salon u Beogradu je na Bulevaru Mihajla Pupina 165e i radi od ponedeljka do petka od 10 do 18h, pa modele možete da pogledate i uživo. Pošaljite mi ime i broj telefona za ponudu."
+        "Super, Beograd!\nSalon nam je na Bulevaru Mihajla Pupina 165e, radimo od ponedeljka do petka od 10 do 18h, pa slobodno svratite da vidite modele uživo.\n\nPošaljite mi samo ime i broj telefona, pa Vam pripremamo ponudu."
       ],
       [
         "user",
@@ -38,7 +38,7 @@
       ],
       [
         "assistant",
-        "Hvala, Marija. Zahtev za ponudu za sofu sa mehanizmom je upisan i prosleđen salonu u Beogradu."
+        "Hvala Vam, Marija!\nCena i dimenzije stižu Vam u ponudi."
       ]
     ],
     "crm": {
@@ -62,7 +62,7 @@
         ],
         [
           "assistant",
-          "Dobar dan. Koji sto sa objave Vas zanima? Na primer, trpezarijski sto Mikado je od 802 €, a za ostale modele pripremamo ponudu."
+          "Dobar dan!\nKoji sto sa objave Vas zanima? Za njega Vam rado pripremamo ponudu sa cenom."
         ],
         [
           "user",
@@ -70,7 +70,7 @@
         ],
         [
           "assistant",
-          "Važi. Modele možete da pogledate i u našim salonima u Beogradu i Novom Sadu, a ponudu pripremamo kad god kažete."
+          "Naravno! Modele možete da pogledate i u našim salonima u Beogradu i Novom Sadu, a ponudu pripremamo kad god kažete."
         ]
       ],
       "crm": {
@@ -79,81 +79,81 @@
         "kategorija": "Trpezarijski stolovi",
         "proizvod": "Trpezarijski sto",
         "status": "Zainteresovan",
-        "razlog": "Pitao za cenu stola sa objave i otišao uz „Hvala, javiću se.“ Agent je rekao da je Mikado od 802 € i ostavio razgovor otvoren.",
+        "razlog": "Pitao za cenu stola sa objave i otišao uz „Hvala, javiću se.“ Agent je rekao da se cena šalje u ponudi za tačan model i ostavio razgovor otvoren.",
         "izvor": "Instagram"
       }
     },
     "intervention": {
       "ask": "Dobar dan, garnitura koju smo kupili kod vas pre osam meseci ima manu na jednom delu. Šta da radim?",
-      "answer": "Žao mi je zbog toga. Garancija na kupljeni proizvod je 2 godine, a reklamaciju možete da prijavite u salonu, telefonom ili mejlom, uz račun ili drugi dokaz o kupovini. Da li je mana pokrivena garancijom, procenjuje naš tim, pa ne bih da nagađam. Mogu li da zabeležim Vaše ime i broj telefona?",
+      "answer": "Žao mi je zbog toga!\nNa kupljeni proizvod imate 2 godine garancije, a reklamaciju prijavljujete u salonu, telefonom ili mejlom, uz račun ili drugi dokaz o kupovini.\n\nPošaljite mi ime i broj telefona, pa Vam se javljamo oko garancije.",
       "razlog": "Reklamacija garniture posle nekoliko meseci. Agent je naveo garanciju od 2 godine i kako se reklamacija prijavljuje, a procenu da li je mana pokrivena prepustio timu. Prosleđeno."
     },
     "qa": [
       [
         "Koja je cena i koje su dimenzije stola?",
-        "Cenu i dimenzije stola šaljemo u ponudi za tačan model. Recite mi koji sto sa objave Vas zanima i za koji salon da je pripremimo, Beograd ili Novi Sad."
+        "Cenu i dimenzije stola šaljemo u ponudi za tačan model.\nKoji sto sa objave Vas zanima?"
       ],
       [
         "Da li dostavljate i van Novog Sada?",
-        "Da, isporuka i montaža su na teritoriji cele Srbije. Isporuka u Beogradu i Novom Sadu je besplatna, a za druga mesta troškove isporuke snosi kupac."
+        "Da, isporuku i montažu radimo na teritoriji cele Srbije.\nIsporuka u Beogradu i Novom Sadu je besplatna, a za druga mesta troškove isporuke snosi kupac."
       ],
       [
         "Da li je montaža u ceni?",
-        "Montaža je uvek u ceni."
+        "Jeste, montaža je uvek u ceni."
       ],
       [
         "Kolika je garancija?",
-        "Garancija na kupljeni proizvod je 2 godine."
+        "Dve godine na kupljeni proizvod."
       ],
       [
         "Može li garnitura u drugom materijalu?",
-        "Može. Svaki model je prilagodljiv potrebama kupca i može da se radi u raznim materijalima."
+        "Može, svaki model je prilagodljiv potrebama kupca i može da se radi u raznim materijalima."
       ],
       [
         "Kako se plaća?",
-        "Da bi ugovor stupio na snagu, uplaćuje se 50% ukupne cene. Drugu polovinu doplaćujete u roku od 5 radnih dana od obaveštenja da je roba stigla u naš magacin."
+        "Najpre uplaćujete 50% ukupne cene, da bi ugovor stupio na snagu.\nDrugu polovinu doplaćujete u roku od 5 radnih dana, kad Vas obavestimo da je roba stigla u naš magacin."
       ],
       [
         "Do koliko radite?",
-        "Beograd radi od ponedeljka do petka od 10 do 18h. Novi Sad radi od ponedeljka do petka od 9 do 19h i subotom od 10 do 15h. Nedeljom saloni ne rade."
+        "Zavisi od salona.\nBeograd radi od ponedeljka do petka, od 10 do 18h.\nNovi Sad radi od ponedeljka do petka, od 9 do 19h, a subotom od 10 do 15h.\n\nNedeljom saloni ne rade."
       ],
       [
         "Imate li nešto na sniženju?",
-        "Imamo rasprodaju: nameštaj iz salona koji je odmah na raspolaganju, sa sniženim cenama."
+        "Imamo, rasprodaju nameštaja iz salona.\nTo su komadi koji su odmah na raspolaganju, sa sniženim cenama."
       ],
       [
         "Da li imate Calligaris?",
-        "Da, Calligaris je među brendovima u našim salonima, zajedno sa Cattelan, Bontempi, Nicoline i drugim italijanskim proizvođačima."
+        "Da, Calligaris je među brendovima u našim salonima.\nTu su i Cattelan, Bontempi, Nicoline i drugi italijanski proizvođači."
       ],
       [
         "Imate li baštenski nameštaj?",
-        "Imamo. U ponudi su Fatboy, Nardi, Unopiu, Varaschin i Vermobil."
+        "Imamo!\nU ponudi su Fatboy, Nardi, Unopiu, Varaschin i Vermobil."
       ],
       [
         "Da li izlazite na teren?",
-        "Da, na osnovu date ponude, ako se usaglasimo sa njom. Potom izlazimo na teren."
+        "Da, na osnovu date ponude.\nAko se usaglasimo oko nje, potom izlazimo na teren."
       ],
       [
         "Radite li sa arhitektonskim biroima?",
-        "Da, sarađujemo sa arhitektonskim biroima."
+        "Da, sarađujemo i sa arhitektonskim biroima."
       ]
     ],
     "objections": [
       [
         "Moram prvo da vidim uživo.",
-        "Naravno. Saloni su u Beogradu i Novom Sadu: Beograd radi pon–pet od 10 do 18h, a Novi Sad pon–pet od 9 do 19h i subotom od 10 do 15h."
+        "Naravno, dođite u salon.\nBeograd radi pon–pet od 10 do 18h, a Novi Sad pon–pet od 9 do 19h i subotom od 10 do 15h."
       ],
       [
         "Razmisliću, pa ću se javiti.",
-        "Važi. Ponudu pripremamo kad god kažete, a modele možete da pogledate i u salonima u Beogradu i Novom Sadu."
+        "Naravno, bez žurbe.\nPonudu pripremamo kad god kažete, a modele možete da pogledate i u salonima u Beogradu i Novom Sadu."
       ],
       [
         "Ne znam da li će mi stati u prostor.",
-        "Zato u salonima možete da čujete predloge naših dizajnera i arhitekata za uklapanje nameštaja u Vaš dom."
+        "U salonima možete da čujete predloge naših dizajnera i arhitekata kako da nameštaj uklopite u Vaš dom."
       ],
       [
         "Preskupo mi je za sada.",
-        "Na rasprodaji imamo nameštaj iz salona koji je odmah na raspolaganju, sa sniženim cenama."
+        "Pogledajte našu rasprodaju: nameštaj iz salona koji je odmah na raspolaganju, sa sniženim cenama."
       ]
     ],
     "background": [
@@ -168,7 +168,7 @@
           ],
           [
             "assistant",
-            "Dobar dan. Koji komad sa objave Vas zanima? Cenu šaljemo u ponudi za tačan model i materijal."
+            "Dobar dan!\nCenu šaljemo u ponudi za tačan model i materijal.\nKoji komad sa objave Vas zanima?"
           ]
         ]
       },
@@ -183,7 +183,7 @@
           ],
           [
             "assistant",
-            "Dobar dan. Cenu i dimenzije šaljemo u ponudi. Recite mi koji model Vas zanima i za koji salon da je pripremimo, Beograd ili Novi Sad."
+            "Dobar dan!\nCenu i dimenzije šaljemo u ponudi, a za to mi treba da znam koji model Vas zanima i koji Vam je salon bliži, Beograd ili Novi Sad."
           ],
           [
             "user",
@@ -191,7 +191,7 @@
           ],
           [
             "assistant",
-            "Važi. Pišite kad god želite da pripremimo ponudu."
+            "U redu, pišite nam kad god poželite da pripremimo ponudu."
           ]
         ]
       },
@@ -206,7 +206,7 @@
           ],
           [
             "assistant",
-            "Da, isporuka i montaža su na teritoriji cele Srbije. Isporuka u Beogradu i Novom Sadu je besplatna, a za druga mesta troškove isporuke snosi kupac."
+            "Da, radimo isporuku i montažu na teritoriji cele Srbije.\nU Beogradu i Novom Sadu isporuka je besplatna, a za druga mesta troškove isporuke snosi kupac."
           ],
           [
             "user",
@@ -214,7 +214,7 @@
           ],
           [
             "assistant",
-            "Naravno. Ponudu pripremamo kad god kažete."
+            "Naravno!\nPonudu pripremamo kad god kažete."
           ]
         ]
       },
@@ -229,7 +229,7 @@
           ],
           [
             "assistant",
-            "Može. Svaki model je prilagodljiv potrebama kupca i može da se radi u raznim materijalima. Pošaljite mi ime i broj telefona, pa pripremamo ponudu."
+            "Može, Aura može da se radi u raznim materijalima.\nPošaljite mi ime i broj telefona, pa Vam pripremamo ponudu."
           ],
           [
             "user",
@@ -237,7 +237,7 @@
           ],
           [
             "assistant",
-            "Hvala, Marko. Zahtev za ponudu za garnituru Aura je upisan i prosleđen."
+            "Super, Marko, hvala Vam!\nJavljamo Vam se sa ponudom."
           ]
         ]
       },
@@ -252,7 +252,7 @@
           ],
           [
             "assistant",
-            "Hvala, Tamara. Porudžbina je upisana. Da bi ugovor stupio na snagu, uplaćuje se 50% ukupne cene."
+            "Hvala Vam, Tamara!\nDa bi ugovor stupio na snagu, potrebno je da uplatite 50% ukupne cene."
           ]
         ]
       },
@@ -267,7 +267,7 @@
           ],
           [
             "assistant",
-            "Dobar dan. Cenu i dimenzije stola šaljemo u ponudi. Za koji model sa objave Vam treba i koji salon Vam je bliži, Beograd ili Novi Sad?"
+            "Dobar dan!\nZa tačan model šaljemo cenu i dimenzije u ponudi.\nZa koji sto sa objave Vam treba, i koji salon Vam je bliži, Beograd ili Novi Sad?"
           ]
         ]
       },
@@ -282,7 +282,7 @@
           ],
           [
             "assistant",
-            "Naravno. Pošaljite mi ime, broj telefona i za koji salon da pripremimo ponudu, Beograd ili Novi Sad."
+            "Naravno!\nPošaljite mi ime i broj telefona, i recite mi za koji salon da pripremimo ponudu, Beograd ili Novi Sad."
           ],
           [
             "user",
@@ -290,7 +290,7 @@
           ],
           [
             "assistant",
-            "Hvala, Milice. Zahtev za ponudu za trpezariju je upisan i prosleđen salonu u Novom Sadu."
+            "Odlično, Milice. Javljamo Vam se sa ponudom za trpezariju."
           ]
         ]
       },
@@ -305,7 +305,7 @@
           ],
           [
             "assistant",
-            "Da, na osnovu date ponude, ako se usaglasimo sa njom. Potom izlazimo na teren."
+            "Izlazimo, na osnovu date ponude, ako se usaglasimo oko nje."
           ],
           [
             "user",
@@ -313,7 +313,7 @@
           ],
           [
             "assistant",
-            "Važi. Za ponudu mi je dovoljno da znam koji model Vas zanima."
+            "U redu! Za ponudu je dovoljno da mi kažete koji model Vas zanima."
           ]
         ]
       },
@@ -328,7 +328,7 @@
           ],
           [
             "assistant",
-            "Hvala, Sara. Da bi ugovor stupio na snagu, uplaćuje se 50% ukupne cene, a drugu polovinu doplaćujete kad Vas obavestimo da je roba stigla u magacin."
+            "Odlično, Sara, hvala Vam!\nDa bi ugovor stupio na snagu, potrebno je da uplatite 50% ukupne cene. Drugu polovinu doplaćujete kad Vas obavestimo da je roba stigla u magacin."
           ]
         ]
       },
@@ -343,7 +343,7 @@
           ],
           [
             "assistant",
-            "Da, imamo posebnu liniju nameštaja za hotele, restorane i ugostiteljske objekte. Pošaljite mi ime i broj telefona."
+            "Da, imamo posebnu liniju nameštaja za hotele, restorane i ugostiteljske objekte.\nPošaljite mi ime i broj telefona, pa Vam se javljamo."
           ],
           [
             "user",
@@ -351,7 +351,7 @@
           ],
           [
             "assistant",
-            "Hvala, Filipe. Upit je upisan i prosleđen."
+            "Hvala, Filipe! Javljamo Vam se."
           ]
         ]
       },
@@ -366,7 +366,7 @@
           ],
           [
             "assistant",
-            "Da bi ugovor stupio na snagu, uplaćuje se 50% ukupne cene. Drugu polovinu doplaćujete u roku od 5 radnih dana od obaveštenja da je roba stigla u naš magacin."
+            "Prvo uplaćujete 50% ukupne cene, da bi ugovor stupio na snagu.\nDrugu polovinu doplaćujete u roku od 5 radnih dana od obaveštenja da je roba stigla u naš magacin."
           ],
           [
             "user",
@@ -385,7 +385,7 @@
           ],
           [
             "assistant",
-            "Da, sarađujemo sa arhitektonskim biroima. Pošaljite mi ime i broj telefona."
+            "Da, sarađujemo i sa arhitektonskim biroima.\nPošaljite mi ime i broj telefona, pa Vam se javljamo."
           ],
           [
             "user",
@@ -393,7 +393,7 @@
           ],
           [
             "assistant",
-            "Hvala, Stefane. Upit je upisan i prosleđen."
+            "Odlično, Stefane, hvala Vam!\nJavljamo Vam se."
           ]
         ]
       }

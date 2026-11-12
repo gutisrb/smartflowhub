@@ -143,7 +143,7 @@ function interventionStory(nicheKey, own = null) {
       ["user", own.ask],
       ["assistant", own.answer],
       ["user", "Dragana Simić, 062 334 5566"],
-      ["assistant", "Hvala Vam, Dragana!\nJavljamo Vam se čim pogledamo."],
+      ["assistant", own.close || "Hvala Vam, Dragana!\nJavljamo Vam se čim pogledamo."], // the sheet names what she waits for (a generic close read as a ticket, 2026-11-12)
       ["system", "[HUMAN_NEEDED]", { human_needed: true }],
     ],
     crm: { full_name: "Dragana Simić", telefon: "062 334 5566", kategorija: "Upit", proizvod: "Stručna procena", status: "Intervencija", razlog: own.razlog, izvor: "Instagram" },
@@ -258,7 +258,7 @@ function ownComplaint(own, category) {
       ["user", own.ask],
       ["assistant", own.answer],
       ["user", "Jelena Marić, 060 444 7788"],
-      ["assistant", "Hvala Vam, Jelena!\nJavljamo Vam se u vezi sa reklamacijom."],
+      ["assistant", own.close || "Hvala Vam, Jelena!\nJavljamo Vam se u vezi sa reklamacijom."],
       ["system", "[HUMAN_NEEDED]", { human_needed: true }],
     ],
     crm: { full_name: "Jelena Marić", telefon: "060 444 7788", kategorija: category || "Proizvodi", proizvod: "Reklamacija", status: "Intervencija", razlog: own.razlog, izvor: "Instagram" },
