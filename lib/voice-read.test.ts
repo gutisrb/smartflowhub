@@ -31,6 +31,14 @@ describe("voice read judge (2026-11-12: v1 flagged different lines every run and
     const v = judge([[...controlsRight, { id: "hero1#3", score: 5 }], [...controlsWrong]], ["hero1#3"])
     expect(v.inconclusive).toBe(true)
   })
+
+  it("tolerates one misjudged control (reader is slightly over-strict on c5's neutral close pattern)", () => {
+    const almostRight = CONTROLS.map((c) => ({ id: c.id, score: c.want === "bad" ? 1 : (c.id === "c5" ? 2 : 5) }))
+    const reads = [[...almostRight, { id: "hero1#1", score: 5 }], [...almostRight, { id: "hero1#1", score: 5 }]]
+    const v = judge(reads, ["hero1#1"])
+    expect(v.inconclusive).toBe(false)
+    expect(v.valid).toBe(2)
+  })
   it("the controls include the line Nikola rejected and a good line of the same kind", () => {
     expect(CONTROLS.some((c) => c.want === "bad" && /^Beležim/.test(c.agent))).toBe(true)
     expect(CONTROLS.some((c) => c.want === "good")).toBe(true)

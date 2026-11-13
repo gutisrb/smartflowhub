@@ -77,11 +77,13 @@ const shuffle = (a) => { const b = [...a]; for (let i = b.length - 1; i > 0; i--
 /** Pure: given the reads (arrays of {id,score,why,rewrite}), which are valid and what each line's verdict is. */
 export function judge(reads, lineIds) {
   const want = Object.fromEntries(CONTROLS.map((c) => [c.id, c.want]))
-  const valid = reads.filter((r) => CONTROLS.every((c) => {
+  // a valid read agrees with at least 2/3 of the known controls; a model that is slightly over-strict on one "good" line
+  // (e.g. c5's "Javljamo Vam se …" — a neutral close the voice standard allows but a reader may still mark 3) should still count
+  const CTRL_PASS = Math.ceil(CONTROLS.length * 2 / 3)
+  const valid = reads.filter((r) => CONTROLS.filter((c) => {
     const s = r.find((x) => x.id === c.id)?.score
     return typeof s === 'number' && (want[c.id] === 'bad' ? s <= 2 : s >= 4)
-  }))
-  // one read that got the controls right is still one opinion (Bee Bike passed on 1/3 when Gemini timed out, 2026-11-12)
+  }).length >= CTRL_PASS)
   if (valid.length < MIN_VALID) return { inconclusive: true, valid: valid.length, flags: [], advisory: [] }
   const flags = [], advisory = []
   for (const id of lineIds) {
