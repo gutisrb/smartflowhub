@@ -22,7 +22,7 @@
       ],
       [
         "assistant",
-        "Hvala. Da li hala treba sa montažom ili bez nje? I pošaljite mi ime i broj telefona, pa zahtev za ponudu prosleđujem."
+        "Super, 30 x 14, Čačak.\nDa li hala treba sa montažom ili bez nje?\nPošaljite mi i ime i broj telefona, pa Vam spremam ponudu."
       ],
       [
         "user",
@@ -30,7 +30,7 @@
       ],
       [
         "assistant",
-        "Hvala, Marija. Zahtev za ponudu je upisan i prosleđen. Informativnu ponudu možete očekivati u roku od 24h, a obavezujuća ponuda sledi nakon sastanka ili telefonskog razgovora."
+        "Hvala Vam, Marija!\nSa montažom, u redu.\nInformativnu ponudu šaljemo u roku od 24h, a obavezujuća ponuda sledi nakon sastanka ili telefonskog razgovora."
       ]
     ],
     "crm": {
@@ -77,8 +77,9 @@
     },
     "intervention": {
       "ask": "Poštovani, koliko košta hala 20x10, 20x15m i da li radite i plocu na koju dolazi hala i koliko bi ona kostala za obe varijante?",
-      "answer": "Zdravo, Dragana. Cenu hala tih dimenzija nemam objavljenu, a da li ploču ispod hale radimo, ne mogu da potvrdim, pa ne bih da nagađam. Prosleđujem upit. Mogu li da zabeležim Vaše ime i broj telefona?",
-      "razlog": "Pitala za cenu hala 20x10 i 20x15 i za ploču ispod hale. Cena nije objavljena, a ploča nije navedena u uslugama — prosleđeno."
+      "answer": "Zdravo, Dragana!\nCenu hala 20x10 i 20x15 ne bih da nagađam, a za ploču ispod hale moram da proverim da li radimo.\n\nPošaljite mi samo ime i broj telefona, pa Vam se javljamo sa odgovorom i ponudom za obe varijante.",
+      "razlog": "Pitala za cenu hala 20x10 i 20x15 i za ploču ispod hale. Cena nije objavljena, a ploča nije navedena u uslugama — prosleđeno.",
+      "close": "Hvala Vam, Dragana!\nJavljamo Vam se sa ponudom za 20x10 i 20x15 i sa odgovorom oko ploče."
     },
     "qa": [
       [

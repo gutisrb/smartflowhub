@@ -30,7 +30,7 @@
       ],
       [
         "assistant",
-        "Nakon usaglašenog rešenja, izrada i montaža obično traju nekoliko nedelja, u zavisnosti od obima projekta i izbora materijala. Pošaljite mi ime, broj telefona i grad, pa upisujem zahtev za ponudu."
+        "Nakon usaglašenog rešenja, izrada i montaža obično traju nekoliko nedelja, u zavisnosti od obima projekta i izbora materijala.\nPošaljite mi ime, broj telefona i grad, pa Vam spremamo ponudu."
       ],
       [
         "user",
@@ -38,7 +38,7 @@
       ],
       [
         "assistant",
-        "Hvala, Marija. Zahtev za ponudu je upisan i prosleđen."
+        "Hvala Vam, Marija!\nKrećemo da pripremamo ponudu za Vašu kuhinju.\nJavljamo Vam se posle besplatne konsultacije i merenja u Beogradu."
       ]
     ],
     "crm": {
@@ -82,8 +82,9 @@
     },
     "intervention": {
       "ask": "Da li radite i u Kragujevcu i koliko košta dolazak?",
-      "answer": "Dobar dan, Dragana. Projekte radimo i van Beograda po dogovoru, a troškovi dolaska i montaže zavise od lokacije projekta. Koliko tačno iznose za Kragujevac, ne bih da nagađam. Prosleđujem upit. Mogu li da zabeležim Vaše ime i broj telefona?",
-      "razlog": "Pita da li radite u Kragujevcu i koliko košta dolazak. Sajt kaže da se van Beograda radi po dogovoru i da troškovi zavise od lokacije, a iznos ne navodi, pa agent ne nagađa. Prosleđeno."
+      "answer": "Zdravo, Dragana!\nKragujevac radimo, projekti van Beograda su po dogovoru.\nTroškovi dolaska i montaže zavise od lokacije, pa to ne bih da nagađam.\n\nPošaljite mi samo ime i broj telefona, pa to proveravamo za Kragujevac.",
+      "razlog": "Pita da li radite u Kragujevcu i koliko košta dolazak. Sajt kaže da se van Beograda radi po dogovoru i da troškovi zavise od lokacije, a iznos ne navodi, pa agent ne nagađa. Prosleđeno.",
+      "close": "Hvala Vam, Dragana!\nJavljamo Vam se sa troškovima dolaska u Kragujevac."
     },
     "qa": [
       [
