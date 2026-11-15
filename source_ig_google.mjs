@@ -30,8 +30,7 @@ const sb = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABA
 // phrases people use when they tell followers to write to them (the restored bio-search list + the wording seen in captions/ads)
 const PHRASES = ['pošaljite nam poruku', 'pošaljite poruku', 'cena u inbox', 'DM za cenu', 'DM za cene', 'pišite nam u inbox', 'pišite nam za ponudu', 'za porudžbine pišite',
   'poručite putem poruke', 'poruči u DM', 'porudžbine u DM', 'pošaljite upit', 'upit u DM', 'cena na upit', 'sve informacije u inbox', 'za više informacija pošaljite poruku',
-  'javite se u inbox', 'javite nam se u poruku', 'za rezervaciju pišite', 'zakažite besplatnu procenu', 'besplatna konsultacija pošaljite poruku', 'pošaljite fotografije za procenu',
-  'pošaljite dimenzije za ponudu', 'za cenu pišite u inbox', 'stanje na upit', 'dostupno na upit', 'informacije u inbox', 'pišite nam na Viber', 'pošaljite nam poruku za ponudu',
+  'javite se u inbox', 'javite nam se u poruku', 'za cenu pišite u inbox', 'stanje na upit', 'dostupno na upit', 'informacije u inbox', 'pišite nam na Viber', 'pošaljite nam poruku za ponudu',
   'ponuda u inbox', 'besplatna ponuda poruka', 'kontaktirajte nas u poruci', 'napišite nam poruku', 'za sve informacije u DM']
 const stateFile = resolve(__dirname, 'ig_google_state.json')
 const state = existsSync(stateFile) ? JSON.parse(readFileSync(stateFile, 'utf8')) : { next: 0 }

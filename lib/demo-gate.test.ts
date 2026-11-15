@@ -54,15 +54,19 @@ describe('checkDemo: what the customer says', () => {
     const t = [{ id: 'demo_x_hero2', role: 'user', message: 'Stigao mi je oštećen proizvod 😞' }]
     expect(rules(checkDemo(base({ threads: t, heroOwn: true })))).not.toContain('generic-complaint')
   })
-  it('requires the sale opener to come from real comments (Luxor "još u ponudi", DENTALUX "ispun kod dece")', () => {
+  it('an opener that is not close to a real comment is only a WARNING (Nikola 2026-11-15: a real comment is not required)', () => {
     const q = [{ text: 'Cena?' }, { text: 'Molim vas koliko cena' }, { text: 'Zdravo cena?' }]
-    expect(rules(checkDemo(base({ questions: q, threads: [{ id: 'demo_x_hero1', role: 'user', message: 'Zanima me Sto za šminkanje LUX 14 MN.BB. Da li je još u ponudi?' }] })))).toContain('template-opener')
+    const r = checkDemo(base({ questions: q, threads: [{ id: 'demo_x_hero1', role: 'user', message: 'Zanima me Sto za šminkanje LUX 14 MN.BB. Da li je još u ponudi?' }] }))
+    expect(r.warnings.map((w) => w.rule)).toContain('template-opener')
+    expect(rules(r)).not.toContain('template-opener')
     expect(openerIsReal('Zdravo, koliko košta ispun kod dece?', q)).toBe(false)
     expect(openerIsReal('Zdravo cena?', q)).toBe(true)
     expect(openerIsReal('Molim vas koliko je cena', q)).toBe(true)
   })
-  it('fails when no real comment is stored at all (DENTALUX: only political spam was stored)', () => {
-    expect(rules(checkDemo(base({ questions: [] })))).toContain('no-real-comments')
+  it('no stored real comment is only a WARNING (comments may be blocked or the business may get its questions in DMs)', () => {
+    const r = checkDemo(base({ questions: [] }))
+    expect(r.warnings.map((w) => w.rule)).toContain('no-real-comments')
+    expect(rules(r)).not.toContain('no-real-comments')
   })
 })
 

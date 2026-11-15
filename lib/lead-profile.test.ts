@@ -6,6 +6,18 @@ import { profileFit } from './lead-profile.mjs'
 // at all: state, content, personal brands, commodity hospitality, chains.
 const pass = (name: string, bio = '', niche = '') => profileFit({ name, bio, niche, followers: 50000 }).pass
 describe('profileFit (who is worth a demo)', () => {
+  it('rejects a pharmacy: it does not sell online (Apoteka Jankovic, 2026-11-15)', () => {
+    expect(profileFit({ name: 'Apoteka Janković', bio: '', followers: 49000 }).pass).toBe(false)
+    expect(profileFit({ name: 'Benu Pharmacy', bio: '', followers: 80000 }).pass).toBe(false)
+  })
+  it('rejects a political movement and a travel organizer that reached the 2026-11-14 shortlist (Zeleno-levi front, Balkan Fun)', () => {
+    expect(profileFit({ name: 'Zeleno-levi front / Ne davimo Beograd', bio: 'Želimo zemlju dobru, zdravu i bezbednu za sve', followers: 45624 }).pass).toBe(false)
+    expect(profileFit({ name: 'Balkan Fun Official', bio: 'Licencirani organizator, atraktivne destinacije', followers: 37585 }).pass).toBe(false)
+  })
+  it('rejects a shopping-mall operator: BIG Fashion Novi Sad (category "Shopping Mall", big-cee.com) is not an owner-run shop', () => {
+    expect(profileFit({ name: 'BIG Fashion Novi Sad', bio: 'Dani planete Zemlje', category: 'Shopping Mall', followers: 48399 }).pass).toBe(false)
+    expect(profileFit({ name: 'Comfortino', bio: 'Kvalitetna obuća | Kvalitetna garderoba', category: 'Shopping & retail', followers: 83582 }).pass).toBe(true)
+  })
   it("passes the original batch's kinds of business", () => {
     expect(pass('Varmus', 'Montažni objekti i kontejnerske kuće')).toBe(true)
     expect(pass('LOGERA TINY HOME', 'Tiny house proizvodnja')).toBe(true)

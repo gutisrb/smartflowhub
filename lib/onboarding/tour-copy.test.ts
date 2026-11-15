@@ -55,17 +55,17 @@ describe('tour card copy', () => {
     expect(offerCopy({ model: 'quote', niche: null, flows: null }).steps[2].body).toContain('prilazi kupcu')
   })
 
-  it('leads with the free setup and first month, keeps the satisfaction guarantee (Nikola, 2026-11-11, reverses 11-01)', () => {
+  it('leads with "pay only if you keep it after the first month", keeps the satisfaction guarantee (Nikola, 2026-11-15, replaces the 11-11 free-month wording)', () => {
     for (const model of ['booking', 'quote', 'order']) {
       const o = offerCopy({ model, niche: null, flows: null })
       const all = JSON.stringify(o)
-      expect(o.headline).toMatch(/besplatno/)
-      expect(o.free).toMatch(/Uvođenje i prvi mesec ne naplaćujem/)
-      expect(o.free).toMatch(/smem da ih pokažem/) // the one plain reason (his exception to the 11-05 rule)
+      expect(o.headline).toMatch(/Plaćate samo ako ga zadržite/)
+      expect(o.free).toMatch(/Plaćate tek ako posle njega odlučite da nastavite/)
+      expect(o.free).toMatch(/smem da ih pokažem/) // the one plain ask (his exception to the 11-05 rule)
       expect(o.catchTitle).toBe('Ostajete samo ako ste potpuno zadovoljni.')
       expect(o.catchBody).toMatch(/rastajemo se kao prijatelji/)
       // nothing is paid in month one, so there is nothing to refund; and after month one it is paid, so never "ne plaćate ništa"
-      expect(all).not.toMatch(/svaki dinar|ne plaćate ništa(?! uvođenje)|besplatno i bez obaveza|povraćaj novca|garancija povraćaja/i)
+      expect(all).not.toMatch(/svaki dinar|ne plaćate ništa|besplatno|bez obaveza|povraćaj novca|garancija povraćaja/i)
     }
   })
   it('answers the objections only with settled terms: no price, no invented process', () => {
@@ -74,7 +74,7 @@ describe('tour card copy', () => {
     const text = o.faq.map((f: any) => f.a).join(' ')
     expect(text).not.toMatch(/\d+\s?(€|eur|rsd|din)/i) // the amount is agreed on the call, never written down
     expect(text).toMatch(/dogovaramo na razgovoru od 20 minuta/)
-    expect(o.faq.map((f: any) => f.q)).toEqual(expect.arrayContaining(['Zašto besplatno?', 'Čiji su razgovori i podaci?']))
+    expect(o.faq.map((f: any) => f.q)).toEqual(expect.arrayContaining(['Zašto prvo probam, pa tek onda plaćam?', 'Čiji su razgovori i podaci?']))
   })
 
   it('keeps a case-correct noun in each sentence', () => {

@@ -91,7 +91,7 @@ for (const r of stage2) {
     r._audit = key ? await auditLead({ ...r, instagram_followers: r._followers ?? r.instagram_followers }, key.token) : null
     const inv = investmentFit(r._audit)
     if (inv.pass) { r._verdict = (fit.pass ? 'PASS' : 'PASS (needs an email)') + ` · ${inv.reason}`; passed.push(r) } else r._verdict = `not investing: ${inv.reason}`
-  } else r._verdict = `reach: ${fit.fails.join(' | ').slice(0, 90)}`
+  } else r._verdict = fit.lane === 'review' ? `REVIEW (Nikola decides): ${fit.reviews.join(' | ').slice(0, 110)}` : `${fit.lane}: ${fit.fails.join(' | ').slice(0, 90)}`
 }
 const pad = (s, n) => String(s ?? '').slice(0, n).padEnd(n)
 for (const r of cands.sort((a, b) => (b._verdict?.startsWith('PASS') ? 1 : 0) - (a._verdict?.startsWith('PASS') ? 1 : 0))) {

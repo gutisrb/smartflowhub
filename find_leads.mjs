@@ -180,7 +180,7 @@ writeFileSync(resolve(__dirname, `find_leads_${TODAY}.json`), JSON.stringify({ p
 if (PLACE) {
   for (const p of passed) {
     const f = p.r.followers
-    const base = { pipeline_stage: 'demo_building', instagram_followers: f, niche: p.niche, website: p.site, email: p.email, sledeca_akcija: line(p),
+    const base = { pipeline_stage: 'sourced', instagram_followers: f, niche: p.niche, website: p.site, email: p.email, sledeca_akcija: line(p),
       kategorija: f >= 50000 ? 'Vreo' : 'Topao', status: p.email ? 'enriched' : 'No Draft' }
     const evidence = { checked_at: TODAY, tier: p.r.tier, views_per_follower: p.r.viewsPerFollower, median_views: p.r.medViews, median_comments: p.r.medComments,
       buyer_qs: p.r.buyerQs, sample_qs: p.r.sampleQs, days_since_post: p.r.daysSincePost, overload: p.r.overload }

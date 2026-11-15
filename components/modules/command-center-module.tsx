@@ -64,12 +64,13 @@ interface Contact {
   niche: string | null
   demo_tenant_url: string | null
   sledeca_akcija?: string | null
+  review?: { rank?: number; line?: string; flags?: string[]; decision?: string } | null
 }
 
 const STATUS_OPTIONS = ["Novi Lead", "Kontaktiran", "Follow Up", "Odgovorio", "Zakazan Sastanak", "Lost"]
 
 const SELECT_FIELDS =
-  "id, company_name, email, status, pipeline_stage, instagram_handle, instagram_followers, email_draft, email_2_draft, email_1_poslat, email_2_poslat, approved_to_send, last_sent_at, email_opened_at, replied_at, reply_intent, reply_snippet, meeting_time, niche, demo_tenant_url, demo_tenant_email, demo_tenant_password, sledeca_akcija"
+  "id, company_name, email, status, pipeline_stage, instagram_handle, instagram_followers, email_draft, email_2_draft, email_1_poslat, email_2_poslat, approved_to_send, last_sent_at, email_opened_at, replied_at, reply_intent, reply_snippet, meeting_time, niche, demo_tenant_url, demo_tenant_email, demo_tenant_password, sledeca_akcija, review:intake_data->review"
 
 // per-stage accent — used ONLY on the numbered marker + thin rules, never on body text
 type Accent = "emerald" | "amber" | "cyan" | "purple" | "blue"
@@ -149,8 +150,25 @@ export function CommandCenterModule({ clientId }: CommandCenterModuleProps) {
     if (error) { toast.error("Greška — poništavam"); fetchData() }
   }
 
-  const approveLead = (c: Contact) => { setStage(c.id, "demo_building"); toast.success("Odobreno — demo se pravi") }
-  const discardLead = (c: Contact) => { setStage(c.id, "discarded"); toast("Odbačeno") }
+  // Station 1 is where Nikola decides. The decision is stored on the lead: approving also overrides the automatic gate (he said yes),
+  // removing marks it so no script ever puts it back in the queue.
+  const decide = async (c: Contact, decision: "approved" | "removed") => {
+    const stage = decision === "approved" ? "demo_building" : "discarded"
+    setContacts((prev) => prev.map((x) => (x.id === c.id ? { ...x, pipeline_stage: stage } : x)))
+    const supabase = createClient()
+    const { data } = await supabase.from("contacts").select("intake_data").eq("id", c.id).single()
+    const intake = ((data?.intake_data as Record<string, unknown> | null) || {}) as Record<string, unknown>
+    const at = new Date().toISOString()
+    const next: Record<string, unknown> = { ...intake, review: { ...((intake.review as Record<string, unknown>) || {}), decision, decided_at: at } }
+    if (decision === "approved") next.fit_override = { by: "Nikola", note: "odobreno u Command Center", at }
+    else next.removed = { by: "Nikola", at }
+    const { error } = await supabase.from("contacts").update({ pipeline_stage: stage, intake_data: next }).eq("id", c.id)
+    if (error) { toast.error("Greška — poništavam"); fetchData() }
+    else if (decision === "approved") toast.success(c.demo_tenant_url ? "Odobreno — ide dalje" : "Odobreno — demo se pravi")
+    else toast("Odbačeno — ne vraća se")
+  }
+  const approveLead = (c: Contact) => decide(c, "approved")
+  const discardLead = (c: Contact) => decide(c, "removed")
   const approveEmail = async (c: Contact) => {
     setContacts((prev) => prev.map((x) => (x.id === c.id ? { ...x, approved_to_send: true } : x)))
     const supabase = createClient()
@@ -172,9 +190,10 @@ export function CommandCenterModule({ clientId }: CommandCenterModuleProps) {
   // Sourcing writes straight to `novi`, which is this station. Until qualify_queue.mjs
   // ran, station 1 was raw scraper output: 68 rows, of which 4 had no way to be
   // contacted at all and 53 had never had their Instagram measured.
-  const novi = byStage("novi").filter(
-    (c) => qualifyForQueue(c, { followerFloor: config?.source_follower_floor }).verdict === "ready",
-  )
+  // queue_for_review.mjs puts every lead that deserves a decision here with its numbers in `review`; anything else must still pass the old qualifier
+  const novi = byStage("novi")
+    .filter((c) => !!c.review?.line || qualifyForQueue(c, { followerFloor: config?.source_follower_floor }).verdict === "ready")
+    .sort((a, b) => (a.review?.rank ?? 999) - (b.review?.rank ?? 999))
   const building = byStage("demo_building")
   const emailReady = byStage("email_ready")
   const sent = byStage("sent")
@@ -214,7 +233,7 @@ export function CommandCenterModule({ clientId }: CommandCenterModuleProps) {
       {/* The conveyor — 5 numbered stations */}
       <div className="space-y-0">
         <Station n={1} accent="emerald" title="Novi leadovi" tagline="Pregledaj i odobri" count={novi.length}
-          info="Sistem svako jutro traži nove firme koje se oglašavaju video-oglasima na Instagramu i imaju dovoljno pratilaca. Klikni na firmu da vidiš njihov Instagram i sve što je sistem prikupio. Odobreni idu u izradu demoa; odbačeni nestaju."
+          info="Ovde stižu samo firme koje su prošle proveru (tržište, lanac, šta prodaju, pravi saobraćaj). Svaka ima u jednom redu šta prodaje, brojke i na šta da paziš. Odobri → pravi se demo i ide dalje. Odbaci (X) → nestaje i ne vraća se."
           settings={config && (
             <div className="space-y-4">
               <p className="text-[11px] font-outfit font-bold uppercase tracking-widest text-emerald">Podešavanja skrejpera</p>
@@ -227,12 +246,12 @@ export function CommandCenterModule({ clientId }: CommandCenterModuleProps) {
           {novi.length === 0
             ? <Empty text="Još nema novih leadova. Uključi traženje ili pokreni skrejper." />
             : novi.map((c) => (
-              <Row key={c.id} c={c} onIntel={() => setIntelLead(c)}>
+              <Row key={c.id} c={c} onIntel={() => setIntelLead(c)} note={c.review?.line}>
                 <IconBtn onClick={() => setIntelLead(c)} tone="silver"><Eye className="w-3.5 h-3.5" /> Intel</IconBtn>
                 <Button size="sm" onClick={() => approveLead(c)} className="h-9 rounded-xl bg-emerald text-obsidian font-outfit font-bold text-xs hover:brightness-110 px-4">
                   <Check className="w-4 h-4 mr-1" /> Odobri
                 </Button>
-                <Button size="sm" variant="ghost" onClick={() => discardLead(c)} className="h-9 w-9 p-0 rounded-xl text-rose-400 hover:text-rose-300 hover:bg-rose-400/10">
+                <Button size="sm" variant="ghost" title="Odbaci: ne vraća se" aria-label="Odbaci" onClick={() => discardLead(c)} className="h-9 w-9 p-0 rounded-xl text-rose-400 hover:text-rose-300 hover:bg-rose-400/10">
                   <X className="w-4 h-4" />
                 </Button>
               </Row>
@@ -373,7 +392,7 @@ function Station({ n, accent, title, tagline, count, info, settings, last, child
   )
 }
 
-function Row({ c, onIntel, subtitle, children }: { c: Contact; onIntel: () => void; subtitle?: string; children: React.ReactNode }) {
+function Row({ c, onIntel, subtitle, note, children }: { c: Contact; onIntel: () => void; subtitle?: string; note?: string; children: React.ReactNode }) {
   return (
     <div className="flex items-center justify-between gap-3 p-3 rounded-2xl bg-white/[0.02] border border-white/5 hover:border-white/20 hover:bg-white/[0.04] transition-colors group">
       <button type="button" onClick={onIntel} className="min-w-0 flex-1 text-left">
@@ -382,12 +401,24 @@ function Row({ c, onIntel, subtitle, children }: { c: Contact; onIntel: () => vo
           <span className="text-silver/80 font-medium">{fmtFollowers(c.instagram_followers)}</span>
           {c.niche ? ` · ${c.niche}` : ""}{subtitle ? ` · ${subtitle}` : ""}
         </p>
+        {note && <ReviewNote text={note} />}
       </button>
       <div className="flex items-center gap-1.5 shrink-0">
         <InstagramBtn c={c} />
         {children}
       </div>
     </div>
+  )
+}
+
+/** What the lead sells and its numbers on one wrapped line; the warnings ("Pažnja") in amber so the thing to check is the first thing seen. */
+function ReviewNote({ text }: { text: string }) {
+  const [facts, warn] = text.split(" | Pažnja: ")
+  return (
+    <p className="mt-1 text-[11px] leading-snug font-outfit text-silver/70 whitespace-normal">
+      {facts}
+      {warn && <span className="block text-amber-300/90">Pažnja: {warn}</span>}
+    </p>
   )
 }
 

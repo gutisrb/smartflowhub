@@ -237,62 +237,11 @@ async function main() {
   console.log('\n─── Stage 2: Qualify queue ───')
   await runScript('qualify_queue.mjs', ['--apply'])
 
-  // ── Stage 3: auto-promote 'ready' leads past the redundant approval click ──
-  //
-  // Used to look at pipeline_stage='novi' only — which is also all qualify_queue.mjs ever
-  // re-evaluates. That made 'sourced' a black hole: once a lead was parked there (for a
-  // missing email, an unmeasured audience, a bad handle), nothing could ever get it out,
-  // no matter how much of that gap later got filled in. Stages 1b/1c/1d spend real money
-  // finding exactly those missing emails/handles/follower counts, and every one of those
-  // writes was landing on leads this step couldn't see. Confirmed 2026-09-12: 5 parked
-  // leads qualified 'ready' and were unreachable, two of them (Posteljine Fratelli 73k,
-  // Dallas Nameštaj 44k) newly qualified *because* of the night's enrichment.
-  //
-  // Now it re-qualifies both stages. Guard against re-creating the retry-waste bug: a
-  // lead that already carries a skip marker in `comment` was conclusively attempted and
-  // failed on its own content (no catalogue, no prices, aggregator…), so it stays parked
-  // until a human decides otherwise. Only never-attempted leads get promoted.
-  console.log('\n─── Stage 3: Re-qualify novi + sourced, promote ready to demo_building ───')
-  if (!isDryRun) {
-    const { data: cfgRow } = await sb
-      .from('machine_config').select('source_follower_floor').eq('client_id', CLIENT_ID).maybeSingle()
-    const followerFloor = cfgRow?.source_follower_floor ?? undefined
-
-    const { data: candidates } = await sb
-      .from('contacts')
-      .select('id,company_name,email,website,instagram_handle,instagram_followers,niche,status,pipeline_stage,izvor,intake_data,approved_to_send,email_draft,demo_built_at,comment')
-      .eq('client_id', CLIENT_ID)
-      .in('pipeline_stage', ['novi', 'sourced'])
-      .not('status', 'in', '("Disqualified","Lost","Bounced")')
-
-    const ATTEMPTED = /Demo preskočen|AOV gate|AOV nepoznat/i
-    const promote = []
-    for (const r of candidates || []) {
-      if (r.demo_built_at) continue                       // already has a demo
-      if (ATTEMPTED.test(r.comment || '')) continue        // conclusively failed before
-      if (qualifyForQueue(r, { followerFloor }).verdict !== 'ready') continue
-      // Reels-led lead gate (2026-11-10, lib/lead-fit.mjs): this step used to promote on audience size alone, with no check that
-      // the business runs a serious social sales pipeline. An unmeasured lead waits for `node find_leads.mjs --place`.
-      const d = r.intake_data?.dm_demand
-      const fit = leadFit({ name: r.company_name, followers: r.instagram_followers, email: r.email,
-        medViews: d?.median_views ?? null, viewsPerFollower: d?.views_per_follower ?? null, reels12: d?.reels12 ?? null, paidAds: !!d?.paid_ads })
-      if (!fit.pass) { console.log(`  ↷ ${r.company_name}: lead gate — ${fit.fails.join(' | ')}`); continue }
-      promote.push(r)
-    }
-
-    if (promote.length) {
-      const { error } = await sb
-        .from('contacts')
-        .update({ pipeline_stage: 'demo_building' })
-        .in('id', promote.map(r => r.id))
-      if (error) console.error('  ✗ promote failed:', error.message)
-      else console.log(`  ✓ Promoted ${promote.length} lead(s): ${promote.map(r => r.company_name).join(', ')}`)
-    } else {
-      console.log(`  Nothing ready to promote (${candidates?.length ?? 0} candidates checked).`)
-    }
-  } else {
-    console.log('  [DRY RUN] — not executed')
-  }
+  // ── Stage 3: queue sanity-checked leads for Nikola (2026-11-14) ─────────────────────────────────────────────
+  // This stage used to promote 'ready' leads to demo_building by itself. Nikola decides in Station 1 of the Command Center and nothing
+  // reaches Demo se pravi without his click, so it now only runs the one gate (queue_for_review.mjs: checks, judge, caps) that fills Station 1.
+  console.log('\n─── Stage 3: put sanity-checked leads in Station 1 (Nikola approves there; nothing is promoted automatically) ───')
+  await runScript('queue_for_review.mjs', ['--apply'], 590000)
 
   // ── Stage 4: build demos ────────────────────────────────────────────────────
   console.log('\n─── Stage 4: Build demos ───')

@@ -1350,52 +1350,12 @@ async function buildDemoForLead(sb, lead) {
     await sleep(800)
   }
 
-  // ── AOV gate ────────────────────────────────────────────────────────────
-  // Runs BEFORE provisioning, which is what the old comment here claimed while the
-  // code did the opposite: provisionTenant() ran first, so every lead the gate
-  // rejected left an orphaned Supabase tenant and auth user behind.
+  // Price check is advisory since 2026-11-14 (Nikola: ticket size does not matter, inbound traffic does). It used to disqualify
+  // low-ticket shops and park leads without a price list; verify_demo.mjs now checks every number the demo states against the site.
   const aov = assessAov(services)
-  if (aov.verdict === 'fail' && !process.argv.includes('--ignore-aov')) {
-    console.log(`│  ⛔ AOV GATE: median price ${aov.aov.toLocaleString('de-DE')} RSD < ${MIN_AOV_RSD.toLocaleString('de-DE')} RSD`)
-    console.log(`│     At a ~400 EUR/mo retainer this business would need an implausible number of`)
-    console.log(`│     extra sales to break even. Skipping build. Override with --ignore-aov.`)
-    await sb.from('contacts').update({
-      status: 'Disqualified',
-      ...parkStage(lead),
-      comment: `AOV gate: medijana cene ${aov.aov} RSD (prag ${MIN_AOV_RSD}). Prenizak tiket za mesečni retainer.`,
-    }).eq('id', lead.id)
-    return { skipped: 'aov', aov: aov.aov }
-  }
-  // Categories where a single transaction is unambiguously above the floor no matter what the
-  // site publishes: dental implants and prosthetics, aesthetic medicine, property, weddings,
-  // pergolas. These businesses very often publish no price list at all ("cena na
-  // konsultacijama" is the norm in Serbian aesthetic medicine), so demanding a scraped price
-  // disqualifies the *best* leads in the pipeline for a reason that has nothing to do with
-  // whether they can afford a retainer. dr Marija Bošković — 60k followers, Belgrade
-  // aesthetic-medicine clinic, 30 named treatments — was rejected exactly this way on
-  // 2026-09-15. Deliberately narrow: beauty salons, gyms and auto shops are NOT here, because
-  // for those the floor is a real question.
-  const HIGH_TICKET_NICHES = new Set(['dental', 'medical', 'real-estate', 'vencanja', 'pergole'])
-  const MIN_SERVICES_FOR_EXEMPTION = 5
-
-  if (aov.verdict === 'pass') console.log(`│  ✓ AOV gate: median ${aov.aov.toLocaleString('de-DE')} RSD`)
-  else if (aov.verdict === 'unknown' && HIGH_TICKET_NICHES.has(nicheKey) && services.length >= MIN_SERVICES_FOR_EXEMPTION) {
-    console.log(`│  ✓ AOV gate: no published prices, but "${nicheKey}" is high-ticket by category`)
-    console.log(`│     (${services.length} named services found — category exemption, not a guess).`)
-  }
-  else {
-    console.log(`│  ⛔ AOV UNKNOWN: only ${aov.prices.length} priced item(s) in the catalogue.`)
-    console.log(`│     We cannot price this business, so we cannot judge whether it can afford us,`)
-    console.log(`│     and a demo built on unpriced guesses is the cream-fallback failure again.`)
-    console.log(`│     Scrape a real price list first. Override with --ignore-aov.`)
-    if (!process.argv.includes('--ignore-aov')) {
-      await sb.from('contacts').update({
-        ...parkStage(lead),
-        comment: `AOV nepoznat: samo ${aov.prices.length} stavki sa cenom. Potreban cenovnik pre demoa.`,
-      }).eq('id', lead.id)
-      return { skipped: 'aov_unknown', aov: null }
-    }
-  }
+  if (aov.verdict === 'pass') console.log(`│  ✓ price check: median ${aov.aov.toLocaleString('de-DE')} RSD`)
+  else if (aov.verdict === 'fail') console.log(`│  ℹ price check (advisory, does not block): median ${aov.aov.toLocaleString('de-DE')} RSD, a pricing hint for the call`)
+  else console.log(`│  ℹ price check (advisory, does not block): ${aov.prices.length} priced item(s) found; the demo states no price the site does not publish`)
 
   // Step 3: Provision tenant (skip if --reseed-only)
   let clientId, authEmail, password

@@ -90,9 +90,7 @@ const TERMS = [
   'porudžbine u DM', 'za cenu pišite u inbox', 'upit u DM', 'cena na upit', 'svi detalji u inbox', 'pišite nam na Viber', 'pošaljite poruku za ponudu',
   'stanje na upit', 'dostupno na upit', 'pitajte u komentarima', 'kontaktirajte nas za više informacija', 'pošaljite poruku za detalje',
   // Bookings and quotes asked for in the inbox
-  'besplatna konsultacija', 'zakažite besplatnu procenu', 'za rezervaciju pišite', 'pišite nam za rezervaciju', 'pošaljite poruku za rezervaciju',
-  'javite se za više detalja', 'za sve upite pišite', 'pošaljite fotografije za procenu', 'besplatna ponuda u inboxu',
-];
+  'javite se za više detalja', 'za sve upite pišite', ];
 
 // ── Generated geo terms ───────────────────────────────────────────────────────
 // Measured 2026-09-15: the ScrapeCreators profile search returns NO pagination cursor —
@@ -104,42 +102,24 @@ const TERMS = [
 // phrase, so niche × city is a dense, non-overlapping way to generate real terms rather than
 // synonyms of the same query. Appended AFTER the hand-written list so `--terms N` always
 // keeps the proven terms first and treats these as the expansion tail.
-const GEO_NICHES = [
-  // 2026-11-11: high-consideration verticals only (same list as TERMS above and lib/lead-profile.mjs); the old salon/laser/wellness/clinic niches are gone.
-  'montažne kuće', 'tiny house', 'pergole', 'bioklimatske pergole', 'nameštaj po meri', 'kuhinje po meri',
-  'salon nameštaja', 'PVC stolarija', 'aluminijumska stolarija', 'izgradnja bazena', 'solarni paneli',
-  'stomatološka ordinacija', 'implantologija', 'ortodoncija',
-];
-const GEO_CITIES = [
-  'Beograd', 'Novi Sad', 'Niš', 'Kragujevac', 'Subotica', 'Čačak', 'Kraljevo',
-  'Novi Pazar', 'Leskovac', 'Valjevo', 'Šabac', 'Užice', 'Zrenjanin', 'Pančevo',
-  'Smederevo', 'Kruševac', 'Sombor', 'Vranje', 'Zaječar', 'Loznica',
-];
-// City-major, so a --terms cap still yields every niche rather than 20 cities of one niche.
-// 2026-11-05: OPT-IN (--geo). Measured on the full run of 2026-11-04: ~375 terms (300 of them niche × city) →
-// 1851 profiles, 1263 under 1k followers, 25 in the 30k-200k band, 6 past the filters, 3 past the reel check:
-// ~125 credits per good lead, and the run left 140 credits. A business with 30k+ followers rarely names a
-// small town in its bio; "kozmetički salon Loznica" finds the salon with 800 followers.
-if (process.argv.includes('--geo')) for (const c of GEO_CITIES) for (const n of GEO_NICHES) TERMS.push(`${n} ${c}`);
+// (removed 2026-11-15, Nikola: no business-type words in any search; the niche x city generator is gone)
 
 // ── Exclusion categories (business-category signals from ScrapeCreators' category_name) ──
-// Same principle as source_leads.mjs: exclude D2C retail, media, and personal brands —
-// no DM-inquiry use case for a service-automation offer.
+// Media, personal brands, organisations and hospitality are excluded. D2C retail (clothing, cosmetics, jewelry, shopping & retail) is NOT, since 2026-11-14:
+// Nikola: niche is irrelevant, and the vault says ecommerce is a perfect fit. Chains are caught later by lib/lead-sanity.mjs.
 const EXCLUDE_CATS = new Set([
-  'Clothing (Brand)', 'Boutique store', 'Fashion designer', 'Clothing store',
-  "Women's Clothing", "Men's Clothing", 'Cosmetics store', 'Jewelry/watches',
   'Personal blog', 'Public figure', 'Artist', 'Musician/band', 'Media/news company',
-  'Shopping & retail', 'Coach', // "Coach" catches personal-brand life-coaches, not clinics
+  'Coach', // "Coach" catches personal-brand life-coaches, not clinics
   'Writer', 'Author', 'Entrepreneur', // personal-brand/mentor accounts, not SMBs (2026-07-06 live test)
   'Digital creator', 'Content creator', 'Blogger', 'Comedian', 'Entertainer', 'Actor/director',
   'Community Organization', 'Community', 'Local business', 'City', 'Region',
   'News & media website', 'Government organization', 'Government official', // both org AND person
   'Broadcasting & media production company', 'Political party', 'Non-profit organization',
   'Nonprofit organization', 'Magazine', 'Newspaper', 'Radio station', 'Podcast',
-  'Restaurant', 'Cafe', 'Bar', 'Fast food restaurant', 'Pizza place', 'Bakery',
+  'Restaurant', 'Cafe', 'Bar', 'Fast food restaurant', 'Pizza place',
 ].map(s => s.toLowerCase()));
 
-const EXCLUDE_NAME_KEYWORDS = /\b(majice|majic|cipelice|cipela|cipele|obuća|obuca|kiflice|kiflic|torte|haljine|suknje|bluze|jakne|kaputi|šminke|sminke|nakit|parfem|parfemi|podkast|podcast|fondacija|fondacij|humanitar|zaklada|blog|kanal|kreator|otkriva|otkrivamo|dobrotvorn|volonter|donacij|kladionic|kladion|kazino|casino|betting|lutrij|shein|aliexpress|garderob|butik|kolekcij|fashion|torb[aei]|nakita|narukvic|piercing|pirsing)\b/i;
+const EXCLUDE_NAME_KEYWORDS = /\b(podkast|podcast|fondacija|fondacij|humanitar|zaklada|blog|kanal|kreator|otkriva|otkrivamo|dobrotvorn|volonter|donacij|kladionic|kladion|kazino|casino|betting|lutrij|shein|aliexpress)\b/i;
 
 // ── Serbian market check — STRICT, Serbia-only (not BA/HR/SI — user directive 2026-07-05) ──
 // Diacritics alone (š/č/ž/đ/ć) are NOT sufficient: Slovenian/Croatian/Bosnian use the same

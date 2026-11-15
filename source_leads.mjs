@@ -1,8 +1,8 @@
 /**
  * SmartFlow Lead Sourcer — Apify Edition
  *
- * Strategy: NO niche queries. Find Serbian businesses running VIDEO ads on Instagram
- * with 3+ active campaigns → verify 10k+ real Instagram followers → enrich with email.
+ * Strategy: NO niche queries. Find Serbian businesses running ads on Instagram (VIDEO ads by default, because their views can be measured; photo ads only
+ * with --all-formats, which Nikola wants as a secondary extra: they mostly bring retail resellers and have no views) → verify real Instagram followers → enrich with email.
  *
  * Pipeline:
  *   Stage 1: Load raw ad records (Apify live OR local JSON files with --local)
@@ -64,7 +64,8 @@ const HUNTER_KEY     = process.env.HUNTER_API_KEY;
 // AVOID: ecommerce words (kupi/popust), international words (hotel/spa), city terms.
 // Markets: RS (Serbia) + BA (Bosnia) + HR (Croatia) — same language family, 3× pool
 const ADS_COUNTRIES = ['RS'];
-const ADS_BASE_URL = 'https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=RS&media_type=video';
+const ADS_MEDIA = process.argv.includes('--all-formats') ? 'all' : 'video';
+const ADS_BASE_URL = `https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=RS&media_type=${ADS_MEDIA}`;
 // B4 remaining — fresh, never run before. Track usage in MEMORY.md after each run.
 // Used: B0(kontaktirajte...), B1(otkrijte...), B2(preuzmite...), B3(vaši snovi...),
 //       B4 partial(rezultati/uspeh/kvalitet — 2026-05-05), B5(vaš/nas — EXHAUSTED)
@@ -93,10 +94,11 @@ const ADS_QUERIES  = [
   // 2026-11-11 (Nikola: "searching by niche is not good, a niche does not indicate an ICP… search by what indicates it"): ad COPY that prompts a message,
   // because an advertiser whose ad says "write to us" is paying for inbox conversations whatever it sells. Niche words are only a short tail.
   'pošaljite poruku', 'pišite nam u poruku', 'javite nam se u inbox', 'za porudžbine pišite nam', 'poručite putem poruke', 'DM za cenu',
-  'pošaljite upit', 'pošaljite nam poruku', 'cena u inbox', 'pišite nam za ponudu', 'zakažite besplatnu procenu', 'besplatna konsultacija',
-  'pošaljite fotografije za procenu', 'za rezervaciju pišite', 'javite se za više detalja', 'sve informacije u inbox',
-  // niche tail (kept because they have produced leads: stomatološka ordinacija 3, nameštaj po meri 3)
-  'stomatološka ordinacija', 'nameštaj po meri', 'ugaone garniture', 'montažne kuće', 'pergole i tende', 'pvc stolarija',
+  'pošaljite upit', 'pošaljite nam poruku', 'cena u inbox', 'pišite nam za ponudu', 'javite se za više detalja', 'sve informacije u inbox',
+  // 2026-11-14: how small online shops write their ads (ecommerce was excluded from sourcing until today)
+  'poruči u inbox', 'porudžbine putem poruke', 'plaćanje pouzećem', 'dostava širom Srbije', 'besplatna dostava', 'pošalji poruku za porudžbinu',
+  // 2026-11-15, Nikola: NO business-type words in the search at all. The first 23 words ever searched were mostly dentist, furniture and house-building words, then I
+  // swapped in a product-type list. Now only phrases that mean "customers write to us"; the no-words scrape of ALL ads (every format) does the rest.
 ];
 
 const isLocal    = process.argv.includes('--local');      // read from local JSON files, skip Apify Stage 1
@@ -122,9 +124,9 @@ function pickQueries(all, budget) {
   const scored  = tried
     .map(q => ({ q, rate: (stats[q].qualified || 0) / Math.max(1, stats[q].runs || 1) }))
     .sort((a, b) => b.rate - a.rate);
-  const exploreN = Math.max(2, Math.ceil(budget / 3));
-  const explore  = untried.slice(0, exploreN);
-  const exploit  = scored.filter(x => x.rate > 0).map(x => x.q).slice(0, budget - explore.length);
+  const exploitN = Math.max(1, Math.floor(budget / 3)); // 2026-11-14: exploitation was two thirds of the budget and fed on itself; exploration dominates now
+  const explore  = untried.slice(0, budget - exploitN);
+  const exploit  = scored.filter(x => x.rate > 0).map(x => x.q).slice(0, exploitN);
   const picked   = [...exploit, ...explore];
   // Still short (early runs, or everything scored zero) — top up with whatever is left,
   // preferring queries tried least recently.
@@ -171,21 +173,15 @@ const LOCAL_DATASET_GLOB = 'dataset_facebook-ads-library-scraper_';
 let MIN_FOLLOWERS = 30000;      // default; overridden by machine_config.source_follower_floor in main()
 const MAX_FOLLOWERS = 200000;  // cap at 200k — above this are large corps with dedicated CS teams
 
-// ── D2C retail & irrelevant exclusion ─────────────────────────────────────────
-// Anything that sells physical products, media, or has no service DM use-case
+// ── Exclusion: media, finance, charities, betting, politics, supermarkets and department stores ──
+// (D2C retail was excluded here until 2026-11-14; see the note inside the set.)
 const EXCLUDE_CATS = new Set([
-  // Apparel / fashion
-  'Clothing (Brand)', 'Boutique store', 'Fashion designer', 'Fashion & beauty',
-  "Women's Clothing", "Men's Clothing", 'Clothing store', 'Apparel & Clothing',
-  'Apparel', 'Clothing',
-  // Accessories / beauty
-  'Jewelry/watches', 'Jewelry', 'Jewelry & Watches', 'Eyewear',
-  'Cosmetics store', 'Beauty, cosmetics & personal care',
-  // Toys / kids / baby
-  'Toy store', 'Toys', 'Baby goods/kids goods',
+  // Apparel, accessories, cosmetics, toys, kids, cakes: NOT excluded since 2026-11-14 (Nikola: niche is irrelevant, and the vault says ecommerce is a PERFECT fit: "never filter ecommerce out").
+  // The old rule here was "anything that sells physical products has no service DM use-case", which is why the pipeline never found an ecommerce lead. Chains and
+  // national retailers are caught by lib/lead-sanity.mjs (many store addresses, national-scale advertiser) before anyone is asked about them.
   // Food & beverage
   'Grocery store', 'Supermarket', 'Food & beverage', 'Restaurant',
-  'Fast food restaurant', 'Bakery', 'Food delivery service',
+  'Fast food restaurant', 'Food delivery service',
   // Electronics, supplements, books intentionally NOT excluded — niche brands are valid leads
   // Cosmetics / perfume retail (D2C) — NOTE: 'Health & Beauty' intentionally NOT excluded
   // because FB uses it for clinics/wellness too. Name keywords catch retail cosmetics instead.
@@ -215,7 +211,7 @@ const EXCLUDE_CATS = new Set([
 ]);
 
 // Page name keyword blacklist — catches retail/personal brands that slipped past category filter
-const EXCLUDE_NAME_KEYWORDS = /\b(majice|majic|cipelice|cipela|cipele|obuća|obuca|kiflice|kiflic|torte|haljine|suknje|bluze|jakne|kaputi|šminke|sminke|nakit|parfem|parfemi|podkast|podcast|fondacija|fondacij|humanitar|zaklada|blog|kanal|kreator|otkriva|otkrivamo|istraž|dobrotvorn|volonter|donacij|kladionic|kladion|kazino|casino|betting|lutrij|temu|shein|aliexpress|garderob|butik|kolekcij|aksesoir|fashion|torb[aei]|nakita|narukvic|minđuš|mindjus|ogrlica|piercing|pirsing|bisuter)\b/i;
+const EXCLUDE_NAME_KEYWORDS = /\b(podkast|podcast|fondacija|fondacij|humanitar|zaklada|blog|kanal|kreator|otkriva|otkrivamo|istraž|dobrotvorn|volonter|donacij|kladionic|kladion|kazino|casino|betting|lutrij|temu|shein|aliexpress)\b/i;
 
 function isExcludedByName(pageName) {
   return EXCLUDE_NAME_KEYWORDS.test(pageName || '');
@@ -645,7 +641,7 @@ async function main() {
   console.log('═══════════════════════════════════════════════════════');
   console.log('  SmartFlow Lead Sourcer — Apify Edition');
   console.log(`  Mode: ${modeLabel} | Max inserts: ${LIMIT}`);
-  console.log(`  Filter: VIDEO · RS · INSTAGRAM · 3+ ads · Serbian language · ${MIN_FOLLOWERS/1000}k+ IG followers`);
+  console.log(`  Filter: ${ADS_MEDIA.toUpperCase()} ADS · RS · INSTAGRAM · 1+ ads · Serbian language · ${MIN_FOLLOWERS/1000}k+ IG followers`);
   console.log('═══════════════════════════════════════════════════════\n');
 
   if (!isLocal && !isTest && !isYes) {
@@ -1200,7 +1196,7 @@ async function main() {
       ad_copies          : lead.adCopies.slice(0, 5),
       ad_cta             : snap.cta_text || null,
       ad_title           : snap.title || null,
-      ad_display_format  : 'VIDEO',
+      ad_display_format  : lead.item.display_format || lead.item.snapshot?.display_format || 'ANY',
       publisher_platforms: lead.item.publisher_platform || [],
       ad_start_date      : lead.item.start_date_formatted || null,
       facebook_page_id   : lead.item.page_id,

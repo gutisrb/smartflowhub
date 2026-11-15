@@ -44,9 +44,11 @@ if (error) { console.error('Fetch error:', error.message); process.exit(1); }
 const passed = [];
 for (const c of data) {
   const d = c.intake_data?.dm_demand;
-  const fit = leadFit({ name: c.company_name, followers: c.instagram_followers, email: c.email,
-    medViews: d?.median_views ?? null, viewsPerFollower: d?.views_per_follower ?? null, reels12: d?.reels12 ?? null, paidAds: !!d?.paid_ads, buyerQs: d?.buyer_qs ?? null });
-  if (!fit.pass) { console.log(`  ✗ ${c.company_name} — lead gate: ${fit.fails.join(' | ')}`); continue; }
+  const ig = c.intake_data?.enrichment?.instagram_profile;
+  const fit = leadFit({ name: c.company_name, bio: ig?.bio, category: ig?.business_category, niche: c.niche, followers: c.instagram_followers, email: c.email,
+    medViews: d?.median_views ?? null, viewsPerFollower: d?.views_per_follower ?? null, reels12: d?.reels12 ?? null, daysSincePost: d?.days_since_post ?? null,
+    paidAds: !!d?.paid_ads, buyerQs: d?.buyer_qs ?? null, override: c.intake_data?.fit_override ?? null });
+  if (!fit.pass) { console.log(`  ✗ ${c.company_name} — lead gate (${fit.lane}): ${[...fit.fails, ...fit.reviews].join(' | ')}`); continue; }
   if (!c.demo_tenant_email) { console.log(`  ✗ ${c.company_name} — no demo tenant to verify`); continue; }
   const g = await verifyTenant(sb, c.demo_tenant_email, { live: true });
   if (g.error || !g.ok) { console.log(`  ✗ ${c.company_name} — claims gate: ${g.error || `${g.failures.length} failure(s)`} (node verify_demo.mjs --email ${c.demo_tenant_email})`); continue; }

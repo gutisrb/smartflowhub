@@ -48,25 +48,32 @@ for (const c of data) {
   const h = (c.instagram_handle || '').toLowerCase()
   const d = c.intake_data?.dm_demand
   const j = byHandle.get(h)
-  const fromDb = d && d.median_views != null ? { medViews: d.median_views, viewsPerFollower: d.views_per_follower, daysSincePost: d.days_since_post, reels12: j?.reels12 ?? null, buyerQs: d.buyer_qs, src: `db ${d.checked_at || ''}` } : null
+  const fromDb = d && d.median_views != null ? { medViews: d.median_views, viewsPerFollower: d.views_per_follower, daysSincePost: d.days_since_post, reels12: d.reels12 ?? j?.reels12 ?? null, p75Views: d.p75_views ?? null, buyerQs: d.buyer_qs, src: `db ${d.source || ''} ${d.checked_at || ''}` } : null
   const fromFile = j ? { medViews: j.medViews, viewsPerFollower: j.viewsPerFollower, daysSincePost: j.daysSincePost, reels12: j.reels12, buyerQs: j.buyerQs, inviteCaps: j.inviteCaps, src: j._file } : null
-  const m = fromFile && (!fromDb || fromFile.reels12 != null) ? { ...fromDb, ...fromFile } : fromDb
+  // a fresh DB measurement (it carries a `source`) beats the old ScrapeCreators files: they sampled 2-3 reels and read JetSet at 706k vs 25k (2026-11-13)
+  const m = fromDb && d?.source ? fromDb : (fromFile && (!fromDb || fromFile.reels12 != null) ? { ...fromDb, ...fromFile } : fromDb)
+  const ig = c.intake_data?.enrichment?.instagram_profile
   const fit = leadFit({
-    name: c.company_name, followers: c.instagram_followers, email: c.email,
-    medViews: m?.medViews ?? null, viewsPerFollower: m?.viewsPerFollower ?? null, reels12: m?.reels12 ?? null,
+    name: c.company_name, bio: ig?.bio, category: ig?.business_category, niche: c.niche, followers: c.instagram_followers, email: c.email,
+    medViews: m?.medViews ?? null, viewsPerFollower: m?.viewsPerFollower ?? null, reels12: m?.reels12 ?? null, p75Views: m?.p75Views ?? null,
     daysSincePost: m?.daysSincePost ?? null, buyerQs: m?.buyerQs ?? null, inviteCaps: m?.inviteCaps ?? null,
     activeAds: c.intake_data?.active_ads_count ? Number(c.intake_data.active_ads_count) : null,
+    override: c.intake_data?.fit_override ?? null,
   })
   rows.push({ company: c.company_name, stage: c.pipeline_stage, followers: c.instagram_followers, ...m, email: c.email, ...fit })
 }
-rows.sort((a, b) => (b.pass - a.pass) || ((b.medViews ?? -1) - (a.medViews ?? -1)))
+const LANE_ORDER = { pass: 0, review: 1, remeasure: 2, fail: 3 }
+rows.sort((a, b) => (LANE_ORDER[a.lane] - LANE_ORDER[b.lane]) || ((b.medViews ?? -1) - (a.medViews ?? -1)))
 
 if (AS_JSON) { console.log(JSON.stringify(rows, null, 2)); process.exit(0) }
 const pad = (s, n) => String(s ?? '').slice(0, n).padEnd(n)
 console.log(`${pad('', 4)}${pad('lead', 34)}${pad('stage', 14)}${pad('followers', 10)}${pad('medViews', 10)}${pad('/fol', 7)}${pad('reels', 6)}${pad('last post', 10)} verdict`)
 for (const r of rows) {
-  const v = r.pass ? 'PASS' + (r.notes.length ? `  (${r.notes.join('; ')})` : '') : 'FAIL: ' + r.fails.join(' | ')
-  console.log(`${r.pass ? 'OK  ' : 'NO  '}${pad(r.company, 34)}${pad(r.stage, 14)}${pad(r.followers, 10)}${pad(r.medViews, 10)}${pad(r.viewsPerFollower, 7)}${pad(r.reels12, 6)}${pad(r.daysSincePost != null ? r.daysSincePost + 'd' : '', 10)} ${v}`)
+  const v = r.lane === 'pass' ? 'PASS' + (r.notes.length ? `  (${r.notes.join('; ')})` : '')
+    : r.lane === 'review' ? 'REVIEW: ' + r.reviews.join(' | ')
+    : r.lane === 'remeasure' ? 'REMEASURE: ' + r.fails.join(' | ')
+    : 'FAIL: ' + r.fails.join(' | ')
+  console.log(`${pad(r.lane.toUpperCase(), 10)}${pad(r.company, 34)}${pad(r.stage, 14)}${pad(r.followers, 10)}${pad(r.medViews, 10)}${pad(r.viewsPerFollower, 7)}${pad(r.reels12, 6)}${pad(r.daysSincePost != null ? r.daysSincePost + 'd' : '', 10)} ${v}`)
 }
-const pass = rows.filter(r => r.pass).length
-console.log(`\n${pass} pass, ${rows.length - pass} fail, ${rows.filter(r => r.needsRemeasure).length} need a re-measure (stale or unmeasured)`)
+const n = (lane) => rows.filter(r => r.lane === lane).length
+console.log(`\n${n('pass')} pass, ${n('review')} review (a human reads these), ${n('remeasure')} need a re-measure, ${n('fail')} fail`)
