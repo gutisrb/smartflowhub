@@ -21,6 +21,8 @@ export const DEMO_PREVIEW_KEYS = {
   store: "sf-demo-preview-cookies",
   /** freshly minted tokens waiting to be adopted, exactly once */
   pending: "sf-demo-preview-tokens",
+  /** set when the operator opened this preview (/api/demo-login), so its views are not counted as the lead's */
+  operator: "sf-demo-operator",
 } as const
 
 export interface DemoTokens {

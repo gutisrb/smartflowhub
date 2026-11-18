@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { adoptDemoSession } from "@/lib/supabase/demo-preview"
+import { trackDemo } from "@/lib/demo-track"
 import { LoginForm } from "@/components/auth/login-form"
 import { Sidebar } from "@/components/dashboard/sidebar"
 import { useUnifiedModules } from "@/lib/modules/hooks"
@@ -168,6 +169,11 @@ export default function DashboardPage() {
   useEffect(() => {
     checkSession()
   }, [checkSession])
+
+  // A demo tenant's dashboard actually loaded in a browser (a mail scanner fetching the link does not get this far).
+  useEffect(() => {
+    if (isAuthenticated && demoNiche) void trackDemo({ kind: "view" })
+  }, [isAuthenticated, demoNiche])
 
   // Landing module.
   //

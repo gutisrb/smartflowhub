@@ -5,6 +5,7 @@ import { ArrowRight } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { expandTourSlots, salesModel, cardAnchorFor, type TourSlot } from "@/lib/onboarding/tour-slots"
 import { tourCopy } from "@/lib/onboarding/tour-copy.mjs"
+import { trackDemo } from "@/lib/demo-track"
 import { subscribeFocus, getFocus, getServerFocus, type FocusRect } from "@/lib/onboarding/focus-store"
 import { placeCard, CARD_MAX, type Placement } from "@/lib/onboarding/place-card"
 import { GlyphIntake, GlyphBoundary, GlyphHandover, GlyphRecord, GlyphCatalog, GlyphSlot, GlyphPattern, GlyphOutlet } from "@/components/onboarding/tour-glyphs"
@@ -90,6 +91,7 @@ export function OnboardingTour({ modules, niche, brandColor = "#10b981", onNavig
     onNavigate(step.moduleKey)
     onPlayback(step.slot === "inbox" || step.slot === "inbox-intervencija")
     onSlot?.(step.slot)
+    void trackDemo({ kind: "step", step: i, of: steps.length, slot: step.slot }) // how far the lead got (node demo_activity.mjs)
 
     setReady(readyAfter === 0)
     setElapsed(0)

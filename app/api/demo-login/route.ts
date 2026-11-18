@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@supabase/supabase-js"
 import { createServerClient } from "@supabase/ssr"
 import { cookies } from "next/headers"
-import { DEMO_PREVIEW_KEYS } from "@/lib/supabase/demo-preview"
+import { bootstrapPage } from "@/lib/supabase/demo-bootstrap"
 
 /**
  * One-click entry into a lead's demo tenant.
@@ -76,39 +76,7 @@ export async function GET(req: NextRequest) {
   }
 
   const { access_token, refresh_token } = verified.session
-  return new NextResponse(bootstrapPage(tenant.name || target, { access_token, refresh_token }), {
+  return new NextResponse(bootstrapPage(tenant.name || target, { access_token, refresh_token }, { operator: true }), {
     headers: { "content-type": "text/html; charset=utf-8", "cache-control": "no-store" },
   })
-}
-
-/**
- * Seeds this tab's storage and hard-navigates to the dashboard. A full load (not a
- * client-side route change) so the module-level Supabase client is rebuilt and picks
- * up the demo cookie adapter.
- */
-function bootstrapPage(tenantName: string, tokens: { access_token: string; refresh_token: string }) {
-  // < so a token can never terminate the script element early
-  const payload = JSON.stringify(tokens).replace(/</g, "\\u003c")
-  const name = tenantName.replace(/[<&]/g, (c) => (c === "<" ? "&lt;" : "&amp;"))
-  return `<!doctype html>
-<html lang="sr"><head><meta charset="utf-8"><title>${name} — demo</title>
-<style>
-  html,body{height:100%;margin:0}
-  body{display:grid;place-items:center;background:#05080c;color:#8fa3b8;
-       font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-</style></head>
-<body><p id="s">Otvaram demo — ${name}…</p>
-<script>
-(function () {
-  try {
-    var t = ${payload};
-    sessionStorage.setItem(${JSON.stringify(DEMO_PREVIEW_KEYS.flag)}, "1");
-    sessionStorage.setItem(${JSON.stringify(DEMO_PREVIEW_KEYS.pending)}, JSON.stringify(t));
-    sessionStorage.removeItem(${JSON.stringify(DEMO_PREVIEW_KEYS.store)});
-    location.replace("/");
-  } catch (e) {
-    document.getElementById("s").textContent = "Ne mogu da otvorim demo: " + (e && e.message);
-  }
-})();
-</script></body></html>`
 }
